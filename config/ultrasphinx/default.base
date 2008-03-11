@@ -18,7 +18,9 @@
 # .conf files. Do not symlink the .conf file to the .base file; it's wrong.
 #
 
-<% path = "/opt/local/var/db/sphinx/" %>
+# <% path = "/opt/local/var/db/sphinx/" %>
+
+<% path = "./sphinx/" %>
 
 # Indexing options
 indexer
