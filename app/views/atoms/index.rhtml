@@ -1,0 +1,33 @@
+<table>
+  <tr>
+    <th>Atom Code</th>
+    <th>Atom Name</th>
+    <th>Alt Loc</th>
+    <th>X</th>
+    <th>Y</th>
+    <th>Z</th>
+    <th>Occupancy</th>
+    <th>Temfactor</th>
+    <th>Element</th>
+    <th>Charge</th>
+    <th>ASA Bound State</th>
+    <th>ASA Unbound State</th>
+  </tr>
+  <%- for atom in @atoms %>
+  <tr>
+    <td><%= atom.atom_code %></td>
+    <td><%= atom.atom_name %></td>
+    <td><%= atom.altloc %></td>
+    <td><%= atom.x %></td>
+    <td><%= atom.y %></td>
+    <td><%= atom.z %></td>
+    <td><%= atom.occupancy %></td>
+    <td><%= atom.tempfactor %></td>
+    <td><%= atom.element %></td>
+    <td><%= atom.charge %></td>
+    <td><%= atom.asa_bound %></td>
+    <td><%= atom.asa_unbound %></td>
+  </tr>
+  <%- end %>
+</table>
+

@@ -1,0 +1,14 @@
+<table>
+  <tr>
+    <th>Chain Code</th>
+    <th>Molecule</th>
+    <th>Molecule Code</th>
+  </tr>
+  <%- for chain in @chains %>
+    <tr>
+      <td><%= chain.chain_code %></td>
+      <td><%= chain.molecule %></td>
+      <td><%= chain.mol_code %></td>
+    </tr>
+  <%- end %>
+</table>

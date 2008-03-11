@@ -1,0 +1,34 @@
+//              
+//       band:  -101   seq2 len2 = 17
+//                \\\1234567890123456
+//              0  \xxxxxxxxxxxxxxxxx
+//              1   xxxxxxxxxxxxxxxxx\ most right band = len2-1
+//              2   xxxxxxxxxxxxxxxxx
+//    seq1      3   xxxxxxxxxxxxxxxxx
+//    len1 = 11 4   xxxxxxxxxxxxxxxxx
+//              5   xxxxxxxxxxxxxxxxx
+//              6   xxxxxxxxxxxxxxxxx
+//              7   xxxxxxxxxxxxxxxxx
+//              8   xxxxxxxxxxxxxxxxx
+//              9   xxxxxxxxxxxxxxxxx
+//              0   xxxxxxxxxxxxxxxxx
+//                  \                
+//                   most left band = -(len1-1)
+
+
+//            seq2 len2 = 17            seq2 len2 = 17      seq2 len2 = 17
+//            01234567890123456       01234567890123456    01234567890123456
+//      0     xxxxxxxxxxxxxxxxx \\\\\\XXXxxxxxxxxxxxxxx    xXXXXXXXxxxxxxxxx
+//      1\\\\\Xxxxxxxxxxxxxxxxx  \\\\\Xxx\xxxxxxxxxxxxx    xx\xxxxx\xxxxxxxx
+//      2 \\\\X\xxxxxxxxxxxxxxx   \\\\Xxxx\xxxxxxxxxxxx    xxx\xxxxx\xxxxxxx
+// seq1 3  \\\Xx\xxxxxxxxxxxxxx    \\\Xxxxx\xxxxxxxxxxx    xxxx\xxxxx\xxxxxx
+// len1 4   \\Xxx\xxxxxxxxxxxxx     \\Xxxxxx\xxxxxxxxxx    xxxxx\xxxxx\xxxxx
+// = 11 5    \Xxxx\xxxxxxxxxxxx      \Xxxxxxx\xxxxxxxxx    xxxxxx\xxxxx\xxxx
+//      6     Xxxxx\xxxxxxxxxxx       Xxxxxxxx\xxxxxxxx    xxxxxxx\xxxxx\xxx
+//      7     x\xxxx\xxxxxxxxxx       x\xxxxxxx\xxxxxxx    xxxxxxxx\xxxxx\xx
+//      8     xx\xxxx\xxxxxxxxx       xx\xxxxxxx\xxxxxx    xxxxxxxxx\xxxxx\x
+//      9     xxx\xxxx\xxxxxxxx       xxx\xxxxxxx\xxxxx    xxxxxxxxxx\xxxxx\
+//      0     xxxx\xxxx\xxxxxxx       xxxx\xxxxxxx\xxxx    xxxxxxxxxxx\xxxxx
+//                band_left < 0           band_left < 0        band_left >=0
+//                band_right < 0          band_right >=0       band_right >=0
+

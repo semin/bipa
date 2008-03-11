@@ -1,0 +1,24 @@
+<h3>Recent structures</h3>
+
+<table>
+  <tr>
+    <th>PDB Code</th>
+    <th>Classification</th>
+    <th>Title</th>
+    <th>Experimental Method</th>
+    <th>Resolution</th>
+    <th>Deposition Date</th>
+  </tr>
+  
+<% for structure in @structures %>
+  <tr>
+    <td><%=h structure.pdb_code %></td>
+    <td><%=h structure.classification %></td>
+    <td><%=h structure.title %></td>
+    <td><%=h structure.exp_method %></td>
+    <td><%=h structure.resolution %></td>
+    <td><%=h structure.deposited_at %></td>
+  </tr>
+<% end %>
+</table>
+

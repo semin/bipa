@@ -1,0 +1,22 @@
+<h1>Structure Details</h1>
+
+<table>
+  <tr>
+    <th>PDB Code</th>
+    <th>Classification</th>
+    <th>Title</th>
+    <th>Experimental Method</th>
+    <th>Resolution</th>
+    <th>Deposition Date</th>
+  </tr>
+  <tr>
+    <td><%=h @structure.pdb_code %></td>
+    <td><%=h @structure.classification %></td>
+    <td><%=h @structure.title %></td>
+    <td><%=h @structure.exp_method %></td>
+    <td><%=h @structure.resolution %></td>
+    <td><%=h @structure.deposited_at %></td>
+  </tr>
+</table>
+
+<%= link_to 'Back', structures_path %>

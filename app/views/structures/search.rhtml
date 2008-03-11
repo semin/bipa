@@ -1,0 +1,28 @@
+<h4>Search results</h4>
+
+<table>
+  <tr>
+    <th>PDB Code</th>
+    <th>Classification</th>
+    <th>Title</th>
+    <th>Experimental Method</th>
+    <th>Resolution</th>
+    <th>Deposition Date</th>
+  </tr>
+  
+<% for structure in @structures %>
+  <tr>
+    <td><%=h structure.pdb_code %></td>
+    <td><%=h structure.classification %></td>
+    <td><%=h structure.title %></td>
+    <td><%=h structure.exp_method %></td>
+    <td><%=h structure.resolution %></td>
+    <td><%=h structure.deposited_at %></td>
+  </tr>
+<% end %>
+</table>
+<%= link_to 'Previous page', { :page => @pages.current.previous, :query => @query} if @pages.current.previous %>
+<%= pagination_links(@pages, :params => { :query=> @query }) %>
+<%= link_to 'Next page', { :page => @pages.current.next, :query => @query} if @pages.current.next %>
+
+

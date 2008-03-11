@@ -1,0 +1,14 @@
+<table>
+  <tr>
+    <th>Residue Code</th>
+    <th>Insertion Code</th>
+    <th>Residue Name</th>
+  </tr>
+  <%- for residue in @residues %>
+    <tr>
+      <td><%= residue.residue_code %></td>
+      <td><%= residue.icode || 'None' %></td>
+      <td><%= residue.residue_name %></td>
+    </tr>
+  <%- end %>
+</table>
