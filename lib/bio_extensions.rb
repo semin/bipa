@@ -40,15 +40,15 @@ module Bio
 
     class Residue
       def is_dna?
-        BIPA::Constants::NucleicAcids::DNA.include?(resName)
+        BIPA::Constants::NucleicAcids::DNA::Residues::ALL.include?(resName)
       end
 
       def is_rna?
-        BIPA::Constants::NucleicAcids::RNA.include?(resName)
+        BIPA::Constants::NucleicAcids::RNA::Residues::ALL.include?(resName)
       end
 
       def is_na?
-        BIPA::Constants::NucleicAcids::ALL.include?(resName)
+        BIPA::Constants::NucleicAcids::Residues::ALL.include?(resName)
       end
 
       def is_aa?
