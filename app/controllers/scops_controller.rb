@@ -9,23 +9,26 @@ class ScopsController < ApplicationController
   end
 
 
-  def search
-    @keyword = params[:scop][:description]
-    @hits = Scop.find_by_contents("#{@keyword} registered:(true)",
-                                  :limit => :all)
-
-    render :update do |page|
-      page.replace_html "main_content",
-                        :partial => "hit",
-                        :collection => @hits
-    end
-  end
+  # def search
+  #   @search = Ultrasphinx::Search.new(:query => @keyword, :class_names => "Scop", :filters => { "registered" => 1 })
+  #   @search.run
+  #   @hits = @search.results
+  #   
+  #   render :update do |page|
+  #     page.replace_html "main_content",
+  #                       :partial => "hit",
+  #                       :collection => @hits
+  #   end
+  # end
 
 
   def auto_complete_description
-    query = params[:scop][:description]
-    @scops = Scop.find_by_contents("#{query} registered:(true)",
-                                   :limit => :all).sort_by(&:level)
+    @sphinx = Ultrasphinx::Search.new(:query => params[:scop][:description],
+                                      :class_names => "Scop",
+                                      :filters => { "registered" => 1 })
+    @sphinx.run
+    @scops = @sphinx.results
+
     render :layout => false
   end
 

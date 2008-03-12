@@ -57,3 +57,19 @@ Rails::Initializer.run do |config|
   # Make Active Record use UTC-base instead of local time
   # config.active_record.default_timezone = :utc
 end
+
+# STI dependency
+require "rubygems"
+require "matrix"
+require "fork_manager"
+require "ar-extensions"
+require "bio_extensions"
+require "array_extensions"
+require "vector_extensions"
+require "math_extensions"
+require "bipa"
+
+require_dependency "scop"
+require_dependency "chain"
+require_dependency "residue"
+require_dependency "interface"

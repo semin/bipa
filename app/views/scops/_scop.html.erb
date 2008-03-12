@@ -12,33 +12,33 @@
   </tr>
   <tr>
     <th>Number of interfaces</th>
-    <td><%= scop.DNA_interfaces.size %></td>
-    <td><%= scop.RNA_interfaces.size %></td>
+    <td><%= scop.dna_interfaces.size %></td>
+    <td><%= scop.rna_interfaces.size %></td>
   </tr>
   <tr>
     <th>Average ASA(&Aring;<sup>2</sup>)</th>
-    <td><%= scop.mean_DNA_interface_asa %> (<%= scop.stddev_DNA_interface_asa %>)</td>
-    <td><%= scop.mean_RNA_interface_asa %> (<%= scop.stddev_RNA_interface_asa %>)</td>
+    <td><%= scop.mean_dna_interface_asa %> (<%= scop.stddev_dna_interface_asa %>)</td>
+    <td><%= scop.mean_rna_interface_asa %> (<%= scop.stddev_rna_interface_asa %>)</td>
   </tr>
   <tr>
     <th>Hydrogen bonds <br /> (per 100&Aring;<sup>2</sup>)</th>
-    <td><%= scop.mean_DNA_interface_hbonds %> (<%= scop.stddev_DNA_interface_hbonds %>)</td>
-    <td><%= scop.mean_RNA_interface_hbonds %> (<%= scop.stddev_RNA_interface_hbonds %>)</td>
+    <td><%= scop.mean_dna_interface_hbonds %> (<%= scop.stddev_dna_interface_hbonds %>)</td>
+    <td><%= scop.mean_rna_interface_hbonds %> (<%= scop.stddev_rna_interface_hbonds %>)</td>
   </tr>
   <tr>
     <th>Water-mediated hydrogen bonds <br />(per 100&Aring;<sup>2</sup>)</th>
-    <td><%= scop.mean_DNA_interface_whbonds %> (<%= scop.stddev_DNA_interface_whbonds %>)</td>
-    <td><%= scop.mean_RNA_interface_whbonds %> (<%= scop.stddev_RNA_interface_whbonds %>)</td>
+    <td><%= scop.mean_dna_interface_whbonds %> (<%= scop.stddev_dna_interface_whbonds %>)</td>
+    <td><%= scop.mean_rna_interface_whbonds %> (<%= scop.stddev_rna_interface_whbonds %>)</td>
   </tr>
   <tr>
     <th>van der Waals contacts <br /> (per 100&Aring;<sup>2</sup>)</th>
-    <td><%= scop.mean_DNA_interface_contacts %> (<%= scop.stddev_DNA_interface_contacts %>)</td>
-    <td><%= scop.mean_RNA_interface_contacts %> (<%= scop.stddev_RNA_interface_contacts %>)</td>
+    <td><%= scop.mean_dna_interface_contacts %> (<%= scop.stddev_dna_interface_contacts %>)</td>
+    <td><%= scop.mean_rna_interface_contacts %> (<%= scop.stddev_rna_interface_contacts %>)</td>
   </tr>
   <tr>
     <th>Polarity</th>
-    <td><%= scop.mean_DNA_interface_polarity %> (<%= scop.stddev_DNA_interface_polarity %>)</td>
-    <td><%= scop.mean_RNA_interface_polarity %> (<%= scop.stddev_RNA_interface_polarity %>)</td>
+    <td><%= scop.mean_dna_interface_polarity %> (<%= scop.stddev_dna_interface_polarity %>)</td>
+    <td><%= scop.mean_rna_interface_polarity %> (<%= scop.stddev_rna_interface_polarity %>)</td>
   </tr>
 </table>
 
@@ -55,8 +55,8 @@
   <% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| %>
     <tr>
       <td><%= aa %></td>
-      <td><%= scop.send("mean_DNA_interface_singlet_propensity_of_#{aa}") %></td>
-      <td><%= scop.send("mean_RNA_interface_singlet_propensity_of_#{aa}") %></td>
+      <td><%= scop.send("mean_dna_interface_singlet_propensity_of_#{aa}") %></td>
+      <td><%= scop.send("mean_rna_interface_singlet_propensity_of_#{aa}") %></td>
     </tr>
   <% end -%>
 </table>
@@ -73,8 +73,8 @@
   <% BIPA::Constants::DSSP::SSES.each do |sse| -%>
     <tr>
       <th><%= dssp_description(sse) %></th>
-      <td><%= scop.send("mean_DNA_interface_sse_propensity_of_#{sse}") %></td>
-      <td><%= scop.send("mean_RNA_interface_sse_propensity_of_#{sse}") %></td>
+      <td><%= scop.send("mean_dna_interface_sse_propensity_of_#{sse}") %></td>
+      <td><%= scop.send("mean_rna_interface_sse_propensity_of_#{sse}") %></td>
     </tr>
   <% end -%>
 </table>
@@ -117,11 +117,11 @@
 				<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{dna}") %></td>
 				<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{dna}") %></td>
 			<% end -%>
-			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_DNA_sugar") %></td>
-			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_DNA_sugar") %></td>
-			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_DNA_phosphate") %></td>
-			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_DNA_phosphate") %></td>
-			<td><%= scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_DNA")%></td>
+			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_sugar") %></td>
+			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_sugar") %></td>
+			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_phosphate") %></td>
+			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_phosphate") %></td>
+			<td><%= scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_dna")%></td>
 		</tr>
 	<% end -%>
 	<tr>
@@ -129,9 +129,9 @@
 		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{dna}") %></th>
 		<% end -%>
-		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_DNA_sugar %></th>
-		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_DNA_phosphate %></th>
-		<th><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_DNA %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_sugar %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_phosphate %></th>
+		<th><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna %></th>
 	</tr>
 </table>
 
@@ -170,11 +170,11 @@
 				<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{dna}") %></td>
 				<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{dna}") %></td>
 			<% end -%>
-			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_DNA_sugar") %></td>
-			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_DNA_sugar") %></td>
-			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_DNA_phosphate") %></td>
-			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_DNA_phosphate") %></td>
-			<td><%= scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_DNA")%></td>
+			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_dna_sugar") %></td>
+			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_dna_sugar") %></td>
+			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_dna_phosphate") %></td>
+			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_dna_phosphate") %></td>
+			<td><%= scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_dna")%></td>
 		</tr>
 	<% end -%>
 	<tr>
@@ -182,9 +182,9 @@
 		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{dna}") %></th>
 		<% end -%>
-		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_DNA_sugar %></th>
-		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_DNA_phosphate %></th>
-		<th><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_DNA %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna_sugar %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna_phosphate %></th>
+		<th><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna %></th>
 	</tr>
 </table>
 
@@ -223,11 +223,11 @@
 				<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_#{dna}") %></td>
 				<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_#{dna}") %></td>
 			<% end -%>
-			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_DNA_sugar") %></td>
-			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_DNA_sugar") %></td>
-			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_DNA_phosphate") %></td>
-			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_DNA_phosphate") %></td>
-			<td><%= scop.send("total_observed_frequency_of_contact_between_#{aa}_and_DNA")%></td>
+			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_dna_sugar") %></td>
+			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_dna_sugar") %></td>
+			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_dna_phosphate") %></td>
+			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_dna_phosphate") %></td>
+			<td><%= scop.send("total_observed_frequency_of_contact_between_#{aa}_and_dna")%></td>
 		</tr>
 	<% end -%>
 	<tr>
@@ -235,9 +235,9 @@
 		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{dna}") %></th>
 		<% end -%>
-		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_DNA_sugar %></th>
-		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_DNA_phosphate %></th>
-		<th><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_DNA %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_dna_sugar %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_dna_phosphate %></th>
+		<th><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_dna %></th>
 	</tr>
 </table>
 
@@ -278,11 +278,11 @@
 				<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{rna}") %></td>
 				<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{rna}") %></td>
 			<% end -%>
-			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_RNA_sugar") %></td>
-			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_RNA_sugar") %></td>
-			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_RNA_phosphate") %></td>
-			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_RNA_phosphate") %></td>
-			<td><%= scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_RNA")%></td>
+			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_rna_sugar") %></td>
+			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_rna_sugar") %></td>
+			<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_rna_phosphate") %></td>
+			<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_rna_phosphate") %></td>
+			<td><%= scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_rna")%></td>
 		</tr>
 	<% end -%>
 	<tr>
@@ -290,9 +290,9 @@
 		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{rna}") %></th>
 		<% end -%>
-		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_RNA_sugar %></th>
-		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_RNA_phosphate %></th>
-		<th><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_RNA %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna_sugar %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna_phosphate %></th>
+		<th><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna %></th>
 	</tr>
 </table>
 
@@ -331,11 +331,11 @@
 				<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{rna}") %></td>
 				<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{rna}") %></td>
 			<% end -%>
-			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_RNA_sugar") %></td>
-			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_RNA_sugar") %></td>
-			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_RNA_phosphate") %></td>
-			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_RNA_phosphate") %></td>
-			<td><%= scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_RNA")%></td>
+			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_rna_sugar") %></td>
+			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_rna_sugar") %></td>
+			<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_rna_phosphate") %></td>
+			<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_rna_phosphate") %></td>
+			<td><%= scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_rna")%></td>
 		</tr>
 	<% end -%>
 	<tr>
@@ -343,9 +343,9 @@
 		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{rna}") %></th>
 		<% end -%>
-		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_RNA_sugar %></th>
-		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_RNA_phosphate %></th>
-		<th><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_RNA %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna_sugar %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna_phosphate %></th>
+		<th><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna %></th>
 	</tr>
 </table>
 
@@ -384,11 +384,11 @@
 				<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_#{rna}") %></td>
 				<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_#{rna}") %></td>
 			<% end -%>
-			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_RNA_sugar") %></td>
-			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_RNA_sugar") %></td>
-			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_RNA_phosphate") %></td>
-			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_RNA_phosphate") %></td>
-			<td><%= scop.send("total_observed_frequency_of_contact_between_#{aa}_and_RNA")%></td>
+			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_rna_sugar") %></td>
+			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_rna_sugar") %></td>
+			<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_rna_phosphate") %></td>
+			<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_rna_phosphate") %></td>
+			<td><%= scop.send("total_observed_frequency_of_contact_between_#{aa}_and_rna")%></td>
 		</tr>
 	<% end -%>
 	<tr>
@@ -396,8 +396,8 @@
 		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{rna}") %></th>
 		<% end -%>
-		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_RNA_sugar %></th>
-		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_RNA_phosphate %></th>
-		<th><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_RNA %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_rna_sugar %></th>
+		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_rna_phosphate %></th>
+		<th><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_rna %></th>
 	</tr>
 </table>

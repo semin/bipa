@@ -1,5 +1,4 @@
 # BIPA environment
-
 BIPA_ENV = {
   :MAX_FORK     => ENV['MAX_FORK'].to_i > 0 ? ENV['MAX_FORK'].to_i : 2,
   :ENTRY_TYPE   => 'prot-nuc',
