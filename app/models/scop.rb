@@ -3,7 +3,7 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  #is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
+  is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
   
   def self.factory_create!(opt={})
     case opt[:stype]
