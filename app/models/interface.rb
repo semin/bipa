@@ -1,4 +1,5 @@
 class Interface < ActiveRecord::Base
+  
   include BIPA::Constants
   include BIPA::USR
 
@@ -15,9 +16,12 @@ class Interface < ActiveRecord::Base
   def asa_of_residue(res)
     residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s + 0 }
   end
+  
 end
 
+
 class DomainInterface < Interface
+  
   include BIPA::NucleicAcidBinding
   
   belongs_to :domain, :class_name => 'ScopDomain', :foreign_key => 'scop_id'
@@ -236,7 +240,9 @@ class DomainInterface < Interface
     end
     sum
   end
-end
+  
+end # class DomainInterface
+
 
 class DomainDnaInterface < DomainInterface
   
@@ -287,7 +293,9 @@ class DomainDnaInterface < DomainInterface
     sum += frequency_of_contact_between_phosphate_and_(aa)
     sum
   end
-end
+  
+end # class DomainDnaInterface
+
 
 class DomainRnaInterface < DomainInterface
 
@@ -338,16 +346,22 @@ class DomainRnaInterface < DomainInterface
     sum += frequency_of_contact_between_phosphate_and_(aa)
     sum
   end
-end
+  
+end # class DomainRnaInterface
+
 
 class ChainInterface < Interface
+  
   belongs_to :chain
   
   has_many :residues, :class_name => "Residue", :foreign_key => "chain_interface_id"
+  
 end
+
 
 class ChainDnaInterface < ChainInterface
 end
+
 
 class ChainRnaInterface < ChainInterface
 end

@@ -1,4 +1,5 @@
 class Atom < ActiveRecord::Base
+  
   include BIPA::NucleicAcidBinding
 
   belongs_to :residue
@@ -39,8 +40,8 @@ class Atom < ActiveRecord::Base
     residue.rna?
   end
   
-  def AA?
-    residue.AA?
+  def aa?
+    residue.aa?
   end
   
   def polar?
@@ -101,4 +102,5 @@ class Atom < ActiveRecord::Base
     # could not be reached here
     raise "Cannot justify the atom name: #{an}"
   end
-end
+  
+end # class Atom

@@ -30,4 +30,5 @@ class Structure < ActiveRecord::Base
       find_all_by_has_complete_contacts(true, :order => 'deposited_at DESC')
     end
   end
+  
 end

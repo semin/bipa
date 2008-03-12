@@ -1,4 +1,5 @@
 class Chain < ActiveRecord::Base
+  
   include BIPA::USR
   include BIPA::NucleicAcidBinding
   include BIPA::ComposedOfResidues
@@ -9,14 +10,14 @@ class Chain < ActiveRecord::Base
   has_many :dna_interfaces, :class_name => 'ChainDnaInterface', :foreign_key => 'chain_id'
   has_many :rna_interfaces, :class_name => 'ChainRnaInterface', :foreign_key => 'chain_id'
   
-  has_many :residues, :dependent => :delete_all
+  has_many :residues, :dependent => :destroy
   has_many :std_residues
   has_many :aa_residues
   has_many :na_residues
   has_many :dna_residues
   has_many :rna_residues
   has_many :het_residues
-           
+
   has_many :domains, :through => :aa_residues, :uniq => true
            
   has_many :atoms,     :through => :residues
@@ -53,22 +54,28 @@ class Chain < ActiveRecord::Base
   def had_aa?
     aa_residues.size > 0
   end
-end
+end # class Chain
+
 
 class ProteinChain < Chain
 end
 
+
 class NucleicAcidChain < Chain
 end
+
 
 class DnaChain < NucleicAcidChain
 end
 
+
 class RnaChain < NucleicAcidChain
 end
 
+
 class HnaChain < NucleicAcidChain
 end
+
 
 class HetChain < Chain
 end

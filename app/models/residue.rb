@@ -1,4 +1,5 @@
 class Residue < ActiveRecord::Base
+  
   include BIPA::USR
   include BIPA::Constants
   include BIPA::NucleicAcidBinding
@@ -60,13 +61,17 @@ class Residue < ActiveRecord::Base
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "Error: No one letter code for residue: #{residue_name}"
   end
-end
+  
+end # class Residue
+
 
 class StdResidue < Residue
 end
 
+
 class HetResidue < Residue
 end
+
 
 class AaResidue < StdResidue
 
@@ -101,11 +106,14 @@ class AaResidue < StdResidue
   end
 end
 
+
 class NaResidue < StdResidue
 end
 
+
 class DnaResidue < NaResidue
 end
+
 
 class RnaResidue < NaResidue
 end

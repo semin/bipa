@@ -1,4 +1,5 @@
 class Scop < ActiveRecord::Base
+  
   include BIPA::Constants
 
   acts_as_nested_set
@@ -222,28 +223,37 @@ class Scop < ActiveRecord::Base
 	end #
 end # class Scop
 
+
 class ScopRoot < Scop
 end
+
 
 class ScopClass < Scop
 end
 
+
 class ScopFold < Scop
 end
+
 
 class ScopSuperFamily < Scop
 end
 
+
 class ScopFamily < Scop
 end
+
 
 class ScopProtein < Scop
 end
 
+
 class ScopSpecies < Scop
 end
 
+
 class ScopDomain < Scop
+  
   include BIPA::USR
   include BIPA::NucleicAcidBinding
   include BIPA::ComposedOfResidues
@@ -311,9 +321,8 @@ class ScopDomain < Scop
     result
   end
 
-  protected
-
-    def update_pdb_code
-      self.pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
-    end
-end
+  def update_pdb_code
+    self.pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
+  end
+  
+end # class ScopDomain

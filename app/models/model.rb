@@ -1,4 +1,5 @@
 class Model < ActiveRecord::Base
+  
   include BIPA::USR
   include BIPA::NucleicAcidBinding
   include BIPA::ComposedOfResidues
@@ -46,4 +47,5 @@ class Model < ActiveRecord::Base
   def chains_with_rna
     chains.select { |c| c.has_rna? }
   end
+  
 end
