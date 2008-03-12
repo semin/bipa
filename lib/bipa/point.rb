@@ -1,8 +1,8 @@
-require 'rubygems'
-require 'inline'
-
 module BIPA
   class Point
+    require 'rubygems'
+    require 'inline'
+    
     attr_reader :x, :y, :z, :serial, :type
 
     def initialize(x, y, z, serial = nil, type = nil)

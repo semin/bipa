@@ -52,7 +52,7 @@
     <th>Protein-RNA</th>
   </tr>
 
-  <% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| %>
+  <% BIPA::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| %>
     <tr>
       <td><%= aa %></td>
       <td><%= scop.send("mean_dna_interface_singlet_propensity_of_#{aa}") %></td>
@@ -70,9 +70,9 @@
     <th>Protein-RNA</th>
   </tr>
 
-  <% BIPA::Constants::DSSP::SSES.each do |sse| -%>
+  <% BIPA::Constants::DSSP::SSES.map(&:downcase).each do |sse| -%>
     <tr>
-      <th><%= dssp_description(sse) %></th>
+      <th><%= dssp_description(sse.upcase) %></th>
       <td><%= scop.send("mean_dna_interface_sse_propensity_of_#{sse}") %></td>
       <td><%= scop.send("mean_rna_interface_sse_propensity_of_#{sse}") %></td>
     </tr>
@@ -110,10 +110,10 @@
 		<th>Obs</th>
 		<th>Exp</th>
 	</tr>
-	<% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| -%>
+	<% BIPA::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
 		<tr>
 			<th><%= aa %></th>
-			<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
+			<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna| -%>
 				<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{dna}") %></td>
 				<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{dna}") %></td>
 			<% end -%>
@@ -126,7 +126,7 @@
 	<% end -%>
 	<tr>
 		<th>Total</th>
-		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
+		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{dna}") %></th>
 		<% end -%>
 		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_sugar %></th>
@@ -163,10 +163,10 @@
 		<th>Obs</th>
 		<th>Exp</th>
 	</tr>
-	<% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| -%>
+	<% BIPA::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
 		<tr>
 			<th><%= aa %></th>
-			<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
+			<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna| -%>
 				<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{dna}") %></td>
 				<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{dna}") %></td>
 			<% end -%>
@@ -179,7 +179,7 @@
 	<% end -%>
 	<tr>
 		<th>Total</th>
-		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
+		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{dna}") %></th>
 		<% end -%>
 		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna_sugar %></th>
@@ -216,10 +216,10 @@
 		<th>Obs</th>
 		<th>Exp</th>
 	</tr>
-	<% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| -%>
+	<% BIPA::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
 		<tr>
 			<th><%= aa %></th>
-			<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
+			<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna| -%>
 				<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_#{dna}") %></td>
 				<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_#{dna}") %></td>
 			<% end -%>
@@ -232,7 +232,7 @@
 	<% end -%>
 	<tr>
 		<th>Total</th>
-		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.each do |dna| -%>
+		<% BIPA::Constants::NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{dna}") %></th>
 		<% end -%>
 		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_dna_sugar %></th>
@@ -271,10 +271,10 @@
 		<th>Obs</th>
 		<th>Exp</th>
 	</tr>
-	<% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| -%>
+	<% BIPA::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
 		<tr>
 			<th><%= aa %></th>
-			<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
+			<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna| -%>
 				<td><%= scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{rna}") %></td>
 				<td><%= scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{rna}") %></td>
 			<% end -%>
@@ -287,7 +287,7 @@
 	<% end -%>
 	<tr>
 		<th>Total</th>
-		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
+		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{rna}") %></th>
 		<% end -%>
 		<th colspan=2><%= scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna_sugar %></th>
@@ -324,10 +324,10 @@
 		<th>Obs</th>
 		<th>Exp</th>
 	</tr>
-	<% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| -%>
+	<% BIPA::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
 		<tr>
 			<th><%= aa %></th>
-			<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
+			<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna| -%>
 				<td><%= scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{rna}") %></td>
 				<td><%= scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{rna}") %></td>
 			<% end -%>
@@ -340,7 +340,7 @@
 	<% end -%>
 	<tr>
 		<th>Total</th>
-		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
+		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{rna}") %></th>
 		<% end -%>
 		<th colspan=2><%= scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna_sugar %></th>
@@ -377,10 +377,10 @@
 		<th>Obs</th>
 		<th>Exp</th>
 	</tr>
-	<% BIPA::Constants::AminoAcids::Residues::STANDARD.each do |aa| -%>
+	<% BIPA::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
 		<tr>
 			<th><%= aa %></th>
-			<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
+			<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna| -%>
 				<td><%= scop.send("observed_frequency_of_contact_between_#{aa}_and_#{rna}") %></td>
 				<td><%= scop.send("expected_frequency_of_contact_between_#{aa}_and_#{rna}") %></td>
 			<% end -%>
@@ -393,7 +393,7 @@
 	<% end -%>
 	<tr>
 		<th>Total</th>
-		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.each do |rna| -%>
+		<% BIPA::Constants::NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna| -%>
 			<th colspan=2><%= scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{rna}") %></th>
 		<% end -%>
 		<th colspan=2><%= scop.total_observed_frequency_of_contact_between_amino_acids_and_rna_sugar %></th>

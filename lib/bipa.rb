@@ -1,19 +1,12 @@
-module BIPA
-
-  BIPA_VERSION = [0, 0, 1].extend(Comparable)
-
-  autoload :Constants,  "bipa/constants"
-  autoload :DSSP,       "bipa/dssp"
-  autoload :HBPlus,     "bipa/hbplus"
-  autoload :NACCESS,    "bipa/naccess"
-  autoload :KDTree,     "bipa/kdtree"
-  autoload :Point,      "bipa/point"
-  autoload :USR,        "bipa/usr"
-  autoload :NCONT,      "bipa/ncont"
-  autoload :StatsArray, "bipa/stats_array"
-  autoload :Cluster,    "bipa/cluster"
-  autoload :NucleicAcidBinding, "bipa/nucleic_acid_binding"
-  autoload :ComposedOfResidues, "bipa/composed_of_residues"
-  autoload :ComposedOfAtoms,    "bipa/composed_of_atoms"
-
-end
+require File.expand_path(File.dirname(__FILE__) + "/bipa/constants")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/dssp")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/hbplus")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/naccess")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/kdtree")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/point")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/usr")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/ncont")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/stats_array")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/nucleic_acid_binding")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_residues")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_atoms")

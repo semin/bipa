@@ -58,7 +58,6 @@ Rails::Initializer.run do |config|
   # config.active_record.default_timezone = :utc
 end
 
-# STI dependency
 require "rubygems"
 require "matrix"
 require "fork_manager"
@@ -69,6 +68,7 @@ require "vector_extensions"
 require "math_extensions"
 require "bipa"
 
+# STI dependency
 require_dependency "scop"
 require_dependency "chain"
 require_dependency "residue"

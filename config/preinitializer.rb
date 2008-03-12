@@ -1,4 +1,5 @@
 # Monkey patching for ActiveRecord::Base
+
 class Object
   def self.lazy_calculate(*attrs)
     attrs.each do |attr|

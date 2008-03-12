@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'bio'
-require File.join(File.dirname(__FILE__), 'bipa/constants')
+require File.expand_path(File.dirname(__FILE__) + '/bipa/constants')
 
 module Bio
   class PDB
