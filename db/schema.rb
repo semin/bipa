@@ -89,14 +89,15 @@ ActiveRecord::Schema.define(:version => 1) do
   
   # 'resdiues' table
   create_table "residues", :force => true do |t|
-    t.belongs_to  "chain",            :null => false
+    t.belongs_to  "chain",              :null => false
     t.belongs_to  "scop"
     t.belongs_to  "chain_interface"
     t.belongs_to  "domain_interface"
-    t.string      "type",                :null => false
+    t.belongs_to  "res_map"
+    t.string      "type",               :null => false
     t.string      "icode"
-    t.integer     "residue_code",        :null => false
-    t.string      "residue_name",        :null => false
+    t.integer     "residue_code",       :null => false
+    t.string      "residue_name",       :null => false
     t.string      "secondary_structure"
     t.string      "hydrophobicity"
     t.float       "bound_asa"

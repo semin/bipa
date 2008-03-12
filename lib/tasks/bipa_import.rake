@@ -89,7 +89,7 @@ namespace :bipa do
                 params = {
                   :chain_id             => chain_id,
                   :residue_code         => residue.residue_id,
-                  :icode                => (residue.iCode =~ /^\s*$/ ? '-' : residue.iCode),
+                  :icode                => (residue.iCode =~ /^\s*$/ ? nil : residue.iCode),
                   :residue_name         => residue.resName,
                   :hydrophobicity       => residue.hydrophobicity,
                   :secondary_structure  => sstruc
@@ -366,8 +366,10 @@ namespace :bipa do
       end # fork_manager.manage
     end
 
+
     desc "Import SCOP datasets"
     task :scop => [:environment] do
+      
       hierarchy_file    = Dir[File.join(BIPA_ENV[:SCOP_DIR], '*hie*scop*')][0]
       description_file  = Dir[File.join(BIPA_ENV[:SCOP_DIR], '*des*scop*')][0]
 
@@ -484,6 +486,7 @@ namespace :bipa do
     
     desc "Import Chain Interfaces"
     task :chain_interfaces => [:environment] do
+      
       structures    = Structure.find_all_by_complete(true)
       pdb_codes     = structures.map { |s| s.pdb_code }
       total_pdb     = structures.size
