@@ -34,6 +34,7 @@ namespace :bipa do
       end
     end
     
+
     desc "Associate Residue with ResMap"
     task :residues_resmap => [:environment] do
       
