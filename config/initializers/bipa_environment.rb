@@ -37,6 +37,8 @@ BIPA_ENV = {
   :DSSP_BIN     => File.join(RAILS_ROOT, '/bin/dssp/dsspcmbi'),
 
   :DOMAIN_DIR   => File.join(RAILS_ROOT, '/public/analysis/domain'),
+  
+  :BATON_SCOP_FAMILY_DIR => File.join(RAILS_ROOT, '/public/baton/scop_family'),
 
   :CDHIT_DIR    => File.join(RAILS_ROOT, '/public/analysis/cdhit'),
   :CDHIT_BIN    => File.join(RAILS_ROOT, '/bin/cdhit/cd-hit'),

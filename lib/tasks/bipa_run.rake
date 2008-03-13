@@ -2,17 +2,37 @@ namespace :bipa do
   namespace :run do
 
     require 'fileutils'
+    
+    include FileUtils
 
     def refresh_dir(dir)
-      FileUtils.rm_rf(dir) if File.exists?(dir)
-      FileUtils.mkdir_p(dir)
+      rm_rf(dir) if File.exists?(dir)
+      mkdir_p(dir)
     end
+    
 
-    task :default => :all
-
-    desc "Run everything on PDB dataset"
-    task :all => [:hbplus, :naccess, :dssp]
-
+    desc "Run Baton on each SCOP family of BIPA"
+    task :baton_scop_family => [:environment] do
+      
+      refresh_dir(BIPA_ENV[:BATON_SCOP_FAMILY_DIR])
+      scop_families = ScopFamily.find(:all).select(&:registered)
+      
+      scop_families.each do |scop_family|
+        scop_family_dir = File.join(BIPA_ENV[:BATON_SCOP_FAMILY_DIR], "#{scop_family.sccs}")
+        mkdir scop_family_dir
+        
+        scop_domains = scop_family.all_registered_leaf_children
+        
+        scop_domains.each do |scop_domain|
+          File.open(File.join(scop_family_dir, "#{scop_domain.sid}.pdb"), "w") do |pdb|
+            pdb.puts scop_domain.to_pdb
+          end
+        end
+        
+        puts "PDB flat file creation for #{scop_family.sccs}: done (#{i + 1}/#{scop_families.size})"
+      end
+    end
+    
 
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
@@ -87,8 +107,8 @@ namespace :bipa do
             pdb_obj   = Bio::PDB.new(pdb_str)
             tmp_dir   = File.join(BIPA_ENV[:NACCESS_DIR], pdb_code)
 
-            FileUtils.mkdir(tmp_dir)
-            FileUtils.cp(pdb_file, tmp_dir)
+            mkdir(tmp_dir)
+            cp(pdb_file, tmp_dir)
             Dir.chdir(tmp_dir)
 
             aa_pdb_file = "#{pdb_code}_aa.pdb"
@@ -105,9 +125,9 @@ namespace :bipa do
             system("#{BIPA_ENV[:NACCESS_BIN]} #{aa_pdb_file}  -r #{BIPA_ENV[:NACCESS_VDW]} -s #{BIPA_ENV[:NACCESS_STD]}")
             system("#{BIPA_ENV[:NACCESS_BIN]} #{na_pdb_file}  -r #{BIPA_ENV[:NACCESS_VDW]} -s #{BIPA_ENV[:NACCESS_STD]}")
 
-            FileUtils.cp(Dir.glob("#{pdb_code}*"), '..')
+            cp(Dir.glob("#{pdb_code}*"), '..')
             Dir.chdir(pwd)
-            FileUtils.rm_r(tmp_dir)
+            rm_r(tmp_dir)
 
             puts "Running NACCESS on #{pdb_file} (#{i + 1}/#{pdb_total}): done"
           end

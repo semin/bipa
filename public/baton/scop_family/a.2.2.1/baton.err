@@ -1,0 +1,487 @@
+Baton started:
+Reading dmatrix /BiO/Install/Baton/data/xs2.mat
+Running /BiO/Install/Baton/bin/psa d1jj2u_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1jj2u_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1jj2u_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1k73w_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1k73w_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1k73w_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1k8aw_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1k8aw_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1k8aw_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1k9mw_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1k9mw_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1k9mw_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1kc8w_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1kc8w_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1kc8w_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1kd1w_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1kd1w_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1kd1w_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1kqsu_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1kqsu_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1kqsu_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1m1kw_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1m1kw_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1m1kw_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1m90w_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1m90w_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1m90w_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1n8rw_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1n8rw_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1n8rw_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1njiw_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1njiw_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1njiw_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1q7yw_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1q7yw_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1q7yw_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1q81w_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1q81w_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1q81w_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1q82w_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1q82w_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1q82w_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1q86w_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1q86w_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1q86w_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1qvfu_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1qvfu_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1qvfu_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1qvgu_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1qvgu_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1qvgu_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1s72v_.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1s72v_.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1s72v_.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vq4v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vq4v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vq4v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vq5v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vq5v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vq5v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vq6v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vq6v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vq6v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vq7v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vq7v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vq7v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vq8v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vq8v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vq8v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vq9v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vq9v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vq9v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vqkv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vqkv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vqkv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vqlv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vqlv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vqlv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vqmv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vqmv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vqmv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vqnv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vqnv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vqnv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vqov1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vqov1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vqov1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vqpv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vqpv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vqpv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vs6x1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vs6x1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vs6x1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1vs8x1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1vs8x1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1vs8x1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yhqv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yhqv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yhqv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yi2v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yi2v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yi2v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yijv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yijv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yijv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yitv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yitv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yitv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yj9v1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yj9v1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yj9v1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yjnv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yjnv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yjnv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yjwv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yjwv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yjwv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d1yl3w1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d1yl3w1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d1yl3w1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2aw4x1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2aw4x1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2aw4x1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2awbx1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2awbx1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2awbx1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2b6621.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2b6621.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2b6621.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2b9n21.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2b9n21.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2b9n21.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2b9p21.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2b9p21.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2b9p21.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2gyaw1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2gyaw1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2gyaw1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2gycw1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2gycw1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2gycw1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2i2ty1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2i2ty1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2i2ty1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2i2vy1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2i2vy1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2i2vy1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2j0121.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2j0121.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2j0121.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2j0321.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2j0321.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2j0321.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2j28x1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2j28x1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2j28x1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2otjv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2otjv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2otjv1.pdb > baton_sstruc.out 2>&1
+Running /BiO/Install/Baton/bin/psa d2otlv1.pdb > baton_psa.out 2>&1
+Running /BiO/Install/Baton/bin/hbond d2otlv1.pdb > baton_hbond.out 2>&1
+Running /BiO/Install/Baton/bin/sstruc s d2otlv1.pdb > baton_sstruc.out 2>&1
+Protein 1 :d1jj2u_: not found in tree file.Adding to end of tree
+Protein 2 :d1k73w_: not found in tree file.Adding to end of tree
+Protein 3 :d1k8aw_: not found in tree file.Adding to end of tree
+Protein 4 :d1k9mw_: not found in tree file.Adding to end of tree
+Protein 5 :d1kc8w_: not found in tree file.Adding to end of tree
+Protein 6 :d1kd1w_: not found in tree file.Adding to end of tree
+Protein 7 :d1kqsu_: not found in tree file.Adding to end of tree
+Protein 8 :d1m1kw_: not found in tree file.Adding to end of tree
+Protein 9 :d1m90w_: not found in tree file.Adding to end of tree
+Protein 10 :d1n8rw_: not found in tree file.Adding to end of tree
+Protein 11 :d1njiw_: not found in tree file.Adding to end of tree
+Protein 12 :d1q7yw_: not found in tree file.Adding to end of tree
+Protein 13 :d1q81w_: not found in tree file.Adding to end of tree
+Protein 14 :d1q82w_: not found in tree file.Adding to end of tree
+Protein 15 :d1q86w_: not found in tree file.Adding to end of tree
+Protein 16 :d1qvfu_: not found in tree file.Adding to end of tree
+Protein 17 :d1qvgu_: not found in tree file.Adding to end of tree
+Protein 18 :d1s72v_: not found in tree file.Adding to end of tree
+Protein 19 :d1vq4v1: not found in tree file.Adding to end of tree
+Protein 20 :d1vq5v1: not found in tree file.Adding to end of tree
+Protein 21 :d1vq6v1: not found in tree file.Adding to end of tree
+Protein 22 :d1vq7v1: not found in tree file.Adding to end of tree
+Protein 23 :d1vq8v1: not found in tree file.Adding to end of tree
+Protein 24 :d1vq9v1: not found in tree file.Adding to end of tree
+Protein 25 :d1vqkv1: not found in tree file.Adding to end of tree
+Protein 26 :d1vqlv1: not found in tree file.Adding to end of tree
+Protein 27 :d1vqmv1: not found in tree file.Adding to end of tree
+Protein 28 :d1vqnv1: not found in tree file.Adding to end of tree
+Protein 29 :d1vqov1: not found in tree file.Adding to end of tree
+Protein 30 :d1vqpv1: not found in tree file.Adding to end of tree
+Protein 31 :d1vs6x1: not found in tree file.Adding to end of tree
+Protein 32 :d1vs8x1: not found in tree file.Adding to end of tree
+Protein 33 :d1yhqv1: not found in tree file.Adding to end of tree
+Protein 34 :d1yi2v1: not found in tree file.Adding to end of tree
+Protein 35 :d1yijv1: not found in tree file.Adding to end of tree
+Protein 36 :d1yitv1: not found in tree file.Adding to end of tree
+Protein 37 :d1yj9v1: not found in tree file.Adding to end of tree
+Protein 38 :d1yjnv1: not found in tree file.Adding to end of tree
+Protein 39 :d1yjwv1: not found in tree file.Adding to end of tree
+Protein 40 :d1yl3w1: not found in tree file.Adding to end of tree
+Protein 41 :d2aw4x1: not found in tree file.Adding to end of tree
+Protein 42 :d2awbx1: not found in tree file.Adding to end of tree
+Protein 43 :d2b6621: not found in tree file.Adding to end of tree
+Protein 44 :d2b9n21: not found in tree file.Adding to end of tree
+Protein 45 :d2b9p21: not found in tree file.Adding to end of tree
+Protein 46 :d2gyaw1: not found in tree file.Adding to end of tree
+Protein 47 :d2gycw1: not found in tree file.Adding to end of tree
+Protein 48 :d2i2ty1: not found in tree file.Adding to end of tree
+Protein 49 :d2i2vy1: not found in tree file.Adding to end of tree
+Protein 50 :d2j0121: not found in tree file.Adding to end of tree
+Protein 51 :d2j0321: not found in tree file.Adding to end of tree
+Protein 52 :d2j28x1: not found in tree file.Adding to end of tree
+Protein 53 :d2otjv1: not found in tree file.Adding to end of tree
+Protein 54 :d2otlv1: not found in tree file.Adding to end of tree
+npr=1 dist=2 li1=1 li2=1 li3=2 li4=2
+npr=2 dist=2 li1=1 li2=2 li3=3 li4=3
+npr=3 dist=2 li1=1 li2=3 li3=4 li4=4
+npr=4 dist=2 li1=1 li2=4 li3=5 li4=5
+npr=5 dist=2 li1=1 li2=5 li3=6 li4=6
+npr=6 dist=2 li1=1 li2=6 li3=7 li4=7
+npr=7 dist=2 li1=1 li2=7 li3=8 li4=8
+npr=8 dist=2 li1=1 li2=8 li3=9 li4=9
+npr=9 dist=2 li1=1 li2=9 li3=10 li4=10
+npr=10 dist=2 li1=1 li2=10 li3=11 li4=11
+npr=11 dist=2 li1=1 li2=11 li3=12 li4=12
+npr=12 dist=2 li1=1 li2=12 li3=13 li4=13
+npr=13 dist=2 li1=1 li2=13 li3=14 li4=14
+npr=14 dist=2 li1=1 li2=14 li3=15 li4=15
+npr=15 dist=2 li1=1 li2=15 li3=16 li4=16
+npr=16 dist=2 li1=1 li2=16 li3=17 li4=17
+npr=17 dist=2 li1=1 li2=17 li3=18 li4=18
+npr=18 dist=2 li1=1 li2=18 li3=19 li4=19
+npr=19 dist=2 li1=1 li2=19 li3=20 li4=20
+npr=20 dist=2 li1=1 li2=20 li3=21 li4=21
+npr=21 dist=2 li1=1 li2=21 li3=22 li4=22
+npr=22 dist=2 li1=1 li2=22 li3=23 li4=23
+npr=23 dist=2 li1=1 li2=23 li3=24 li4=24
+npr=24 dist=2 li1=1 li2=24 li3=25 li4=25
+npr=25 dist=2 li1=1 li2=25 li3=26 li4=26
+npr=26 dist=2 li1=1 li2=26 li3=27 li4=27
+npr=27 dist=2 li1=1 li2=27 li3=28 li4=28
+npr=28 dist=2 li1=1 li2=28 li3=29 li4=29
+npr=29 dist=2 li1=1 li2=29 li3=30 li4=30
+npr=30 dist=2 li1=1 li2=30 li3=31 li4=31
+npr=31 dist=2 li1=1 li2=31 li3=32 li4=32
+npr=32 dist=2 li1=1 li2=32 li3=33 li4=33
+npr=33 dist=2 li1=1 li2=33 li3=34 li4=34
+npr=34 dist=2 li1=1 li2=34 li3=35 li4=35
+npr=35 dist=2 li1=1 li2=35 li3=36 li4=36
+npr=36 dist=2 li1=1 li2=36 li3=37 li4=37
+npr=37 dist=2 li1=1 li2=37 li3=38 li4=38
+npr=38 dist=2 li1=1 li2=38 li3=39 li4=39
+npr=39 dist=2 li1=1 li2=39 li3=40 li4=40
+npr=40 dist=2 li1=1 li2=40 li3=41 li4=41
+npr=41 dist=2 li1=1 li2=41 li3=42 li4=42
+npr=42 dist=2 li1=1 li2=42 li3=43 li4=43
+npr=43 dist=2 li1=1 li2=43 li3=44 li4=44
+npr=44 dist=2 li1=1 li2=44 li3=45 li4=45
+npr=45 dist=2 li1=1 li2=45 li3=46 li4=46
+npr=46 dist=2 li1=1 li2=46 li3=47 li4=47
+npr=47 dist=2 li1=1 li2=47 li3=48 li4=48
+npr=48 dist=2 li1=1 li2=48 li3=49 li4=49
+npr=49 dist=2 li1=1 li2=49 li3=50 li4=50
+npr=50 dist=2 li1=1 li2=50 li3=51 li4=51
+npr=51 dist=2 li1=1 li2=51 li3=52 li4=52
+npr=52 dist=2 li1=1 li2=52 li3=53 li4=53
+npr=53 dist=2 li1=1 li2=53 li3=54 li4=54
+npr=54 dist=2 li1=1 li2=54 li3=0 li4=0
+  Now go to main loop(s): (you have 53 loops)
+1 . multiple weight matrix constructed
+1 . score calculated.
+1 . pointers obtained.
+. new alignment contructed.
+2 . multiple weight matrix constructed
+2 . score calculated.
+2 . pointers obtained.
+. new alignment contructed.
+3 . multiple weight matrix constructed
+3 . score calculated.
+3 . pointers obtained.
+. new alignment contructed.
+4 . multiple weight matrix constructed
+4 . score calculated.
+4 . pointers obtained.
+. new alignment contructed.
+5 . multiple weight matrix constructed
+5 . score calculated.
+5 . pointers obtained.
+. new alignment contructed.
+6 . multiple weight matrix constructed
+6 . score calculated.
+6 . pointers obtained.
+. new alignment contructed.
+7 . multiple weight matrix constructed
+7 . score calculated.
+7 . pointers obtained.
+. new alignment contructed.
+8 . multiple weight matrix constructed
+8 . score calculated.
+8 . pointers obtained.
+. new alignment contructed.
+9 . multiple weight matrix constructed
+9 . score calculated.
+9 . pointers obtained.
+. new alignment contructed.
+10 . multiple weight matrix constructed
+10 . score calculated.
+10 . pointers obtained.
+. new alignment contructed.
+11 . multiple weight matrix constructed
+11 . score calculated.
+11 . pointers obtained.
+. new alignment contructed.
+12 . multiple weight matrix constructed
+12 . score calculated.
+12 . pointers obtained.
+. new alignment contructed.
+13 . multiple weight matrix constructed
+13 . score calculated.
+13 . pointers obtained.
+. new alignment contructed.
+14 . multiple weight matrix constructed
+14 . score calculated.
+14 . pointers obtained.
+. new alignment contructed.
+15 . multiple weight matrix constructed
+15 . score calculated.
+15 . pointers obtained.
+. new alignment contructed.
+16 . multiple weight matrix constructed
+16 . score calculated.
+16 . pointers obtained.
+. new alignment contructed.
+17 . multiple weight matrix constructed
+17 . score calculated.
+17 . pointers obtained.
+. new alignment contructed.
+18 . multiple weight matrix constructed
+18 . score calculated.
+18 . pointers obtained.
+. new alignment contructed.
+19 . multiple weight matrix constructed
+19 . score calculated.
+19 . pointers obtained.
+. new alignment contructed.
+20 . multiple weight matrix constructed
+20 . score calculated.
+20 . pointers obtained.
+. new alignment contructed.
+21 . multiple weight matrix constructed
+21 . score calculated.
+21 . pointers obtained.
+. new alignment contructed.
+22 . multiple weight matrix constructed
+22 . score calculated.
+22 . pointers obtained.
+. new alignment contructed.
+23 . multiple weight matrix constructed
+23 . score calculated.
+23 . pointers obtained.
+. new alignment contructed.
+24 . multiple weight matrix constructed
+24 . score calculated.
+24 . pointers obtained.
+. new alignment contructed.
+25 . multiple weight matrix constructed
+25 . score calculated.
+25 . pointers obtained.
+. new alignment contructed.
+26 . multiple weight matrix constructed
+26 . score calculated.
+26 . pointers obtained.
+. new alignment contructed.
+27 . multiple weight matrix constructed
+27 . score calculated.
+27 . pointers obtained.
+. new alignment contructed.
+28 . multiple weight matrix constructed
+28 . score calculated.
+28 . pointers obtained.
+. new alignment contructed.
+29 . multiple weight matrix constructed
+29 . score calculated.
+29 . pointers obtained.
+. new alignment contructed.
+30 . multiple weight matrix constructed
+30 . score calculated.
+30 . pointers obtained.
+. new alignment contructed.
+31 . multiple weight matrix constructed
+31 . score calculated.
+31 . pointers obtained.
+. new alignment contructed.
+32 . multiple weight matrix constructed
+32 . score calculated.
+32 . pointers obtained.
+. new alignment contructed.
+33 . multiple weight matrix constructed
+33 . score calculated.
+33 . pointers obtained.
+. new alignment contructed.
+34 . multiple weight matrix constructed
+34 . score calculated.
+34 . pointers obtained.
+. new alignment contructed.
+35 . multiple weight matrix constructed
+35 . score calculated.
+35 . pointers obtained.
+. new alignment contructed.
+36 . multiple weight matrix constructed
+36 . score calculated.
+36 . pointers obtained.
+. new alignment contructed.
+37 . multiple weight matrix constructed
+37 . score calculated.
+37 . pointers obtained.
+. new alignment contructed.
+38 . multiple weight matrix constructed
+38 . score calculated.
+38 . pointers obtained.
+. new alignment contructed.
+39 . multiple weight matrix constructed
+39 . score calculated.
+39 . pointers obtained.
+. new alignment contructed.
+40 . multiple weight matrix constructed
+40 . score calculated.
+40 . pointers obtained.
+. new alignment contructed.
+41 . multiple weight matrix constructed
+41 . score calculated.
+41 . pointers obtained.
+. new alignment contructed.
+42 . multiple weight matrix constructed
+42 . score calculated.
+42 . pointers obtained.
+. new alignment contructed.
+43 . multiple weight matrix constructed
+43 . score calculated.
+43 . pointers obtained.
+. new alignment contructed.
+44 . multiple weight matrix constructed
+44 . score calculated.
+44 . pointers obtained.
+. new alignment contructed.
+45 . multiple weight matrix constructed
+45 . score calculated.
+45 . pointers obtained.
+. new alignment contructed.
+46 . multiple weight matrix constructed
+46 . score calculated.
+46 . pointers obtained.
+. new alignment contructed.
+47 . multiple weight matrix constructed
+47 . score calculated.
+47 . pointers obtained.
+. new alignment contructed.
+48 . multiple weight matrix constructed
+48 . score calculated.
+48 . pointers obtained.
+. new alignment contructed.
+49 . multiple weight matrix constructed
+49 . score calculated.
+49 . pointers obtained.
+. new alignment contructed.
+50 . multiple weight matrix constructed
+50 . score calculated.
+50 . pointers obtained.
+. new alignment contructed.
+51 . multiple weight matrix constructed
+51 . score calculated.
+51 . pointers obtained.
+. new alignment contructed.
+52 . multiple weight matrix constructed
+52 . score calculated.
+52 . pointers obtained.
+. new alignment contructed.
+53 . multiple weight matrix constructed
+53 . score calculated.
+53 . pointers obtained.
+. new alignment contructed.
+Successfully finished alignment
+last alignment displayed

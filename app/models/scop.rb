@@ -325,4 +325,8 @@ class ScopDomain < Scop
     self.pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
   end
   
+  def to_pdb
+    atoms.sort_by(&:atom_code).inject("") { |p, a| p + a.to_pdb }
+  end 
+  
 end # class ScopDomain

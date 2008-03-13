@@ -1,0 +1,11 @@
+# produced by hbond, version 2.2  (2.3c)
+#   parameterized for 5000 residues, 90 atoms per residue, and 10000 hetatoms
+#
+# coordinate data taken from file d1njiw_.atm
+#   number of atoms    =   499
+#   number of residues =    65
+#   number of chains   =     1
+# criteria for hetatm bond definition :-
+# hetatm bond distance cutoff (oxygen and nitrogen) = 2.40
+# hetatm bond distance cutoff (sulphur)             = 2.50
+#index - res - atm index - res - atm typ span Dd-a Dh-a <d-H-N <a-O=C   kJ/mol

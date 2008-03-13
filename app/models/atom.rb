@@ -103,4 +103,22 @@ class Atom < ActiveRecord::Base
     raise "Cannot justify the atom name: #{an}"
   end
   
+  def to_pdb
+    sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s\n",
+            'ATOM',
+            self.atom_code, 
+            self.justified_atom_name,
+            self.altloc,
+            self.residue.residue_name,
+            self.residue.chain.chain_code,
+            self.residue.residue_code,
+            self.residue.icode,
+            self.x, self.y, self.z,
+            self.occupancy,
+            self.tempfactor,
+            "",
+            self.element,
+            self.charge)
+  end
+  
 end # class Atom
