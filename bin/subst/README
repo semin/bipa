@@ -1,0 +1,48 @@
+SUBST README
+------------
+
+1. Download the file subst.tar.gz from http://www-cryst.bioc.cam.ac.uk/~kenji/subst/.
+   You should read the files COPYING and LICENSE.
+
+2. Extract the source files by typing 'gunzip -c subst.tar.gz | tar xvf -'.
+
+3. Change directory to ./subst and type make.
+
+4. Extract the archive alltem-allmask.tar.gz in another directory.
+   These are the 177 structural alignments used for constructing the
+   current substitution tables, stored in the file allmat.dat.
+
+5. Save the files 'classdef.dat' and 'TEMLIST' in the current directory.
+
+6. Run subst to recreate the substitution tables by typing
+   'subst -f TEMLIST -o newmat'.
+
+7. Compare the new output (file newmat) with the original file allmat.dat.
+   They should be identical apart from the CreationDate line.
+   See NOTES for details.
+
+8. To produce the conservation probabilities, type
+   'subst -f TEMLIST --output 1 -o cons.prb'.
+   This will create the output file 'cons.prb'.
+
+9. To produce substitutaion data derived from the sequence pairs with
+   a given PID range (e.g., 70%-80%), type
+   'subst -f TEMLIST --pidmin 70 --pidmax 80 --output 0'
+   for raw counts (the file rawc000 is the total matrix), or
+   'subst -f TEMLIST --pidmin 70 --pidmax 80 --output 1'
+   for conservation probabilities.
+
+10. Type subst to display all available options.
+   If you omit -o filename, the output file will be named 'allmat.dat'
+   (if this file already exists, it will be *overwritten*).
+   To change the clustering level, type --weight int.
+
+11. In the alignments listed in the file TEMLIST, some positions are masked
+   (character 'X's in the secondary structure feature) and these amino acids
+   are excluded from the calculation of substitution counts.
+   The 'nomask' version can be found in the archive 'alltem-nomask.tar.gz'.
+   To use these alignments, modify TEMLIST appropriately and also delete
+   the line beginning with 'domain interface' in the classdef.dat file.
+
+
+Kenji Mizuguchi <kenji@cryst.bioc.cam.ac.uk>

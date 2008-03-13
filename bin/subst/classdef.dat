@@ -1,0 +1,16 @@
+#
+# classdef.dat (alpha version)
+#
+# name of feature (string); values adopted in .tem file (string); class labels assigned for each value (string);\
+# constrained or not (T or F); silent (used as masks)? (T or F)
+#
+# The following is for 64 files
+#
+# ("secondary structure" includes a skip character 'X')
+#
+domain interface;TF;Dd;T;T
+secondary structure and phi angle;HEPC;HEPC;F;F
+solvent accessibility;TF;Aa;F;F
+hydrogen bond to other sidechain/heterogen;TF;Ss;F;F
+hydrogen bond to mainchain CO;TF;Oo;F;F
+hydrogen bond to mainchain NH;TF;Nn;F;F

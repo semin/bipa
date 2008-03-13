@@ -1,0 +1,96 @@
+>P1;1zwg
+sequence
+----------EIQLMHNLGKHLNSMERVEWLRKKLQDVHNFVAL*
+>P1;1bzg
+sequence
+AVSEHQLLHDKGKSIQDLRRR----FFLHHLIA-EIHTA-----*
+>P1;1zwg
+secondary structure and phi angle
+----------CCHHHHHHHHHPCPHHHHHHHHHHHCCPCCCPCC*
+>P1;1bzg
+secondary structure and phi angle
+CCCCHHPHCCCPCCCHHHHHH----HHHHHHCP-PCCPP-----*
+>P1;1zwg
+solvent accessibility
+----------TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT*
+>P1;1bzg
+solvent accessibility
+TTTTTTTTTTTTTTTTTTTTT----TTTTTTTT-TTTTT-----*
+>P1;1zwg
+hydrogen bond to mainchain CO
+----------FFFFFFTFFFFFFFFTTFTFFFTFFFTFTFFFFF*
+>P1;1bzg
+hydrogen bond to mainchain CO
+FFFFFFFFTFFFFFFFFFTFF----FFFFFFFF-TFFFF-----*
+>P1;1zwg
+hydrogen bond to mainchain NH
+----------FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF*
+>P1;1bzg
+hydrogen bond to mainchain NH
+FFTFFFFFFFFFFFFFFFFFF----FFFFFFFF-FFFFF-----*
+>P1;1zwg
+hydrogen bond to other sidechain/heterogen
+----------TFTFFTFFFTFFTFTTFFTFFFTFFTFFFTFFFF*
+>P1;1bzg
+hydrogen bond to other sidechain/heterogen
+FFFFFTFFFFFFTFFTTFTTF----FFFFTFFF-TFFFF-----*
+>P1;1zwg
+cis-peptide bond
+----------FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF*
+>P1;1bzg
+cis-peptide bond
+FFFFFFFFFFFFFFFFFFFFF----FFFFFFFF-FFFFF-----*
+>P1;1zwg
+hydrogen bond to heterogen
+----------TFTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF*
+>P1;1bzg
+hydrogen bond to heterogen
+FFFFFFFFFFFFFFFFFFFFF----FFFFFFFF-FFFFF-----*
+>P1;1zwg
+covalent bond to heterogen
+----------TFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF*
+>P1;1bzg
+covalent bond to heterogen
+FFFFFFFFFFFFFFFFFFFFF----FFFFFFFF-FFFFF-----*
+>P1;1zwg
+disulphide
+----------FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF*
+>P1;1bzg
+disulphide
+FFFFFFFFFFFFFFFFFFFFF----FFFFFFFF-FFFFF-----*
+>P1;1zwg
+mainchain to mainchain hydrogen bonds (amide)
+----------FFFFTTTTTTTFFFTTTTTTTTTTTTTTTFFTFF*
+>P1;1bzg
+mainchain to mainchain hydrogen bonds (amide)
+FFTFFTFTTTTTTFTTTTTTT----TTTTTTTT-FFFTT-----*
+>P1;1zwg
+Mainchain to mainchain hydrogen bonds (carbonyl)
+----------FTTTTTTTTFFFTTTTTTTTTTTFFTTFFTFFFF*
+>P1;1bzg
+Mainchain to mainchain hydrogen bonds (carbonyl)
+TFFTTTTTTTFFTTTFTTTTF----TTTTTFFF-FTTFF-----*
+>P1;1zwg
+DSSP
+----------CCHHHHHHHHHCCCHHHHHHHHHHHCCCCCCCCC*
+>P1;1bzg
+DSSP
+CCCCHHHHCCCCCCCHHHHHH----HHHHHHCC-CCCCC-----*
+>P1;1zwg
+positive phi angle
+----------FFFFFFFFFFFTFTFFFFFFFFFFFFFTFFFTFF*
+>P1;1bzg
+positive phi angle
+FFFFFFTFFFFTFFFFFFFFF----FFFFFFFT-TFFTT-----*
+>P1;1zwg
+percentage accessibility
+----------7876677735928a74344346648477577949*
+>P1;1bzg
+percentage accessibility
+b77a82986774454544565----66877883-58abc-----*
+>P1;1zwg
+Ooi number
+----------0011111122121111112222221111111011*
+>P1;1bzg
+Ooi number
+011111111111211111211----11111111-11000-----*
