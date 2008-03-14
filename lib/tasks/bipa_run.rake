@@ -2,45 +2,47 @@ namespace :bipa do
   namespace :run do
 
     require 'fileutils'
-    
+
     include FileUtils
 
     def refresh_dir(dir)
       rm_rf(dir) if File.exists?(dir)
       mkdir_p(dir)
     end
-    
+
 
     desc "Run Baton on each SCOP family of BIPA"
     task :baton_scop_family => [:environment] do
-      
+
       refresh_dir(BIPA_ENV[:BATON_SCOP_FAMILY_DIR])
       scop_families = ScopFamily.find(:all).select(&:registered)
-      
-      scop_families.each do |scop_family|
+
+      scop_families.each_with_index do |scop_family, i|
         scop_family_dir = File.join(BIPA_ENV[:BATON_SCOP_FAMILY_DIR], "#{scop_family.sccs}")
         mkdir scop_family_dir
-        
+
         scop_domains = scop_family.all_registered_leaf_children
-        
+
         scop_domains.each do |scop_domain|
           File.open(File.join(scop_family_dir, "#{scop_domain.sid}.pdb"), "w") do |pdb|
             pdb.puts scop_domain.to_pdb
           end
         end
-        
-        puts "PDB flat file creation for #{scop_family.sccs}: done (#{i + 1}/#{scop_families.size})"
+
+        puts "Creating PDB flat file for #{scop_family.sccs}: done (#{i + 1}/#{scop_families.size})"
       end
     end
-    
+
 
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
+
       refresh_dir(BIPA_ENV[:HBPLUS_DIR])
+
       pdb_files = Dir.glob(File.join(BIPA_ENV[:PDB_DIR], '*.pdb'))
       pdb_total = pdb_files.size
+      fm        = ForkManager.new(BIPA_ENV[:MAX_FORK])
 
-      fm = ForkManager.new(BIPA_ENV[:MAX_FORK])
       fm.manage do
         pdb_files.each_with_index do |pdb_file, i|
           fm.fork do
@@ -88,7 +90,9 @@ namespace :bipa do
 
     desc "Run NACCESS on each PDB file"
     task :naccess => [:environment] do
+
       refresh_dir(BIPA_ENV[:NACCESS_DIR])
+
       pdb_files = Dir.glob(File.join(BIPA_ENV[:PDB_DIR], '*.pdb'))
       pdb_total = pdb_files.size
 
@@ -158,4 +162,4 @@ namespace :bipa do
     end
 
   end
-end
+
