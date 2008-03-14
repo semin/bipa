@@ -1,0 +1,529 @@
+#!/usr/local/bin/perl
+#
+# $Id:
+# joy 5.0 release $Name:  $
+#
+# joy: A program for protein sequence-structure representation and analysis
+# Copyright (C) 1988-1997  John Overington
+# Copyright (C) 1997-1999  Kenji Mizuguchi and Charlotte Deane
+# Copyright (C) 1999-2000  Kenji Mizuguchi
+#
+# mkjoyf
+# Utility to add a new set of structural features or modify existing one.
+#
+# Note:
+# 1. Copy the file joyfeature.default and save it as joyfeature.xxx,
+#    where xxx is the name of the new feature set (choose any one).
+# 2. Make sure the following three files are in the current directory:
+#    tem.h, create_tem.c and Makefile.
+# 3. Type mkjoyf joyfeature.xxx.
+# 4. This will create the files tem_xxx.h and tem_xxx.c. and modify
+#    tem.h, create_tem.c and Makefile.
+# 5. Re-compile joy.
+# 6. The new feature set can be specified by typing
+#    joy --feature-set=xxx
+#
+use strict;
+
+my $MASTER_TEM_HEADER = 'tem.h';
+my $MASTER_TEM_SOURCE = 'create_tem.c';
+my $MAKEFILE = 'Makefile';
+
+my @vartype = ("int", "char", "double");
+
+my $feature_file;
+my ($fset, $nfeature, @feature_name);
+my (@Fld, @buffer, $flg);
+my ($i, $j);
+my $source_file;
+my $header_file;
+my @output;
+
+my $force = 0;	# if true, overwrite the defnition of existing feature set 
+
+################################################################
+while ($ARGV[0] =~ /^-/) {      # Processing command line options
+SWITCH: {
+    if ($ARGV[0] eq '-f') { shift; $force = 1; last SWITCH}
+    print STDERR "Error: unrecognisable option $ARGV[0]\n";
+    exit -1;
+}
+}
+
+$feature_file = shift;
+
+if ($feature_file =~ /^joyfeature\.(.*)$/) {
+    $fset = $1;
+}
+else {
+    print STDERR "Rename the input file as joyfeature.xxx\n";
+    print STDERR "where xxx is used as the name for the feature set\n";
+    exit -1;
+}
+
+open FEATURE, "$feature_file" or die "Can't open $feature_file: $!\n";
+
+examine_master_header($fset);
+
+$nfeature = 0;
+undef @buffer;
+$flg = 0;
+
+while (<FEATURE>) {
+    chop;
+    $_ =~ s/#.*//;
+    
+    @Fld = split ' ';
+    if ($Fld[0] eq 'feature') {
+	if (@buffer) {
+	    push @output, [ generate_def($fset, $nfeature, $feature_name[$nfeature], @buffer) ];
+	    $nfeature++;
+	    undef @buffer;
+	}
+	if ($_ =~ /"(.*)"/) {
+	    push @feature_name, $1;
+	}
+	else {
+	    print STDERR "Syntax error: $_\n";
+            exit -1;
+        }
+	$flg = 1;
+	next;
+    }
+
+    if ($flg == 1) {
+	push @buffer, $_;
+    }
+}
+close FEATURE;
+
+push @output, [ generate_def($fset, $nfeature, $feature_name[$nfeature], @buffer) ];
+$nfeature++;
+
+if ($nfeature != ($#output + 1)) {
+    print STDERR "Something is wrong:\n";
+    print STDERR "You seem to define $nfeature features, but \n";
+    print STDERR "actural data read in was ", $#output+1, "\n";
+    exit -1;
+}
+
+update_master_source($fset, $nfeature);
+
+update_makefile($fset);
+
+$source_file = 'tem_'. $fset . '.c';
+$header_file = 'tem_'. $fset . '.h';
+
+open SRC, ">$source_file" or die "Can't open $source_file:$!\n";
+open HDR, ">$header_file" or die "Can't open $header_file:$!\n";
+
+print STDERR "Writing $header_file...\n";
+create_header_file ($fset, $nfeature, @feature_name);
+
+print STDERR "Writing $source_file...\n";
+create_source_file ($fset, $nfeature, @feature_name);
+
+close SRC;
+close HDR;
+
+################################################################
+#  End of main
+################################################################
+
+sub examine_master_header {   # check tem.h file
+                              # and add the name of the new feature
+    my $fset = shift;
+    my $fsetdef;
+    my $n;
+    my @buffer;
+    my @Fld;
+    my $backupfile;
+    my $i;
+    my $defined = 0;		# this feature set already defined
+
+    $fsetdef = '_' . uc($fset);
+    $n = -1;
+    open IN, "$MASTER_TEM_HEADER" or die "Can't open $MASTER_TEM_HEADER: $!\n";
+    while (<IN>) {
+	chop;
+	if ($_ eq '/* start feature list */') {
+	    push @buffer, $_;
+	    last;
+	}
+	push @buffer, $_;	# store up to the line /* start feature list */
+    }
+    while (<IN>) {
+	chop;
+	@Fld = split ' ';
+	if ($#Fld <=0) {
+	    push @buffer, $_;
+	    next;
+	}
+	elsif ($Fld[1] eq 'end') {
+	    last;
+	}
+	elsif ($Fld[0] eq '#define') {
+	    if ($Fld[1] eq $fsetdef) {
+		$defined = 1;
+		if ($force == 0) {
+		    print STDERR "Error: the feature name $fset already defined\n";
+		    print STDERR "If you want to update this feature set, use -f option\n";
+		    exit -1;
+		}
+	    }
+	    $n = $Fld[2];
+	    $n =~ s/[\(\)]//;
+	    push @buffer, $_;
+	}
+    }
+    if ($defined == 0) { # new feature set to add
+	$n++;
+	push @buffer, "#define $fsetdef ($n)";
+    }
+    push @buffer, "/* end */";
+    push @buffer, "#endif";
+    close IN;
+
+    $backupfile = $MASTER_TEM_HEADER . '.bak';
+    rename $MASTER_TEM_HEADER, $backupfile;
+
+    open OUT, ">$MASTER_TEM_HEADER" or die "Can't open $MASTER_TEM_HEADER: $!\n";
+
+    print STDERR "Updating $MASTER_TEM_HEADER...\n";
+    foreach $i (@buffer) {
+	print OUT "$i\n";
+    }
+    close OUT;
+}
+
+sub update_master_source {	# check and modify create_tem.c file
+    my $fset = shift;
+    my $nfeature = shift;
+    my $fsetdef;
+    my $backupfile;
+
+    my $n;
+    my @buffer;
+    my @Fld;
+
+    my $i;
+    my $new_temfile;
+    my $defined = 0;
+
+    $fsetdef = '_' . uc($fset);
+    $new_temfile = "\"tem_" . $fset . ".h\"";
+    $backupfile = $MASTER_TEM_SOURCE . '.bak';
+    rename $MASTER_TEM_SOURCE, $backupfile;
+
+    open IN, "$backupfile" or die "Can't open $backupfile: $!\n";
+    open OUT, ">$MASTER_TEM_SOURCE" or die "Can't open $MASTER_TEM_SOURCE: $!\n";
+
+    print STDERR "Updating $MASTER_TEM_SOURCE...\n";
+    while (<IN>) {
+	chop;
+	@Fld = split ' ';
+	if ($Fld[0] eq "#include" && $Fld[1] eq $new_temfile) {
+	    $defined = 1;
+	    if ($force == 0) {
+		print STDERR "Error: the feature name $fset already defined\n";
+		print STDERR "If you want to update this feature set, use -f option\n";
+		exit -1;
+	    }
+	}
+
+	if ($_ eq '/* end of include files */') {
+	    if ($defined == 0) {      # new feature, so add the line "#include..."
+		print OUT "#include $new_temfile\n";
+	    }
+	    print OUT "/* end of include files */\n";
+	    next;
+	}
+
+	if ($_ eq "/* begin case $fset */") {
+	    print OUT "$_\n";
+	    while ($_ ne "/* end case $fset */") {
+		$_ = <IN>;
+		chop;
+	    }
+	    write_case($fset, $nfeature, $fsetdef);	# overwrite case_statement
+	    print OUT "$_\n";
+	    next;
+	}
+	    
+	if ($_ eq '/* add new features between here */' && $defined == 0) {
+	    print OUT "/* begin case $fset */\n";
+	    write_case($fset, $nfeature, $fsetdef);	# create new case statement
+	    print OUT "/* end case $fset */\n";
+	    print OUT "/* add new features between here */\n\n";
+	    print OUT "/* and here */\n\n";
+	    $_ = <IN>;
+	    $_ = <IN>;
+	    $_ = <IN>;
+	}
+	elsif ($_ eq "/* which_fset */" && $defined == 0) {
+	    print OUT "  if (strcmp(fsetc, \"$fset\") == 0) {\n";
+	    print OUT "    fprintf(stderr, \"feature set: %s\\n\", fsetc);\n";
+	    print OUT "    return $fsetdef\;\n";
+	    print OUT "  }\n";
+	    print OUT "\n";
+	    print OUT "/* which_fset */\n";
+	}
+	else {
+	    print OUT "$_\n";
+	}
+    }
+    close IN;
+    close OUT;
+}
+
+sub write_case {
+    my $fset = shift;
+    my $nfeature = shift;
+    my $fsetdef = shift;
+
+    print OUT "  case $fsetdef\:\n";
+    print OUT "    nfeature = $nfeature\;\n";
+    print OUT "    temall = allocate_tem(nstr, nfeature, alilen);\n";
+    print OUT "\n";
+    print OUT "    assign_", "$fset\_features (nstr, alilen, aliall, str_lst,\n";
+    print OUT "                        sstall, psaall, hbdall, temall);\n";
+    print OUT "    fprintf(stderr, \"%d features assigned\\n\", nfeature);\n";
+    print OUT "    write_tem(nstr, alilen, nfeature, ";
+    print OUT "$fset\_feature_name, alibase, aliall, str_lst, temall, 75);\n";
+    print OUT "    break;\n";
+}
+
+
+sub update_makefile {
+    my $fset = shift;
+    my $backupfile;
+
+    my $i;
+    my $objectfile;
+
+    $backupfile = $MAKEFILE . '.bak';
+    rename $MAKEFILE, $backupfile;
+
+    open IN, "$backupfile" or die "Can't open $backupfile: $!\n";
+    open OUT, ">$MAKEFILE" or die "Can't open $MAKEFILE: $!\n";
+
+    $objectfile = 'tem_' . $fset . '.o';
+    while (<IN>) {
+	chop;
+	$_ =~ s/$objectfile/ /;
+	$_ =~ s/create_tem\.o/$objectfile create_tem\.o/;
+	print OUT "$_\n";
+    }
+
+    close IN;
+    close OUT;
+}
+
+
+sub generate_def {
+    my $fset = shift;
+    my $n = shift;
+    my $fname = shift;
+    my @buffer = @_;
+    my @lines;			# output source code
+    my @vardefs;
+    my $i;
+
+    foreach $i (@buffer) {
+	if (isThisVardef($i) == 0) {
+	    push @vardefs, $i;
+	    next;
+	}
+	if ($i =~ /SST\.(\w+)\[/) {    # allow the specification for
+				       # residue number (mainly for omega) 
+	    $i =~ s/SST\.(\w+)/sst.$1/g;
+	}
+	else {
+	    $i =~ s/SST\.(\w+)/sst.$1\[k]/g;
+        }
+	if ($i =~ /PSA\.(\w+)\[/) {
+	    $i =~ s/PSA\.(\w+)/psa.$1/g;
+	}
+	else {
+	    $i =~ s/PSA\.(\w+)/psa.$1\[k]/g;
+        }
+	if ($i =~ /HBD\.(\w+)\[/) {
+	    $i =~ s/HBD\.(\w+)/hbd.$1/g;
+	}
+	else {
+	    $i =~ s/HBD\.(\w+)/hbd.$1\[k]/g;
+        }
+
+        $i =~ s/psacutoff/VF(V_PSACUTOFF)/g;
+        $i =~ s/ +eq +/ == /g;
+        if ($i =~ s/return/tem.feature[$nfeature\].assign[j] =/) {
+	    push @lines, $i;
+	    push @lines, "continue;";
+	    next;
+	}
+        push @lines, $i;
+    }
+    push @lines, "  tem.feature[$nfeature\].assign[alilen] = '\\0';";
+    push @lines, "  return (0);";
+    push @lines, '}';
+
+    unshift(@lines, write_header($fset, $n, $fname, @vardefs));
+
+    @lines;
+}
+
+sub isThisVardef {
+    my $line = shift;
+    my @Fld;
+    my $i;
+
+    @Fld = split ' ', $line;
+    foreach $i (@vartype) {
+	if ($Fld[0] eq $i) {
+	    return 0;
+	}
+    }
+    return 1;
+}
+
+sub write_header {
+    my $fset = shift;
+    my $n = shift;
+    my $fname = shift;
+    my @vardefs = @_;
+    my $function_name;
+    my @lines;
+    my $i;
+
+    $function_name = '_' . $fset . '_' . $n;
+
+    push @lines, "/**********************************************************************************/";
+    push @lines, "int $function_name (char *sequence, int alilen, SST sst, PSA psa, HBD hbd, TEM tem, int strtpos, int endpos) {";
+    push @lines, "             /* $fname   */";
+    push @lines, '';
+    push @lines, "int j, k;";
+    foreach $i (@vardefs) {
+	push @lines, $i;
+    }
+    push @lines, '';
+    push @lines, "k = strtpos -1;";
+    push @lines, '';
+    push @lines, "tem.feature[$n].name = strdup(\"$fname\");";
+    push @lines, '';
+    push @lines, "for (j=0; j<alilen; j++) {";
+    push @lines, "  if (sequence[j] == ' ' || sequence[j] == '-' || sequence[j] == '/') {";
+    push @lines, "    tem.feature[$n].assign[j] = '-';";
+    push @lines, "    continue;";
+    push @lines, "  }";
+    push @lines, "  k++;";
+    push @lines, '';
+    @lines;
+}
+
+sub create_header_file {
+    my $fset = shift;
+    my $nfeature =shift;
+    my @feature_name = @_;
+    my ($function_name, $i);
+
+    print HDR "#ifndef __tem_$fset\n";
+    print HDR "#define __tem_$fset\n";
+    print HDR "\n";
+
+    $function_name = 'assign_' . $fset . '_features';
+    print HDR "int $function_name", "(int, int, ALI *, int *, SST *, PSA *, HBD *, TEM *);\n";
+    print HDR "\n";
+
+    for($i=0; $i<$nfeature; $i++) {
+	$function_name = '_' . $fset . '_' . $i;
+	print HDR "int $function_name (char *, int, SST, PSA, HBD, TEM, int, int);\n";
+    }
+    print HDR "\n";
+    print HDR "extern char *", "$fset\_feature_name[];\n";
+    print HDR "\n";
+    print HDR "#endif\n";
+}
+
+sub create_source_file {
+    my $fset = shift;
+    my $nfeature =shift;
+    my @feature_name = @_;
+    my $i;
+
+    standard_include($fset);
+
+    print SRC "/* names for the structural features */\n";
+    print SRC "char *", "$fset\_feature_name[]={\n";
+    foreach $i (@feature_name) {
+	print SRC "  \"$i\",\n";
+    }
+    print SRC "};\n\n";
+
+    assign_features($fset, $nfeature);
+
+    foreach $i (@output) {
+	foreach $j (@{$i}) {
+	    print SRC "$j\n";
+	}
+    }
+
+}
+
+sub standard_include {
+    my $fset = shift;
+
+    print SRC "#include <stdio.h>\n";
+    print SRC "#include <stdlib.h>\n";
+    print SRC "#include <string.h>\n";
+    print SRC "\n";
+    print SRC "#include <parse.h>\n";
+    print SRC "#include \"rdali.h\"\n";
+    print SRC "#include \"rdsst.h\"\n";
+    print SRC "#include \"rdpsa.h\"\n";
+    print SRC "#include \"rdhbd.h\"\n";
+    print SRC "#include \"utility.h\"\n";
+    print SRC "#include \"tem.h\"\n";
+    print SRC "#include \"tem_$fset\.h\"\n";
+    print SRC "\n";
+}
+
+sub assign_features {
+    my $fset = shift;
+    my $nfeature = shift;
+    my $function_name;
+    my $i;
+
+    $function_name = 'assign_' . $fset . '_features';
+
+    print SRC "/*\n";
+    print SRC " * $function_name", "(int, int *, ALI *,\n";
+    print SRC " *         SST *, PSA *, HBD *, TEM *)\n";
+    print SRC " *\n";
+    print SRC " * Assign features (set $fset)\n";
+    print SRC " *\n";
+    print SRC " */\n";
+    print SRC "int $function_name (int nstr, int alilen, ALI *aliall,\n";
+    print SRC "        int *str_lst, SST *sstall, PSA *psaall, HBD *hbdall, TEM *temall) {\n";
+    print SRC "\n";
+    print SRC "  int i;\n";
+    print SRC "  int strtpos, endpos;\n";
+    print SRC "\n";
+
+    print SRC "  for (i=0; i<nstr; i++) {\n";    
+    print SRC "    if (VI(V_SEG)) {\n";
+    print SRC "       strtpos = aliall[str_lst[i]].seg.strt_seqnum;\n";
+    print SRC "       endpos = aliall[str_lst[i]].seg.end_seqnum;\n";
+    print SRC "    }\n";
+    print SRC "    else {\n";
+    print SRC "       strtpos = 0;\n";
+    print SRC "       endpos = alilen;\n";
+    print SRC "    }\n";
+
+    for ($i=0; $i<$nfeature; $i++) {
+	print SRC "    _$fset\_$i", "(aliall[str_lst[i]].sequence, alilen, sstall[i], psaall[i], hbdall[i], temall[i], strtpos, endpos);\n";
+    }
+    print SRC "  }\n";
+    print SRC "  return 0;\n";
+    print SRC "}\n";
+    print SRC "\n";
+}

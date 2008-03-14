@@ -1,0 +1,29 @@
+JOY 5.10
+--------
+
+1. (Optional) Modify the variable DEFAULT_PDBDIR in joy.h to
+point to the directory where you store PDB files. The
+program assumes that all the PDB files are in a single
+directory with the file names pdb****.ent.
+
+You can also set the environment variable JOY_PDBDIR to
+overwrite the default assignment.
+
+If you set this variable properly, you can simply type 'joy
+1xyz' or 'joy 1xyza' to format the structure 1xyz (or chain
+A of 1xyz).
+
+2. Type './configure'
+
+If you would like to install the programmes in '/somewhere/your_home/bin',
+type './configure --prefix=/somewhere/your_home'.
+
+If you would like to use cc rather than gcc on SGI,
+type './configure CC=cc CFLAGS='-O2 -Xcpluscomm'.
+
+3. Type 'make'. This will create a single binary 'joy'.
+
+4. Type 'make install' to install the programme.
+
+5. Before using JOY, you must download the package 'joy_related'
+   and install it. JOY requires the programmes HBOND and SSTRUC.
