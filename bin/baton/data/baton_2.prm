@@ -1,0 +1,176 @@
+# 5_3_exonuclease ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 2 0
+# AAA ../FN1/baton_2.prm Super 2 Missing 2 superimposed atm files 4 2
+# ABC_tran ../FN1/baton_2.prm Super 5 Missing 2 superimposed atm files 6 7
+# actin ../FN1/baton_2.prm Super 5 Missing 1 superimposed atm files 7 12
+# AhpC-TSA ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 7 15
+# Ald_Xan_dh_1 ../FN1/baton_2.prm Super 8 Missing 0 superimposed atm files 7 23
+# alpha-amylase_C ../FN1/baton_2.prm Super 21 Missing 0 superimposed atm files 7 44
+# Amidase_2 ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 7 47
+# ARID ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 7 49
+# ATP-synt ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 7 53
+# ATP-synt_g ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 7 55
+# az ../FN1/baton_2.prm Super 35 Missing 2 superimposed atm files 9 90
+# Bcl-2 ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 9 93
+# biotin_lipoyl ../FN1/baton_2.prm Super 7 Missing 0 superimposed atm files 9 100
+# BIR ../FN1/baton_2.prm Super 3 Missing 1 superimposed atm files 10 103
+# bowman ../FN1/baton_2.prm Super 4 Missing 1 superimposed atm files 11 107
+# bv ../FN1/baton_2.prm Super 5 Missing 2 superimposed atm files 13 112
+# CAP_GLY ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 13 114
+# cbp ../FN1/baton_2.prm Super 7 Missing 3 superimposed atm files 16 121
+# CBS ../FN1/baton_2.prm Super 3 Missing 1 superimposed atm files 17 124
+# chey ../FN1/baton_2.prm Super 5 Missing 0 superimposed atm files 17 129
+# Chorismate_mut ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 19 129
+# chromo ../FN1/baton_2.prm Super 2 Missing 1 superimposed atm files 20 131
+# CIDE-N ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 20 133
+# COX2 ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 20 136
+# COX3 ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 20 139
+# cpn60_TCP1 ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 20 143
+# CPS ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 20 146
+# CPSase_L_chain ../FN1/baton_2.prm Super 3 Missing 1 superimposed atm files 21 149
+# cryst ../FN1/baton_2.prm Super 8 Missing 0 superimposed atm files 21 157
+# cyclin ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 21 160
+# cystatin ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 21 163
+# DEAD ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 21 167
+# DEATH ../FN1/baton_2.prm Super 7 Missing 0 superimposed atm files 21 174
+# DegT_DnrJ_EryC1 ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 21 176
+# DISIN ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 21 180
+# DNA_pol_B ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 21 182
+# DNA_PPF ../FN1/baton_2.prm Super 3 Missing 1 superimposed atm files 22 185
+# dpb ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 22 187
+# EF_TS ../FN1/baton_2.prm Super 0 Missing 3 superimposed atm files 25 187
+# egf ../FN1/baton_2.prm Super 12 Missing 0 superimposed atm files 25 199
+# END ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 25 201
+# ENTH ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 25 204
+# FAD-oxidase_C ../FN1/baton_2.prm Super 3 Missing 1 superimposed atm files 26 207
+# fer2 ../FN1/baton_2.prm Super 14 Missing 0 superimposed atm files 26 221
+# fer4 ../FN1/baton_2.prm Super 20 Missing 0 superimposed atm files 26 241
+# fn3 ../FN1/baton_2.prm Super 14 Missing 0 superimposed atm files 26 255
+# formyl_transf ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 26 257
+# FTR ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 26 259
+# fusion_gly ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 26 261
+# GAF ../FN1/baton_2.prm Super 0 Missing 3 superimposed atm files 29 261
+# GATA ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 29 264
+# GATase_2 ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 29 267
+# GEL ../FN1/baton_2.prm Super 5 Missing 0 superimposed atm files 29 272
+# GFO_IDH_MocA_NC ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 29 274
+# ghf5 ../FN1/baton_2.prm Super 6 Missing 0 superimposed atm files 29 280
+# grs ../FN1/baton_2.prm Super 11 Missing 0 superimposed atm files 29 291
+# gtp ../FN1/baton_2.prm Super 11 Missing 0 superimposed atm files 29 302
+# helicase_C ../FN1/baton_2.prm Super 3 Missing 2 superimposed atm files 31 305
+# helicase_N ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 31 308
+# helicase_NC ../FN1/baton_2.prm Super 2 Missing 1 superimposed atm files 32 310
+# hexapep ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 32 313
+# Histidine_kinase ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 32 315
+# HLH ../FN1/baton_2.prm Super 5 Missing 0 superimposed atm files 32 320
+# HMG-CoA_red ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 34 320
+# hormone_rec ../FN1/baton_2.prm Super 5 Missing 0 superimposed atm files 34 325
+# igI ../FN1/baton_2.prm Super 9 Missing 0 superimposed atm files 34 334
+# il8 ../FN1/baton_2.prm Super 11 Missing 1 superimposed atm files 35 345
+# Isochorismatase ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 37 345
+# kinase ../FN1/baton_2.prm Super 18 Missing 3 superimposed atm files 40 363
+# ku ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 40 365
+# kunitz ../FN1/baton_2.prm Super 10 Missing 0 superimposed atm files 40 375
+# L15 ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 42 375
+# LBP_BPI_CETP ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 44 375
+# ligase-CoA ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 44 378
+# lipo ../FN1/baton_2.prm Super 12 Missing 1 superimposed atm files 45 390
+# LRR ../FN1/baton_2.prm Super 2 Missing 1 superimposed atm files 46 392
+# lyase_1 ../FN1/baton_2.prm Super 5 Missing 0 superimposed atm files 46 397
+# Lyase_8_C ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 46 399
+# MBD ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 46 401
+# MGS ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 48 401
+# MIF4G ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 48 403
+# MMOB ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 48 406
+# mthina ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 48 410
+# mthinb ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 48 414
+# PARATHYROID ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 50 414
+# PH ../FN1/baton_2.prm Super 13 Missing 0 superimposed atm files 50 427
+# Phage_integrase ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 50 431
+# pilin ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 50 434
+# porin ../FN1/baton_2.prm Super 5 Missing 0 superimposed atm files 50 439
+# prenyltrans ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 52 439
+# PRK ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 52 441
+# RA ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 52 443
+# recombinase ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 52 446
+# Rhodanese ../FN1/baton_2.prm Super 6 Missing 0 superimposed atm files 52 452
+# rhv ../FN1/baton_2.prm Super 12 Missing 6 superimposed atm files 58 464
+# Ribosomal_L1 ../FN1/baton_2.prm Super 2 Missing 1 superimposed atm files 59 466
+# Ribosomal_L4 ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 59 468
+# Ribosomal_L5_NC ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 59 470
+# ricin ../FN1/baton_2.prm Super 10 Missing 0 superimposed atm files 59 480
+# RING ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 59 483
+# rnase ../FN1/baton_2.prm Super 0 Missing 5 superimposed atm files 64 483
+# RRF ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 64 487
+# rrm ../FN1/baton_2.prm Super 30 Missing 0 superimposed atm files 64 517
+# rubisco ../FN1/baton_2.prm Super 3 Missing 1 superimposed atm files 65 520
+# S1 ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 65 522
+# seatoxin ../FN1/baton_2.prm Super 5 Missing 0 superimposed atm files 65 527
+# Staphylokinase ../FN1/baton_2.prm Super 0 Missing 2 superimposed atm files 67 527
+# tgfb ../FN1/baton_2.prm Super 9 Missing 1 superimposed atm files 68 536
+# thiored ../FN1/baton_2.prm Super 6 Missing 0 superimposed atm files 68 542
+# TIL ../FN1/baton_2.prm Super 4 Missing 0 superimposed atm files 68 546
+# TNFR_c6 ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 68 549
+# Topoisomerase_I_core ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 68 551
+# Toprim ../FN1/baton_2.prm Super 3 Missing 0 superimposed atm files 68 554
+# toxin ../FN1/baton_2.prm Super 17 Missing 5 superimposed atm files 73 571
+# toxin_2 ../FN1/baton_2.prm Super 21 Missing 0 superimposed atm files 73 592
+# TPR ../FN1/baton_2.prm Super 6 Missing 0 superimposed atm files 73 598
+# trfl ../FN1/baton_2.prm Super 8 Missing 0 superimposed atm files 73 606
+# tRNA-synt_1b ../FN1/baton_2.prm Super 2 Missing 0 superimposed atm files 73 608
+# uce ../FN1/baton_2.prm Super 17 Missing 0 superimposed atm files 73 625
+# xia ../FN1/baton_2.prm Super 7 Missing 0 superimposed atm files 73 632
+# ../FN1/baton_2.prm Super 632 Total 73 superimposed atm files
+#>P1;1fbr1
+#structureX:1fbr1:   1 : :  46 : :undefined:undefined::
+#A--E-KCFDHAA-GTSYVVGETWEKP--YQGWMMVDCTCLGEGSGRITCTSR----*
+#>P1;1fbr2
+#structureX:1fbr2:  47 : :  93 : :undefined:undefined::
+#---N-RCND-QDTRTSYRIGDTWSKKDN-RG-NLLQCICTGNGRGEWKCE-RHTS-*
+#>P1;1tpn
+#structureX:1tpn:   1 : :  50 : :undefined:undefined::
+#-SYQVICRD-EKTQMIYQQHQSWLRPV-LRSNRVEYCWCN-SGRA--QCHSVPVKS*
+#>P1;FINC_BOVIN
+#sequence:FINC_BOVIN: 200 : : 239 : :undefined:undefined::
+#------CND-QDTRTSYRIGDTWSKKD-NRG-NLLQCICTGNGRGEWKC-------*
+#>P1;UROT_HUMAN
+#sequence:UROT_HUMAN:  41 : :  78 : :undefined:undefined::
+#------CRD-EKTQMIYQQHQSWLRPV-LRSNRVEYCWCN-SGRA--QC-------*
+#>P1;FINC_HUMAN
+#sequence:FINC_HUMAN: 561 : : 599 : :undefined:undefined::
+#------CQD-SETGTFYQIGDSWEKY--VHG-VRYQCYCYGRGIGEWHC-------*
+FEATURE 1          =   0.499 3.00     ....  LOCAL STR.
+FEATURE 2          =   3.049 2.30     ....  SEQUENCE SIMILARITY
+FEATURE 3          =   0.117 10.0     ....  CENTER OF GRAV.
+FEATURE 4          =   0.888 180.0    ....  SD.CH. ORIENT. REL. GC
+FEATURE 5          =   1.574 180.0    ....  SD.CH. ORIENT. REL. MC
+FEATURE 6          =   1.003 180.0    ....  MN. CH. ORIENT. REL. GC
+FEATURE 7          =   2.903 100.0    ....  SD.CH.ACCESSIBILITY
+FEATURE 8          =   0.300 10.0     ....  SD.CH. DIST TO CA
+FEATURE 9          =   3.325 1.00     ....  MFIT EQUIVALENCES
+FEATURE10          =   1.289 100.0    ....  MN.CH.ACCESSIBILITY
+FEATURE11          =   0.520 1.00     ....  HYDROPHOBIC CONTACT
+FEATURE14          =   0.000 1.00     ....  MIXED RELATIONSHIPs
+FEATURE15          =   0.224 1.00     ....  SEQUENCE FIT TO ENVIRONMENT
+FEATURE16          =   0.000 1.00     ....  HIERARCHY
+FEATURE17          =   1.196 7.00     ....  ABSOLUTE SPACE
+FEATURE18          =   2.606 180.0    ....  PHI DIHEDRAL
+FEATURE19          =   0.459 180.0    ....  PSI DIHEDRAL
+FEATURE20          =   0.053 10.0     ....  LOCAL DIRECTIONS
+FEATURE21          =   1.300 2.00     ....  M-M H BOND (0.918)
+FEATURE22          =   0.600 2.00     ....  M-S H BOND
+FEATURE23          =   0.600 1.00     ....  S-S H BOND
+FEATURE24          =   2.100 1.00     ....  Cys-Cys BOND
+FEATURE25          =   0.000 1.00     ....  SEA structure match
+ALPHA              =  7   11   5   5   3   .. alpha params. for loc.conf.
+BETA               =  2   10   2   2   1   .. beta params. for loc.conf.
+GAMMA              =  6   10   4   4   2   .. gamma params. for loc. conf.
+SEGMENTAVR         = 99.   1.  1.  1.  99. .. averaging coeff. for loc. conf.
+OVERHANGAB         = 1   0   0   1   .. overhangs with no penalty (1N,1C,2N,2C)
+OVERHGAB           =  0    0   1   0   .. overhangs with no gaps (1N,1C,2N,2C)
+NFEATREE           = 0          ....  how many features used to get the tree
+IFEATREE           = 1  2  3  4  5  6  7 10  14 15 17 18 19 20   21  22  23
+FCUT               = 0. 0. 0. 0. 0. 0. 0. 0. 0.2 0. 0. 0. 0. 0. 0.2 0.2 0.2
+VARIABILITY        = .F.        ....  do variability calculations
+MULTIPLE           = 2          ....  multiple alignment gap penalty strategy
+UMULTIPLE          =   1.000          ....  multiple alignment gap penalty factor
+GAPPENALUV         =  1.50 1.00 0.50    ....  GAP PENALTIES
