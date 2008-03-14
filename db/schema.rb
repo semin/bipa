@@ -1,4 +1,4 @@
-# This file is auto-generated from the current state of the database. Instead of editing this file, 
+# This file is auto-generated from the current state of the database. Instead of editing this file,
 # please use the migrations feature of ActiveRecord to incrementally modify your database, and
 # then regenerate this schema definition.
 #
@@ -11,17 +11,17 @@
 include BIPA::Constants
 
 ActiveRecord::Schema.define(:version => 1) do
-  
+
   # 'scops' table
   create_table "scops", :force => true do |t|
-    t.belongs_to  "parent"  
-    t.integer     "lft"        
+    t.belongs_to  "parent"
+    t.integer     "lft"
     t.integer     "rgt"
-    t.string      "type"        
+    t.string      "type"
     t.integer     "sunid",      :null => false
     t.string      "stype",      :null => false
-    t.string      "sccs"       
-    t.string      "sid"        
+    t.string      "sccs"
+    t.string      "sid"
     t.string      "pdb_code"
     t.string      "description"
     t.float       "bound_asa"
@@ -29,7 +29,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "delta_asa"
     t.boolean     "registered", :default => false
   end
-  
+
   add_index "scops", ["sunid"],                   :name => "index_scops_on_sunid", :unique => true
   add_index "scops", ["pdb_code"],                :name => "index_scops_on_pdb_code"
   add_index "scops", ["parent_id"],               :name => "index_scops_on_parent_id"
@@ -45,7 +45,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table  "structures", :force => true do |t|
     t.string    "pdb_code",              :null => false
     t.string    "classification",        :null => false
-    t.string    "title"                  
+    t.string    "title"
     t.string    "exp_method",            :null => false
     t.float     "resolution",            :null => false
     t.date      "deposited_at",          :null => false
@@ -58,7 +58,7 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index "structures", ["pdb_code"], :name => "index_structures_on_pdb_code", :unique => true
-  
+
   # 'models' table
   create_table "models", :force => true do |t|
     t.belongs_to  "structure", :null => false
@@ -70,7 +70,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index "models", ["model_code"],   :name => "index_models_on_model_code"
   add_index "models", ["structure_id"], :name => "index_models_on_structure_id"
-  
+
   # 'chains' table
   create_table "chains", :force => true do |t|
     t.belongs_to  "model",   :null => false
@@ -86,7 +86,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "chains", ["chain_code"],             :name => "index_chains_on_chain_code"
   add_index "chains", ["model_id"],               :name => "index_chains_on_model_id"
   add_index "chains", ["model_id", "chain_code"], :name => "index_chains_on_model_id_and_chain_code"
-  
+
   # 'resdiues' table
   create_table "residues", :force => true do |t|
     t.belongs_to  "chain",              :null => false
@@ -94,6 +94,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  "chain_interface"
     t.belongs_to  "domain_interface"
     t.belongs_to  "res_map"
+    t.belongs_to  "residue_map"
     t.string      "type",               :null => false
     t.string      "icode"
     t.integer     "residue_code",       :null => false
@@ -110,6 +111,10 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index "residues", ["chain_id"],                           :name => "index_residues_on_chain_id"
   add_index "residues", ["scop_id"],                            :name => "index_residues_on_scop_id"
+  add_index "residues", ["domain_interface_id"],                :name => "index_residues_on_domain_interface_id"
+  add_index "residues", ["chain_interface_id"],                 :name => "index_residues_on_chain_interface_id"
+  add_index "residues", ["res_map_id"],                         :name => "index_residues_on_res_map_id"
+  add_index "residues", ["residue_map_id"],                     :name => "index_residues_on_residue_map_id"
   add_index "residues", ["residue_name"],                       :name => "index_residues_on_residue_name"
   add_index "residues", ["type"],                               :name => "index_residues_on_type"
   add_index "residues", ["icode", "residue_code"],              :name => "index_residues_on_icode_and_residue_code"
@@ -117,11 +122,9 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "residues", ["chain_id", "residue_name"],           :name => "index_residues_on_chain_id_and_residue_name"
   add_index "residues", ["chain_id", "scop_id"],                :name => "index_residues_on_chain_id_and_scop_id"
   add_index "residues", ["chain_id", "type"],                   :name => "index_residues_on_chain_id_and_type"
-  add_index "residues", ["domain_interface_id"],                :name => "index_residues_on_domain_interface_id"
-  add_index "residues", ["chain_interface_id"],                 :name => "index_residues_on_chain_interface_id"
   add_index "residues", ["id", "domain_interface_id"],          :name => "index_residues_on_id_and_domain_interface_id"
   add_index "residues", ["id", "chain_interface_id"],           :name => "index_residues_on_id_and_chain_interface_id"
-  
+
   # 'atoms' table
   create_table "atoms", :force => true do |t|
     t.belongs_to  "residue",          :null => false
@@ -189,7 +192,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "whbonds", ["whbonding_atom_id", "atom_id"],  :name => "index_whbonds_on_whbonding_atom_id_and_atom_id", :unique => true
   add_index "whbonds", ["atom_id"],                       :name => "index_whbonds_on_atom_id"
   add_index "whbonds", ["whbonding_atom_id"],             :name => "index_whbonds_on_whbonding_atom_id"
-    
+
   # 'interface' table
   create_table :interfaces, :force => true do |t|
     t.belongs_to  "scop"
@@ -197,16 +200,16 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "type"
     t.float       "asa"
     t.float       "polarity"
-    
+
     AminoAcids::Residues::STANDARD.map(&:downcase).each { |a| t.float "singlet_propensity_of_#{a}" }
     DSSP::SSES.map(&:downcase).each { |s| t.float "sse_propensity_of_#{s}" }
-    
+
     %w(hbond whbond contact).each do |int|
       %w(dna rna).each do |na|
         na_residues = "NucleicAcids::#{na.upcase}::Residues::STANDARD".constantize.map(&:downcase)
         na_residues.each { |r| t.integer "frequency_of_#{int}_between_amino_acids_and_#{r}" }
         %w(sugar phosphate).each { |m| t.integer "frequency_of_#{int}_between_amino_acids_and_#{m}" }
-        
+
         AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
           %w(sugar phosphate).each { |m| t.integer "frequency_of_#{int}_between_#{aa}_and_#{m}" }
           na_residues.each { |r| t.integer "frequency_of_#{int}_between_#{aa}_and_#{r}" }
@@ -214,7 +217,7 @@ ActiveRecord::Schema.define(:version => 1) do
       end
     end
   end
-  
+
   add_index "interfaces", ["scop_id"],          :name => "index_interfaces_on_scop_id"
   add_index "interfaces", ["chain_id"],         :name => "index_interfaces_on_chain_id"
   add_index "interfaces", ["id", "scop_id"],    :name => "index_interfaces_on_id_and_scop_id"
