@@ -3,6 +3,10 @@ class Interface < ActiveRecord::Base
   include BIPA::Constants
   include BIPA::USR
 
+  acts_as_cached
+
+  after_save :expire_cache
+
   lazy_calculate :asa, :polarity
 
   def calculate_asa
@@ -16,7 +20,7 @@ class Interface < ActiveRecord::Base
   def asa_of_residue(res)
     residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s + 0 }
   end
-  
+
 end
 
 

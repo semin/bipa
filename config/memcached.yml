@@ -2,7 +2,8 @@ defaults:
   ttl: 1800
   readonly: false
   urlencode: false
-  c_threshold: 10000
+  #c_threshold: 10000
+  c_threshold: 1000
   compression: true
   debug: false
   namespace: app
@@ -17,8 +18,8 @@ defaults:
   fastest_hash: false
 
 development:
-  sessions: false
-  fragments: false
+  sessions: true
+  fragments: true
   servers: localhost:11211
 
 # turn off caching
