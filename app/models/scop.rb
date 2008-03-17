@@ -6,6 +6,10 @@ class Scop < ActiveRecord::Base
 
   is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
 
+  scop_out :registered do
+    { :conditions => { :registered => true } }
+  end
+
   def self.factory_create!(opt={})
     case opt[:stype]
     when 'root' then ScopRoot.create!(opt)
