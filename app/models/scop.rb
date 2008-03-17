@@ -112,6 +112,7 @@ class Scop < ActiveRecord::Base
     end
   end
 
+
   %w(hbond whbond contact).each do |int|
     %w(dna rna).each do |na|
       na_residues = "BIPA::Constants::NucleicAcids::#{na.upcase}::Residues::STANDARD".constantize.map(&:downcase)
@@ -138,7 +139,7 @@ class Scop < ActiveRecord::Base
             %w(sugar phosphate).sum do |moiety|
               "observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}"
             end
-            instance_variable_set("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}", result)
+              instance_variable_set("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}", result)
           end
         end
       end
@@ -165,23 +166,24 @@ class Scop < ActiveRecord::Base
               end
               instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}", result)
             end
-      		end
+          end
 
-  		    define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{res}" do
-  		      if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
-  		        return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
-		        else
-  		        result = (
-          		  send("total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}").to_f *
+          define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{res}" do
+            if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
+              return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
+            else
+              result = (
+                send("total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}").to_f *
                 send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}").to_f /
                 send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}").to_f
               )
               result.nan? ? 0 : "%.2f" % result
               instance_variable_set("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}", result)
             end
-      	  end
-    	  end
+          end
+        end
       end
+
 
       %w(sugar phosphate).each do |moiety|
         define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}" do
@@ -203,26 +205,26 @@ class Scop < ActiveRecord::Base
               result = send("#{na}_interfaces").sum(&:"frequency_of_#{int}_between_#{aa}_and_#{moiety}")
               instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}", result)
             end
-      		end
+          end
 
-  		    define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}" do
-  		      if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
-  		        return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
-		        else
-        		  result = (
-        		    send("total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}").to_f *
+          define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}" do
+            if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
+              return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
+            else
+              result = (
+                send("total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}").to_f *
                 send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}").to_f /
                 send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}").to_f
               )
               result.nan? ? 0 : "%.2f" % result
               instance_variable_set("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}", result)
             end
-      	  end
-    	  end
-  	  end
+          end
+        end
+      end
 
-  	end #
-	end #
+    end #
+  end #
 end # class Scop
 
 
@@ -244,7 +246,7 @@ end
 
 class ScopFamily < Scop
 
-  (10..100).step(10) { |i| has_many :"cluster#{i}" }
+  (10..100).step(10) { |i| has_many :"cluster#{i}s" }
 
 end
 
@@ -299,31 +301,31 @@ class ScopDomain < Scop
     result = false
     ranges_on_chains.each do |range|
       raise "Empty description!" if range =~ /^\s*$/
-      case range.strip
-      when /^(\S):$/ # F:
-        chain_code = $1
-        if residue.chain[:chain_code] == chain_code
-          result = true
-        end
-      when /^-$/ # -
-        true
-      when /^(-?\d+)-(-?\d+)$/ # 496-581
-        res_from  = $1.to_i
-        res_to    = $2.to_i
-        if ((res_from..res_to).include?(residue[:residue_code]))
-          result = true
-        end
-      when /^(\S):(-?\d+)-(-?\d+)$/ # A:104-157
-        chain_code  = $1
-        res_from    = $2.to_i
-        res_to      = $3.to_i
-        if ((residue.chain[:chain_code] == chain_code) &&
-            (res_from..res_to).include?(residue[:residue_code]))
-          result = true
-        end
-      else
-        raise "#{self.description} should be added to Scop class!"
-      end # case
+        case range.strip
+        when /^(\S):$/ # F:
+          chain_code = $1
+          if residue.chain[:chain_code] == chain_code
+            result = true
+          end
+        when /^-$/ # -
+          true
+        when /^(-?\d+)-(-?\d+)$/ # 496-581
+          res_from  = $1.to_i
+          res_to    = $2.to_i
+          if ((res_from..res_to).include?(residue[:residue_code]))
+            result = true
+          end
+        when /^(\S):(-?\d+)-(-?\d+)$/ # A:104-157
+          chain_code  = $1
+          res_from    = $2.to_i
+          res_to      = $3.to_i
+          if ((residue.chain[:chain_code] == chain_code) &&
+              (res_from..res_to).include?(residue[:residue_code]))
+            result = true
+          end
+        else
+          raise "#{self.description} should be added to Scop class!"
+        end # case
     end # each des
     result
   end
