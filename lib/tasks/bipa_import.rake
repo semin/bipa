@@ -1,5 +1,3 @@
-require 'fileutils'
-
 namespace :bipa do
   namespace :import do
 
@@ -14,17 +12,18 @@ namespace :bipa do
         (10..100).step(10) do |nr|
 
           cluster_file = File.join(family_dir, family.sccs + '.nr' + nr.to_s + '.fa')
-          cluster = Cluster.new(:identity => nr)
+          cluster = Cluster.create(:identity => nr)
 
           IO.readlines(cluster_file).each do |line|
             members = line.split(/\s+/)
             members.each do |member|
-              cluster.scop_domains << ScopDomain.find_by_sunid(member)
+              scop_domain = ScopDomain.find_by_sunid(member)
+              scop_domain[:"cluster#{nr}_id"] = cluster.id
+              scop_domain.save!
             end
           end
 
           family.clusters << cluster
-          cluster.save!
           puts "Cluster #{cluster.id} (#{nr}): created"
         end
 

@@ -1,11 +1,11 @@
 class Scop < ActiveRecord::Base
-  
+
   include BIPA::Constants
 
   acts_as_nested_set
 
   is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
-  
+
   def self.factory_create!(opt={})
     case opt[:stype]
     when 'root' then ScopRoot.create!(opt)
@@ -18,7 +18,7 @@ class Scop < ActiveRecord::Base
     when 'px'   then ScopDomain.create!(opt)
     else; raise "Unknown SCOP hierarchy: #{opt[:stype]}"; end
   end
-  
+
   def hierarchy_and_description
     "#{hierarchy}: #{description}"
   end
@@ -109,11 +109,11 @@ class Scop < ActiveRecord::Base
       end
     end
   end
-  
+
   %w(hbond whbond contact).each do |int|
     %w(dna rna).each do |na|
       na_residues = "BIPA::Constants::NucleicAcids::#{na.upcase}::Residues::STANDARD".constantize.map(&:downcase)
-      
+
       define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}" do
         if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}")
           return instance_variable_get("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}")
@@ -124,13 +124,13 @@ class Scop < ActiveRecord::Base
           instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}", result)
         end
       end
-      
+
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
         define_method :"total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}" do
           if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}")
             return instance_variable_get("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}")
           else
-            result = na_residues.sum do |res| 
+            result = na_residues.sum do |res|
               "observed_frequency_of_#{int}_between_#{aa}_and_#{res}"
             end +
             %w(sugar phosphate).sum do |moiety|
@@ -140,7 +140,7 @@ class Scop < ActiveRecord::Base
           end
         end
       end
-    
+
       na_residues.each do |res|
         define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}" do
           if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}")
@@ -152,7 +152,7 @@ class Scop < ActiveRecord::Base
             instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}", result)
           end
         end
-      
+
         AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
           define_method :"observed_frequency_of_#{int}_between_#{aa}_and_#{res}" do
             if instance_variable_defined?("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}")
@@ -164,7 +164,7 @@ class Scop < ActiveRecord::Base
               instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}", result)
             end
       		end
-	
+
   		    define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{res}" do
   		      if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
   		        return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
@@ -180,7 +180,7 @@ class Scop < ActiveRecord::Base
       	  end
     	  end
       end
-    
+
       %w(sugar phosphate).each do |moiety|
         define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}" do
           if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}")
@@ -192,7 +192,7 @@ class Scop < ActiveRecord::Base
             instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}", result)
           end
         end
-          
+
         AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
           define_method :"observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}" do
             if instance_variable_defined?("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
@@ -202,7 +202,7 @@ class Scop < ActiveRecord::Base
               instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}", result)
             end
       		end
-	
+
   		    define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}" do
   		      if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
   		        return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
@@ -262,16 +262,16 @@ end
 
 
 class ScopDomain < Scop
-  
+
   include BIPA::USR
   include BIPA::NucleicAcidBinding
   include BIPA::ComposedOfResidues
   include BIPA::ComposedOfAtoms
-  
+
   (10..100).step(10) do |nr|
     belongs_to  :"cluster#{nr}",
                 :class_name => "Cluster",
-                :foreign_key => "cluster_id",
+                :foreign_key => "cluster#{nr}_id",
                 :conditions => "identity = #{nr}"
   end
 
@@ -279,21 +279,21 @@ class ScopDomain < Scop
   has_many :rna_interfaces, :class_name => 'DomainRnaInterface', :foreign_key => 'scop_id'
 
   has_many :residues, :class_name => 'AaResidue', :foreign_key => 'scop_id'
-  
+
   has_many :chains, :through => :residues, :uniq => true
   has_many :atoms,  :through => :residues
-  
+
   has_many :contacts,         :through => :atoms
   has_many :contacting_atoms, :through => :contacts
-    
+
   has_many :whbonds,          :through => :atoms
   has_many :whbonding_atoms,  :through => :whbonds
-  
+
   has_many :hbonds_as_donor,    :through => :atoms
   has_many :hbonds_as_acceptor, :through => :atoms
   has_many :hbonding_donors,    :through => :hbonds_as_acceptor
   has_many :hbonding_acceptors, :through => :hbonds_as_donor
-  
+
   lazy_calculate :unbound_asa, :bound_asa, :delta_asa
 
   before_validation :update_pdb_code
@@ -303,7 +303,7 @@ class ScopDomain < Scop
     # "2hz1 A:2-124, B:1-50" => [A:2-124, B:1-50]
     description.gsub(/^\S{4}\s+/, '').split(',')
   end
-  
+
   def include?(residue)
     result = false
     ranges_on_chains.each do |range|
@@ -340,13 +340,13 @@ class ScopDomain < Scop
   def update_pdb_code
     self.pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
   end
-  
+
   def to_pdb
     atoms.sort_by(&:atom_code).inject("") { |p, a| p + a.to_pdb }
-  end 
+  end
 
   def to_fasta
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
   end
-  
+
 end # class ScopDomain
