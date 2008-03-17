@@ -15,6 +15,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'scops' table
   create_table "scops", :force => true do |t|
     t.belongs_to  "parent"
+    (10..100).step(10) { |nr| t.belongs_to  "cluster#{nr}" }
     t.integer     "lft"
     t.integer     "rgt"
     t.string      "type"
@@ -41,6 +42,16 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "scops", ["parent_id", "lft", "rgt"], :name => "index_scops_on_parent_id_and_lft_and_rgt"
   add_index "scops", ["id", "registered"],        :name => "index_scops_on_id_and_registered"
 
+
+  # 'clusters' table
+  create_table "clusters", :force => true do |t|
+    t.belongs_to  "scop_family"
+    t.integer     "identity"
+  end
+
+  add_index "clusters", ["scop_family_id", "identity"], :name => "index_clusters_on_scop_family_id_and_identity", :unique => true
+
+
   # 'structures' table
   create_table  "structures", :force => true do |t|
     t.string    "pdb_code",              :null => false
@@ -58,6 +69,7 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index "structures", ["pdb_code"], :name => "index_structures_on_pdb_code", :unique => true
+
 
   # 'models' table
   create_table "models", :force => true do |t|

@@ -1,35 +1,81 @@
 namespace :bipa do
   namespace :run do
 
-    require 'fileutils'
+    require "fileutils"
 
     include FileUtils
 
     def refresh_dir(dir)
       rm_rf(dir) if File.exists?(dir)
       mkdir_p(dir)
+      puts "Refreshing #{dir}: done"
     end
 
 
-    desc "Run Baton on each SCOP family of BIPA"
-    task :baton_scop_family => [:environment] do
+    desc "Run blastclust for each SCOP family"
+    task :blastclust_scop_families => [:environment] do
 
-      refresh_dir(BIPA_ENV[:BATON_SCOP_FAMILY_DIR])
-      scop_families = ScopFamily.find(:all).select(&:registered)
+      refresh_dir BIPA_ENV[:BLASTCLUST_FAMILY_DIR]
 
-      scop_families.each_with_index do |scop_family, i|
-        scop_family_dir = File.join(BIPA_ENV[:BATON_SCOP_FAMILY_DIR], "#{scop_family.sccs}")
-        mkdir scop_family_dir
+      families = ScopFamily.find(:all).select(&:registered)
+      families.each_with_index do |family, i|
 
-        scop_domains = scop_family.all_registered_leaf_children
+        family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sccs}")
+        family_fasta = File.join(family_dir, "#{family.sccs}.fa")
+        mkdir family_dir
 
-        scop_domains.each do |scop_domain|
-          File.open(File.join(scop_family_dir, "#{scop_domain.sid}.pdb"), "w") do |pdb|
-            pdb.puts scop_domain.to_pdb
+        File.open(family_fasta, "w") do |f|
+          domains = family.all_registered_leaf_children
+          domains.each do |domain|
+            sunid = domain.sunid
+            fasta = domain.to_fasta
+
+            if fasta.include? "X"
+              puts "Skip: #{sunid} has some unknown residues!"
+              next
+            end
+
+            f.puts ">#{sunid}"
+            f.puts fasta
           end
         end
 
-        puts "Creating PDB flat file for #{scop_family.sccs}: done (#{i + 1}/#{scop_families.size})"
+        (10..100).step(10) do |nr|
+          blastclust_cmd =
+            "blastclust " +
+            "-i #{family_fasta} "+
+            "-o #{File.join(family_dir, family.sccs + '.nr' + nr.to_s + '.fa')} " +
+            "-L .9 " +
+            "-S #{nr} " +
+            "-a 2 " +
+            "-p T"
+            system blastclust_cmd
+        end
+
+        puts "Creating non-redundant fasta files for #{family.sccs} : done (#{i+1}/#{families.size})"
+      end
+    end
+
+
+    desc "Run Baton and JOY for each SCOP family"
+    task :baton_and_joy_scop_families => [:environment] do
+
+      refresh_dir(BIPA_ENV[:BATON_SCOP_FAMILY_DIR])
+
+      families = ScopFamily.find(:all).select(&:registered)
+      families.each_with_index do |family, i|
+
+        family_dir = File.join(BIPA_ENV[:BATON_SCOP_FAMILY_DIR], "#{family.sccs}")
+        mkdir family_dir
+
+        domains = family.all_registered_leaf_children
+        domains.each do |domain|
+          File.open(File.join(family_dir, "#{domain.sid}.pdb"), "w") do |pdb|
+            pdb.puts domain.to_pdb
+          end
+        end
+
+        puts "Creating PDB file for #{scop_family.sccs}: done (#{i + 1}/#{scop_families.size})"
       end
     end
 

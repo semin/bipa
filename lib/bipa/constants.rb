@@ -37,6 +37,7 @@ module BIPA
         }
         
         ONE_LETTER_CODE = {
+          # Standard Encoded Amino Acids
           "ALA" => "A",
           "ARG" => "R",
           "ASN" => "N",
@@ -58,7 +59,16 @@ module BIPA
           "THR" => "T",
           "TRP" => "W",
           "TYR" => "Y",
-          "VAL" => "V"
+          "VAL" => "V",
+          # Amino Acid Amibiguities
+          "ASX" => "B", # aspartic acid or asparagine
+          "XLE" => "J", # leucine or isoleucine
+          "XAA" => "X", # unknown or unspecified amino acid
+          "UNK" => "X", # unknown or unspecified amino acid
+          "GLZ" => "Z", # glutamic acid or glutamine
+          # Special Encoded Amino Acids
+          "SEC" => "U", # selenocysteine (the UniProt Knowledgebase uses "C" and a feature rather than "U"
+          "PYL" => "O"  # pyrrolysine ("pyrrOlysine", the UniProt Knowledgebase uses "K" and a feature rather than "O"
         }
       end
 

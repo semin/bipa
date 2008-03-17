@@ -241,6 +241,15 @@ end
 
 
 class ScopFamily < Scop
+
+  has_many :clusters
+
+  (10..100).step(10) do |nr|
+    has_one :"cluster#{nr}",
+            :class_name => "Cluster",
+            :conditions => "identity = #{nr}"
+  end
+
 end
 
 
@@ -259,6 +268,13 @@ class ScopDomain < Scop
   include BIPA::ComposedOfResidues
   include BIPA::ComposedOfAtoms
   
+  (10..100).step(10) do |nr|
+    belongs_to  :"cluster#{nr}",
+                :class_name => "Cluster",
+                :foreign_key => "cluster_id",
+                :conditions => "identity = #{nr}"
+  end
+
   has_many :dna_interfaces, :class_name => 'DomainDnaInterface', :foreign_key => 'scop_id'
   has_many :rna_interfaces, :class_name => 'DomainRnaInterface', :foreign_key => 'scop_id'
 
@@ -328,5 +344,9 @@ class ScopDomain < Scop
   def to_pdb
     atoms.sort_by(&:atom_code).inject("") { |p, a| p + a.to_pdb }
   end 
+
+  def to_fasta
+    residues.sort_by(&:residue_code).map(&:one_letter_code).join
+  end
   
 end # class ScopDomain

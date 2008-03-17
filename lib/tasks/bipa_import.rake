@@ -3,6 +3,36 @@ require 'fileutils'
 namespace :bipa do
   namespace :import do
 
+    desc "Import Clusters for each SCOP family"
+    task :clusters => [:environment] do
+
+      families = ScopFamily.find(:all).select(&:registered)
+      families.each_with_index do |family, i|
+
+        family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sccs}")
+
+        (10..100).step(10) do |nr|
+
+          cluster_file = File.join(family_dir, family.sccs + '.nr' + nr.to_s + '.fa')
+          cluster = Cluster.new(:identity => nr)
+
+          IO.readlines(cluster_file).each do |line|
+            members = line.split(/\s+/)
+            members.each do |member|
+              cluster.scop_domains << ScopDomain.find_by_sunid(member)
+            end
+          end
+
+          family.clusters << cluster
+          cluster.save!
+          puts "Cluster #{cluster.id} (#{nr}): created"
+        end
+
+        puts "Import clusters for #{family.sccs} : done (#{i+1}/#{families.size})"
+      end
+    end
+
+
     desc "Import PDB datasets"
     task :pdb => [:environment] do
       pdb_files     = Dir[File.join(BIPA_ENV[:PDB_DIR], '*.pdb')].sort
