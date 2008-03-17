@@ -244,7 +244,7 @@ end
 
 class ScopFamily < Scop
 
-  (10..100).step(10) { |i| has_one :"cluster#{i}" }
+  (10..100).step(10) { |i| has_many :"cluster#{i}" }
 
 end
 

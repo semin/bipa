@@ -49,7 +49,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "type"
   end
 
-  add_index "clusters", ["scop_family_id", "type"], :name => "index_clusters_on_scop_family_id_and_type", :unique => true
+  add_index "clusters", ["scop_family_id", "type"], :name => "index_clusters_on_scop_family_id_and_type"
 
 
   # 'structures' table

@@ -10,22 +10,21 @@ namespace :bipa do
         family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sccs}")
 
         (10..100).step(10) do |id|
-
           cluster_file = File.join(family_dir, family.sccs + '.nr' + id.to_s + '.fa')
-          cluster = "Cluster#{id}".constantize.new
 
           IO.readlines(cluster_file).each do |line|
+            cluster = "Cluster#{id}".constantize.new
+
             members = line.split(/\s+/)
             members.each do |member|
               scop_domain = ScopDomain.find_by_sunid(member)
               cluster.scop_domains << scop_domain
             end
-          end
 
-          #family.send("cluster#{id}") << cluster
-          cluster.scop_family = family
-          cluster.save!
-          puts "Cluster#{id} (#{cluster.id}): created"
+            cluster.scop_family = family
+            cluster.save!
+            puts "Cluster#{id} (#{cluster.id}): created"
+          end
         end
 
         puts "Import clusters for #{family.sccs} : done (#{i+1}/#{families.size})"

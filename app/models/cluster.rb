@@ -6,5 +6,14 @@ class Cluster < ActiveRecord::Base
 
 end
 
-(10..100).step(10) { |i| eval "class Cluster#{i} < Cluster; end" }
+(10..100).step(10) do |id|
+  eval <<-CLASS
+    class Cluster#{id} < Cluster
+      
+      has_many  :scop_domains,
+                :class_name => "ScopDomain",
+                :foreign_key => "cluster#{id}_id"
+    end
+  CLASS
+end
 
