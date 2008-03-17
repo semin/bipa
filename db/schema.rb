@@ -46,10 +46,10 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'clusters' table
   create_table "clusters", :force => true do |t|
     t.belongs_to  "scop_family"
-    t.integer     "identity"
+    t.string      "type"
   end
 
-  add_index "clusters", ["scop_family_id", "identity"], :name => "index_clusters_on_scop_family_id_and_identity", :unique => true
+  add_index "clusters", ["scop_family_id", "type"], :name => "index_clusters_on_scop_family_id_and_type", :unique => true
 
 
   # 'structures' table

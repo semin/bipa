@@ -4,27 +4,28 @@ namespace :bipa do
     desc "Import Clusters for each SCOP family"
     task :clusters => [:environment] do
 
-      families = ScopFamily.find(:all).select(&:registered)
+      families = ScopFamily.find_registered(:all)
       families.each_with_index do |family, i|
 
         family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sccs}")
 
-        (10..100).step(10) do |nr|
+        (10..100).step(10) do |id|
 
-          cluster_file = File.join(family_dir, family.sccs + '.nr' + nr.to_s + '.fa')
-          cluster = Cluster.create(:identity => nr)
+          cluster_file = File.join(family_dir, family.sccs + '.nr' + id.to_s + '.fa')
+          cluster = "Cluster#{id}".constantize.new
 
           IO.readlines(cluster_file).each do |line|
             members = line.split(/\s+/)
             members.each do |member|
               scop_domain = ScopDomain.find_by_sunid(member)
-              scop_domain[:"cluster#{nr}_id"] = cluster.id
-              scop_domain.save!
+              cluster.scop_domains << scop_domain
             end
           end
 
-          family.clusters << cluster
-          puts "Cluster #{cluster.id} (#{nr}): created"
+          #family.send("cluster#{id}") << cluster
+          cluster.scop_family = family
+          cluster.save!
+          puts "Cluster#{id} (#{cluster.id}): created"
         end
 
         puts "Import clusters for #{family.sccs} : done (#{i+1}/#{families.size})"

@@ -4,6 +4,7 @@
 require_dependency "scop"
 require_dependency "chain"
 require_dependency "residue"
+require_dependency "cluster"
 require_dependency "interface"
 
 class ApplicationController < ActionController::Base

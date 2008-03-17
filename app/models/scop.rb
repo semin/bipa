@@ -6,9 +6,7 @@ class Scop < ActiveRecord::Base
 
   is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
 
-  scop_out :registered do
-    { :conditions => { :registered => true } }
-  end
+  scope_out :registered
 
   def self.factory_create!(opt={})
     case opt[:stype]
@@ -246,13 +244,7 @@ end
 
 class ScopFamily < Scop
 
-  has_many :clusters
-
-  (10..100).step(10) do |nr|
-    has_one :"cluster#{nr}",
-            :class_name => "Cluster",
-            :conditions => "identity = #{nr}"
-  end
+  (10..100).step(10) { |i| has_one :"cluster#{i}" }
 
 end
 
@@ -272,12 +264,7 @@ class ScopDomain < Scop
   include BIPA::ComposedOfResidues
   include BIPA::ComposedOfAtoms
 
-  (10..100).step(10) do |nr|
-    belongs_to  :"cluster#{nr}",
-                :class_name => "Cluster",
-                :foreign_key => "cluster#{nr}_id",
-                :conditions => "identity = #{nr}"
-  end
+  (10..100).step(10) { |i| belongs_to :"cluster#{i}" }
 
   has_many :dna_interfaces, :class_name => 'DomainDnaInterface', :foreign_key => 'scop_id'
   has_many :rna_interfaces, :class_name => 'DomainRnaInterface', :foreign_key => 'scop_id'
