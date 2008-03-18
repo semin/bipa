@@ -4,15 +4,26 @@ class Cluster < ActiveRecord::Base
 
   has_many :scop_domains
 
+  def representative
+    rep = nil
+    scop_domains.each do |domain|
+      if rep.nil?
+        rep = domain
+      else
+        rep = domain if domain.resolution < rep.resolution
+      end
+    end
+    rep
+  end
+
 end
 
-(10..100).step(10) do |id|
+(10..100).step(10) do |i|
   eval <<-CLASS
-    class Cluster#{id} < Cluster
-      
-      has_many  :scop_domains,
-                :class_name => "ScopDomain",
-                :foreign_key => "cluster#{id}_id"
+    class Cluster#{i} < Cluster
+
+      has_many :scop_domains
+
     end
   CLASS
 end
