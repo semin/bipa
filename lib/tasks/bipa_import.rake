@@ -7,10 +7,10 @@ namespace :bipa do
       families = ScopFamily.find_registered(:all)
       families.each_with_index do |family, i|
 
-        family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sccs}")
+        family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sunid}")
 
         (10..100).step(10) do |id|
-          cluster_file = File.join(family_dir, family.sccs + '.nr' + id.to_s + '.fa')
+          cluster_file = File.join(family_dir, family.sunid.to_s + '.nr' + id.to_s + '.fa')
 
           IO.readlines(cluster_file).each do |line|
             cluster = "Cluster#{id}".constantize.new
@@ -27,7 +27,7 @@ namespace :bipa do
           end
         end
 
-        puts "Import clusters for #{family.sccs} : done (#{i+1}/#{families.size})"
+        puts "Import clusters for #{family.sunid} : done (#{i+1}/#{families.size})"
       end
     end
 
