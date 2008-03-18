@@ -83,20 +83,24 @@ namespace :bipa do
             clusters = family.send("cluster#{nr_cutoff}s")
             clusters.each do |cluster|
               domain = cluster.representative
+              next if domain.nil?
               File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |pdb|
                 pdb.puts domain.to_pdb
               end
             end
             ActiveRecord::Base.remove_connection
           end
+
           puts "NR(#{nr_cutoff}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})"
           ActiveRecord::Base.establish_connection(config)
         end
       end
 
       # Baton & JOY
+      fmanager = ForkManager.new(BIPA_ENV[:MAX_FORK])
       fmanager.manage do
         family_sunids.each_with_index do |family_sunid, i|
+
           fmanager.fork do
             cwd = pwd
             family_dir = File.join(nr_dir, "#{family_sunid}")
@@ -105,7 +109,7 @@ namespace :bipa do
             system "joy baton.ali"
             chdir cwd
 
-            puts "NR(#{nr_cutoff}): Run Baton and JOY on PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})"
+            puts "NR(#{nr_cutoff}): Running Baton and JOY on PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})"
           end
         end
       end

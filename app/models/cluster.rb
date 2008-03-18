@@ -11,11 +11,18 @@ class Cluster < ActiveRecord::Base
         rep = domain
       else
         if not domain.resolution.nil?
-          rep = domain if domain.resolution < rep.resolution
+          next if domain.calpha_only?
+          if rep.resolution.nil?
+            rep = domain
+          else
+            if domain.resolution < rep.resolution
+              rep = domain
+            end
+          end
         end
       end
     end
-    rep
+    rep.calpha_only? ? nil : rep
   end
 
 end
