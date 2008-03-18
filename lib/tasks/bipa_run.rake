@@ -58,24 +58,34 @@ namespace :bipa do
 
 
     desc "Run Baton and JOY for each SCOP family"
-    task :baton_and_joy_scop_families => [:environment] do
+    task :baton_and_joy_scop_nr_families => [:environment] do
 
-      refresh_dir(BIPA_ENV[:BATON_SCOP_FAMILY_DIR])
+      nr_cutoff = BIPA_ENV[:NR_CUTOFF]
+      nr_dir    = File.join(BIPA_ENV[:BATON_SCOP_FAMILY_DIR], "nr#{nr_cutoff}")
+      refresh_dir nr_dir
 
       families = ScopFamily.find(:all).select(&:registered)
       families.each_with_index do |family, i|
 
-        family_dir = File.join(BIPA_ENV[:BATON_SCOP_FAMILY_DIR], "#{family.sccs}")
+        family_dir = File.join(nr_dir, "#{family.sccs}")
         mkdir family_dir
 
-        domains = family.all_registered_leaf_children
-        domains.each do |domain|
+        clusters = family.send("cluster#{nr_cutoff}s")
+        clusters.each do |cluster|
+          domain = cluster.representative
+
           File.open(File.join(family_dir, "#{domain.sid}.pdb"), "w") do |pdb|
             pdb.puts domain.to_pdb
           end
         end
 
-        puts "Creating PDB file for #{scop_family.sccs}: done (#{i + 1}/#{scop_families.size})"
+        cwd = pwd
+        chdir family_dir
+        system "Baton *.pdb"
+        system "joy baton.ali"
+        chdir cwd
+
+        puts "NR(#{nr_cutoff}): Creating PDB file for #{family.sccs}: done (#{i + 1}/#{families.size})"
       end
     end
 

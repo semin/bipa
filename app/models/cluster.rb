@@ -10,7 +10,9 @@ class Cluster < ActiveRecord::Base
       if rep.nil?
         rep = domain
       else
-        rep = domain if domain.resolution < rep.resolution
+        if not domain.resolution.nil?
+          rep = domain if domain.resolution < rep.resolution
+        end
       end
     end
     rep

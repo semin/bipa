@@ -1,6 +1,7 @@
 # BIPA environment
 BIPA_ENV = {
   :MAX_FORK     => ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i : 2,
+  :NR_CUTOFF    => ENV["NR_CUTOFF"].to_i > 0 ? ENV["NR_CUTOFF"].to_i : 90,
   :ENTRY_TYPE   => "prot-nuc",
   :MAX_DISTANCE => 5.0,
 

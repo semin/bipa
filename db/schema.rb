@@ -58,7 +58,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string    "classification",        :null => false
     t.string    "title"
     t.string    "exp_method",            :null => false
-    t.float     "resolution",            :null => false
+    t.float     "resolution"
     t.date      "deposited_at",          :null => false
     t.boolean   "obsolete",              :default => false
     t.boolean   "complete",              :default => false
