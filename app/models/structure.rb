@@ -29,10 +29,4 @@ class Structure < ActiveRecord::Base
   has_many :hbonds_as_donor,    :through => :atoms
   has_many :hbonds_as_acceptor, :through => :atoms
 
-  def self.find_recent(options = {})
-    with_scope :find => options do
-      find_all_by_has_complete_contacts(true, :order => 'deposited_at DESC')
-    end
-  end
-  
 end

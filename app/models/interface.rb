@@ -15,15 +15,14 @@ class Interface < ActiveRecord::Base
     residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s }
   end
 
-  # Callbacks
-  def update_asa
-    self.asa = atoms.inject(0) { |s, a| a.delta_asa ? : s + a.delta_asa : s }
+  def asa
+    self[:asa] ||= atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
   end
 
-  def update_polarity
-    self.polarity =
+  def polarity
+    self[:polarity] ||=
       atoms.select(&:polar?).inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
-      atoms.inject(0) { |s, a| a.delta_asa ? : s + a.delta_asa : s }
+      atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
   end
 
 end

@@ -36,10 +36,6 @@ class Model < ActiveRecord::Base
   has_many :hbonding_donors,    :through => :hbonds_as_acceptor
   has_many :hbonding_acceptors, :through => :hbonds_as_donor
 
-  before_save :update_unbound_asa,
-              :update_bound_asa,
-              :update_delta_asa
-
   def chains_with_na
     chains.select { |c| c.has_na? }
   end
@@ -50,19 +46,6 @@ class Model < ActiveRecord::Base
 
   def chains_with_rna
     chains.select { |c| c.has_rna? }
-  end
-
-  # Callbacks
-  def update_unbound_asa
-    self.unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
-  end
-
-  def update_bound_asa
-    self.bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
-  end
-
-  def update_delta_asa
-    self.delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
   end
 
 end

@@ -21,10 +21,6 @@ class Residue < ActiveRecord::Base
   has_many :hbonding_donors,    :through => :hbonds_as_acceptor
   has_many :hbonding_acceptors, :through => :hbonds_as_donor
 
-  before_save :update_unbound_asa,
-              :update_bound_asa,
-              :update_delta_asa
-
   # ASA related
   def on_surface?
     surface_atoms.size > 0
@@ -64,19 +60,6 @@ class Residue < ActiveRecord::Base
     raise "Error: No one letter code for residue: #{residue_name}"
   end
 
-  # Callbacks
-  def update_unbound_asa
-    self.unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
-  end
-
-  def update_bound_asa
-    self.bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
-  end
-
-  def update_delta_asa
-    self.delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
-  end
-
 end # class Residue
 
 
@@ -93,13 +76,8 @@ class AaResidue < StdResidue
   belongs_to :domain, :class_name => 'ScopDomain', :foreign_key => 'scop_id'
   belongs_to :domain_interface, :class_name => "DomainInterface", :foreign_key => "domain_interface_id"
 
-  before_save :update_relative_unbound_asa,
-              :update_relative_bound_asa,
-              :update_relative_delta_asa
-
-
-  def update_relative_unbound_asa
-    self.relative_unbound_asa =
+  def relative_unbound_asa
+    @relative_unbound_asa ||=
       if AminoAcids::Residues::STANDARD.include? residue_name
         atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /
           AminoAcids::Residues::STANDARD_ASA[residue_name]
@@ -108,8 +86,8 @@ class AaResidue < StdResidue
       end
   end
 
-  def update_relative_bound_asa
-    self.relative_bound_asa =
+  def relative_bound_asa
+    @relative_bound_asa ||=
       if AminoAcids::Residues::STANDARD.include? residue_name
         atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s } /
           AminoAcids::Residues::STANDARD_ASA[residue_name]
@@ -118,8 +96,8 @@ class AaResidue < StdResidue
       end
   end
 
-  def update_relative_delta_asa
-    self.relative_delta_asa =
+  def relative_delta_asa
+    @relative_delta_asa ||=
       if AminoAcids::Residues::STANDARD.include? residue_name
         atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
           AminoAcids::Residues::STANDARD_ASA[residue_name]

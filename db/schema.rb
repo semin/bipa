@@ -25,9 +25,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "sid"
     t.string      "pdb_code"
     t.string      "description"
-    t.float       "bound_asa"
-    t.float       "unbound_asa"
-    t.float       "delta_asa"
     t.boolean     "registered", :default => false
   end
 
@@ -51,20 +48,20 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index "sub_families", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
 
+  #
+  create_table "alignments", :force => true do |t|
+    t.belongs_to "sub_family"
+  end
 
   # 'structures' table
   create_table  "structures", :force => true do |t|
-    t.string    "pdb_code",              :null => false
-    t.string    "classification",        :null => false
+    t.string    "pdb_code",       :null => false
+    t.string    "classification", :null => false
     t.string    "title"
-    t.string    "exp_method",            :null => false
+    t.string    "exp_method",     :null => false
     t.float     "resolution"
-    t.date      "deposited_at",          :null => false
-    t.boolean   "obsolete",              :default => false
-    t.boolean   "complete",              :default => false
-    t.boolean   "has_complete_contacts", :default => false
-    t.boolean   "has_complete_hbonds",   :default => false
-    t.boolean   "has_complete_whbonds",  :default => false
+    t.date      "deposited_at",   :null => false
+    t.boolean   "obsolete",       :default => false
     t.timestamps
   end
 
@@ -73,31 +70,27 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'models' table
   create_table "models", :force => true do |t|
-    t.belongs_to  "structure", :null => false
-    t.integer     "model_code",   :null => false
-    t.float       "bound_asa"
-    t.float       "unbound_asa"
-    t.float       "delta_asa"
+    t.belongs_to  "structure",  :null => false
+    t.integer     "model_code", :null => false
   end
 
   add_index "models", ["model_code"],   :name => "index_models_on_model_code"
   add_index "models", ["structure_id"], :name => "index_models_on_structure_id"
 
+
   # 'chains' table
   create_table "chains", :force => true do |t|
-    t.belongs_to  "model",   :null => false
+    t.belongs_to  "model",      :null => false
     t.string      "type"
     t.string      "chain_code", :null => false
     t.integer     "mol_code"
     t.string      "molecule"
-    t.float       "bound_asa"
-    t.float       "unbound_asa"
-    t.float       "delta_asa"
   end
 
   add_index "chains", ["chain_code"],             :name => "index_chains_on_chain_code"
   add_index "chains", ["model_id"],               :name => "index_chains_on_model_id"
   add_index "chains", ["model_id", "chain_code"], :name => "index_chains_on_model_id_and_chain_code"
+
 
   # 'resdiues' table
   create_table "residues", :force => true do |t|
@@ -113,12 +106,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "residue_name",       :null => false
     t.string      "secondary_structure"
     t.string      "hydrophobicity"
-    t.float       "bound_asa"
-    t.float       "unbound_asa"
-    t.float       "delta_asa"
-    t.float       "relative_bound_asa"
-    t.float       "relative_unbound_asa"
-    t.float       "relative_delta_asa"
   end
 
   add_index "residues", ["chain_id"],                           :name => "index_residues_on_chain_id"
