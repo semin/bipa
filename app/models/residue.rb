@@ -66,15 +66,15 @@ class Residue < ActiveRecord::Base
 
   # Callbacks
   def update_unbound_asa
-    unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
+    self.unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
   end
 
   def update_bound_asa
-    bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
+    self.bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
   end
 
   def update_delta_asa
-    delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
+    self.delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
   end
 
 end # class Residue
@@ -98,31 +98,34 @@ class AaResidue < StdResidue
               :update_relative_delta_asa
 
 
-  def calculate_relative_unbound_asa
-    if AminoAcids::Residues::STANDARD.include? residue_name
-      atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /
-        AminoAcids::Residues::STANDARD_ASA[residue_name]
-    else
-      raise "Unknown residue type: #{id}, #{residue_name}"
-    end
+  def update_relative_unbound_asa
+    self.relative_unbound_asa =
+      if AminoAcids::Residues::STANDARD.include? residue_name
+        atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /
+          AminoAcids::Residues::STANDARD_ASA[residue_name]
+      else
+        raise "Unknown residue type: #{id}, #{residue_name}"
+      end
   end
 
-  def calculate_relative_bound_asa
-    if AminoAcids::Residues::STANDARD.include? residue_name
-      atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s } /
-        AminoAcids::Residues::STANDARD_ASA[residue_name]
-    else
-      raise "Unknown residue type: #{id}, #{residue_name}"
-    end
+  def update_relative_bound_asa
+    self.relative_bound_asa =
+      if AminoAcids::Residues::STANDARD.include? residue_name
+        atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s } /
+          AminoAcids::Residues::STANDARD_ASA[residue_name]
+      else
+        raise "Unknown residue type: #{id}, #{residue_name}"
+      end
   end
 
-  def calculate_relative_delta_asa
-    if AminoAcids::Residues::STANDARD.include? residue_name
-      atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
-        AminoAcids::Residues::STANDARD_ASA[residue_name]
-    else
-      raise "Unknown residue type: #{id}, #{residue_name}"
-    end
+  def update_relative_delta_asa
+    self.relative_delta_asa =
+      if AminoAcids::Residues::STANDARD.include? residue_name
+        atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
+          AminoAcids::Residues::STANDARD_ASA[residue_name]
+      else
+        raise "Unknown residue type: #{id}, #{residue_name}"
+      end
   end
 
 end

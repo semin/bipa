@@ -12,16 +12,18 @@ class Interface < ActiveRecord::Base
 
   def asa_of_residue(res)
     res.upcase!
-    residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s + 0 }
+    residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s }
   end
 
   # Callbacks
   def update_asa
-    asa = atoms.sum(&:delta_asa)
+    self.asa = atoms.inject(0) { |s, a| a.delta_asa ? : s + a.delta_asa : s }
   end
 
   def update_polarity
-    polarity = atoms.select(&:polar?).to_a.sum(&:delta_asa) / atoms.sum(&:delta_asa)
+    self.polarity =
+      atoms.select(&:polar?).inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
+      atoms.inject(0) { |s, a| a.delta_asa ? : s + a.delta_asa : s }
   end
 
 end
@@ -54,13 +56,13 @@ class DomainInterface < Interface
   # Callbacks
   def update_singlet_propensities
     AminoAcids::Residues::STANDARD.each do |aa|
-      send("singlet_propensity_of_#{aa}=", singlet_propensity_of(aa))
+      self.send("singlet_propensity_of_#{aa}=", singlet_propensity_of(aa))
     end
   end
 
   def update_sse_propensities
     DSSP::SSES.map(&:downcase).each do |sse|
-      send("sse_propensity_of_#{sse}=", sse_propensity_of(sse))
+      self.send("sse_propensity_of_#{sse}=", sse_propensity_of(sse))
     end
   end
 
@@ -71,16 +73,16 @@ class DomainInterface < Interface
         before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{moiety}"
 
         define_method "update_frequency_of_#{int}_between_#{aa}_and_#{moiety}" do
-          send("frequency_of_#{int}_between_#{aa}_and_#{moiety}=",
-               send("frequency_of_#{int}_between_#{moiety}_and_", aa))
+          self.send("frequency_of_#{int}_between_#{aa}_and_#{moiety}=",
+                    self.send("frequency_of_#{int}_between_#{moiety}_and_", aa))
         end
       end
 
       before_save :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids"
 
       define_method :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids" do
-        send("frequency_of_#{int}_between_#{aa}_and_nucleic_acids=",
-             send("frequency_of_#{int}_between_nucleic_acids_and_", aa))
+        self.send("frequency_of_#{int}_between_#{aa}_and_nucleic_acids=",
+                  self.send("frequency_of_#{int}_between_nucleic_acids_and_", aa))
       end
     end
   end
@@ -296,8 +298,8 @@ class DomainDnaInterface < DomainInterface
       before_save :"update_frequency_of_#{int}_between_amino_acids_and_#{dna}"
 
       define_method :"update_frequency_of_#{int}_between_amino_acids_and_#{dna}" do
-        send("frequency_of_#{int}_between_amino_acids_and_#{dna}=",
-             send("frequency_of_#{int}_between_amino_acids_and_", dna))
+        self.send("frequency_of_#{int}_between_amino_acids_and_#{dna}=",
+                  self.send("frequency_of_#{int}_between_amino_acids_and_", dna))
       end
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
@@ -305,8 +307,8 @@ class DomainDnaInterface < DomainInterface
         before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{dna}"
 
         define_method :"update_frequency_of_#{int}_between_#{aa}_and_#{dna}" do
-          send("frequency_of_#{int}_between_#{aa}_and_#{dna}=",
-               send("frequency_of_#{int}_between", aa, dna))
+          self.send("frequency_of_#{int}_between_#{aa}_and_#{dna}=",
+                    self.send("frequency_of_#{int}_between", aa, dna))
         end
       end
     end
@@ -353,8 +355,8 @@ class DomainRnaInterface < DomainInterface
       before_save :"update_frequency_of_#{int}_between_amino_acids_and_#{rna}"
 
       define_method :"update_frequency_of_#{int}_between_amino_acids_and_#{rna}" do
-        send("frequency_of_#{int}_between_amino_acids_and_#{rna}=",
-             send("frequency_of_#{int}_between_amino_acids_and_", rna))
+        self.send("frequency_of_#{int}_between_amino_acids_and_#{rna}=",
+                  self.send("frequency_of_#{int}_between_amino_acids_and_", rna))
       end
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
@@ -362,8 +364,8 @@ class DomainRnaInterface < DomainInterface
         before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{rna}"
 
         define_method :"update_frequency_of_#{int}_between_#{aa}_and_#{rna}" do
-          send("frequency_of_#{int}_between_#{aa}_and_#{rna}=",
-               send("frequency_of_#{int}_between", aa, rna))
+          self.send("frequency_of_#{int}_between_#{aa}_and_#{rna}=",
+                    self.send("frequency_of_#{int}_between", aa, rna))
         end
       end
     end
