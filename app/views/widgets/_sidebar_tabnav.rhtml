@@ -32,11 +32,17 @@ render_tabnav :sidebar,
     t.links_to :controller => 'scops'
   end
 
-#  add_tab do |t|
-#    t.named 'GO'
-#    t.titled 'GO'
-#    t.links_to :controller => 'scops'
-#  end
+  add_tab do |t|
+    t.named 'ESST'
+    t.titled 'ESST'
+    t.links_to :controller => 'essts'
+  end
+
+  add_tab do |t|
+    t.named 'GO'
+    t.titled 'GO'
+    t.links_to :controller => 'gos'
+  end
 
   # you can use restful routes with:
   #
