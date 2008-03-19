@@ -455,16 +455,16 @@ namespace :bipa do
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
-      pdb_codes     = Structure.find(:all).map(&:pdb_code)
-      fork_manager  = ForkManager.new(BIPA_ENV[:MAX_FORK])
+      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      fmanager  = ForkManager.new(BIPA_ENV[:MAX_FORK])
 
-      fork_manager.manage do
+      fmanager.manage do
 
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
-          fork_manager.fork do
+          fmanager.fork do
 
             ActiveRecord::Base.establish_connection(config)
             structure = Structure.find_by_pdb_code(pdb_code)
@@ -503,12 +503,10 @@ namespace :bipa do
 
             puts "Populating 'interfaces' table from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
             ActiveRecord::Base.remove_connection
-
           end # fork_manager.fork
         end # pdb_codes.each_with_index
 
         ActiveRecord::Base.establish_connection(config)
-
       end # fork_manager.manage
     end
 
