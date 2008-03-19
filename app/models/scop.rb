@@ -246,7 +246,7 @@ end
 
 class ScopFamily < Scop
 
-  (10..100).step(10) { |i| has_many :"cluster#{i}s" }
+  (10..100).step(10) { |i| has_many :"sub_family#{i}s" }
 
 end
 
@@ -266,7 +266,7 @@ class ScopDomain < Scop
   include BIPA::ComposedOfResidues
   include BIPA::ComposedOfAtoms
 
-  (10..100).step(10) { |i| belongs_to :"cluster#{i}" }
+  (10..100).step(10) { |i| belongs_to :"sub_family#{i}" }
 
   has_many :dna_interfaces, :class_name => 'DomainDnaInterface', :foreign_key => 'scop_id'
   has_many :rna_interfaces, :class_name => 'DomainRnaInterface', :foreign_key => 'scop_id'

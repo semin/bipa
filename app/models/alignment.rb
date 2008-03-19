@@ -1,5 +1,5 @@
 class Alignment < ActiveRecord::Base
 
-  belongs_to :cluster
+  belongs_to :sub_family
 
 end
