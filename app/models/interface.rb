@@ -17,11 +17,11 @@ class Interface < ActiveRecord::Base
 
   # Callbacks
   def update_asa
-    asa = atoms.to_a.sum(&:delta_asa)
+    asa = atoms.sum(&:delta_asa)
   end
 
   def update_polarity
-    polarity = atoms.select(&:polar?).to_a.sum(&:delta_asa) / atoms.to_a.sum(&:delta_asa)
+    polarity = atoms.select(&:polar?).to_a.sum(&:delta_asa) / atoms.sum(&:delta_asa)
   end
 
 end

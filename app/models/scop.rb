@@ -288,9 +288,10 @@ class ScopDomain < Scop
   has_many :hbonding_donors,    :through => :hbonds_as_acceptor
   has_many :hbonding_acceptors, :through => :hbonds_as_donor
 
-  lazy_calculate :unbound_asa, :bound_asa, :delta_asa
-
-  before_validation :update_pdb_code
+  before_validation :update_pdb_code,
+                    :update_unbound_asa,
+                    :update_bound_asa,
+                    :update_delta_asa
 
   # Methods
   def ranges_on_chains
@@ -331,10 +332,6 @@ class ScopDomain < Scop
     result
   end
 
-  def update_pdb_code
-    self.pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
-  end
-
   def resolution
     chains.first.model.structure.resolution
   end
@@ -349,6 +346,23 @@ class ScopDomain < Scop
 
   def to_fasta
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
+  end
+
+  # Callbacks
+  def update_pdb_code
+    pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
+  end
+
+  def update_unbound_asa
+    unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
+  end
+
+  def update_bound_asa
+    bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
+  end
+
+  def update_delta_asa
+    delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
   end
 
 end # class ScopDomain

@@ -1,5 +1,5 @@
 class Residue < ActiveRecord::Base
-  
+
   include BIPA::USR
   include BIPA::Constants
   include BIPA::NucleicAcidBinding
@@ -12,26 +12,28 @@ class Residue < ActiveRecord::Base
 
   has_many :contacts,           :through => :atoms
   has_many :contacting_atoms,   :through => :contacts
-  
+
   has_many :whbonds,            :through => :atoms
   has_many :whbonding_atoms,    :through => :whbonds
-  
+
   has_many :hbonds_as_donor,    :through => :atoms
   has_many :hbonds_as_acceptor, :through => :atoms
   has_many :hbonding_donors,    :through => :hbonds_as_acceptor
   has_many :hbonding_acceptors, :through => :hbonds_as_donor
 
-  lazy_calculate :unbound_asa, :bound_asa, :delta_asa
-  
-  # ASA related 
+  before_save :update_unbound_asa,
+              :update_bound_asa,
+              :update_delta_asa
+
+  # ASA related
   def on_surface?
     surface_atoms.size > 0
   end
-  
+
   def on_interface?
     interface_atoms.size > 0
   end
-  
+
   def buried?
     not on_surface?
   end
@@ -40,15 +42,15 @@ class Residue < ActiveRecord::Base
   def dna?
     self.class == DnaResidue
   end
-  
+
   def rna?
     self.class == RnaResidue
   end
-  
+
   def aa?
     self.class == AaResidue
   end
-  
+
   def justified_residue_name
     residue_name.rjust(3)
   end
@@ -61,7 +63,20 @@ class Residue < ActiveRecord::Base
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "Error: No one letter code for residue: #{residue_name}"
   end
-  
+
+  # Callbacks
+  def update_unbound_asa
+    unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
+  end
+
+  def update_bound_asa
+    bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
+  end
+
+  def update_delta_asa
+    delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
+  end
+
 end # class Residue
 
 
@@ -77,33 +92,39 @@ class AaResidue < StdResidue
 
   belongs_to :domain, :class_name => 'ScopDomain', :foreign_key => 'scop_id'
   belongs_to :domain_interface, :class_name => "DomainInterface", :foreign_key => "domain_interface_id"
-  
-  lazy_calculate :relative_unbound_asa, :relative_bound_asa, :relative_delta_asa
+
+  before_save :update_relative_unbound_asa,
+              :update_relative_bound_asa,
+              :update_relative_delta_asa
 
 
   def calculate_relative_unbound_asa
     if AminoAcids::Residues::STANDARD.include? residue_name
-      unbound_asa / AminoAcids::Residues::STANDARD_ASA[residue_name]
+      atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /
+        AminoAcids::Residues::STANDARD_ASA[residue_name]
     else
       raise "Unknown residue type: #{id}, #{residue_name}"
     end
   end
-  
+
   def calculate_relative_bound_asa
     if AminoAcids::Residues::STANDARD.include? residue_name
-      bound_asa / AminoAcids::Residues::STANDARD_ASA[residue_name]
+      atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s } /
+        AminoAcids::Residues::STANDARD_ASA[residue_name]
     else
       raise "Unknown residue type: #{id}, #{residue_name}"
     end
   end
-  
+
   def calculate_relative_delta_asa
     if AminoAcids::Residues::STANDARD.include? residue_name
-      delta_asa / AminoAcids::Residues::STANDARD_ASA[residue_name]
+      atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
+        AminoAcids::Residues::STANDARD_ASA[residue_name]
     else
       raise "Unknown residue type: #{id}, #{residue_name}"
     end
   end
+
 end
 
 

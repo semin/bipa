@@ -1,28 +1,29 @@
 class Atom < ActiveRecord::Base
-  
+
   include BIPA::NucleicAcidBinding
 
   belongs_to :residue
 
   has_many :contacts,         :dependent => :delete_all
   has_many :contacting_atoms, :through => :contacts
-           
+
   has_many :whbonds,         :dependent => :delete_all
   has_many :whbonding_atoms, :through => :whbonds
-           
-  has_many :hbonds_as_donor,       :dependent => :delete_all,
-           :class_name => 'Hbond', :foreign_key => 'hbonding_donor_id'
-  has_many :hbonds_as_acceptor,    :dependent => :delete_all,
-           :class_name => 'Hbond', :foreign_key => 'hbonding_acceptor_id'
-           
+
+  has_many  :hbonds_as_donor,  :dependent => :delete_all,
+            :class_name => 'Hbond', :foreign_key => 'hbonding_donor_id'
+
+  has_many  :hbonds_as_acceptor,    :dependent => :delete_all,
+            :class_name => 'Hbond', :foreign_key => 'hbonding_acceptor_id'
+
   has_many :hbonding_donors,    :through => :hbonds_as_acceptor
   has_many :hbonding_acceptors, :through => :hbonds_as_donor
-  
+
   # ASA related
   def on_surface?
     unbound_asa ? unbound_asa > BIPA_ENV[:SURFACE_ATOM_ASA_THRESHOLD] : false
   end
-  
+
   def buried?
     not on_surface?
   end
@@ -39,19 +40,19 @@ class Atom < ActiveRecord::Base
   def rna?
     residue.rna?
   end
-  
+
   def aa?
     residue.aa?
   end
-  
+
   def polar?
     atom_name =~ /O|N/
   end
-  
+
   def on_major_groove?
     raise "Not implemented yet"
   end
-  
+
   def on_minor_groove?
     raise "Not implemented yet"
   end
@@ -102,7 +103,7 @@ class Atom < ActiveRecord::Base
     # could not be reached here
     raise "Cannot justify the atom name: #{an}"
   end
-  
+
   def to_pdb
     sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s\n",
             'ATOM',
@@ -120,5 +121,5 @@ class Atom < ActiveRecord::Base
             self.element,
             self.charge)
   end
-  
+
 end # class Atom
