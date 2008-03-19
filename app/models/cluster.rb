@@ -1,4 +1,4 @@
-class Cluster < ActiveRecord::Base
+class SubFamily < ActiveRecord::Base
 
   belongs_to :scop_family
 
@@ -30,12 +30,12 @@ class Cluster < ActiveRecord::Base
 end
 
 (10..100).step(10) do |i|
-  eval <<-CLASS
-    class Cluster#{i} < Cluster
+  eval <<-EVAL
+    class SubFamily#{i} < SubFamily
 
       has_many :scop_domains
 
     end
-  CLASS
+  EVAL
 end
 
