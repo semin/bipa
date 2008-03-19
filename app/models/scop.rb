@@ -121,9 +121,9 @@ class Scop < ActiveRecord::Base
         if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}")
           return instance_variable_get("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}")
         else
-          result = AminoAcids::Residues::STANDARD.map(&:downcase).sum do |aa|
-            "total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}"
-          end
+          result = AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
+            send("total_observed_frequency_of_#{int}_between_#{a}_and_#{na}")
+          }
           instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}", result)
         end
       end
@@ -133,13 +133,12 @@ class Scop < ActiveRecord::Base
           if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}")
             return instance_variable_get("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}")
           else
-            result = na_residues.sum do |res|
-              "observed_frequency_of_#{int}_between_#{aa}_and_#{res}"
-            end +
-            %w(sugar phosphate).sum do |moiety|
-              "observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}"
-            end
-              instance_variable_set("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}", result)
+            result = na_residues.sum { |r|
+              send("observed_frequency_of_#{int}_between_#{aa}_and_#{r}")
+            } + %w(sugar phosphate).sum { |m|
+              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{m}")
+            }
+            instance_variable_set("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}", result)
           end
         end
       end
@@ -149,9 +148,9 @@ class Scop < ActiveRecord::Base
           if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}")
             return instance_variable_get("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}")
           else
-            result = AminoAcids::Residues::STANDARD.map(&:downcase).sum do |aa|
-              "observed_frequency_of_#{int}_between_#{aa}_and_#{res}"
-            end
+            result = AminoAcids::Residues::STANDARD.map(&:downcase).sum { |r|
+              send("observed_frequency_of_#{int}_between_#{r}_and_#{res}")
+            }
             instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}", result)
           end
         end
@@ -161,9 +160,9 @@ class Scop < ActiveRecord::Base
             if instance_variable_defined?("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}")
               return instance_variable_get("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}")
             else
-              result = send("#{na}_interfaces").sum do |i|
+              result = send("#{na}_interfaces").sum { |i|
                 i.send("frequency_of_#{int}_between_#{aa}_and_#{res}")
-              end
+              }
               instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}", result)
             end
           end
@@ -190,9 +189,9 @@ class Scop < ActiveRecord::Base
           if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}")
             return instance_variable_get("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}")
           else
-            result = AminoAcids::Residues::STANDARD.map(&:downcase).sum do |aa|
-              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
-            end
+            result = AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
+              send("observed_frequency_of_#{int}_between_#{a}_and_#{na}_#{moiety}")
+            }
             instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}", result)
           end
         end
@@ -202,7 +201,9 @@ class Scop < ActiveRecord::Base
             if instance_variable_defined?("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
               return instance_variable_get("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
             else
-              result = send("#{na}_interfaces").sum(&:"frequency_of_#{int}_between_#{aa}_and_#{moiety}")
+              result = send("#{na}_interfaces").sum { |i|
+                i.send("frequency_of_#{int}_between_#{aa}_and_#{moiety}")
+              }
               instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}", result)
             end
           end

@@ -224,21 +224,21 @@ namespace :bipa do
 
             pdb.models.first.each do |chain|
               next if chain.chain_id =~ /^\s*$/
-              chain.each do |residue|
+                chain.each do |residue|
                 type = case
-                        when residue.is_na?
-                          :na
-                        when residue.is_aa?
-                          :aa
-                        else
-                          raise "Unknown type of residue!"
-                        end
+                       when residue.is_na?
+                         :na
+                       when residue.is_aa?
+                         :aa
+                       else
+                         raise "Unknown type of residue!"
+                       end
                 residue.each do |atom|
                   point = BIPA::Point.new(atom.x, atom.y, atom.z, atom.serial, type)
                   kdtree.insert(point)
                   aa_points << point if type ==:aa
                 end
-              end
+                end
             end
 
             contacts = Array.new
@@ -274,7 +274,7 @@ namespace :bipa do
       structures  = Structure.find_all_by_complete(true)
       pdb_codes   = structures.map {|s| s.pdb_code}
       total_pdb   = structures.size
-      
+
       fork_manager = ForkManager.new(BIPA_ENV[:MAX_FORK])
       fork_manager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -398,7 +398,7 @@ namespace :bipa do
 
     desc "Import SCOP datasets"
     task :scop => [:environment] do
-      
+
       hierarchy_file    = Dir[File.join(BIPA_ENV[:SCOP_DIR], '*hie*scop*')][0]
       description_file  = Dir[File.join(BIPA_ENV[:SCOP_DIR], '*des*scop*')][0]
 
@@ -424,10 +424,10 @@ namespace :bipa do
       # 100068  px      a.1.1.1 d1uvya_ 1uvy A:
       IO.foreach(description_file) do |line|
         next if line =~ /^#/ || line =~ /^\s*$/ # Skip empty lines
-        sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
+          sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
         sccs = '-' if sccs =~ /unassigned/
-        sid = '-' if sid =~ /unassigned/
-        descriptions[sunid] = {
+          sid = '-' if sid =~ /unassigned/
+          descriptions[sunid] = {
           :sunid => sunid,
           :stype => stype,
           :sccs => sccs,
@@ -441,8 +441,8 @@ namespace :bipa do
       # 14982   46461   -
       IO.readlines(hierarchy_file).each_with_index do |line, i|
         next if line =~ /^#/ || line =~ /^\s*$/
-        self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
-        
+          self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
+
         current_scop = Scop.factory_create!(descriptions[self_sunid])
         unless self_sunid.to_i == 0
           parent_scop = Scop.find_by_sunid(parent_sunid)
@@ -454,27 +454,27 @@ namespace :bipa do
 
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
-      
+
       pdb_codes     = Structure.find(:all).map(&:pdb_code)
       fork_manager  = ForkManager.new(BIPA_ENV[:MAX_FORK])
-      
+
       fork_manager.manage do
-        
+
         config = ActiveRecord::Base.remove_connection
-        
+
         pdb_codes.each_with_index do |pdb_code, i|
-          
+
           fork_manager.fork do
-            
+
             ActiveRecord::Base.establish_connection(config)
             structure = Structure.find_by_pdb_code(pdb_code)
-            
+
             structure.domains.each do |domain|
-              
+
               registered = false
-              
+
               dna_binding_residues = domain.residues.select(&:binding_dna?)
-              
+
               if dna_binding_residues.length > 0
                 (domain.dna_interfaces.create).residues << dna_binding_residues
                 registered = true
@@ -482,13 +482,13 @@ namespace :bipa do
               end
 
               rna_binding_residues = domain.residues.select(&:binding_rna?)
-              
+
               if rna_binding_residues.length > 0
                 (domain.rna_interfaces).create.residues << rna_binding_residues
                 registered = true
                 puts "#{domain.sid} has an rna interface"
               end
-            
+
               if registered
                 domain.registered = true
                 domain.save!
@@ -500,45 +500,45 @@ namespace :bipa do
                 puts "#{domain.sid} has no interface"
               end
             end # structure.domains.each
-            
+
             puts "Populating 'interfaces' table from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
             ActiveRecord::Base.remove_connection
-            
+
           end # fork_manager.fork
         end # pdb_codes.each_with_index
-        
+
         ActiveRecord::Base.establish_connection(config)
-        
+
       end # fork_manager.manage
     end
-    
-    
+
+
     desc "Import Chain Interfaces"
     task :chain_interfaces => [:environment] do
-      
+
       structures    = Structure.find_all_by_complete(true)
       pdb_codes     = structures.map { |s| s.pdb_code }
       total_pdb     = structures.size
       fork_manager  = ForkManager.new(BIPA_ENV[:MAX_FORK])
-      
+
       fork_manager.manage do
         config = ActiveRecord::Base.remove_connection
-          
+
         pdb_codes.each_with_index do |pdb_code, i|
           fork_manager.fork do
             ActiveRecord::Base.establish_connection(config)
             structure = Structure.find_by_pdb_code(pdb_code)
-            
+
             structure.chains.each do |chain|
               dna_residues = chain.dna_binding_interface_residues
               rna_residues = chain.rna_binding_interface_residues
-              
+
               if dna_residues.length > 0
                 (chain.dna_interface = ChainDnaInterface.new).residues << dna_residues
                 chain.save!
                 puts "#{pdb_code}: #{chain.chain_code} has an dna interface"
               end
-              
+
               if rna_residues.length > 0
                 (chain.rna_interface = ChainRnaInterface.new).residues << rna_residues
                 chain.save!

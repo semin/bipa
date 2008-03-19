@@ -7,19 +7,21 @@ class Interface < ActiveRecord::Base
 
   after_save :expire_cache
 
-  lazy_calculate :asa, :polarity
-
-  def calculate_asa
-    atoms.to_a.sum(&:delta_asa)
-  end
-
-  def calculate_polarity
-    atoms.select(&:polar?).to_a.sum(&:delta_asa) / asa
-  end
+  before_save :update_asa,
+              :update_polarity
 
   def asa_of_residue(res)
     res.upcase!
     residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s + 0 }
+  end
+
+  # Callbacks
+  def update_asa
+    asa = atoms.to_a.sum(&:delta_asa)
+  end
+
+  def update_polarity
+    polarity = atoms.select(&:polar?).to_a.sum(&:delta_asa) / atoms.to_a.sum(&:delta_asa)
   end
 
 end
@@ -46,48 +48,54 @@ class DomainInterface < Interface
   has_many :hbonding_donors,    :through => :hbonds_as_acceptor
   has_many :hbonding_acceptors, :through => :hbonds_as_donor
 
-  AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-    lazy_calculate :"singlet_propensity_of_#{aa}"
+  before_save :update_singlet_propensities,
+              :update_sse_propensities
 
-    define_method :"calculate_singlet_propensity_of_#{aa}" do
-      calculate_singlet_propensity_of(aa)
+  # Callbacks
+  def update_singlet_propensities
+    AminoAcids::Residues::STANDARD.each do |aa|
+      send("singlet_propensity_of_#{aa}=", singlet_propensity_of(aa))
     end
+  end
 
+  def update_sse_propensities
+    DSSP::SSES.map(&:downcase).each do |sse|
+      send("sse_propensity_of_#{sse}=", sse_propensity_of(sse))
+    end
+  end
+
+  AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
     %w(hbond whbond contact).each do |int|
       %w(sugar phosphate).each do |moiety|
 
-        lazy_calculate :"frequency_of_#{int}_between_#{aa}_and_#{moiety}"
+        before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{moiety}"
 
-        define_method "calculate_frequency_of_#{int}_between_#{aa}_and_#{moiety}" do
-          send("frequency_of_#{int}_between_#{moiety}_and_", aa)
+        define_method "update_frequency_of_#{int}_between_#{aa}_and_#{moiety}" do
+          send("frequency_of_#{int}_between_#{aa}_and_#{moiety}=",
+               send("frequency_of_#{int}_between_#{moiety}_and_", aa))
         end
       end
 
-      lazy_calculate :"frequency_of_#{int}_between_#{aa}_and_nucleic_acids"
+      before_save :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids"
 
-      define_method :"calculate_frequency_of_#{int}_between_#{aa}_and_nucleic_acids" do
-        send("frequency_of_#{int}_between_nucleic_acids_and_", aa)
+      define_method :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids" do
+        send("frequency_of_#{int}_between_#{aa}_and_nucleic_acids=",
+             send("frequency_of_#{int}_between_nucleic_acids_and_", aa))
       end
     end
   end
 
-  DSSP::SSES.map(&:downcase).each do |sse|
-    lazy_calculate :"sse_propensity_of_#{sse}"
-
-    define_method :"calculate_sse_propensity_of_#{sse}" do
-      calculate_sse_propensity_of(sse)
-    end
-  end
-
-  def calculate_singlet_propensity_of(res)
+  def singlet_propensity_of(res)
     res.upcase!
-    result = (asa_of_residue(res) / asa) / (domain.asa_of_residue(res) / domain.unbound_asa)
+    result = ((asa_of_residue(res) / atoms.to_a.sum(&:delta_asa)) /
+              (domain.asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
 
-  def calculate_sse_propensity_of(sse)
+  def sse_propensity_of(sse)
     sse.upcase!
-    result = ((asa_of_sse(sse) / asa) / (domain.asa_of_sse(sse) / domain.unbound_asa))
+    result = ((asa_of_sse(sse) / atoms.to_a.sum(&:delta_asa)) /
+              (domain.asa_of_sse(sse) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
 
@@ -104,8 +112,8 @@ class DomainInterface < Interface
   def frequency_of_hbond_between(aa, na)
     aa.upcase!
     na.upcase!
-
     sum = 0
+
     hbonds_as_donor.each do |h|
       if h.hbonding_donor.residue.residue_name == aa &&
         h.hbonding_acceptor.residue.residue_name == na &&
@@ -128,8 +136,8 @@ class DomainInterface < Interface
   def frequency_of_whbond_between(aa, na)
     aa.upcase!
     na.upcase!
-
     sum = 0
+
     whbonds.each do |wh|
       if wh.atom.residue.residue_name == aa &&
         wh.whbonding_atom.residue.residue_name == na &&
@@ -144,8 +152,8 @@ class DomainInterface < Interface
   def frequency_of_contact_between(aa, na)
     aa.upcase!
     na.upcase!
-
     sum = 0
+
     contacts.each do |c|
       if c.atom.residue.residue_name == aa &&
         c.contacting_atom.residue.residue_name == na &&
@@ -159,8 +167,8 @@ class DomainInterface < Interface
 
   def frequency_of_hbond_between_sugar_and_(aa)
     aa.upcase!
-
     sum = 0
+
     hbonds_as_donor.each do |h|
       if h.hbonding_donor.residue.residue_name == aa &&
         NucleicAcids::Atoms::SUGAR.include?(h.hbonding_acceptor.atom_name)
@@ -178,8 +186,8 @@ class DomainInterface < Interface
 
   def frequency_of_whbond_between_sugar_and_(aa)
     aa.upcase!
-
     sum = 0
+
     whbonds.each do |wh|
       if wh.atom.residue.residue_name == aa &&
         NucleicAcids::Atoms::SUGAR.include?(wh.whbonding_atom.atom_name)
@@ -191,8 +199,8 @@ class DomainInterface < Interface
 
   def frequency_of_contact_between_sugar_and_(aa)
     aa.upcase!
-
     sum = 0
+
     contacts.each do |c|
       if c.atom.residue.residue_name == aa &&
         NucleicAcids::Atoms::SUGAR.include?(c.contacting_atom.atom_name)
@@ -204,8 +212,8 @@ class DomainInterface < Interface
 
   def frequency_of_hbond_between_phosphate_and_(aa)
     aa.upcase!
-
     sum = 0
+
     hbonds_as_donor.each do |h|
       if h.hbonding_donor.residue.residue_name == aa &&
         NucleicAcids::Atoms::PHOSPHATE.include?(h.hbonding_acceptor.atom_name)
@@ -223,8 +231,8 @@ class DomainInterface < Interface
 
   def frequency_of_whbond_between_phosphate_and_(aa)
     aa.upcase!
-
     sum = 0
+
     whbonds.each do |wh|
       if wh.atom.residue.residue_name == aa &&
         NucleicAcids::Atoms::PHOSPHATE.include?(wh.whbonding_atom.atom_name)
@@ -236,8 +244,8 @@ class DomainInterface < Interface
 
   def frequency_of_contact_between_phosphate_and_(aa)
     aa.upcase!
-
     sum = 0
+
     contacts.each do |c|
       if c.atom.residue.residue_name == aa &&
         NucleicAcids::Atoms::PHOSPHATE.include?(c.contacting_atom.atom_name)
@@ -250,6 +258,7 @@ class DomainInterface < Interface
   def frequency_of_hbond_between_amino_acids_and_(na)
     na.upcase!
     sum = 0
+
     AminoAcids::Residues::STANDARD.each do |aa|
       sum += frequency_of_hbond_between(aa, na)
     end
@@ -259,6 +268,7 @@ class DomainInterface < Interface
   def frequency_of_whbond_between_amino_acids_and_(na)
     na.upcase!
     sum = 0
+
     AminoAcids::Residues::STANDARD.each do |aa|
       sum += frequency_of_whbond_between(aa, na)
     end
@@ -268,6 +278,7 @@ class DomainInterface < Interface
   def frequency_of_contact_between_amino_acids_and_(na)
     na.upcase!
     sum = 0
+
     AminoAcids::Residues::STANDARD.each do |aa|
       sum += frequency_of_contact_between(aa, na)
     end
@@ -281,17 +292,21 @@ class DomainDnaInterface < DomainInterface
 
   %w(hbond whbond contact).each do |int|
     NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna|
-  	  lazy_calculate :"frequency_of_#{int}_between_amino_acids_and_#{dna}"
 
-      define_method :"calculate_frequency_of_#{int}_between_amino_acids_and_#{dna}" do
-        send("frequency_of_#{int}_between_amino_acids_and_", dna)
+      before_save :"update_frequency_of_#{int}_between_amino_acids_and_#{dna}"
+
+      define_method :"update_frequency_of_#{int}_between_amino_acids_and_#{dna}" do
+        send("frequency_of_#{int}_between_amino_acids_and_#{dna}=",
+             send("frequency_of_#{int}_between_amino_acids_and_", dna))
       end
 
-  	  AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-  	    lazy_calculate :"frequency_of_#{int}_between_#{aa}_and_#{dna}"
+      AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
 
-        define_method :"calculate_frequency_of_#{int}_between_#{aa}_and_#{dna}" do
-          send("frequency_of_#{int}_between", aa, dna)
+        before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{dna}"
+
+        define_method :"update_frequency_of_#{int}_between_#{aa}_and_#{dna}" do
+          send("frequency_of_#{int}_between_#{aa}_and_#{dna}=",
+               send("frequency_of_#{int}_between", aa, dna))
         end
       end
     end
@@ -300,34 +315,31 @@ class DomainDnaInterface < DomainInterface
   def frequency_of_hbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna|
+    NucleicAcids::DNA::Residues::STANDARD.each do |dna|
       sum += frequency_of_hbond_between(aa, dna)
     end
     sum += frequency_of_hbond_between_sugar_and_(aa)
     sum += frequency_of_hbond_between_phosphate_and_(aa)
-    sum
   end
 
   def frequency_of_whbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna|
+    NucleicAcids::DNA::Residues::STANDARD.each do |dna|
       sum += frequency_of_whbond_between(aa, dna)
     end
     sum += frequency_of_whbond_between_sugar_and_(aa)
     sum += frequency_of_whbond_between_phosphate_and_(aa)
-    sum
   end
 
   def frequency_of_contact_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna|
+    NucleicAcids::DNA::Residues::STANDARD.each do |dna|
       sum += frequency_of_contact_between(aa, dna)
     end
     sum += frequency_of_contact_between_sugar_and_(aa)
     sum += frequency_of_contact_between_phosphate_and_(aa)
-    sum
   end
 
 end # class DomainDnaInterface
@@ -336,18 +348,22 @@ end # class DomainDnaInterface
 class DomainRnaInterface < DomainInterface
 
   %w(hbond whbond contact).each do |int|
-	  NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna|
-  	  lazy_calculate :"frequency_of_#{int}_between_amino_acids_and_#{rna}"
+    NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna|
 
-      define_method :"calculate_frequency_of_#{int}_between_amino_acids_and_#{rna}" do
-        send("frequency_of_#{int}_between_amino_acids_and_", rna)
+      before_save :"update_frequency_of_#{int}_between_amino_acids_and_#{rna}"
+
+      define_method :"update_frequency_of_#{int}_between_amino_acids_and_#{rna}" do
+        send("frequency_of_#{int}_between_amino_acids_and_#{rna}=",
+             send("frequency_of_#{int}_between_amino_acids_and_", rna))
       end
 
-  	  AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-  	    lazy_calculate :"frequency_of_#{int}_between_#{aa}_and_#{rna}"
+      AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
 
-        define_method :"calculate_frequency_of_#{int}_between_#{aa}_and_#{rna}" do
-          send("frequency_of_#{int}_between", aa, rna)
+        before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{rna}"
+
+        define_method :"update_frequency_of_#{int}_between_#{aa}_and_#{rna}" do
+          send("frequency_of_#{int}_between_#{aa}_and_#{rna}=",
+               send("frequency_of_#{int}_between", aa, rna))
         end
       end
     end
@@ -356,34 +372,31 @@ class DomainRnaInterface < DomainInterface
   def frequency_of_hbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna|
+    NucleicAcids::RNA::Residues::STANDARD.each do |rna|
       sum += frequency_of_hbond_between(aa, rna)
     end
     sum += frequency_of_hbond_between_sugar_and_(aa)
     sum += frequency_of_hbond_between_phosphate_and_(aa)
-    sum
   end
 
   def frequency_of_whbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna|
+    NucleicAcids::RNA::Residues::STANDARD.each do |rna|
       sum += frequency_of_whbond_between(aa, rna)
     end
     sum += frequency_of_whbond_between_sugar_and_(aa)
     sum += frequency_of_whbond_between_phosphate_and_(aa)
-    sum
   end
 
   def frequency_of_contact_between_NucleicAcids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna|
+    NucleicAcids::RNA::Residues::STANDARD.each do |rna|
       sum += frequency_of_contact_between(aa, rna)
     end
     sum += frequency_of_contact_between_sugar_and_(aa)
     sum += frequency_of_contact_between_phosphate_and_(aa)
-    sum
   end
 
 end # class DomainRnaInterface
