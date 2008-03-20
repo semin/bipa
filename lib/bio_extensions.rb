@@ -57,19 +57,19 @@ module Bio
 
       def hydrophobicity
         if is_aa?
-          if BIPA::Constants::AminoAcids::POSITIVE.include? resName
+          if BIPA::Constants::AminoAcids::Residues::POSITIVE.include? resName
             'positive'
-          elsif BIPA::Constants::AminoAcids::NEGATIVE.include? resName
+          elsif BIPA::Constants::AminoAcids::Residues::NEGATIVE.include? resName
             'negative'
-          elsif BIPA::Constants::AminoAcids::POLAR.include? resName
+          elsif BIPA::Constants::AminoAcids::Residues::POLAR.include? resName
             'polar'
-          elsif BIPA::Constants::AminoAcids::ALIPHATIC.include? resName
+          elsif BIPA::Constants::AminoAcids::Residues::ALIPHATIC.include? resName
             'aliphatic'
-          elsif BIPA::Constants::AminoAcids::AROMATIC.include? resName
+          elsif BIPA::Constants::AminoAcids::Residues::AROMATIC.include? resName
             'aromatic'
-          elsif BIPA::Constants::AminoAcids::PARTICULAR.include? resName
+          elsif BIPA::Constants::AminoAcids::Residues::PARTICULAR.include? resName
             'particular'
-          elsif BIPA::Constants::AminoAcids::UNKNOWN.include? resName
+          elsif BIPA::Constants::AminoAcids::Residues::UNKNOWN.include? resName
             nil
           else
             nil

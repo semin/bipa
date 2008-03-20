@@ -8,10 +8,9 @@
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
 # It's strongly recommended to check this file into your version control system.
-include BIPA::Constants
 
 ActiveRecord::Schema.define(:version => 1) do
-
+  
   # 'scops' table
   create_table "scops", :force => true do |t|
     t.belongs_to  "parent"
@@ -126,34 +125,34 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'atoms' table
   create_table "atoms", :force => true do |t|
-    t.belongs_to  "residue",          :null => false
+    t.belongs_to  "residue",      :null => false
     t.string      "position_type"
-    t.integer     "atom_code",           :null => false
-    t.string      "atom_name",           :null => false
-    t.string      "altloc"
-    t.float       "x",                   :null => false
-    t.float       "y",                   :null => false
-    t.float       "z",                   :null => false
-    t.float       "occupancy",           :null => false
-    t.float       "tempfactor",          :null => false
-    t.string      "element"
+    t.integer     "atom_code",    :null => false
+    t.string      "atom_name",    :null => false
+    t.string      "altloc"        
+    t.float       "x",            :null => false
+    t.float       "y",            :null => false
+    t.float       "z",            :null => false
+    t.float       "occupancy",
+    t.float       "tempfactor",
+    t.string      "element"      
     t.string      "charge"
     t.float       "bound_asa"
     t.float       "unbound_asa"
     t.float       "delta_asa"
   end
 
-  add_index "atoms", ["residue_id"],                :name => "index_atoms_on_residue_id"
-  add_index "atoms", ["residue_id", "atom_code"],   :name => "index_atoms_on_residue_id_and_atom_code"
-  add_index "atoms", ["residue_id", "atom_name"],   :name => "index_atoms_on_residue_id_and_atom_name"
-  add_index "atoms", ["atom_code"],                 :name => "index_atoms_on_atom_code"
-  add_index "atoms", ["atom_name"],                 :name => "index_atoms_on_atom_name"
+  add_index "atoms", ["residue_id"],              :name => "index_atoms_on_residue_id"
+  add_index "atoms", ["residue_id", "atom_code"], :name => "index_atoms_on_residue_id_and_atom_code"
+  add_index "atoms", ["residue_id", "atom_name"], :name => "index_atoms_on_residue_id_and_atom_name"
+  add_index "atoms", ["atom_code"],               :name => "index_atoms_on_atom_code"
+  add_index "atoms", ["atom_name"],               :name => "index_atoms_on_atom_name"
 
   # 'contacts' table
   create_table "contacts", :force => true do |t|
-    t.belongs_to  "atom",            :null => false
-    t.belongs_to  "contacting_atom", :null => false
-    t.float       "distance",           :null => false
+    t.belongs_to  "atom",             :null => false
+    t.belongs_to  "contacting_atom",  :null => false
+    t.float       "distance",         :null => false
   end
 
   add_index "contacts", ["atom_id"],                        :name => "index_contacts_on_atom_id"
@@ -200,6 +199,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "asa"
     t.float       "polarity"
 
+    include BIPA::Constants
+    
     AminoAcids::Residues::STANDARD.map(&:downcase).each { |a| t.float "singlet_propensity_of_#{a}" }
     DSSP::SSES.map(&:downcase).each { |s| t.float "sse_propensity_of_#{s}" }
 

@@ -19,12 +19,12 @@ class Atom < ActiveRecord::Base
   has_many  :hbonds_as_donor,
             :class_name   => 'Hbond',
             :foreign_key  => 'hbonding_donor_id',
-            :dependent    => :delete_all,
+            :dependent    => :destroy
 
   has_many  :hbonds_as_acceptor,
             :class_name   => 'Hbond',
             :foreign_key  => 'hbonding_acceptor_id',
-            :dependent    => :delete_all
+            :dependent    => :destroy
 
   has_many  :hbonding_donors,
             :through      => :hbonds_as_acceptor

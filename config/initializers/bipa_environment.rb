@@ -49,5 +49,12 @@ BIPA_ENV = {
   :CDHIT_WORD   => 5,
 
   :STATS_DIR    => File.join(RAILS_ROOT, "/public/analysis/stats"),
-  :STATS_FILE   => "bipa_stats.tsv"
+  :STATS_FILE   => "bipa_stats.tsv",
+  
+  :PDBNUC_DIR             => "/BiO/Store/PDB/CLEAN/PDBNUC",
+  :PDBNUC_STRUCTURES_DIR  => "/BiO/Store/PDB/CLEAN/PDBNUC/Structures",
+  :PDBNUC_HBPLUS_DIR      => "/BiO/Store/PDB/CLEAN/PDBNUC/HBPLUS",
+  :PDBNUC_NACCESS_DIR     => "/BiO/Store/PDB/CLEAN/PDBNUC/NACCESS",
+  :PDBNUC_JOY_DIR         => "/BiO/Store/PDB/CLEAN/PDBNUC/JOY",
+  :DSSP_MIRROR_DIR        => "/BiO/Mirror/DSSP"
 }

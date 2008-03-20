@@ -1,74 +1,36 @@
 namespace :bipa do
   namespace :import do
 
-    desc "Import Clusters for each SCOP family"
-    task :clusters => [:environment] do
-
-      families = ScopFamily.find_registered(:all)
-      families.each_with_index do |family, i|
-
-        family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sunid}")
-
-        (10..100).step(10) do |id|
-          cluster_file = File.join(family_dir, family.sunid.to_s + '.nr' + id.to_s + '.fa')
-
-          IO.readlines(cluster_file).each do |line|
-            cluster = "Cluster#{id}".constantize.new
-
-            members = line.split(/\s+/)
-            members.each do |member|
-              scop_domain = ScopDomain.find_by_sunid(member)
-              cluster.scop_domains << scop_domain
-            end
-
-            cluster.scop_family = family
-            cluster.save!
-            puts "Cluster#{id} (#{cluster.id}): created"
-          end
-        end
-
-        puts "Import clusters for #{family.sunid} : done (#{i+1}/#{families.size})"
-      end
-    end
-
-
     desc "Import PDB datasets"
     task :pdb => [:environment] do
-      pdb_files     = Dir[File.join(BIPA_ENV[:PDB_DIR], '*.pdb')].sort
-      total_pdb     = pdb_files.size
-      fork_manager  = ForkManager.new(BIPA_ENV[:MAX_FORK])
+      
+      pdb_files = Dir[File.join(BIPA_ENV[:PDBNUC_STRUCTURES_DIR], '*.pdb')].sort
+      fmanager  = ForkManager.new(BIPA_ENV[:MAX_FORK])
 
-      fork_manager.manage do
+      fmanager.manage do
+        
         config = ActiveRecord::Base.remove_connection
+        
         pdb_files.each_with_index do |pdb_file, i|
-          fork_manager.fork do
+          
+          fmanager.fork do
+            
             ActiveRecord::Base.establish_connection(config)
 
-            pdb_bio       = Bio::PDB.new(IO.readlines(pdb_file).join)
-            pdb_code_up   = pdb_bio.entry_id.upcase
-            pdb_code_down = pdb_bio.entry_id.downcase
-
-            structure = Structure.find_by_pdb_code(pdb_code_up)
-
-            if structure && structure.complete
-              puts "Skip #{pdb_code_up} (#{i + 1} / #{total_pdb})"
-              next
-            elsif structure
-              puts "Delete incomplete #{pdb_code_up} (#{i + 1} / #{total_pdb})"
-              Structure.delete(structure)
-            end
+            pdb       = Bio::PDB.new(IO.readlines(pdb_file).join)
+            structure = Structure.find_by_pdb_code(pdb.entry_id.upcase)
 
             # Load NACCESS results for every atom in the structure
-            bound_asa_file      = File.join(BIPA_ENV[:NACCESS_DIR], "#{pdb_code_down}.asa")
-            unbound_aa_asa_file = File.join(BIPA_ENV[:NACCESS_DIR], "#{pdb_code_down}_aa.asa")
-            unbound_na_asa_file = File.join(BIPA_ENV[:NACCESS_DIR], "#{pdb_code_down}_na.asa")
+            bound_asa_file      = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code_down}.asa")
+            unbound_aa_asa_file = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code_down}_aa.asa")
+            unbound_na_asa_file = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code_down}_na.asa")
 
             bound_atom_asa      = BIPA::NACCESS.new(IO.readlines(bound_asa_file).join).atom_asa
             unbound_aa_atom_asa = BIPA::NACCESS.new(IO.readlines(unbound_aa_asa_file).join).atom_asa
             unbound_na_atom_asa = BIPA::NACCESS.new(IO.readlines(unbound_na_asa_file).join).atom_asa
 
             # Load DSSP results for every amino acid residue in the structure
-            dssp_file   = File.join(BIPA_ENV[:DSSP_DIR], "#{pdb_code_down}.dssp")
+            dssp_file   = File.join(BIPA_ENV[:DSSP_DIR], "#{pdb.entry_id}.dssp")
             dssp_sstruc = BIPA::DSSP.new(IO.readlines(dssp_file).join).sstruc
 
             # Parse molecule and chain information
@@ -554,6 +516,37 @@ namespace :bipa do
         ActiveRecord::Base.establish_connection(config)
       end
     end
-
   end
+  
+  
+  desc "Import Clusters for each SCOP family"
+  task :clusters => [:environment] do
+
+    families = ScopFamily.find_registered(:all)
+    families.each_with_index do |family, i|
+
+      family_dir = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sunid}")
+
+      (10..100).step(10) do |id|
+        cluster_file = File.join(family_dir, family.sunid.to_s + '.nr' + id.to_s + '.fa')
+
+        IO.readlines(cluster_file).each do |line|
+          cluster = "Cluster#{id}".constantize.new
+
+          members = line.split(/\s+/)
+          members.each do |member|
+            scop_domain = ScopDomain.find_by_sunid(member)
+            cluster.scop_domains << scop_domain
+          end
+
+          cluster.scop_family = family
+          cluster.save!
+          puts "Cluster#{id} (#{cluster.id}): created"
+        end
+      end
+
+      puts "Import clusters for #{family.sunid} : done (#{i+1}/#{families.size})"
+    end
+  end
+  
 end
