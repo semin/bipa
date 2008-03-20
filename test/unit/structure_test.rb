@@ -6,5 +6,4 @@ class StructureTest < Test::Unit::TestCase
     structure = Structure.new(:pdb_code => "abcd")
     assert_equal "abcd", structure.pdb_code
   end
-
 end

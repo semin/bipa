@@ -2,6 +2,7 @@ module BIPA
   module Constants
     module AminoAcids
       module Residues
+        
         POSITIVE    = %w(ARG LYS)
         NEGATIVE    = %w(ASP GLU)
         POLAR       = %w(ASN GLN HIS SER THR)
@@ -75,16 +76,19 @@ module BIPA
       module Atoms
         BACKBONE  = %w(H N HN2 HA CA C O OXT HXT)
       end
-    end
+    end # module AminoAcids
 
     module NucleicAcids
       module DNA
         module Residues
+          
           STANDARD  = %w(DA DC DG DT)
           OTHER     = %w(DU DI)
           ALL       = STANDARD + OTHER
         end
+        
         module Atoms
+          
           MAJOR_GROOVE = {
             "DA" => %w(C5 C6 C8 N6 N7),
             "DT" => %w(C4 C5 C6 C7 O4),
@@ -98,31 +102,36 @@ module BIPA
             "DC" => %w(O2 N1 C2)
           }
         end
-      end
+      end # module DNA
       
       module RNA
         module Residues
+          
           STANDARD  = %w(A C G U)
           OTHER     = %w(T I)
           ALL       = STANDARD + OTHER
         end
+        
         module Atoms
         end
       end
       
       module Residues
+        
         UNKNOWN   = %w(N)
         STANDARD  = DNA::Residues::STANDARD + RNA::Residues::STANDARD
         ALL       = DNA::Residues::ALL + RNA::Residues::ALL + UNKNOWN
       end
 
       module Atoms
+        
         PHOSPHATE = %w(P OP1 OP2 OP3 HOP3 HOP2)
         SUGAR     = %w(C1' C2' C3' C4' C5' O2' O3' H1' H2' H2'' H3' H4' H5' H5' HO2' HO3')
       end
-    end
+    end # module NucleicAcids
 
     module DSSP
+      
       HELIX = %w(H G I)
       SHEET = %w(E B)
       LOOP  = %w(T S L)
