@@ -4,20 +4,33 @@ class Atom < ActiveRecord::Base
 
   belongs_to :residue
 
-  has_many :contacts,         :dependent => :delete_all
-  has_many :contacting_atoms, :through => :contacts
+  has_many  :contacts,
+            :dependent    => :delete_all
 
-  has_many :whbonds,         :dependent => :delete_all
-  has_many :whbonding_atoms, :through => :whbonds
+  has_many  :contacting_atoms,
+            :through      => :contacts
 
-  has_many  :hbonds_as_donor,  :dependent => :delete_all,
-            :class_name => 'Hbond', :foreign_key => 'hbonding_donor_id'
+  has_many  :whbonds,
+            :dependent    => :delete_all
 
-  has_many  :hbonds_as_acceptor,    :dependent => :delete_all,
-            :class_name => 'Hbond', :foreign_key => 'hbonding_acceptor_id'
+  has_many  :whbonding_atoms,
+            :through      => :whbonds
 
-  has_many :hbonding_donors,    :through => :hbonds_as_acceptor
-  has_many :hbonding_acceptors, :through => :hbonds_as_donor
+  has_many  :hbonds_as_donor,
+            :class_name   => 'Hbond',
+            :foreign_key  => 'hbonding_donor_id',
+            :dependent    => :delete_all,
+
+  has_many  :hbonds_as_acceptor,
+            :class_name   => 'Hbond',
+            :foreign_key  => 'hbonding_acceptor_id',
+            :dependent    => :delete_all
+
+  has_many  :hbonding_donors,
+            :through      => :hbonds_as_acceptor
+
+  has_many  :hbonding_acceptors,
+            :through       => :hbonds_as_donor
 
   # ASA related
   def on_surface?
@@ -88,7 +101,7 @@ class Atom < ActiveRecord::Base
       end
     end
     if self.kind_of?(HetAtom)
-      if /\A(B[^AEHIKR]|C[^ADEFLMORSU]|F[^EMR]|H[^EFGOS]|I[^NR]|K[^R]|N[^ABDEIOP]|O[^S]|P[^ABDMORTU]|S[^BCEGIMNR]|V|W|Y[^B])/ =~ an then
+      if /\A(B[^AEHIKR]|C[^ADEFLMORSU]|F[^EMR]|H[^EFGOS]|I[^NR]|K[^R]|N[^ABDEIOP]|O[^S]|P[^ABDMORTU]|S[^BCEGIMNR]|V|W|Y[^B])/ =~ an
         return sprintf(' %-3s', an)
       else
         return sprintf('%-4s', an)
@@ -107,19 +120,19 @@ class Atom < ActiveRecord::Base
   def to_pdb
     sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s\n",
             'ATOM',
-            self.atom_code, 
-            self.justified_atom_name,
-            self.altloc,
-            self.residue.residue_name,
-            self.residue.chain.chain_code,
-            self.residue.residue_code,
-            self.residue.icode,
-            self.x, self.y, self.z,
-            self.occupancy,
-            self.tempfactor,
+            atom_code,
+            justified_atom_name,
+            altloc,
+            residue.residue_name,
+            residue.chain.chain_code,
+            residue.residue_code,
+            residue.icode,
+            x, y, z,
+            occupancy,
+            tempfactor,
             "",
-            self.element,
-            self.charge)
+            element,
+            charge)
   end
 
 end # class Atom
