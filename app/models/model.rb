@@ -94,7 +94,7 @@ class Model < ActiveRecord::Base
   has_many  :het_chains
 
   has_many  :het_residues,
-            :through    => :het_chains
+            :through    => :het_chains,
             :source     => :residues
 
   has_many  :het_atoms,
