@@ -22,54 +22,78 @@ module Bio
     end
 
     class Model
+
       def na_chains
-        chains.select {|c| c.has_na? && c.chain_id !~ /^\s*$/}
+        chains.select { |c| c.na? && not c.chain_id.empty? }
       end
 
       def aa_chains
-        chains.select {|c| (not c.has_na?) && (c.chain_id !~ /^\s*$/)}
+        chains.select { |c| c.aa? && not c.chain_id.empty? }
       end
     end
 
     class Chain
-      def has_na?
-        residues.each {|r| return true if r.is_na?}
-        false
+
+      def aa?
+        residues.all? { |r| r.aa? }
+      end
+
+      def dna?
+        residues.all? { |r| r.dna? }
+      end
+
+      def rna?
+        residues.all? { |r| r.rna? }
+      end
+
+      def hna?
+        residues.any? { |r| r.dna? } && residues.any? { |r| r.rna? }
+      end
+
+      def na?
+        dna? or rna? or hna?
+      end
+
+      def het?
+        @heterogens.size > 0 && chain_id.empty?
       end
     end
 
     class Residue
-      def is_dna?
-        BIPA::Constants::NucleicAcids::DNA::Residues::ALL.include?(resName)
+
+      include BIPA::Constants
+
+      def dna?
+        NucleicAcids::DNA::Residues::ALL.include?(resName)
       end
 
-      def is_rna?
-        BIPA::Constants::NucleicAcids::RNA::Residues::ALL.include?(resName)
+      def rna?
+        NucleicAcids::RNA::Residues::ALL.include?(resName)
       end
 
-      def is_na?
-        BIPA::Constants::NucleicAcids::Residues::ALL.include?(resName)
+      def na?
+        NucleicAcids::Residues::ALL.include?(resName)
       end
 
-      def is_aa?
+      def aa?
         not is_na?
       end
 
       def hydrophobicity
-        if is_aa?
-          if BIPA::Constants::AminoAcids::Residues::POSITIVE.include? resName
+        if self.aa?
+          if AminoAcids::Residues::POSITIVE.include? resName
             'positive'
-          elsif BIPA::Constants::AminoAcids::Residues::NEGATIVE.include? resName
+          elsif AminoAcids::Residues::NEGATIVE.include? resName
             'negative'
-          elsif BIPA::Constants::AminoAcids::Residues::POLAR.include? resName
+          elsif AminoAcids::Residues::POLAR.include? resName
             'polar'
-          elsif BIPA::Constants::AminoAcids::Residues::ALIPHATIC.include? resName
+          elsif AminoAcids::Residues::ALIPHATIC.include? resName
             'aliphatic'
-          elsif BIPA::Constants::AminoAcids::Residues::AROMATIC.include? resName
+          elsif AminoAcids::Residues::AROMATIC.include? resName
             'aromatic'
-          elsif BIPA::Constants::AminoAcids::Residues::PARTICULAR.include? resName
+          elsif AminoAcids::Residues::PARTICULAR.include? resName
             'particular'
-          elsif BIPA::Constants::AminoAcids::Residues::UNKNOWN.include? resName
+          elsif AminoAcids::Residues::UNKNOWN.include? resName
             nil
           else
             nil
@@ -80,19 +104,23 @@ module Bio
       end
     end
 
+
     class Record
       class ATOM
+
+        include BIPA::Constants
+
         def position_type
-          if residue.is_na?
-            if BIPA::Constants::NucleicAcids::Atoms::PHOSPHATE.include? name
+          if residue.na?
+            if NucleicAcids::Atoms::PHOSPHATE.include? name
               'phosphate'
-            elsif BIPA::Constants::NucleicAcids::Atoms::SUGAR.include? name
+            elsif NucleicAcids::Atoms::SUGAR.include? name
               'sugar'
             else
               'base'
             end
-          elsif residue.is_aa?
-            if BIPA::Constants::AminoAcids::Atoms::BACKBONE.include? name
+          elsif residue.aa?
+            if AminoAcids::Atoms::BACKBONE.include? name
               'backbone'
             else
               'sidechain'

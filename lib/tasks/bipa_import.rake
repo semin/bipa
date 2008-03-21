@@ -1,40 +1,40 @@
 namespace :bipa do
   namespace :import do
 
-    desc "Import PDB datasets"
+    desc "Import protein-nucleic acid complex PDB files to BIPA tables"
     task :pdb => [:environment] do
-      
-      pdb_files = Dir[File.join(BIPA_ENV[:PDBNUC_STRUCTURES_DIR], '*.pdb')].sort
+
+      pdb_files = Dir[File.join(BIPA_ENV[:PDBNUC_STRUCTURES_DIR], "*.pdb")].sort
       fmanager  = ForkManager.new(BIPA_ENV[:MAX_FORK])
 
       fmanager.manage do
-        
-        config = ActiveRecord::Base.remove_connection
-        
-        pdb_files.each_with_index do |pdb_file, i|
-          
-          fmanager.fork do
-            
-            ActiveRecord::Base.establish_connection(config)
 
-            pdb       = Bio::PDB.new(IO.readlines(pdb_file).join)
-            structure = Structure.find_by_pdb_code(pdb.entry_id.upcase)
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_files.each_with_index do |pdb_file, i|
+
+          fmanager.fork do
+
+            ActiveRecord::Base.establish_connection config
+
+            pdb_code  = pdb_file.gsub(/\.pdb/, "")
+            pdb_bio   = Bio::PDB.new IO.readlines(pdb_file).join
 
             # Load NACCESS results for every atom in the structure
-            bound_asa_file      = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code_down}.asa")
-            unbound_aa_asa_file = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code_down}_aa.asa")
-            unbound_na_asa_file = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code_down}_na.asa")
+            bound_asa_file      = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code}.asa")
+            unbound_aa_asa_file = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code}_aa.asa")
+            unbound_na_asa_file = File.join(BIPA_ENV[:PDBNUC_NACCESS_DIR], "#{pdb_code}_na.asa")
 
             bound_atom_asa      = BIPA::NACCESS.new(IO.readlines(bound_asa_file).join).atom_asa
             unbound_aa_atom_asa = BIPA::NACCESS.new(IO.readlines(unbound_aa_asa_file).join).atom_asa
             unbound_na_atom_asa = BIPA::NACCESS.new(IO.readlines(unbound_na_asa_file).join).atom_asa
 
             # Load DSSP results for every amino acid residue in the structure
-            dssp_file   = File.join(BIPA_ENV[:DSSP_DIR], "#{pdb.entry_id}.dssp")
+            dssp_file   = File.join(BIPA_ENV[:DSSP_UNCOMPRESSED_DIR], "#{pdb_code}.dssp")
             dssp_sstruc = BIPA::DSSP.new(IO.readlines(dssp_file).join).sstruc
 
             # Parse molecule and chain information
-            # Very dirty... it needs to be refactored!
+            # Very dirty... it needs refactoring!
             mol_codes = {}
             molecules = {}
 
@@ -60,27 +60,42 @@ namespace :bipa do
             model_bio = pdb_bio.models[0]
 
             model = Model.create!(
-              :structure_id => structure[:id],
-              :model_code   => model_bio.serial.nil? ? 1 : model_bio.serial
+              :structure_id => structure.id,
+              :model_code   => model_bio.serial ? model_bio.serial : 1
             )
 
             # Create empty atoms array for massive importing Atom AREs
             atoms = Array.new
 
             model_bio.each do |chain_bio|
-              chain_code = chain_bio.chain_id =~ /^\s*$/ ? '-' : chain_bio.chain_id
-              chain = Chain.create!(
-                :model_id   => model[:id],
+
+              chain_code = chain_bio.chain_id.empty? ? '-' : chain_bio.chain_id
+
+              chain_type = case chain_bio
+                           when chain_bio.aa?
+                             AaChain
+                           when chain_bio.dna?
+                             DnaChain
+                           when chain_bio.rna?
+                             RnaChain
+                           when chain_bio.hna?
+                             HnaChain
+                           when chain_bio.het?
+                             HetChain
+                           end
+
+              chain = chain_type.create!(
+                :model_id   => model.id,
                 :chain_code => chain_code,
-                :mol_code   => mol_codes[chain_code].nil? ? nil : mol_codes[chain_code],
-                :molecule   => molecules[chain_code].nil? ? nil : molecules[chain_code]
+                :mol_code   => mol_codes[chain_code] ? mol_codes[chain_code] : nil,
+                :molecule   => molecules[chain_code] ? molecules[chain_code] : nil
               )
 
               def residue_params(chain_id, residue, sstruc = nil)
-                params = {
+                {
                   :chain_id             => chain_id,
                   :residue_code         => residue.residue_id,
-                  :icode                => (residue.iCode =~ /^\s*$/ ? nil : residue.iCode),
+                  :icode                => (residue.iCode.empty? ? nil : residue.iCode),
                   :residue_name         => residue.resName,
                   :hydrophobicity       => residue.hydrophobicity,
                   :secondary_structure  => sstruc
@@ -88,20 +103,22 @@ namespace :bipa do
               end
 
               def atom_params(residue_id, atom, bound_asa = nil, unbound_asa = nil)
+
                 delta_asa = unbound_asa - bound_asa if bound_asa && unbound_asa
-                params = {
+
+                {
                   :residue_id     => residue_id,
                   :position_type  => atom.position_type,
                   :atom_code      => atom.serial,
                   :atom_name      => atom.name,
-                  :altloc         => atom.altLoc =~ /^\s*$/ ? nil : atom.altLoc,
+                  :altloc         => atom.altLoc.empty? ? nil : atom.altLoc,
                   :x              => atom.x,
                   :y              => atom.y,
                   :z              => atom.z,
                   :occupancy      => atom.occupancy,
                   :tempfactor     => atom.tempFactor,
                   :element        => atom.element,
-                  :charge         => atom.charge =~ /^\s*$/ ? nil : atom.charge,
+                  :charge         => atom.charge.empty? ? nil : atom.charge,
                   :bound_asa      => bound_asa,
                   :unbound_asa    => unbound_asa,
                   :delta_asa      => delta_asa
@@ -110,20 +127,22 @@ namespace :bipa do
 
               # For each standard residue
               chain_bio.each_residue do |residue_bio|
+
                 if residue_bio.is_dna?
-                  residue = DnaResidue.create!(residue_params(chain[:id], residue_bio))
+                  residue = DnaResidue.create!(residue_params(chain.id, residue_bio))
                 elsif residue_bio.is_rna?
-                  residue = RnaResidue.create!(residue_params(chain[:id], residue_bio))
+                  residue = RnaResidue.create!(residue_params(chain.id, residue_bio))
                 else
                   dssp_hash_key = chain_bio.chain_id + residue_bio.residue_id
-                  sstruc        = dssp_sstruc[dssp_hash_key] =~ /^\s*$/ ? 'L' : dssp_sstruc[dssp_hash_key]
-                  residue       = AaResidue.create!(residue_params(chain[:id], residue_bio, sstruc))
+                  sstruc        = dssp_sstruc[dssp_hash_key].empty? ? 'L' : dssp_sstruc[dssp_hash_key]
+                  residue       = AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
                 end
 
                 residue_bio.each do |atom_bio|
+
                   atoms << Atom.new(
                     atom_params(
-                      residue[:id],
+                      residue.id,
                       atom_bio,
                       bound_atom_asa[atom_bio.serial],
                       unbound_aa_atom_asa[atom_bio.serial] || unbound_na_atom_asa[atom_bio.serial])
@@ -132,18 +151,19 @@ namespace :bipa do
               end
 
               chain_bio.each_heterogen do |het_residue_bio|
-                het_residue = HetResidue.create!(residue_params(chain[:id], het_residue_bio))
+
+                het_residue = HetResidue.create!(residue_params(chain.id, het_residue_bio))
+
                 het_residue_bio.each do |het_atom_bio|
-                  atoms << Atom.new(atom_params(het_residue[:id], het_atom_bio))
+                  atoms << Atom.new(atom_params(het_residue.id, het_atom_bio))
                 end
               end
             end
 
             Atom.import(atoms, :validate => false)
 
-            # Tag and Save structure!
-            structure.complete = true
             structure.save!
+
             puts "Importing #{pdb_code_up}, #{pdb_bio.exp_method} (#{i + 1} / #{total_pdb}): done"
 
             # Remove DB connection for this fork
@@ -517,8 +537,8 @@ namespace :bipa do
       end
     end
   end
-  
-  
+
+
   desc "Import Clusters for each SCOP family"
   task :clusters => [:environment] do
 
@@ -548,5 +568,5 @@ namespace :bipa do
       puts "Import clusters for #{family.sunid} : done (#{i+1}/#{families.size})"
     end
   end
-  
+
 end

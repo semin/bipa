@@ -66,6 +66,7 @@ require "bio_extensions"
 require "array_extensions"
 require "vector_extensions"
 require "math_extensions"
+require "composite_primary_keys"
 require "bipa"
 
 # STI dependency
