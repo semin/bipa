@@ -24,11 +24,11 @@ module Bio
     class Model
 
       def na_chains
-        chains.select { |c| c.na? && not c.chain_id.empty? }
+        chains.select { |c| c.na? && !c.chain_id.empty? }
       end
 
       def aa_chains
-        chains.select { |c| c.aa? && not c.chain_id.empty? }
+        chains.select { |c| c.aa? && !c.chain_id.empty? }
       end
     end
 

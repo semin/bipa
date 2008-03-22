@@ -1,21 +1,49 @@
 namespace :bipa do
-  namespace :get do
-    require 'fileutils'
-    require 'zlib'
-
-    def refresh_dir(dir)
-      FileUtils.rm_rf(dir) if File.exists?(dir)
-      FileUtils.mkdir_p(dir)
-    end
+  namespace :fetch do
+  
+    require "fileutils"
+    require "net/ftp"
+    require "open-uri"
+    require "hpricot"
+    require "logger"
+    
+    include FileUtils
+    
+    $logger = Logger.new(STDOUT)
 
     task :default => [:all]
 
-    desc "Get everything for BIPA construction"
-    task :all => [:pdb, :scop]
+    desc "Fetch datasets for BIPA construction"
+    task :all => [:pdb_remote, :scop]
 
-    desc "Get PDB datasets from local mirror"
-    task :pdb => [:environment] do
-      refresh_dir(BIPA_ENV[:PDB_DIR])
+
+    desc "Download protein-nucleic acid complexes from PDB ftp"
+    task :pdb_remote => [:environment] do
+
+      Net::FTP.open(BIPA_ENV[:PDB_FTP]) do |ftp|
+        ftp.login "anonymous"
+        ftp.chdir BIPA_ENV[:PDB_EBI_DIR]
+        ftp.chdir BIPA_ENV[:PDB_ZIPPED_DIR]
+        
+        files = ftp.nlis("*.ent.gz")
+        files.each_with_index do |file, i|
+          ftp.getbinaryfile(file, File.join(BIPA_ENV[:PDB_DIR], file))
+          $logger.info "Downloading #{file}: done (#{i+1}/#{files.size})"
+        end
+      end
+      
+      cwd = pwd
+      chdir BIPA_ENV[:PDB_DIR]
+      system "gzip -d *.gz"
+      chdir cwd
+      $logger.info "Unzipping downloaded PDB files: done"
+    end
+    
+    
+    desc "Fetch PDB datasets from local mirror"
+    task :pdb_local => [:environment] do
+      
+      refresh_dir BIPA_ENV[:PDB_DIR]
       selected_pdbs = []
 
       IO.foreach(File.join(BIPA_ENV[:PDB_MIRROR_DIR],
@@ -51,34 +79,24 @@ namespace :bipa do
       end
     end
 
+
     desc "Get SCOP dataset from MRC-LMB Web site"
     task :scop => [:environment] do
-      #refresh_dir(BIPA_ENV[:PRESCOP_DIR])
-      refresh_dir(BIPA_ENV[:SCOP_DIR])
-      
-      require 'open-uri'
-      require 'hpricot'
+
+      refresh_dir BIPA_ENV[:SCOP_DIR]
+
       
       Hpricot(open(BIPA_ENV[:SCOP_URI])).search("//a") do |link|
         if (link['href'] && link['href'] =~ /(dir\.\S+)/)
           File.open(File.join(BIPA_ENV[:PRESCOP_DIR],
                               link['href']), 'w') do |f|
-            f.puts open(BIPA_ENV[:PRESCOP_URI] + "/#{link['href']}").read
+            f.puts open(BIPA_ENV[:SCOP_URI] + "/#{link['href']}").read
             puts "Downloading #{link['href']}: done"
           end
         end
       end
-      
-      #Hpricot(open(BIPA_ENV[:PRESCOP_URI])).search("//a") do |link|
-      #  if (link['href'] && link['href'] =~ /(dir\.\S+)/)
-      #    File.open(File.join(BIPA_ENV[:PRESCOP_DIR],
-      #                        link['href']), 'w') do |f|
-      #      f.puts open(BIPA_ENV[:PRESCOP_URI] + "/#{link['href']}").read
-      #      puts "Downloading #{link['href']}: done"
-      #    end
-      #  end
-      #end
     end
+    
 
     desc "Get NCBI Taxonomy dataset from NCBI ftp"
     task :taxonomy => [:environment] do
