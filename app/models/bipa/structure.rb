@@ -1,4 +1,4 @@
-class Structure < ActiveRecord::Base
+class Bipa::Structure < ActiveRecord::Base
 
   #acts_as_cached
 
@@ -8,7 +8,7 @@ class Structure < ActiveRecord::Base
 
   has_many  :models,
             :dependent  => :destroy
-            
+
   has_many  :chains,
             :through    => :models
 

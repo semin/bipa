@@ -1,8 +1,8 @@
 class Chain < ActiveRecord::Base
 
-  include BIPA::USR
-  include BIPA::ComposedOfResidues
-  include BIPA::ComposedOfAtoms
+  include Bipa::Usr
+  include Bipa::ComposedOfResidues
+  include Bipa::ComposedOfAtoms
 
   belongs_to :model
 
