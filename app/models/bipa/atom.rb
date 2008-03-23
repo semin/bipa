@@ -5,14 +5,14 @@ class Bipa::Atom < ActiveRecord::Base
   belongs_to :residue
 
   has_many  :contacts,
-            :class_name   => "Bipa::Contact"
+            :class_name   => "Bipa::Contact",
             :dependent    => :delete_all
 
   has_many  :contacting_atoms,
             :through      => :contacts
 
   has_many  :whbonds,
-            :class_name   => "Bipa::Whbond"
+            :class_name   => "Bipa::Whbond",
             :dependent    => :delete_all
 
   has_many  :whbonding_atoms,
@@ -32,7 +32,7 @@ class Bipa::Atom < ActiveRecord::Base
             :through      => :hbonds_as_acceptor
 
   has_many  :hbonding_acceptors,
-            :through       => :hbonds_as_donor
+            :through      => :hbonds_as_donor
 
   # ASA related
   def on_surface?
@@ -136,5 +136,4 @@ class Bipa::Atom < ActiveRecord::Base
             element,
             charge)
   end
-
 end # class Atom

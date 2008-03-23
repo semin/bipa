@@ -1,2 +1,2 @@
-module ContactsHelper
+module Bipa::ContactsHelper
 end

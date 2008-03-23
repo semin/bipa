@@ -2,7 +2,6 @@ class Bipa::Residue < ActiveRecord::Base
 
   include Bipa::Usr
   include Bipa::Constants
-  include Bipa::NucleicAcidBinding
   include Bipa::ComposedOfAtoms
 
   belongs_to  :chain,
@@ -92,6 +91,8 @@ end
 
 
 class Bipa::AaResidue < Bipa::StdResidue
+  
+  include Bipa::NucleicAcidBinding
 
   belongs_to  :domain,
               :class_name   => "Bipa::ScopDomain",
@@ -130,7 +131,6 @@ class Bipa::AaResidue < Bipa::StdResidue
         raise "Unknown residue type: #{id}, #{residue_name}"
       end
   end
-
 end
 
 

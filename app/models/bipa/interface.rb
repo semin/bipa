@@ -9,7 +9,6 @@ class Bipa::Interface < ActiveRecord::Base
   end
 end
 
-
 class Bipa::DomainInterface < Bipa::Interface
 
   include Bipa::NucleicAcidBinding
@@ -22,33 +21,6 @@ class Bipa::DomainInterface < Bipa::Interface
             :class_name   => "Bipa::AaResidue",
             :foreign_key  => 'domain_interface_id'
 
-  has_many  :atoms,
-            :through => :residues
-
-  has_many  :contacts,
-            :through => :atoms
-            
-  has_many  :contacting_atoms,
-            :through => :contacts
-
-  has_many  :whbonds,
-            :through => :atoms
-            
-  has_many  :whbonding_atoms,
-            :through => :whbonds
-
-  has_many  :hbonds_as_donor,
-            :through => :atoms
-            
-  has_many  :hbonds_as_acceptor,
-            :through => :atoms
-            
-  has_many  :hbonding_donors,
-            :through => :hbonds_as_acceptor
-            
-  has_many  :hbonding_acceptors,
-            :through => :hbonds_as_donor
-            
   # Callbacks
   def update_singlet_propensities
     AminoAcids::Residues::STANDARD.each do |aa|
@@ -404,8 +376,9 @@ class Bipa::ChainInterface < Bipa::Interface
 
   belongs_to :chain
 
-  has_many :residues, :class_name => "Residue", :foreign_key => "chain_interface_id"
-
+  has_many  :residues,
+            :class_name   => "Bipa::Residue",
+            :foreign_key  => "chain_interface_id"
 end
 
 

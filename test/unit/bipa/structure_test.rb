@@ -1,8 +1,8 @@
-require File.dirname(__FILE__) + '/../test_helper'
+require File.dirname(__FILE__) + '/../../test_helper'
 
-class StructureTest < Test::Unit::TestCase
+class Bipa::StructureTest < Test::Unit::TestCase
   
-  include BIPA::Constants
+  include Bipa::Constants
   
   # Dummy parameters for models
   def valid_structure_params
@@ -33,7 +33,7 @@ class StructureTest < Test::Unit::TestCase
                            
     residue_names = AminoAcids::Residues::STANDARD +
                     NucleicAcids::Residues::STANDARD
-    residue_types = Residue.send(:subclasses).map(&:to_s)
+    residue_types = Bipa::Residue.send(:subclasses).map(&:to_s)
     
     {
       :residue_code => residue_code || rand(100),
@@ -62,9 +62,9 @@ class StructureTest < Test::Unit::TestCase
   
   # Tests
   def test_models
-    structure = Structure.new(valid_structure_params)
-    model1    = Model.new(valid_model_params)
-    model2    = Model.new(valid_model_params)
+    structure = Bipa::Structure.new(valid_structure_params)
+    model1    = Bipa::Model.new(valid_model_params)
+    model2    = Bipa::Model.new(valid_model_params)
     
     structure.models << model1
     structure.models << model2
@@ -77,10 +77,10 @@ class StructureTest < Test::Unit::TestCase
   end 
   
   def test_chains
-    structure = Structure.new(valid_structure_params)
-    model     = Model.new(valid_model_params)
-    chain1    = Chain.new(valid_chain_params)
-    chain2    = Chain.new(valid_chain_params)
+    structure = Bipa::Structure.new(valid_structure_params)
+    model     = Bipa::Model.new(valid_model_params)
+    chain1    = Bipa::Chain.new(valid_chain_params)
+    chain2    = Bipa::Chain.new(valid_chain_params)
     
     structure.models << model
     structure.models.first.chains << chain1
@@ -98,11 +98,11 @@ class StructureTest < Test::Unit::TestCase
   end
   
   def test_residues
-    structure = Structure.new(valid_structure_params)
-    model     = Model.new(valid_model_params)
-    chain     = Chain.new(valid_chain_params)
-    residue1  = AaResidue.new(valid_residue_params)
-    residue2  = AaResidue.new(valid_residue_params)
+    structure = Bipa::Structure.new(valid_structure_params)
+    model     = Bipa::Model.new(valid_model_params)
+    chain     = Bipa::Chain.new(valid_chain_params)
+    residue1  = Bipa::AaResidue.new(valid_residue_params)
+    residue2  = Bipa::AaResidue.new(valid_residue_params)
     
     structure.models << model
     structure.models.first.chains << chain
@@ -121,12 +121,12 @@ class StructureTest < Test::Unit::TestCase
   end
   
   def test_atoms
-    structure = Structure.new(valid_structure_params)
-    model     = Model.new(valid_model_params)
-    chain     = Chain.new(valid_chain_params)
-    residue   = AaResidue.new(valid_residue_params)
-    atom1     = Atom.new(valid_atom_params)
-    atom2     = Atom.new(valid_atom_params)
+    structure = Bipa::Structure.new(valid_structure_params)
+    model     = Bipa::Model.new(valid_model_params)
+    chain     = Bipa::Chain.new(valid_chain_params)
+    residue   = Bipa::AaResidue.new(valid_residue_params)
+    atom1     = Bipa::Atom.new(valid_atom_params)
+    atom2     = Bipa::Atom.new(valid_atom_params)
     
     structure.models << model
     structure.models.first.chains << chain

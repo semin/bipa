@@ -9,6 +9,8 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
+include Bipa::Constants
+
 ActiveRecord::Schema.define(:version => 1) do
   
   # 'scops' table
@@ -199,8 +201,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "asa"
     t.float       "polarity"
 
-    include Bipa::Constants
-    
     AminoAcids::Residues::STANDARD.map(&:downcase).each { |a| t.float "singlet_propensity_of_#{a}" }
     Dssp::SSES.map(&:downcase).each { |s| t.float "sse_propensity_of_#{s}" }
 

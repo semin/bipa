@@ -1,2 +1,2 @@
-module ResiduesHelper
+module Bipa::ResiduesHelper
 end

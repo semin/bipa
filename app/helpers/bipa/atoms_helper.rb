@@ -1,2 +1,2 @@
-module AtomsHelper
+module Bipa::AtomsHelper
 end

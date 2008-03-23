@@ -1,2 +1,2 @@
-module ModelsHelper
+module Bipa::ModelsHelper
 end

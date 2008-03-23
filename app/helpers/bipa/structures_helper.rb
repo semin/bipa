@@ -1,2 +1,2 @@
-module StructuresHelper
+module Bipa::StructuresHelper
 end

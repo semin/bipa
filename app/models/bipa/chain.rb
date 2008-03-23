@@ -11,35 +11,7 @@ class Bipa::Chain < ActiveRecord::Base
   has_many  :residues,
             :class_name => "Bipa::Residue",
             :dependent  => :destroy
-
-  has_many  :atoms,
-            :through    => :residues
-
-  has_many  :contacts,
-            :through    => :atoms
-
-  has_many  :contacting_atoms,
-            :through    => :contacts
-
-  has_many  :whbonds,
-            :through    => :atoms
-
-  has_many  :whbonding_atoms,
-            :through    => :whbonds
-
-  has_many  :hbonds_as_donor,
-            :through    => :atoms
-
-  has_many  :hbonds_as_acceptor,
-            :through    => :atoms
-
-  has_many  :hbonding_donors,
-            :through    => :hbonds_as_acceptor
-
-  has_many  :hbonding_acceptors,
-            :through    => :hbonds_as_donor
-
-end # class Bipa::Chain
+end
 
 
 class Bipa::AaChain < Bipa::Chain
@@ -57,7 +29,6 @@ class Bipa::AaChain < Bipa::Chain
   has_many  :domains,
             :through      => :residues,
             :uniq         => true
-
 end
 
 
@@ -76,19 +47,12 @@ end
 class Bipa::HnaChain < Bipa::NaChain
 
   has_many  :dna_residues,
-            :class_name => "Bipa::DnaResidue"
+            :class_name   => "Bipa::DnaResidue",
+            :foreign_key  => "chain_id"
 
   has_many  :rna_residues,
-            :class_name => "Bipa::RnaResidue"
-
-  has_many  :dna_atoms,
-            :through  => :dna_residues,
-            :source   => :atoms
-
-  has_many  :rna_atoms,
-            :through  => :rna_residues,
-            :source   => :atoms
-
+            :class_name   => "Bipa::RnaResidue",
+            :foreign_key  => "chain_id"
 end
 
 

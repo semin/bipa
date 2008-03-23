@@ -1,2 +1,2 @@
-module MainHelper
+module Bipa::MainHelper
 end
