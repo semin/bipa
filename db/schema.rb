@@ -49,7 +49,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
   #
   create_table "alignments", :force => true do |t|
-    t.belongs_to "sub_family"
+    t.belongs_to "subfamily"
   end
 
   # 'structures' table
@@ -206,7 +206,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
     %w(hbond whbond contact).each do |int|
       %w(dna rna).each do |na|
-        na_residues = "NucleicAcids::#{na.upcase}::Residues::STANDARD".constantize.map(&:downcase)
+        na_residues = "NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize.map(&:downcase)
         na_residues.each { |r| t.integer "frequency_of_#{int}_between_amino_acids_and_#{r}" }
         %w(sugar phosphate).each { |m| t.integer "frequency_of_#{int}_between_amino_acids_and_#{m}" }
 
