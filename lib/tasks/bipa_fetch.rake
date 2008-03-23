@@ -24,7 +24,6 @@ namespace :bipa do
         ftp.login "anonymous"
         ftp.chdir BIPA_ENV[:PDB_EBI_DIR]
         ftp.chdir BIPA_ENV[:PDB_ZIPPED_DIR]
-        
         files = ftp.nlis("*.ent.gz")
         files.each_with_index do |file, i|
           ftp.getbinaryfile(file, File.join(BIPA_ENV[:PDB_DIR], file))
