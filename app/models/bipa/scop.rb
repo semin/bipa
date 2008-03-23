@@ -2,6 +2,8 @@ class Bipa::Scop < ActiveRecord::Base
 
   include Bipa::Constants
 
+  set_table_name "scops"
+  
   acts_as_nested_set
 
   is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
@@ -247,9 +249,10 @@ end
 
 class Bipa::ScopFamily < Bipa::Scop
 
-  (10..100).step(10) do |i|
-    has_many  :"subfamily#{i}s",
-              :class_name => "Bipa::Subfamily"
+  (10..100).step(10) do |si|
+    has_many  :"subfamily#{si}s",
+              :class_name   => "Bipa::Subfamily#{si}",
+              :foreign_key  => "scop_family_id"
   end
 end
 
@@ -262,38 +265,61 @@ class Bipa::ScopSpecies < Bipa::Scop
 end
 
 
-class Bipa::ScopDomain < Scop
+class Bipa::ScopDomain < Bipa::Scop
 
   include BIPA::USR
   include BIPA::NucleicAcidBinding
   include BIPA::ComposedOfResidues
   include BIPA::ComposedOfAtoms
 
-  (10..100).step(10) { |i| belongs_to :"sub_family#{i}" }
+  (10..100).step(10) do |si|
+    belongs_to  :"subfamily#{si}",
+                :class_name   => "Bipa::Subfamiy#{si}",
+                :foreign_key  => "subfamily#{si}_id"
+  end
 
-  has_many :dna_interfaces, :class_name => 'DomainDnaInterface', :foreign_key => 'scop_id'
-  has_many :rna_interfaces, :class_name => 'DomainRnaInterface', :foreign_key => 'scop_id'
-
-  has_many :residues, :class_name => 'AaResidue', :foreign_key => 'scop_id'
-
-  has_many :chains, :through => :residues, :uniq => true
-  has_many :atoms,  :through => :residues
-
-  has_many :contacts,         :through => :atoms
-  has_many :contacting_atoms, :through => :contacts
-
-  has_many :whbonds,          :through => :atoms
-  has_many :whbonding_atoms,  :through => :whbonds
-
-  has_many :hbonds_as_donor,    :through => :atoms
-  has_many :hbonds_as_acceptor, :through => :atoms
-  has_many :hbonding_donors,    :through => :hbonds_as_acceptor
-  has_many :hbonding_acceptors, :through => :hbonds_as_donor
-
-  before_validation :update_pdb_code,
-                    :update_unbound_asa,
-                    :update_bound_asa,
-                    :update_delta_asa
+  has_many  :dna_interfaces,
+            :class_name   => "Bipa::DomainDnaInterface",
+            :foreign_key  => 'scop_id'
+            
+  has_many  :rna_interfaces,
+            :class_name   => 'Bipa::DomainRnaInterface',
+            :foreign_key  => 'scop_id'
+            
+  has_many  :residues,
+            :class_name   => 'Bipa::AaResidue',
+            :foreign_key  => 'scop_id'
+            
+  has_many  :chains,
+            :through      => :residues,
+            :uniq         => true
+            
+  has_many  :atoms,
+            :through      => :residues
+            
+  has_many  :contacts,
+            :through      => :atoms
+            
+  has_many  :contacting_atoms, 
+            :through      => :contacts
+            
+  has_many  :whbonds,
+            :through      => :atoms
+            
+  has_many  :whbonding_atoms,
+            :through      => :whbonds
+            
+  has_many  :hbonds_as_donor,
+            :through      => :atoms
+            
+  has_many  :hbonds_as_acceptor,
+            :through      => :atoms
+            
+  has_many  :hbonding_donors,
+            :through      => :hbonds_as_acceptor
+            
+  has_many  :hbonding_acceptors,
+            :through      => :hbonds_as_donor
 
   # Methods
   def ranges_on_chains
