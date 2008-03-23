@@ -27,7 +27,7 @@ NACCESS_DIR     = File.join(RAILS_ROOT "/public/naccess")
 NACCESS_BIN     = `which naccess`
 NACCESS_VDW     = File.join(RAILS_ROOT "/config/vdw.radii")
 NACCESS_STD     = File.join(RAILS_ROOT "/config/standard.data")
-                
+
 MAX_DISTANCE    = 5.0
 MIN_INTRES_DASA = 1.0
 MIN_SRFRES_SASA = 0.1
