@@ -1,5 +1,6 @@
-module BIPA
+module Bipa
   class Point
+    
     require 'rubygems'
     require 'inline'
     

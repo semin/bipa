@@ -1,4 +1,4 @@
-module BIPA
+module Bipa
   class Naccess
     
     attr_reader :atom_asa

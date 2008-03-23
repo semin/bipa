@@ -1,5 +1,5 @@
-module BIPA
-  module USR
+module Bipa
+  module Usr
 
     ShapeDescriptors = %w(
       ctd_mean

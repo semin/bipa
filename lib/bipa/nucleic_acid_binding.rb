@@ -1,4 +1,4 @@
-module BIPA
+module Bipa
   module NucleicAcidBinding
     #
     # Van der Waals contacts

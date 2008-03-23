@@ -1,4 +1,4 @@
-module BIPA
+module Bipa
   class StatsArray < Array
     def count
       size
