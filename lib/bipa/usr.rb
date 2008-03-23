@@ -117,7 +117,7 @@ module Bipa
       ]
     end
 
-    def USR.append_features(klass)
+    def Usr.append_features(klass)
       def klass.shape_similarity_between(a, b)
         sa = a.shape_descriptors
         sb = b.shape_descriptors

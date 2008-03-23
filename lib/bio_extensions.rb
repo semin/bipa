@@ -61,7 +61,7 @@ module Bio
 
     class Residue
 
-      include BIPA::Constants
+      include Bipa::Constants
 
       def dna?
         NucleicAcids::DNA::Residues::ALL.include?(resName)
@@ -108,7 +108,7 @@ module Bio
     class Record
       class ATOM
 
-        include BIPA::Constants
+        include Bipa::Constants
 
         def position_type
           if residue.na?
