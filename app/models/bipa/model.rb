@@ -4,9 +4,12 @@ class Bipa::Model < ActiveRecord::Base
   include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
 
-  belongs_to :structure
+  belongs_to  :structure,
+              :class_name   => "Bipa::Structure",
+              :foreign_key  => "structure_id"
 
   has_many  :chains,
+            :class_name => "Bipa::Chain",
             :dependent  => :destroy
 
   has_many  :residues,
@@ -39,7 +42,9 @@ class Bipa::Model < ActiveRecord::Base
   has_many  :hbonding_acceptors,
             :through    => :hbonds_as_donor
 
-  has_many  :aa_chains
+  has_many  :aa_chains,
+            :class_name => "Bipa::AaChain",
+
 
   has_many  :domains,
             :through    => :aa_chains,
@@ -53,7 +58,8 @@ class Bipa::Model < ActiveRecord::Base
             :through    => :aa_residues,
             :source     => :atoms
 
-  has_many  :dna_chains
+  has_many  :dna_chains,
+            :class_name => "Bipa::DnaChain"
 
   has_many  :dna_residues,
             :through    => :dna_chains,
@@ -63,7 +69,8 @@ class Bipa::Model < ActiveRecord::Base
             :through    => :dna_residues,
             :source     => :atoms
 
-  has_many  :rna_chains
+  has_many  :rna_chains,
+            :class_name => "Bipa::RnaChain"
 
   has_many  :rna_residues,
             :through    => :rna_chains,
@@ -73,7 +80,8 @@ class Bipa::Model < ActiveRecord::Base
             :through    => :rna_residues,
             :source     => :atoms
 
-  has_many  :hna_chains
+  has_many  :hna_chains,
+            :class_name => "Bipa::HnaChain"
 
   has_many  :hna_dna_residues,
             :through    => :hna_chains,
@@ -91,7 +99,8 @@ class Bipa::Model < ActiveRecord::Base
             :through    => :hna_rna_residues,
             :source     => :atoms
 
-  has_many  :het_chains
+  has_many  :het_chains,
+            :class_name => "Bipa::HnaChain"
 
   has_many  :het_residues,
             :through    => :het_chains,
@@ -100,5 +109,4 @@ class Bipa::Model < ActiveRecord::Base
   has_many  :het_atoms,
             :through    => :het_residues,
             :source     => :atoms
-
 end

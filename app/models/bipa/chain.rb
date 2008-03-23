@@ -1,12 +1,15 @@
-class Chain < ActiveRecord::Base
+class Bipa::Chain < ActiveRecord::Base
 
   include Bipa::Usr
   include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
 
-  belongs_to :model
+  belongs_to  :model,
+              :class_name   => "Bipa::Model",
+              :foreign_key  => "model_id"
 
   has_many  :residues,
+            :class_name => "Bipa::Residue"
             :dependent  => :destroy
 
   has_many  :atoms,
@@ -36,44 +39,47 @@ class Chain < ActiveRecord::Base
   has_many  :hbonding_acceptors,
             :through    => :hbonds_as_donor
 
-end # class Chain
+end # class Bipa::Chain
 
 
-class AaChain < Chain
+class Bipa::AaChain < Bipa::Chain
 
-  include BIPA::NucleicAcidBinding
+  include Bipa::NucleicAcidBinding
 
   has_many  :dna_interfaces,
-            :class_name   => 'ChainDnaInterface',
+            :class_name   => 'Bipa::ChainDnaInterface',
             :foreign_key  => 'chain_id'
 
   has_many  :rna_interfaces,
-            :class_name   => 'ChainRnaInterface',
+            :class_name   => 'Bipa::ChainRnaInterface',
             :foreign_key  => 'chain_id'
 
   has_many  :domains,
-            :through      => :aa_residues,
+            :through      => :residues,
             :uniq         => true
 
 end
 
 
-class NaChain < Chain
+class Bipa::NaChain < Bipa::Chain
 end
 
 
-class DnaChain < NaChain
+class Bipa::DnaChain < Bipa::NaChain
 end
 
 
-class RnaChain < NaChain
+class Bipa::RnaChain < Bipa::NaChain
 end
 
 
-class HnaChain < NaChain
+class Bipa::HnaChain < Bipa::NaChain
 
-  has_many  :dna_residues
+  has_many  :dna_residues,
+            :class_name => "Bipa::DnaResidue",
+
   has_many  :rna_residues
+            :class_name => "Bipa::RnaResidue"
 
   has_many  :dna_atoms,
             :through  => :dna_residues,
@@ -86,5 +92,5 @@ class HnaChain < NaChain
 end
 
 
-class HetChain < Chain
+class Bipa::HetChain < Bipa::Chain
 end

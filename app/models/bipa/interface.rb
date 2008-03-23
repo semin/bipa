@@ -1,57 +1,54 @@
-class Interface < ActiveRecord::Base
+class Bipa::Interface < ActiveRecord::Base
 
-  include BIPA::Constants
-  include BIPA::USR
-
-  acts_as_cached
-
-  after_save :expire_cache
-
-  before_save :update_asa,
-              :update_polarity
+  include Bipa::Constants
+  include Bipa::Usr
 
   def asa_of_residue(res)
     res.upcase!
     residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s }
   end
-
-  def asa
-    self[:asa] ||= atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
-  end
-
-  def polarity
-    self[:polarity] ||=
-      atoms.select(&:polar?).inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
-      atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
-  end
-
 end
 
 
-class DomainInterface < Interface
+class Bipa::DomainInterface < Bipa::Interface
 
-  include BIPA::NucleicAcidBinding
+  include Bipa::NucleicAcidBinding
 
-  belongs_to :domain, :class_name => 'ScopDomain', :foreign_key => 'scop_id'
+  belongs_to  :domain,
+              :class_name   => "Bipa::ScopDomain",
+              :foreign_key  => 'scop_id'
 
-  has_many :residues, :class_name => "AaResidue", :foreign_key => 'domain_interface_id'
+  has_many  :residues,
+            :class_name   => "Bipa::AaResidue",
+            :foreign_key  => 'domain_interface_id'
 
-  has_many :atoms,              :through => :residues
+  has_many  :atoms,
+            :through => :residues
 
-  has_many :contacts,           :through => :atoms
-  has_many :contacting_atoms,   :through => :contacts
+  has_many  :contacts,
+            :through => :atoms
+            
+  has_many  :contacting_atoms,
+            :through => :contacts
 
-  has_many :whbonds,            :through => :atoms
-  has_many :whbonding_atoms,    :through => :whbonds
+  has_many  :whbonds,
+            :through => :atoms
+            
+  has_many  :whbonding_atoms,
+            :through => :whbonds
 
-  has_many :hbonds_as_donor,    :through => :atoms
-  has_many :hbonds_as_acceptor, :through => :atoms
-  has_many :hbonding_donors,    :through => :hbonds_as_acceptor
-  has_many :hbonding_acceptors, :through => :hbonds_as_donor
-
-  before_save :update_singlet_propensities,
-              :update_sse_propensities
-
+  has_many  :hbonds_as_donor,
+            :through => :atoms
+            
+  has_many  :hbonds_as_acceptor,
+            :through => :atoms
+            
+  has_many  :hbonding_donors,
+            :through => :hbonds_as_acceptor
+            
+  has_many  :hbonding_acceptors,
+            :through => :hbonds_as_donor
+            
   # Callbacks
   def update_singlet_propensities
     AminoAcids::Residues::STANDARD.each do |aa|
@@ -286,10 +283,10 @@ class DomainInterface < Interface
     sum
   end
 
-end # class DomainInterface
+end # class Bipa::DomainInterface
 
 
-class DomainDnaInterface < DomainInterface
+class Bipa::DomainDnaInterface < Bipa::DomainInterface
 
   %w(hbond whbond contact).each do |int|
     NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna|
@@ -343,10 +340,10 @@ class DomainDnaInterface < DomainInterface
     sum += frequency_of_contact_between_phosphate_and_(aa)
   end
 
-end # class DomainDnaInterface
+end # class Bipa::DomainDnaInterface
 
 
-class DomainRnaInterface < DomainInterface
+class Bipa::DomainRnaInterface < Bipa::DomainInterface
 
   %w(hbond whbond contact).each do |int|
     NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna|
@@ -400,10 +397,10 @@ class DomainRnaInterface < DomainInterface
     sum += frequency_of_contact_between_phosphate_and_(aa)
   end
 
-end # class DomainRnaInterface
+end # class Bipa::DomainRnaInterface
 
 
-class ChainInterface < Interface
+class Bipa::ChainInterface < Bipa::Interface
 
   belongs_to :chain
 
@@ -412,9 +409,9 @@ class ChainInterface < Interface
 end
 
 
-class ChainDnaInterface < ChainInterface
+class Bipa::ChainDnaInterface < Bipa::ChainInterface
 end
 
 
-class ChainRnaInterface < ChainInterface
+class Bipa::ChainRnaInterface < Bipa::ChainInterface
 end

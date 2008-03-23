@@ -1,5 +1,7 @@
-class Alignment < ActiveRecord::Base
+class Bipa::Alignment < ActiveRecord::Base
 
-  belongs_to :sub_family
+  belongs_to  :subfamily,
+              :class_name   => "Bipa::Subfamily",
+              :foreign_key  => "subfamily_id"
 
 end

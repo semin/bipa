@@ -1,6 +1,6 @@
-class Scop < ActiveRecord::Base
+class Bipa::Scop < ActiveRecord::Base
 
-  include BIPA::Constants
+  include Bipa::Constants
 
   acts_as_nested_set
 
@@ -10,14 +10,14 @@ class Scop < ActiveRecord::Base
 
   def self.factory_create!(opt={})
     case opt[:stype]
-    when 'root' then ScopRoot.create!(opt)
-    when 'cl'   then ScopClass.create!(opt)
-    when 'cf'   then ScopFold.create!(opt)
-    when 'sf'   then ScopSuperFamily.create!(opt)
-    when 'fa'   then ScopFamily.create!(opt)
-    when 'dm'   then ScopProtein.create!(opt)
-    when 'sp'   then ScopSpecies.create!(opt)
-    when 'px'   then ScopDomain.create!(opt)
+    when 'root' then Bipa::ScopRoot.create!(opt)
+    when 'cl'   then Bipa::ScopClass.create!(opt)
+    when 'cf'   then Bipa::ScopFold.create!(opt)
+    when 'sf'   then Bipa::ScopSuperFamily.create!(opt)
+    when 'fa'   then Bipa::ScopFamily.create!(opt)
+    when 'dm'   then Bipa::ScopProtein.create!(opt)
+    when 'sp'   then Bipa::ScopSpecies.create!(opt)
+    when 'px'   then Bipa::ScopDomain.create!(opt)
     else; raise "Unknown SCOP hierarchy: #{opt[:stype]}"; end
   end
 
@@ -229,38 +229,40 @@ class Scop < ActiveRecord::Base
 end # class Scop
 
 
-class ScopRoot < Scop
+class Bipa::ScopRoot < Bipa::Scop
 end
 
 
-class ScopClass < Scop
+class Bipa::ScopClass < Bipa::Scop
 end
 
 
-class ScopFold < Scop
+class Bipa::ScopFold < Bipa::Scop
 end
 
 
-class ScopSuperFamily < Scop
+class Bipa::ScopSuperFamily < Bipa::Scop
 end
 
 
-class ScopFamily < Scop
+class Bipa::ScopFamily < Bipa::Scop
 
-  (10..100).step(10) { |i| has_many :"sub_family#{i}s" }
-
+  (10..100).step(10) do |i|
+    has_many  :"subfamily#{i}s",
+              :class_name => "Bipa::Subfamily"
+  end
 end
 
 
-class ScopProtein < Scop
+class Bipa::ScopProtein < Bipa::Scop
 end
 
 
-class ScopSpecies < Scop
+class Bipa::ScopSpecies < Bipa::Scop
 end
 
 
-class ScopDomain < Scop
+class Bipa::ScopDomain < Scop
 
   include BIPA::USR
   include BIPA::NucleicAcidBinding

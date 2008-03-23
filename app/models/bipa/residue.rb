@@ -1,25 +1,45 @@
-class Residue < ActiveRecord::Base
+class Bipa::Residue < ActiveRecord::Base
 
-  include BIPA::USR
-  include BIPA::Constants
-  include BIPA::NucleicAcidBinding
-  include BIPA::ComposedOfAtoms
+  include Bipa::Usr
+  include Bipa::Constants
+  include Bipa::NucleicAcidBinding
+  include Bipa::ComposedOfAtoms
 
-  belongs_to :chain
-  belongs_to :chain_interface
+  belongs_to  :chain,
+              :class_name   => "Bipa::Chain"
+              :foreign_key  => "chain_id"
+              
+  belongs_to  :chain_interface
+              :class_name   => "Bipa::ChainInterface",
+              :foreign_key  => "chain_interface_id"
 
-  has_many :atoms, :dependent => :delete_all
+  has_many  :atoms,
+            :class_name => "Bipa::Atom"
+            :dependent  => :destory
 
-  has_many :contacts,           :through => :atoms
-  has_many :contacting_atoms,   :through => :contacts
+  has_many  :contacts,
+            :through => :atoms
+            
+  has_many  :contacting_atoms,
+            :through => :contacts
 
-  has_many :whbonds,            :through => :atoms
-  has_many :whbonding_atoms,    :through => :whbonds
+  has_many  :whbonds,
+            :through => :atoms
+            
+  has_many  :whbonding_atoms,
+            :through => :whbonds
 
-  has_many :hbonds_as_donor,    :through => :atoms
-  has_many :hbonds_as_acceptor, :through => :atoms
-  has_many :hbonding_donors,    :through => :hbonds_as_acceptor
-  has_many :hbonding_acceptors, :through => :hbonds_as_donor
+  has_many  :hbonds_as_donor,
+            :through => :atoms
+            
+  has_many  :hbonds_as_acceptor,
+            :through => :atoms
+            
+  has_many  :hbonding_donors,
+            :through => :hbonds_as_acceptor
+            
+  has_many  :hbonding_acceptors,
+            :through => :hbonds_as_donor
 
   # ASA related
   def on_surface?
@@ -60,21 +80,26 @@ class Residue < ActiveRecord::Base
     raise "Error: No one letter code for residue: #{residue_name}"
   end
 
-end # class Residue
+end # class Bipa::Residue
 
 
-class StdResidue < Residue
+class Bipa::StdResidue < Bipa::Residue
 end
 
 
-class HetResidue < Residue
+class Bipa::HetResidue < Bipa::Residue
 end
 
 
-class AaResidue < StdResidue
+class Bipa::AaResidue < Bipa::StdResidue
 
-  belongs_to :domain, :class_name => 'ScopDomain', :foreign_key => 'scop_id'
-  belongs_to :domain_interface, :class_name => "DomainInterface", :foreign_key => "domain_interface_id"
+  belongs_to  :domain,
+              :class_name   => "Bipa::ScopDomain",
+              :foreign_key  => "scop_id"
+              
+  belongs_to  :domain_interface,
+              :class_name   => "Bipa::DomainInterface",
+              :foreign_key  => "domain_interface_id"
 
   def relative_unbound_asa
     @relative_unbound_asa ||=
@@ -109,13 +134,13 @@ class AaResidue < StdResidue
 end
 
 
-class NaResidue < StdResidue
+class Bipa::NaResidue < Bipa::StdResidue
 end
 
 
-class DnaResidue < NaResidue
+class Bipa::DnaResidue < Bipa::NaResidue
 end
 
 
-class RnaResidue < NaResidue
+class Bipa::RnaResidue < Bipa::NaResidue
 end

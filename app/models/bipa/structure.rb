@@ -1,13 +1,11 @@
 class Bipa::Structure < ActiveRecord::Base
 
-  #acts_as_cached
-
-  #after_save :expire_cache
-
   is_indexed :fields => ["pdb_code", "classification", "title", "exp_method", "resolution"]
 
   has_many  :models,
-            :dependent  => :destroy
+            :class_name   => "Bipa::Model",
+            :foreign_key  => "structure_id",
+            :dependent    => :destroy
 
   has_many  :chains,
             :through    => :models
@@ -108,5 +106,4 @@ class Bipa::Structure < ActiveRecord::Base
   has_many  :het_atoms,
             :through    => :het_residues,
             :source     => :atoms
-
 end
