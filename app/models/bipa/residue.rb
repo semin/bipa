@@ -13,32 +13,9 @@ class Bipa::Residue < ActiveRecord::Base
               :foreign_key  => "chain_interface_id"
 
   has_many  :atoms,
-            :class_name => "Bipa::Atom",
-            :dependent  => :destroy
-
-  has_many  :contacts,
-            :through => :atoms
-            
-  has_many  :contacting_atoms,
-            :through => :contacts
-
-  has_many  :whbonds,
-            :through => :atoms
-            
-  has_many  :whbonding_atoms,
-            :through => :whbonds
-
-  has_many  :hbonds_as_donor,
-            :through => :atoms
-            
-  has_many  :hbonds_as_acceptor,
-            :through => :atoms
-            
-  has_many  :hbonding_donors,
-            :through => :hbonds_as_acceptor
-            
-  has_many  :hbonding_acceptors,
-            :through => :hbonds_as_donor
+            :class_name   => "Bipa::Atom",
+            :foreign_key  => "residue_id"
+            :dependent    => :destroy
 
   # ASA related
   def on_surface?
@@ -78,7 +55,6 @@ class Bipa::Residue < ActiveRecord::Base
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "Error: No one letter code for residue: #{residue_name}"
   end
-
 end # class Bipa::Residue
 
 

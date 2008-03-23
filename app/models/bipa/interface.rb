@@ -311,7 +311,6 @@ class Bipa::DomainDnaInterface < Bipa::DomainInterface
     sum += frequency_of_contact_between_sugar_and_(aa)
     sum += frequency_of_contact_between_phosphate_and_(aa)
   end
-
 end # class Bipa::DomainDnaInterface
 
 
@@ -368,7 +367,6 @@ class Bipa::DomainRnaInterface < Bipa::DomainInterface
     sum += frequency_of_contact_between_sugar_and_(aa)
     sum += frequency_of_contact_between_phosphate_and_(aa)
   end
-
 end # class Bipa::DomainRnaInterface
 
 
