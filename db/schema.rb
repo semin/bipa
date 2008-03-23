@@ -39,7 +39,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "scops", ["id", "registered"],        :name => "index_scops_on_id_and_registered"
 
 
-  # 'sub_families' table
+  # 'subfamilies' table
   create_table "subfamilies", :force => true do |t|
     t.belongs_to  "scop_family"
     t.string      "type"
