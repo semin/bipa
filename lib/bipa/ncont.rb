@@ -1,5 +1,5 @@
-module BIPA
-  class NCONT
+module Bipa
+  class Nconts
     attr_reader :contacts
 
     Atom = Struct.new('Atom', :model_code, :chain_code,

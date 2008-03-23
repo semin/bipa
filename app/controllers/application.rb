@@ -1,11 +1,11 @@
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 
-require_dependency "scop"
-require_dependency "chain"
-require_dependency "residue"
-require_dependency "interface"
-require_dependency "sub_family"
+require_dependency "bipa/scop"
+require_dependency "bipa/chain"
+require_dependency "bipa/residue"
+require_dependency "bipa/interface"
+require_dependency "bipa/subfamily"
 
 class ApplicationController < ActionController::Base
   helper :all # include all helpers, all the time

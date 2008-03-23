@@ -1,12 +1,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/constants')
 
-module BIPA
-
-  class HBPlus
+module Bipa
+  class Hbplus
 
     attr_reader :hbonds, :whbonds
 
     class Atom
+      
       include Constants
 
       attr_reader :chain_code, :residue_code, :insertion_code,
@@ -42,7 +42,7 @@ module BIPA
       end
 
       def ==(other)
-        raise "Cannot compare to #{other.class} type!" unless other.kind_of?(BIPA::HBPlus::Atom)
+        raise "Cannot compare to #{other.class} type!" unless other.kind_of?(BIPA::Hbplus::Atom)
         return  @chain_code == other.chain_code &&
                 @residue_code == other.residue_code &&
                 @insertion_code == other.insertion_code &&
@@ -66,7 +66,7 @@ module BIPA
 
       file_str.each do |line|
         if line[15..15] =~ /\d+/
-          hbline = HBPlus.parse_hbplus_line(line)
+          hbline = Hbplus.parse_hbplus_line(line)
           @hbonds <<  Hbond.new(Atom.new(hbline[:donor_chain_code],
                                         hbline[:donor_residue_code],
                                         hbline[:donor_insertion_code],
@@ -144,20 +144,21 @@ module BIPA
       hbline[:hbond_code]               = line[70..74].to_i
       hbline
     end
-  end # class HBPlus
-end # module BIPA
+  end # class Hbplus
+end # module Bipa
 
 if $0 == __FILE__
   require 'test/unit'
-  include BIPA
+  
+  include Bipa
 
-  class TestHBPlus < Test::Unit::TestCase
+  class TestHbplus < Test::Unit::TestCase
 
     def setup
 @test_str = <<END
-HBPlus Hydrogen Bond Calculator v 3.15            May 03 11:00:02 BST 2007
+Hbplus Hydrogen Bond Calculator v 3.15            May 03 11:00:02 BST 2007
 (c) I McDonald, D Naylor, D Jones and J Thornton 1993 All Rights Reserved.
-  Citing HBPlus in publications that use these results is condition of use.
+  Citing Hbplus in publications that use these results is condition of use.
   1EFW <- Brookhaven Code "pdb1efw.new" <- PDB file
 <---DONOR---> <-ACCEPTOR-->    atom                        ^               
 c    i                          cat <-CA-CA->   ^        H-A-AA   ^      H- 
@@ -186,7 +187,7 @@ END
 
     def test_parse_hbplus_line
       test_line = "-2015-HOH O   A0008-GLY O   3.38 HM  -2 -1.00  -1.0 -1.00  -1.0 107.9    15"
-      hbline = HBPlus.parse_hbplus_line(test_line)
+      hbline = Hbplus.parse_hbplus_line(test_line)
       assert_equal('-',     hbline[:donor_chain_code])
       assert_equal(2015,    hbline[:donor_residue_code])
       assert_equal('-',     hbline[:donor_insertion_code])
@@ -209,18 +210,18 @@ END
     end
 
     def test_parse_multiple_hbplus_lines_with_headers
-      hbplus = HBPlus.new(@test_str)
+      hbplus = Hbplus.new(@test_str)
       assert_equal(18, hbplus.hbonds.size)
       assert_equal(2032, hbplus.hbonds.first.donor.residue_code)
     end
 
     def test_is_aa?
-      hbplus = HBPlus.new(@test_str)
+      hbplus = Hbplus.new(@test_str)
       assert(hbplus.hbonds[0].acceptor.is_aa?)
     end
 
     def test_is_dna?
-      hbplus = HBPlus.new(@test_str)
+      hbplus = Hbplus.new(@test_str)
       assert(hbplus.hbonds[17].acceptor.is_dna?)
     end
 
@@ -228,19 +229,19 @@ END
     end
 
     def test_is_na?
-      hbplus = HBPlus.new(@test_str)
+      hbplus = Hbplus.new(@test_str)
       assert(hbplus.hbonds[17].acceptor.is_na?)
     end
 
     def test_is_water?
-      hbplus = HBPlus.new(@test_str)
+      hbplus = Hbplus.new(@test_str)
       assert(hbplus.hbonds[0].donor.is_water?)
     end
 
     def test_equality
-      atom1 = HBPlus::Atom.new('A', '1', nil, 'GLY', 'O')
-      atom2 = HBPlus::Atom.new('A', '1', nil, 'GLY', 'O')
-      atom3 = HBPlus::Atom.new('A', '1', 'A', 'GLY', 'O')
+      atom1 = Hbplus::Atom.new('A', '1', nil, 'GLY', 'O')
+      atom2 = Hbplus::Atom.new('A', '1', nil, 'GLY', 'O')
+      atom3 = Hbplus::Atom.new('A', '1', 'A', 'GLY', 'O')
       assert_equal(atom1, atom2)
       assert_not_equal(atom1, atom3)
       assert_raise RuntimeError do
@@ -250,9 +251,9 @@ END
 
     def test_water_mediated_hbonds
 hbplus_str = <<END
-HBPlus Hydrogen Bond Calculator v 3.15            May 03 11:00:02 BST 2007
+Hbplus Hydrogen Bond Calculator v 3.15            May 03 11:00:02 BST 2007
 (c) I McDonald, D Naylor, D Jones and J Thornton 1993 All Rights Reserved.
-  Citing HBPlus in publications that use these results is condition of use.
+  Citing Hbplus in publications that use these results is condition of use.
   1EFW <- Brookhaven Code "pdb1efw.new" <- PDB file
 <---DONOR---> <-ACCEPTOR-->    atom                        ^               
 c    i                          cat <-CA-CA->   ^        H-A-AA   ^      H- 
@@ -262,7 +263,7 @@ n    s   type  num  typ     dist DA aas  dist angle  dist       angle   num
 A0002- DA NE  -2032-HOH O   3.01 SS  -1  9.22 118.2  2.40  97.3 108.9     2
 A0003- DG NH1 -2032-HOH O   2.75 SS  -1 11.31 110.0  2.25 126.3 132.4     3
 END
-      whbonds = HBPlus.new(hbplus_str).whbonds
+      whbonds = Hbplus.new(hbplus_str).whbonds
       assert_equal(2, whbonds.size)
     end
   end

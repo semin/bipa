@@ -1,4 +1,4 @@
-module BIPA
+module Bipa
   module ComposedOfAtoms
     #
     # a specific set of atoms

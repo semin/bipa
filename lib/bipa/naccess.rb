@@ -1,5 +1,6 @@
 module BIPA
-  class NACCESS
+  class Naccess
+    
     attr_reader :atom_asa
 
     def initialize(file_str)
@@ -16,7 +17,9 @@ end
 
 if $0 == __FILE__
   require 'test/unit'
-  class TestNACCESS < Test::Unit::TestCase
+  
+  class TestNaccess < Test::Unit::TestCase
+    
     def setup
       test_str = <<END
 ATOM      1  N   VAL A  33       6.401  -0.502  39.397  38.898  1.65
@@ -30,7 +33,7 @@ ATOM      8  N   ILE A  34       5.732   2.053  40.482   3.262  1.65
 ATOM      9  CA  ILE A  34       5.028   3.019  41.326   0.000  1.87
 ATOM     10  C   ILE A  34       3.653   2.511  41.633   0.000  1.76
 END
-      @naccess = BIPA::NACCESS.new(test_str)
+      @naccess = Bipa::Naccess.new(test_str)
     end
 
     def test_return_size

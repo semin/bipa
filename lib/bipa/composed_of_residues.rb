@@ -1,4 +1,4 @@
-module BIPA
+module Bipa
   module ComposedOfResidues
     #
     # a specific set of residues

@@ -1,4 +1,4 @@
-module BIPA
+module Bipa
   module Constants
     module AminoAcids
       module Residues
@@ -79,7 +79,7 @@ module BIPA
     end # module AminoAcids
 
     module NucleicAcids
-      module DNA
+      module Dna
         module Residues
           
           STANDARD  = %w(DA DC DG DT)
@@ -104,7 +104,7 @@ module BIPA
         end
       end # module DNA
       
-      module RNA
+      module Rna
         module Residues
           
           STANDARD  = %w(A C G U)
@@ -119,8 +119,8 @@ module BIPA
       module Residues
         
         UNKNOWN   = %w(N)
-        STANDARD  = DNA::Residues::STANDARD + RNA::Residues::STANDARD
-        ALL       = DNA::Residues::ALL + RNA::Residues::ALL + UNKNOWN
+        STANDARD  = Dna::Residues::STANDARD + Rna::Residues::STANDARD
+        ALL       = Dna::Residues::ALL + Rna::Residues::ALL + UNKNOWN
       end
 
       module Atoms
@@ -130,7 +130,7 @@ module BIPA
       end
     end # module NucleicAcids
 
-    module DSSP
+    module Dssp
       
       HELIX = %w(H G I)
       SHEET = %w(E B)

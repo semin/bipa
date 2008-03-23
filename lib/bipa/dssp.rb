@@ -1,5 +1,5 @@
-module BIPA
-  class DSSP
+module Bipa
+  class Dssp
     attr_reader :sstruc
 
     def initialize(file_str)
@@ -24,7 +24,7 @@ if $0 == __FILE__
 
   require 'test/unit'
 
-  class TestDSSP < Test::Unit::TestCase
+  class TestDssp < Test::Unit::TestCase
     def setup
       test_str = <<END
 ==== Secondary Structure Definition by the program DSSP, updated CMBI version by ElmK / April 1,2000 ==== DATE=16-MAY-2007     .
@@ -60,7 +60,7 @@ AUTHOR    S.SU,Y.-G.GAO,H.ROBINSON,Y.-C.LIAW,S.P.EDMONDSON,                     
     3    3 A T  E     -A   16   0A  54     13,-0.3     2,-0.4    14,-0.1    13,-0.2  -0.714  11.8-147.1-114.5 162.6   10.6   19.0    3.4
     4    4 A V  E     -A   15   0A   2     11,-2.6    11,-2.4    -2,-0.3     2,-0.4  -0.993  12.9-155.0-120.9 137.2    9.5   20.7    6.7
 END
-      @dssp = BIPA::DSSP.new(test_str)
+      @dssp = Bipa::Dssp.new(test_str)
     end
 
     def test_return_size
