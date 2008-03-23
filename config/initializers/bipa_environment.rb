@@ -1,7 +1,7 @@
 # BIPA environment
-MAX_FORK        = ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i  2
+MAX_FORK        = ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i : 2
 
-PDB_SRC         = remote
+PDB_SRC         = :remote
 PDB_MIRROR_DIR  = "/BiO/Mirror/PDB"
 PDB_ZIPPED_DIR  = "./data/structures/all/pdb"
 PDB_ENTRY_FILE  = "./derived_data/pdb_entry_type.txt"
@@ -39,6 +39,6 @@ DSSP_DIR        = File.join(RAILS_ROOT "/public/dssp")
 DSSP_BIN        = `which dssp`
 
 BATON_DIR       = File.join(RAILS_ROOT "/public/baton")
-SUBFAM_CUTOFF   = ENV["SUBFAM_CUTOFF"].to_i > 0 ? ENV["SUBFAM_CUTOFF"].to_i  90
+SUBFAM_CUTOFF   = ENV["SUBFAM_CUTOFF"].to_i > 0 ? ENV["SUBFAM_CUTOFF"].to_i : 90
 
 BLASTCLUST_DIR  = File.join(RAILS_ROOT "/public/blastclust/")
