@@ -19,30 +19,34 @@ namespace :bipa do
 
     desc "Download protein-nucleic acid complexes from PDB ftp"
     task :pdb_remote => [:environment] do
-
-      Net::FTP.open(BIPA_ENV[:PDB_FTP]) do |ftp|
-        ftp.login "anonymous"
-        ftp.chdir BIPA_ENV[:PDB_EBI_DIR]
-        ftp.chdir BIPA_ENV[:PDB_ZIPPED_DIR]
-        files = ftp.nlis("*.ent.gz")
-        files.each_with_index do |file, i|
-          ftp.getbinaryfile(file, File.join(BIPA_ENV[:PDB_DIR], file))
-          $logger.info "Downloading #{file}: done (#{i+1}/#{files.size})"
+      
+      refresh_dir(PDB_DIR)
+      
+      Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
+        ftp.login("anonymous")
+        ftp.chdir("/pub/databases/rcsb/pdb-remediated")
+        ftp.gettextfile("./derived_data/pdb_entry_type.txt") do |line|
+          pdb_code, entry_type, exp_method = line.split(/\s+/)
+          if entry_type == "prot-nuc"
+            ftp.getbinaryfile("./data/structures/all/pdb/pdb#{pdb_code}.ent.gz",
+                              File.join(PDB_DIR, "#{pdb_code}.pdb.gz"))
+            $logger.info "Downloading #{pdb_code}: done (#{i + 1})"
+          end
         end
       end
       
       cwd = pwd
-      chdir BIPA_ENV[:PDB_DIR]
-      system "gzip -d *.gz"
-      chdir cwd
-      $logger.info "Unzipping downloaded PDB files: done"
+      chdir(PDB_DIR)
+      system("gzip -d *.gz")
+      chdir(cwd)
+      $logger.info("Unzipping downloaded PDB files: done")
     end
     
     
     desc "Fetch PDB datasets from local mirror"
     task :pdb_local => [:environment] do
       
-      refresh_dir BIPA_ENV[:PDB_DIR]
+      refresh_dir(PDB_DIR)
       selected_pdbs = []
 
       IO.foreach(File.join(BIPA_ENV[:PDB_MIRROR_DIR],

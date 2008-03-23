@@ -20,12 +20,7 @@ require_dependency "bipa/subfamily"
 MAX_FORK        = ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i : 2
 
 PDB_SRC         = :remote
-PDB_MIRROR_DIR  = "/BiO/Mirror/PDB"
-PDB_ZIPPED_DIR  = "./data/structures/all/pdb"
-PDB_ENTRY_FILE  = "./derived_data/pdb_entry_type.txt"
-PDB_ENTRY_TYPE  = "prot-nuc"
 PDB_DIR         = File.join(RAILS_ROOT, "/public/pdb")
-PDB_FTP         = "ftp.ebi.ac.uk"
                 
 SCOP_DIR        = File.join(RAILS_ROOT, "/public/scop")
 SCOP_URI        = "http//scop.mrc-lmb.cam.ac.uk/scop/parse/"
