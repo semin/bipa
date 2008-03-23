@@ -40,12 +40,12 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'sub_families' table
-  create_table "sub_families", :force => true do |t|
+  create_table "subfamilies", :force => true do |t|
     t.belongs_to  "scop_family"
     t.string      "type"
   end
 
-  add_index "sub_families", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
+  add_index "subfamilies", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
 
   #
   create_table "alignments", :force => true do |t|
