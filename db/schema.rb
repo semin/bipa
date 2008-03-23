@@ -14,7 +14,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'scops' table
   create_table "scops", :force => true do |t|
     t.belongs_to  "parent"
-    (10..100).step(10) { |i| t.belongs_to  "sub_family#{i}" }
+    (10..100).step(10) { |i| t.belongs_to  "subfamily#{i}" }
     t.integer     "lft"
     t.integer     "rgt"
     t.string      "type"
