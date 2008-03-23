@@ -5,7 +5,7 @@ class Bipa::Subfamily < ActiveRecord::Base
               :foreign_key  => "scop_family_id"
 
   has_one :alignment,
-          :class_name   => "Bipa::Alignment"
+          :class_name   => "Bipa::Alignment",
           :foreign_key  => "subfamily_id"
 
   has_many  :scop_domains,
@@ -34,7 +34,7 @@ end
   eval <<-EVAL
     class Bipa::Subfamily#{si} < Bipa::Subfamily
 
-      has_many  :scop_domains
+      has_many  :scop_domains,
                 :class_name   => "Bipa::ScopDomains",
                 :foreign_key  => "subfamily_id"
     end

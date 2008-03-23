@@ -9,7 +9,7 @@ class Bipa::Chain < ActiveRecord::Base
               :foreign_key  => "model_id"
 
   has_many  :residues,
-            :class_name => "Bipa::Residue"
+            :class_name => "Bipa::Residue",
             :dependent  => :destroy
 
   has_many  :atoms,
@@ -76,9 +76,9 @@ end
 class Bipa::HnaChain < Bipa::NaChain
 
   has_many  :dna_residues,
-            :class_name => "Bipa::DnaResidue",
+            :class_name => "Bipa::DnaResidue"
 
-  has_many  :rna_residues
+  has_many  :rna_residues,
             :class_name => "Bipa::RnaResidue"
 
   has_many  :dna_atoms,

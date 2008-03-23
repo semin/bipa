@@ -289,7 +289,7 @@ end # class Bipa::DomainInterface
 class Bipa::DomainDnaInterface < Bipa::DomainInterface
 
   %w(hbond whbond contact).each do |int|
-    NucleicAcids::DNA::Residues::STANDARD.map(&:downcase).each do |dna|
+    NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna|
 
       before_save :"update_frequency_of_#{int}_between_amino_acids_and_#{dna}"
 
@@ -313,7 +313,7 @@ class Bipa::DomainDnaInterface < Bipa::DomainInterface
   def frequency_of_hbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::DNA::Residues::STANDARD.each do |dna|
+    NucleicAcids::Dna::Residues::STANDARD.each do |dna|
       sum += frequency_of_hbond_between(aa, dna)
     end
     sum += frequency_of_hbond_between_sugar_and_(aa)
@@ -323,7 +323,7 @@ class Bipa::DomainDnaInterface < Bipa::DomainInterface
   def frequency_of_whbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::DNA::Residues::STANDARD.each do |dna|
+    NucleicAcids::Dna::Residues::STANDARD.each do |dna|
       sum += frequency_of_whbond_between(aa, dna)
     end
     sum += frequency_of_whbond_between_sugar_and_(aa)
@@ -333,7 +333,7 @@ class Bipa::DomainDnaInterface < Bipa::DomainInterface
   def frequency_of_contact_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::DNA::Residues::STANDARD.each do |dna|
+    NucleicAcids::Dna::Residues::STANDARD.each do |dna|
       sum += frequency_of_contact_between(aa, dna)
     end
     sum += frequency_of_contact_between_sugar_and_(aa)
@@ -346,7 +346,7 @@ end # class Bipa::DomainDnaInterface
 class Bipa::DomainRnaInterface < Bipa::DomainInterface
 
   %w(hbond whbond contact).each do |int|
-    NucleicAcids::RNA::Residues::STANDARD.map(&:downcase).each do |rna|
+    NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna|
 
       before_save :"update_frequency_of_#{int}_between_amino_acids_and_#{rna}"
 
@@ -370,7 +370,7 @@ class Bipa::DomainRnaInterface < Bipa::DomainInterface
   def frequency_of_hbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::RNA::Residues::STANDARD.each do |rna|
+    NucleicAcids::Rna::Residues::STANDARD.each do |rna|
       sum += frequency_of_hbond_between(aa, rna)
     end
     sum += frequency_of_hbond_between_sugar_and_(aa)
@@ -380,7 +380,7 @@ class Bipa::DomainRnaInterface < Bipa::DomainInterface
   def frequency_of_whbond_between_nucleic_acids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::RNA::Residues::STANDARD.each do |rna|
+    NucleicAcids::Rna::Residues::STANDARD.each do |rna|
       sum += frequency_of_whbond_between(aa, rna)
     end
     sum += frequency_of_whbond_between_sugar_and_(aa)
@@ -390,7 +390,7 @@ class Bipa::DomainRnaInterface < Bipa::DomainInterface
   def frequency_of_contact_between_NucleicAcids_and_(aa)
     aa.upcase!
     sum = 0
-    NucleicAcids::RNA::Residues::STANDARD.each do |rna|
+    NucleicAcids::Rna::Residues::STANDARD.each do |rna|
       sum += frequency_of_contact_between(aa, rna)
     end
     sum += frequency_of_contact_between_sugar_and_(aa)

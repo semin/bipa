@@ -2,8 +2,6 @@ class Bipa::Scop < ActiveRecord::Base
 
   include Bipa::Constants
 
-  set_table_name "scops"
-  
   acts_as_nested_set
 
   is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
@@ -104,7 +102,7 @@ class Bipa::Scop < ActiveRecord::Base
         end
       end
 
-      DSSP::SSES.map(&:downcase).each do |sse|
+      Dssp::SSES.map(&:downcase).each do |sse|
         define_method "#{property}_#{na}_interface_sse_propensity_of_#{sse}" do
           "%.2f" % send("#{na}_interfaces").map { |i|
             i.send("sse_propensity_of_#{sse}")
@@ -117,7 +115,7 @@ class Bipa::Scop < ActiveRecord::Base
 
   %w(hbond whbond contact).each do |int|
     %w(dna rna).each do |na|
-      na_residues = "BIPA::Constants::NucleicAcids::#{na.upcase}::Residues::STANDARD".constantize.map(&:downcase)
+      na_residues = "Bipa::Constants::NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize.map(&:downcase)
 
       define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}" do
         if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}")
@@ -267,10 +265,10 @@ end
 
 class Bipa::ScopDomain < Bipa::Scop
 
-  include BIPA::USR
-  include BIPA::NucleicAcidBinding
-  include BIPA::ComposedOfResidues
-  include BIPA::ComposedOfAtoms
+  include Bipa::Usr
+  include Bipa::NucleicAcidBinding
+  include Bipa::ComposedOfResidues
+  include Bipa::ComposedOfAtoms
 
   (10..100).step(10) do |si|
     belongs_to  :"subfamily#{si}",

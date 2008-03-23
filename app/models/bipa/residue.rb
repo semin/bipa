@@ -6,16 +6,16 @@ class Bipa::Residue < ActiveRecord::Base
   include Bipa::ComposedOfAtoms
 
   belongs_to  :chain,
-              :class_name   => "Bipa::Chain"
+              :class_name   => "Bipa::Chain",
               :foreign_key  => "chain_id"
               
-  belongs_to  :chain_interface
+  belongs_to  :chain_interface,
               :class_name   => "Bipa::ChainInterface",
               :foreign_key  => "chain_interface_id"
 
   has_many  :atoms,
-            :class_name => "Bipa::Atom"
-            :dependent  => :destory
+            :class_name => "Bipa::Atom",
+            :dependent  => :destroy
 
   has_many  :contacts,
             :through => :atoms

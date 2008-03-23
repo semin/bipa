@@ -27,7 +27,7 @@ if $0 == __FILE__
   class TestDssp < Test::Unit::TestCase
     def setup
       test_str = <<END
-==== Secondary Structure Definition by the program DSSP, updated CMBI version by ElmK / April 1,2000 ==== DATE=16-MAY-2007     .
+==== Secondary Structure Definition by the program Dssp, updated CMBI version by ElmK / April 1,2000 ==== DATE=16-MAY-2007     .
 REFERENCE W. KABSCH AND C.SANDER, BIOPOLYMERS 22 (1983) 2577-2637                                                              .
 HEADER    DNA BINDING PROTEIN/DNA                 04-MAY-00   1C8C                                                             .
 COMPND   2 MOLECULE: DNA-BINDING PROTEIN 7A;                                                                                   .

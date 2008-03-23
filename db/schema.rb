@@ -133,8 +133,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "x",            :null => false
     t.float       "y",            :null => false
     t.float       "z",            :null => false
-    t.float       "occupancy",
-    t.float       "tempfactor",
+    t.float       "occupancy"
+    t.float       "tempfactor"
     t.string      "element"      
     t.string      "charge"
     t.float       "bound_asa"
@@ -199,10 +199,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "asa"
     t.float       "polarity"
 
-    include BIPA::Constants
+    include Bipa::Constants
     
     AminoAcids::Residues::STANDARD.map(&:downcase).each { |a| t.float "singlet_propensity_of_#{a}" }
-    DSSP::SSES.map(&:downcase).each { |s| t.float "sse_propensity_of_#{s}" }
+    Dssp::SSES.map(&:downcase).each { |s| t.float "sse_propensity_of_#{s}" }
 
     %w(hbond whbond contact).each do |int|
       %w(dna rna).each do |na|
