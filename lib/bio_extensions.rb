@@ -64,11 +64,11 @@ module Bio
       include Bipa::Constants
 
       def dna?
-        NucleicAcids::DNA::Residues::ALL.include?(resName)
+        NucleicAcids::Dna::Residues::ALL.include?(resName)
       end
 
       def rna?
-        NucleicAcids::RNA::Residues::ALL.include?(resName)
+        NucleicAcids::Rna::Residues::ALL.include?(resName)
       end
 
       def na?
@@ -76,7 +76,7 @@ module Bio
       end
 
       def aa?
-        not is_na?
+        !na?
       end
 
       def hydrophobicity

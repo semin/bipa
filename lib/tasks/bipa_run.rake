@@ -1,21 +1,12 @@
 namespace :bipa do
   namespace :run do
 
-    require "fileutils"
-
     include FileUtils
-
-    def refresh_dir(dir)
-      rm_rf dir if File.exists? dir
-      mkdir_p dir
-      puts "Refreshing #{dir}: done"
-    end
-
 
     desc "Run blastclust for each SCOP family"
     task :blastclust_scop_families => [:environment] do
 
-      refresh_dir BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR]
+      refresh_dir(BLASTCLUST_DIR)
 
       families = ScopFamily.find_registered(:all)
       families.each_with_index do |family, i|
@@ -119,103 +110,127 @@ namespace :bipa do
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
-      refresh_dir(BIPA_ENV[:HBPLUS_DIR])
+      refresh_dir(HBPLUS_DIR)
 
-      pdb_files = Dir.glob(File.join(BIPA_ENV[:PDB_DIR], '*.pdb'))
-      pdb_total = pdb_files.size
-      fm        = ForkManager.new(BIPA_ENV[:MAX_FORK])
+      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
+      fmanager  = ForkManager.new(MAX_FORK)
 
-      fm.manage do
+      fmanager.manage do
         pdb_files.each_with_index do |pdb_file, i|
-          fm.fork do
-            pwd = Dir.pwd
-            Dir.chdir(BIPA_ENV[:HBPLUS_DIR])
-            pdb_file_basename = File.basename(pdb_file, '.pdb')
-            File.open(pdb_file_basename + '.clean_stdout', 'w') do |file|
-              IO.popen(BIPA_ENV[:CLEAN_BIN], 'r+') do |pipe|
+          fmanager.fork do
+
+            cwd = pwd
+
+            pdb_code = File.basename(pdb_file, ".pdb")
+            work_dir = File.join(HBPLUS_DIR, pdb_code)
+
+            mkdir_p(work_dir)
+            chdir(work_dir)
+
+            # CLEAN
+            File.open(pdb_code + ".clean_stdout", "w") do |log|
+              IO.popen(CLEAN_BIN, "r+") do |pipe|
                 pipe.puts pdb_file
-                file.puts(pipe.readlines)
+                log.puts pipe.readlines
               end
             end
-            Dir.chdir(pwd)
-            puts "Running CLEAN on #{pdb_file} (#{i + 1}/#{pdb_total}): done"
+            $logger.info("CLEAN: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+
+            # NACCESS
+            new_pdb_file  = pdb_code + ".new"
+            naccess_input = File.exists?(new_pdb_file) ? new_pdb_file : pdb_file
+            naccess_cmd   = "#{NACCESS_BIN} #{naccess_input} -p 1.40 -r #{NACCESS_VDW} -s #{NACCESS_STD} -z 0.05"
+
+            File.open(pdb_code + ".naccess.log", "w") do |log|
+              IO.popen(naccess_cmd, "r") do |pipe|
+                log.puts pipe.readlines
+              end
+            end
+            $logger.info("NACCESS: #{naccess_input} (#{i + 1}/#{pdb_files.size}): done")
+
+            # HBADD
+            hbadd_cmd = "#{HBADD_BIN} #{naccess_input} #{HET_DICT_FILE}"
+
+            File.open(pdb_code + ".hbadd.log", "w") do |log|
+              IO.popen(hbadd_cmd, "r") do |pipe|
+                log.puts pipe.readlines
+              end
+            end
+            $logger.info("HBADD: #{naccess_input} (#{i + 1}/#{pdb_files.size}): done")
+
+            # HBPLUS
+            if File.exists?(new_pdb_file)
+              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q #{new_pdb_file} #{pdb_file}"
+            else
+              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q #{pdb_file}"
+            end
+
+            if File.exists?("hbplus.rc")
+              mv "hbplus.rc", "#{pdb_code}.rc"
+              hbplus_cmd += " -f #{pdb_code}.rc"
+            end
+
+            File.open(pdb_code + ".hbplus.log", "w") do |log|
+              IO.popen(hbplus_cmd, "r") do |pipe|
+                log.puts pipe.readlines
+              end
+            end
+            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+
+            move(Dir["*"], HBPLUS_DIR)
+            rm_rf(work_dir)
+            chdir(cwd)
           end
         end
       end
-
-      fm = ForkManager.new(BIPA_ENV[:MAX_FORK])
-      fm.manage do
-        pdb_files.each_with_index do |pdb_file, i|
-          fm.fork do
-            pwd = Dir.pwd
-            Dir.chdir(BIPA_ENV[:HBPLUS_DIR])
-            pdb_file_basename = File.basename(pdb_file, '.pdb')
-            pdb_new_file      = pdb_file_basename + '.new'
-            hbplus_cmd        = ''
-            if File.exists? pdb_new_file
-              hbplus_cmd = "#{BIPA_ENV[:HBPLUS_BIN]} #{pdb_new_file} #{pdb_file}"
-            else
-              hbplus_cmd = "#{BIPA_ENV[:HBPLUS_BIN]} #{pdb_file}"
-            end
-            File.open(pdb_file_basename + '.hbplus_stdout', 'w') do |file|
-              IO.popen(hbplus_cmd, 'r') do |pipe|
-                file.puts(pipe.readlines)
-              end
-            end
-            Dir.chdir(pwd)
-            puts "Running HBPLUS on #{pdb_file} (#{i + 1}/#{pdb_total}): done"
-          end # fm.fork
-        end # pdb_files.each_with_index
-      end # fm.manage
     end # task :hbplus
 
 
     desc "Run NACCESS on each PDB file"
     task :naccess => [:environment] do
 
-      refresh_dir(BIPA_ENV[:NACCESS_DIR])
+      refresh_dir(NACCESS_DIR)
 
-      pdb_files = Dir.glob(File.join(BIPA_ENV[:PDB_DIR], '*.pdb'))
-      pdb_total = pdb_files.size
+      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
 
       # Run naccess for every protein-nulceic acid complex,
       # 1) protein only,
       # 2) nucleic acid only,
       # 3) and protein-nucleic acid complex
 
-      fm = ForkManager.new(BIPA_ENV[:MAX_FORK])
-      fm.manage do
-        pwd = Dir.pwd
+      fmanager = ForkManager.new(MAX_FORK)
+      fmanager.manage do
+        cwd = pwd
         pdb_files.each_with_index do |pdb_file, i|
-          fm.fork do
-            pdb_code  = File.basename(pdb_file, '.pdb')
+          fmanager.fork do
+            pdb_code  = File.basename(pdb_file, ".pdb")
             pdb_str   = IO.readlines(pdb_file).join
             pdb_obj   = Bio::PDB.new(pdb_str)
-            tmp_dir   = File.join(BIPA_ENV[:NACCESS_DIR], pdb_code)
+            work_dir  = File.join(NACCESS_DIR, pdb_code)
 
-            mkdir(tmp_dir)
-            cp(pdb_file, tmp_dir)
-            Dir.chdir(tmp_dir)
+            mkdir(work_dir)
+            cp(pdb_file, work_dir)
+            chdir(work_dir)
 
             aa_pdb_file = "#{pdb_code}_aa.pdb"
-            File.open(aa_pdb_file, 'w') do |f|
-              f.puts pdb_obj.models[0].aa_chains.to_s
+            File.open(aa_pdb_file, "w") do |f|
+              f.puts pdb_obj.models.first.aa_chains.to_s
             end
 
             na_pdb_file = "#{pdb_code}_na.pdb"
-            File.open(na_pdb_file, 'w') do |f|
-              f.puts pdb_obj.models[0].na_chains.to_s
+            File.open(na_pdb_file, "w") do |f|
+              f.puts pdb_obj.models.first.na_chains.to_s
             end
 
-            system("#{BIPA_ENV[:NACCESS_BIN]} #{pdb_code}.pdb -r #{BIPA_ENV[:NACCESS_VDW]} -s #{BIPA_ENV[:NACCESS_STD]}")
-            system("#{BIPA_ENV[:NACCESS_BIN]} #{aa_pdb_file}  -r #{BIPA_ENV[:NACCESS_VDW]} -s #{BIPA_ENV[:NACCESS_STD]}")
-            system("#{BIPA_ENV[:NACCESS_BIN]} #{na_pdb_file}  -r #{BIPA_ENV[:NACCESS_VDW]} -s #{BIPA_ENV[:NACCESS_STD]}")
+            system("#{NACCESS_BIN} #{pdb_code}.pdb -r #{NACCESS_VDW} -s #{NACCESS_STD}")
+            system("#{NACCESS_BIN} #{aa_pdb_file}  -r #{NACCESS_VDW} -s #{NACCESS_STD}")
+            system("#{NACCESS_BIN} #{na_pdb_file}  -r #{NACCESS_VDW} -s #{NACCESS_STD}")
 
-            cp(Dir.glob("#{pdb_code}*"), '..')
-            Dir.chdir(pwd)
-            rm_r(tmp_dir)
+            cp(Dir["#{pdb_code}*"], "..")
+            chdir(pwd)
+            rm_r(work_dir)
 
-            puts "Running NACCESS on #{pdb_file} (#{i + 1}/#{pdb_total}): done"
+            $logger.info("NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
           end
         end
       end
