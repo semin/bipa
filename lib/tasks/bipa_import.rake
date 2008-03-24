@@ -1,3 +1,6 @@
+require "logger"
+$logger = Logger.new(STDOUT)
+
 namespace :bipa do
   namespace :import do
 
@@ -175,6 +178,7 @@ namespace :bipa do
       end
     end # task :pdb
 
+
     desc "Import van der Waals Contacts"
     task :contacts => [:environment] do
       structures    = Structure.find_all_by_complete(true)
@@ -251,6 +255,7 @@ namespace :bipa do
       end # fork_manager.manage
     end
 
+
     desc "Import Hydrogen Bonds"
     task :hbonds => [:environment] do
       structures  = Structure.find_all_by_complete(true)
@@ -319,6 +324,7 @@ namespace :bipa do
       end # fork_manager.manage
     end
 
+
     desc "Import Water-mediated hydrogen bonds"
     task :whbonds => [:environment] do
       structures  = Structure.find_all_by_complete(true)
@@ -381,8 +387,8 @@ namespace :bipa do
     desc "Import SCOP datasets"
     task :scop => [:environment] do
 
-      hierarchy_file    = Dir[File.join(BIPA_ENV[:SCOP_DIR], '*hie*scop*')][0]
-      description_file  = Dir[File.join(BIPA_ENV[:SCOP_DIR], '*des*scop*')][0]
+      hierarchy_file    = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
+      description_file  = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
 
       # Create a hash for description of scop entries, 
       # and set a description for 'root' scop entry with sunid, '0'
@@ -406,10 +412,10 @@ namespace :bipa do
       # 100068  px      a.1.1.1 d1uvya_ 1uvy A:
       IO.foreach(description_file) do |line|
         next if line =~ /^#/ || line =~ /^\s*$/ # Skip empty lines
-          sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
-        sccs = '-' if sccs =~ /unassigned/
-          sid = '-' if sid =~ /unassigned/
-          descriptions[sunid] = {
+        sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
+        sccs  = '-' if sccs =~ /unassigned/
+        sid   = '-' if sid  =~ /unassigned/
+        descriptions[sunid] = {
           :sunid => sunid,
           :stype => stype,
           :sccs => sccs,
@@ -423,13 +429,15 @@ namespace :bipa do
       # 14982   46461   -
       IO.readlines(hierarchy_file).each_with_index do |line, i|
         next if line =~ /^#/ || line =~ /^\s*$/
-          self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
-
-        current_scop = Scop.factory_create!(descriptions[self_sunid])
+        
+        self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
+        current_scop = Bipa::Scop.factory_create!(descriptions[self_sunid])
+        
         unless self_sunid.to_i == 0
-          parent_scop = Scop.find_by_sunid(parent_sunid)
+          parent_scop = Bipa::Scop.find_by_sunid(parent_sunid)
           current_scop.move_to_child_of parent_scop
         end
+        $logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
       end
     end # task :scop
 

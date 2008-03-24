@@ -24,13 +24,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "stype",      :null => false
     t.string      "sccs"
     t.string      "sid"
-    t.string      "pdb_code"
     t.string      "description"
     t.boolean     "registered", :default => false
   end
 
   add_index "scops", ["sunid"],                   :name => "index_scops_on_sunid", :unique => true
-  add_index "scops", ["pdb_code"],                :name => "index_scops_on_pdb_code"
   add_index "scops", ["parent_id"],               :name => "index_scops_on_parent_id"
   add_index "scops", ["lft"],                     :name => "index_scops_on_lft"
   add_index "scops", ["rgt"],                     :name => "index_scops_on_rgt"
