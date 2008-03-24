@@ -23,7 +23,7 @@ namespace :bipa do
       
       Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
         ftp.login("anonymous")
-        ftp.chdir("/pub/databases/rcsb/pdb-remediated")
+        ftp.chdir("/pub/databases/rcsb/pdb-remediated/")
         ftp.gettextfile("./derived_data/pdb_entry_type.txt",
                         File.join(PDB_DIR, "pdb_entry_type.txt"))
         $logger.info("Downloading pdb_entry_type.txt file: done")
