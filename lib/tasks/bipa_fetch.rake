@@ -1,6 +1,7 @@
 namespace :bipa do
   namespace :fetch do
   
+    require "filetutils"
     require "net/ftp"
     require "open-uri"
     require "hpricot"
