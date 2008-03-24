@@ -25,7 +25,7 @@ PDB_DIR         = File.join(RAILS_ROOT, "/public/pdb")
 SCOP_DIR        = File.join(RAILS_ROOT, "/public/scop")
 SCOP_URI        = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
                 
-PRESCOP_DIR     = File.join(RAILS_ROOT, "/public/data/pre-scop")
+PRESCOP_DIR     = File.join(RAILS_ROOT, "/public/pre-scop")
 PRESCOP_URI     = "http://www.mrc-lmb.cam.ac.uk/agm/pre-scop/parseable/"
                 
 NCBI_FTP        = "ftp.ncbi.nih.gov"
