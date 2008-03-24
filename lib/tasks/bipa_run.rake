@@ -6,19 +6,26 @@ namespace :bipa do
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
-      refresh_dir(HBPLUS_DIR)
+      refresh_dir(HBPLUS_DIR) if !ENV["RESUME"]
 
       pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
+
         pdb_files.each_with_index do |pdb_file, i|
+
           fmanager.fork do
 
             cwd = pwd
 
             pdb_code = File.basename(pdb_file, ".pdb")
             work_dir = File.join(HBPLUS_DIR, pdb_code)
+
+            if ENV["RESUME"] && File.exists?(File.join(HBPLUS_DIR, "#{pdb_code}.hb2"))
+              $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): skip")
+              next
+            end
 
             mkdir_p(work_dir)
             chdir(work_dir)
@@ -35,7 +42,7 @@ namespace :bipa do
             # NACCESS
             new_pdb_file  = pdb_code + ".new"
             naccess_input = File.exists?(new_pdb_file) ? new_pdb_file : pdb_file
-            naccess_cmd   = "#{NACCESS_BIN} #{naccess_input} -p 1.40 -r #{NACCESS_VDW} -s #{NACCESS_STD} -z 0.05"
+            naccess_cmd   = "#{NACCESS_BIN} #{naccess_input} -p 1.40 -z 0.05 -r #{NACCESS_VDW} -s #{NACCESS_STD}"
 
             File.open(pdb_code + ".naccess.log", "w") do |log|
               IO.popen(naccess_cmd, "r") do |pipe|
@@ -56,14 +63,9 @@ namespace :bipa do
 
             # HBPLUS
             if File.exists?(new_pdb_file)
-              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q #{new_pdb_file} #{pdb_file}"
+              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q -f hbplus.rc #{new_pdb_file} #{pdb_file}"
             else
-              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q #{pdb_file}"
-            end
-
-            if File.exists?("hbplus.rc")
-              mv "hbplus.rc", "#{pdb_code}.rc"
-              hbplus_cmd += " -f #{pdb_code}.rc"
+              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q -f hbplus.rc #{pdb_file}"
             end
 
             File.open(pdb_code + ".hbplus.log", "w") do |log|
@@ -71,6 +73,8 @@ namespace :bipa do
                 log.puts pipe.readlines
               end
             end
+
+            mv("hbplus.rc", "#{pdb_code}.rc") if File.exists?("hbplus.rc")
             $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
 
             move(Dir["*"], HBPLUS_DIR)
@@ -85,20 +89,23 @@ namespace :bipa do
     desc "Run NACCESS on each PDB file"
     task :naccess => [:environment] do
 
-      refresh_dir(NACCESS_DIR)
-
-      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
-
       # Run naccess for every protein-nulceic acid complex,
       # 1) protein only,
       # 2) nucleic acid only,
       # 3) and protein-nucleic acid complex
 
-      fmanager = ForkManager.new(MAX_FORK)
+      refresh_dir(NACCESS_DIR)
+
+      cwd       = pwd
+      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
+      fmanager  = ForkManager.new(MAX_FORK)
+
       fmanager.manage do
-        cwd = pwd
+
         pdb_files.each_with_index do |pdb_file, i|
+
           fmanager.fork do
+
             pdb_code  = File.basename(pdb_file, ".pdb")
             pdb_str   = IO.readlines(pdb_file).join
             pdb_obj   = Bio::PDB.new(pdb_str)
