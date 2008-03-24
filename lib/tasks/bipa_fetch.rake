@@ -1,7 +1,6 @@
 namespace :bipa do
   namespace :fetch do
   
-    require "fileutils"
     require "net/ftp"
     require "open-uri"
     require "hpricot"
@@ -25,12 +24,16 @@ namespace :bipa do
       Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
         ftp.login("anonymous")
         ftp.chdir("/pub/databases/rcsb/pdb-remediated")
-        ftp.gettextfile("./derived_data/pdb_entry_type.txt") do |line|
+        ftp.gettextfile("./derived_data/pdb_entry_type.txt",
+                        File.join(PDB_DIR, "pdb_entry_type.txt"))
+        $logger.info("Downloading pdb_entry_type.txt file: done")
+        
+        IO.readlines(File.join(PDB_DIR, "pdb_entry_type.txt")).each do |line|
           pdb_code, entry_type, exp_method = line.split(/\s+/)
           if entry_type == "prot-nuc"
             ftp.getbinaryfile("./data/structures/all/pdb/pdb#{pdb_code}.ent.gz",
                               File.join(PDB_DIR, "#{pdb_code}.pdb.gz"))
-            $logger.info "Downloading #{pdb_code}: done (#{i + 1})"
+            $logger.info("Downloading #{pdb_code}: done")
           end
         end
       end
