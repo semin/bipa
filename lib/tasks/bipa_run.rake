@@ -3,110 +3,6 @@ namespace :bipa do
 
     include FileUtils
 
-    desc "Run blastclust for each SCOP family"
-    task :blastclust_scop_families => [:environment] do
-
-      refresh_dir(BLASTCLUST_DIR)
-
-      families = ScopFamily.find_registered(:all)
-      families.each_with_index do |family, i|
-
-        family_dir    = File.join(BIPA_ENV[:BLASTCLUST_SCOP_FAMILY_DIR], "#{family.sunid}")
-        family_fasta  = File.join(family_dir, "#{family.sunid}.fa")
-        mkdir family_dir
-
-        File.open(family_fasta, "w") do |file|
-
-          domains = family.all_registered_leaf_children
-          domains.each do |domain|
-            sunid = domain.sunid
-            fasta = domain.to_fasta
-
-            if fasta.include? "X"
-              puts "Skip: SCOP domain, #{sunid} has some unknown residues!"
-              next
-            end
-
-            file.puts ">#{sunid}"
-            file.puts fasta
-          end
-        end
-
-        (10..100).step(10) do |id|
-          blastclust_cmd =
-            "blastclust " +
-            "-i #{family_fasta} "+
-            "-o #{File.join(family_dir, family.sunid.to_s + '.nr' + id.to_s + '.fa')} " +
-            "-L .9 " +
-            "-S #{id} " +
-            "-a 2 " +
-            "-p T"
-            system blastclust_cmd
-        end
-
-        puts "Creating non-redundant fasta files for SCOP family, #{family.sunid} : done (#{i+1}/#{families.size})"
-      end
-    end
-
-
-    desc "Run Baton and JOY for each SCOP family"
-    task :baton_and_joy_scop_families => [:environment] do
-
-      nr_cutoff     = BIPA_ENV[:NR_CUTOFF]
-      nr_dir        = File.join(BIPA_ENV[:BATON_SCOP_FAMILY_DIR], "nr#{nr_cutoff}")
-      family_sunids = ScopFamily.find_registered(:all).map(&:sunid)
-      fmanager      = ForkManager.new(BIPA_ENV[:MAX_FORK])
-      refresh_dir nr_dir
-
-      # NR SCOP domain PDB files for each SCOP family
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        family_sunids.each_with_index do |family_sunid, i|
-          fmanager.fork do
-
-            ActiveRecord::Base.establish_connection(config)
-
-            family = ScopFamily.find_by_sunid(family_sunid)
-            family_dir = File.join(nr_dir, "#{family_sunid}")
-            mkdir family_dir
-
-            clusters = family.send("cluster#{nr_cutoff}s")
-            clusters.each do |cluster|
-              domain = cluster.representative
-              next if domain.nil?
-              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |pdb|
-                pdb.puts domain.to_pdb
-              end
-            end
-            ActiveRecord::Base.remove_connection
-          end
-
-          puts "NR(#{nr_cutoff}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})"
-          ActiveRecord::Base.establish_connection(config)
-        end
-      end
-
-      # Baton & JOY
-      fmanager = ForkManager.new(BIPA_ENV[:MAX_FORK])
-      fmanager.manage do
-        family_sunids.each_with_index do |family_sunid, i|
-
-          fmanager.fork do
-            cwd = pwd
-            family_dir = File.join(nr_dir, "#{family_sunid}")
-            chdir family_dir
-            system "Baton *.pdb"
-            system "joy baton.ali"
-            chdir cwd
-
-            puts "NR(#{nr_cutoff}): Running Baton and JOY on PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})"
-          end
-        end
-      end
-    end
-
-
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
@@ -227,7 +123,7 @@ namespace :bipa do
             system("#{NACCESS_BIN} #{na_pdb_file}  -r #{NACCESS_VDW} -s #{NACCESS_STD}")
 
             cp(Dir["#{pdb_code}*"], "..")
-            chdir(pwd)
+            chdir(cwd)
             rm_r(work_dir)
 
             $logger.info("NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
@@ -239,20 +135,134 @@ namespace :bipa do
 
     desc "Run DSSP on each PDB file"
     task :dssp => [:environment] do
-      refresh_dir(BIPA_ENV[:DSSP_DIR])
-      pdb_files = Dir.glob(File.join(BIPA_ENV[:PDB_DIR], '*.pdb'))
-      pdb_total = pdb_files.size
 
-      fm = ForkManager.new(BIPA_ENV[:MAX_FORK])
-      fm.manage do
+      refresh_dir(DSSP_DIR)
+
+      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
+
+      fmanager = ForkManager.new(MAX_FORK)
+      fmanager.manage do
         pdb_files.each_with_index do |pdb_file, i|
-          fm.fork do
-            pwd = Dir.pwd
-            Dir.chdir(BIPA_ENV[:DSSP_DIR])
+          fmanager.fork do
+            cwd = pwd
+            chdir(DSSP_DIR)
             pdb_code = File.basename(pdb_file, '.pdb')
-            system("#{BIPA_ENV[:DSSP_BIN]} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.stderr")
-            puts ("Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_total}): done")
-            Dir.chdir(pwd)
+            system("#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err")
+            $logger.info("Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+            chdir(cwd)
+          end
+        end
+      end
+    end
+
+
+    desc "Run blastclust for each SCOP family"
+    task :blastclust_scop_families => [:environment] do
+
+      refresh_dir(BLASTCLUST_DIR)
+
+      families = ScopFamily.find_registered(:all)
+      families.each_with_index do |family, i|
+
+        family_dir    = File.join(BLASTCLUST_DIR, "#{family.sunid}")
+        family_fasta  = File.join(family_dir, "#{family.sunid}.fa")
+
+        mkdir(family_dir)
+
+        File.open(family_fasta, "w") do |file|
+
+          domains = family.all_registered_leaf_children
+          domains.each do |domain|
+
+            sunid = domain.sunid
+            fasta = domain.to_fasta
+
+            if fasta.include? "X"
+              puts "Skip: SCOP domain, #{sunid} has some unknown residues!"
+              next
+            end
+
+            file.puts ">#{sunid}"
+            file.puts fasta
+          end
+        end
+
+        (10..100).step(10) do |si|
+          blastclust_cmd =
+            "blastclust " +
+            "-i #{family_fasta} "+
+            "-o #{File.join(family_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')} " +
+            "-L .9 " +
+            "-S #{si} " +
+            "-a 2 " +
+            "-p T"
+            system blastclust_cmd
+        end
+
+        $logger.info("Creating non-redundant fasta files for SCOP family, #{family.sunid} : done (#{i+1}/#{families.size})")
+      end
+    end
+
+
+    desc "Run Baton and JOY for each SCOP family"
+    task :baton_and_joy_scop_families => [:environment] do
+
+      nr_cutoff     = 100
+      nr_dir        = File.join(BATON_DIR, "nr#{nr_cutoff}")
+      family_sunids = ScopFamily.find_registered(:all).map(&:sunid)
+      fmanager      = ForkManager.new(BIPA_ENV[:MAX_FORK])
+
+      refresh_dir(nr_dir)
+
+      fmanager.manage do
+
+        config = ActiveRecord::Base.remove_connection
+
+        family_sunids.each_with_index do |family_sunid, i|
+
+          fmanager.fork do
+
+            ActiveRecord::Base.establish_connection(config)
+
+            family      = ScopFamily.find_by_sunid(family_sunid)
+            family_dir  = File.join(nr_dir, "#{family_sunid}")
+
+            mkdir(family_dir)
+
+            subfamilies = family.send("subfamily#{nr_cutoff}s")
+            subfamilies.each do |subfamily|
+              domain = subfamily.representative
+              next if domain.nil?
+              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |pdb|
+                pdb.puts domain.to_pdb
+              end
+            end
+
+            ActiveRecord::Base.remove_connection
+          end
+
+          ActiveRecord::Base.establish_connection(config)
+          $logger.info("NR(#{nr_cutoff}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+        end
+      end
+
+      # Baton & JOY
+      fmanager = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+
+        family_sunids.each_with_index do |family_sunid, i|
+
+          fmanager.fork do
+
+            cwd = pwd
+            family_dir = File.join(nr_dir, "#{family_sunid}")
+            chdir(family_dir)
+            system("Baton *.pdb")
+            system("joy baton.ali")
+            chdir(cwd)
+
+            $logger.info("NR(#{nr_cutoff}): Running Baton and JOY on PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
           end
         end
       end
