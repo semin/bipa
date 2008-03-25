@@ -137,7 +137,8 @@ namespace :bipa do
                   residue = Bipa::RnaResidue.create!(residue_params(chain.id, residue_bio))
                 else
                   dssp_hash_key = chain_bio.chain_id + residue_bio.residue_id
-                  sstruc        = dssp_sstruc[dssp_hash_key].empty? ? 'L' : dssp_sstruc[dssp_hash_key]
+                  # In some cases, there are no 'dssp_hash_key', you should check!
+                  sstruc        = dssp_sstruc[dssp_hash_key] ? dssp_sstruc[dssp_hash_key] : "L"
                   residue       = Bipa::AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
                 end
 
