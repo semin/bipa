@@ -30,56 +30,59 @@ namespace :bipa do
             mkdir_p(work_dir)
             chdir(work_dir)
 
-            # CLEAN
-            File.open(pdb_code + ".clean_stdout", "w") do |log|
-              IO.popen(CLEAN_BIN, "r+") do |pipe|
-                pipe.puts pdb_file
-                log.puts pipe.readlines
-              end
-            end
-            $logger.info("CLEAN: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+#            # CLEAN
+#            File.open(pdb_code + ".clean_stdout", "w") do |log|
+#              IO.popen(CLEAN_BIN, "r+") do |pipe|
+#                pipe.puts pdb_file
+#                log.puts pipe.readlines
+#              end
+#            end
+#            $logger.info("CLEAN: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+#
+#            # NACCESS
+#            new_pdb_file  = pdb_code + ".new"
+#            naccess_input = File.exists?(new_pdb_file) ? new_pdb_file : pdb_file
+#            naccess_cmd   = "#{NACCESS_BIN} #{naccess_input} -p 1.40 -z 0.05 -r #{NACCESS_VDW} -s #{NACCESS_STD}"
+#
+#            File.open(pdb_code + ".naccess.log", "w") do |log|
+#              IO.popen(naccess_cmd, "r") do |pipe|
+#                log.puts pipe.readlines
+#              end
+#            end
+#            $logger.info("NACCESS: #{naccess_input} (#{i + 1}/#{pdb_files.size}): done")
+#
+#            # HBADD
+#            hbadd_cmd = "#{HBADD_BIN} #{naccess_input} #{HET_DICT_FILE}"
+#
+#            File.open(pdb_code + ".hbadd.log", "w") do |log|
+#              IO.popen(hbadd_cmd, "r") do |pipe|
+#                log.puts pipe.readlines
+#              end
+#            end
+#            $logger.info("HBADD: #{naccess_input} (#{i + 1}/#{pdb_files.size}): done")
+#
+#            # HBPLUS
+#            if File.exists?(new_pdb_file)
+#              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q -f hbplus.rc #{new_pdb_file} #{pdb_file}"
+#            else
+#              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q -f hbplus.rc #{pdb_file}"
+#            end
+#
+#            File.open(pdb_code + ".hbplus.log", "w") do |log|
+#              IO.popen(hbplus_cmd, "r") do |pipe|
+#                log.puts pipe.readlines
+#              end
+#            end
+#
+#            mv("hbplus.rc", "#{pdb_code}.rc") if File.exists?("hbplus.rc")
+#            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
 
-            # NACCESS
-            new_pdb_file  = pdb_code + ".new"
-            naccess_input = File.exists?(new_pdb_file) ? new_pdb_file : pdb_file
-            naccess_cmd   = "#{NACCESS_BIN} #{naccess_input} -p 1.40 -z 0.05 -r #{NACCESS_VDW} -s #{NACCESS_STD}"
-
-            File.open(pdb_code + ".naccess.log", "w") do |log|
-              IO.popen(naccess_cmd, "r") do |pipe|
-                log.puts pipe.readlines
-              end
-            end
-            $logger.info("NACCESS: #{naccess_input} (#{i + 1}/#{pdb_files.size}): done")
-
-            # HBADD
-            hbadd_cmd = "#{HBADD_BIN} #{naccess_input} #{HET_DICT_FILE}"
-
-            File.open(pdb_code + ".hbadd.log", "w") do |log|
-              IO.popen(hbadd_cmd, "r") do |pipe|
-                log.puts pipe.readlines
-              end
-            end
-            $logger.info("HBADD: #{naccess_input} (#{i + 1}/#{pdb_files.size}): done")
-
-            # HBPLUS
-            if File.exists?(new_pdb_file)
-              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q -f hbplus.rc #{new_pdb_file} #{pdb_file}"
-            else
-              hbplus_cmd = "#{HBPLUS_BIN} -x -R -q -f hbplus.rc #{pdb_file}"
-            end
-
-            File.open(pdb_code + ".hbplus.log", "w") do |log|
-              IO.popen(hbplus_cmd, "r") do |pipe|
-                log.puts pipe.readlines
-              end
-            end
-
-            mv("hbplus.rc", "#{pdb_code}.rc") if File.exists?("hbplus.rc")
+            system("#{HBPLUS_BIN} #{pdb_file} 1>#{pdb_code}.hbplus.log 2>&1")
             $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
 
-            move(Dir["*"], HBPLUS_DIR)
-            rm_rf(work_dir)
+            move(Dir["*"], "..")
             chdir(cwd)
+            rm_rf(work_dir)
           end
         end
       end
