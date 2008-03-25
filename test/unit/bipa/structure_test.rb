@@ -1,66 +1,7 @@
 require File.dirname(__FILE__) + '/../../test_helper'
 
 class Bipa::StructureTest < Test::Unit::TestCase
-  
-  include Bipa::Constants
-  
-  # Dummy parameters for models
-  def valid_structure_params
-    {
-      :pdb_code       => "10mh",
-      :exp_method     => "X-ray",
-      :classification => "protein-DNA",
-      :deposited_at   => "1998-10-12"
-    }
-  end
-  
-  def valid_model_params(model_code = nil)
-    {
-      :model_code     => model_code || rand(100)
-    }
-  end
-  
-  def valid_chain_params(chain_code = nil)
-    alphabets = ("a".."z").to_a + ("A".."Z").to_a
-    {
-      :chain_code     => chain_code || alphabets[rand(alphabets.size)]
-    }
-  end
-  
-  def valid_residue_params(residue_code = nil,
-                           residue_name = nil,
-                           type = nil)
-                           
-    residue_names = AminoAcids::Residues::STANDARD +
-                    NucleicAcids::Residues::STANDARD
-    residue_types = Bipa::Residue.send(:subclasses).map(&:to_s)
-    
-    {
-      :residue_code => residue_code || rand(100),
-      :residue_name => residue_name || residue_names[rand(residue_names.size)],
-      :type         => type || residue_types[rand(residue_types.size)]
-    }
-  end
-  
-  def valid_atom_params(atom_code = nil,
-                        atom_name = nil,
-                        x = nil, y = nil, z = nil)
-    
-    atom_names =  AminoAcids::Atoms::BACKBONE + 
-                  NucleicAcids::Atoms::PHOSPHATE +
-                  NucleicAcids::Atoms::SUGAR
-                  
-    {
-      :atom_code  => atom_code || rand(1000),
-      :atom_name  => atom_name || atom_names[rand(atom_names.size)],
-      :x          => x || rand(0) + rand(100),
-      :y          => y || rand(0) + rand(100),
-      :z          => z || rand(0) + rand(100)
-    }
-  end
-  
-  
-  # Tests
+
   def test_models
     structure = Bipa::Structure.new(valid_structure_params)
     model1    = Bipa::Model.new(valid_model_params)

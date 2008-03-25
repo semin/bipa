@@ -7,6 +7,11 @@ class Bipa::Interface < ActiveRecord::Base
     res.upcase!
     residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s }
   end
+  
+  def asa_of_sse(sse)
+    sse.upcase!
+    residues.inject(0) { |s, r| r.secondary_structure == sse ? s + r.delta_asa : s }
+  end
 end
 
 class Bipa::DomainInterface < Bipa::Interface

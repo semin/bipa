@@ -3,6 +3,10 @@ module Bipa
     #
     # a specific set of atoms
     #
+    def atoms
+      raise "You should implement this 'atoms' method in your class!"
+    end
+    
     def surface_atoms
       atoms.select { |a| a.on_surface? }
     end
