@@ -18,7 +18,7 @@ require_dependency "bipa/subfamily"
 
 # Constants for BIPA
 RESUME          = ENV["RESUME"].to_i > 0 ? ENV["RESUME"].to_i : false
-MAX_FORK        = ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i : 4
+MAX_FORK        = ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i : 2
 
 PDB_SRC         = :remote
 PDB_MIRROR_DIR  = "/BiO/Mirror/PDB"
