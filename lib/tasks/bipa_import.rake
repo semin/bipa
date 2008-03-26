@@ -51,6 +51,8 @@ namespace :bipa do
               end
             end
 
+            pdb_bio.resolution = nil if pdb_bio.resolution < 0.000001
+
             structure = Bipa::Structure.create!(
               :pdb_code       => pdb_bio.accession,
               :classification => pdb_bio.classification,
