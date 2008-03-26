@@ -26,7 +26,7 @@ module Bio
       def aa_chains
         chains.select { |c| c.aa? }
       end
-      
+
       def na_chains
         chains.select { |c| c.na? }
       end
@@ -52,10 +52,6 @@ module Bio
 
       def na?
         dna? or rna? or hna?
-      end
-
-      def het?
-        @heterogens.size > 0 && id.empty?
       end
     end
 

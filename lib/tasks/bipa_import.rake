@@ -51,14 +51,12 @@ namespace :bipa do
               end
             end
 
-            pdb_bio.resolution = nil if pdb_bio.resolution < 0.000001
-
             structure = Bipa::Structure.create!(
               :pdb_code       => pdb_bio.accession,
               :classification => pdb_bio.classification,
               :title          => pdb_bio.definition,
               :exp_method     => pdb_bio.exp_method,
-              :resolution     => pdb_bio.resolution,
+              :resolution     => pdb_bio.resolution.to_f < 0.0000001 ? nil : pdb_bio.resolution,
               :deposited_at   => pdb_bio.deposition_date
             )
 
@@ -76,16 +74,15 @@ namespace :bipa do
 
               chain_code = chain_bio.chain_id.empty? ? '-' : chain_bio.chain_id
 
-              chain_type = case chain_bio
-                           when chain_bio.aa?
+              chain_type = if chain_bio.aa?
                              Bipa::AaChain
-                           when chain_bio.dna?
+                           elsif chain_bio.dna?
                              Bipa::DnaChain
-                           when chain_bio.rna?
+                           elsif chain_bio.rna?
                              Bipa::RnaChain
-                           when chain_bio.hna?
+                           elsif chain_bio.hna?
                              Bipa::HnaChain
-                           else chain_bio.het?
+                           else
                              Bipa::HetChain
                            end
 
