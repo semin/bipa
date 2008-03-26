@@ -15,7 +15,7 @@ class Bipa::Structure < ActiveRecord::Base
 
   def residues
     residues = []
-    models.each { |c| residues.concat(m.residues) }
+    models.each { |m| residues.concat(m.residues) }
     residues
   end
 

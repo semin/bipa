@@ -7,5 +7,5 @@ class Bipa::InterfaceTest < Test::Unit::TestCase
   end
   
   def test_asa_of_sse
-  end
+  end
 end
