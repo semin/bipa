@@ -2,7 +2,7 @@ module Bipa
   module Constants
     module AminoAcids
       module Residues
-        
+
         POSITIVE    = %w(ARG LYS)
         NEGATIVE    = %w(ASP GLU)
         POLAR       = %w(ASN GLN HIS SER THR)
@@ -36,7 +36,7 @@ module Bipa
           "TRP" =>  249.36,
           "TYR" =>  212.76
         }
-        
+
         ONE_LETTER_CODE = {
           # Standard Encoded Amino Acids
           "ALA" => "A",
@@ -81,14 +81,14 @@ module Bipa
     module NucleicAcids
       module Dna
         module Residues
-          
+
           STANDARD  = %w(DA DC DG DT)
           OTHER     = %w(DU DI)
           ALL       = STANDARD + OTHER
         end
-        
+
         module Atoms
-          
+
           MAJOR_GROOVE = {
             "DA" => %w(C5 C6 C8 N6 N7),
             "DT" => %w(C4 C5 C6 C7 O4),
@@ -103,35 +103,35 @@ module Bipa
           }
         end
       end # module DNA
-      
+
       module Rna
         module Residues
-          
+
           STANDARD  = %w(A C G U)
           OTHER     = %w(T I)
           ALL       = STANDARD + OTHER
         end
-        
+
         module Atoms
         end
       end
-      
+
       module Residues
-        
+
         UNKNOWN   = %w(N)
         STANDARD  = Dna::Residues::STANDARD + Rna::Residues::STANDARD
         ALL       = Dna::Residues::ALL + Rna::Residues::ALL + UNKNOWN
       end
 
       module Atoms
-        
+
         PHOSPHATE = %w(P OP1 OP2 OP3 HOP3 HOP2)
         SUGAR     = %w(C1' C2' C3' C4' C5' O2' O3' H1' H2' H2'' H3' H4' H5' H5' HO2' HO3')
       end
     end # module NucleicAcids
 
     module Dssp
-      
+
       HELIX = %w(H G I)
       SHEET = %w(E B)
       LOOP  = %w(T S L)

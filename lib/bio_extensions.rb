@@ -24,30 +24,30 @@ module Bio
     class Model
 
       def na_chains
-        chains.select { |c| c.na? && !c.chain_id.empty? }
+        chains.select { |c| c.na? }
       end
 
       def aa_chains
-        chains.select { |c| c.aa? && !c.chain_id.empty? }
+        chains.select { |c| c.aa? }
       end
     end
 
     class Chain
 
       def aa?
-        residues.all? { |r| r.aa? }
+        residues.any? { |r| r.aa? } && !id.empty?
       end
 
       def dna?
-        residues.all? { |r| r.dna? }
+        residues.all? { |r| r.dna? } && !id.empty? && rna?
       end
 
       def rna?
-        residues.all? { |r| r.rna? }
+        residues.all? { |r| r.rna? } && !id.empty? && dna?
       end
 
       def hna?
-        residues.any? { |r| r.dna? } && residues.any? { |r| r.rna? }
+        residues.any? { |r| r.dna? } && residues.any? { |r| r.rna? } && !id.empty?
       end
 
       def na?
@@ -55,7 +55,7 @@ module Bio
       end
 
       def het?
-        @heterogens.size > 0 && chain_id.empty?
+        @heterogens.size > 0 && id.empty?
       end
     end
 

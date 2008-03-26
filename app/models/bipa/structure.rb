@@ -8,14 +8,32 @@ class Bipa::Structure < ActiveRecord::Base
             :dependent    => :destroy
 
   def chains
-    models.inject([]) { |s, m| s.concat(m.chains) }
+    chains = []
+    models.each { |m| chains.concat(m.chains) }
+    chains
   end
-  
+
   def residues
-    chains.inject([]) { |s, c| s.concat(c.residues) }
+    residues = []
+    models.each { |c| residues.concat(m.residues) }
+    residues
   end
 
   def atoms
-    residues.inject([]) { |s, r| s.concat(r.atoms)}
+    atoms = []
+    models.each { |m| atoms.concat(m.atoms) }
+    atoms
+  end
+
+  def aa_atoms
+    aa_atoms = []
+    models.each { |m| aa_atoms.concat(m.aa_atoms) }
+    aa_atoms
+  end
+
+  def na_atoms
+    na_atoms = []
+    models.each { |m| na_atoms.concat(m.na_atoms) }
+    na_atoms
   end
 end

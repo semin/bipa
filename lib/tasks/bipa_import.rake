@@ -21,7 +21,7 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             pdb_code  = File.basename(pdb_file, ".pdb")
-            pdb_bio   = Bio::PDB.new IO.readlines(pdb_file).join
+            pdb_bio   = Bio::PDB.new(IO.read(pdb_file))
 
             # Load NACCESS results for every atom in the structure
             bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}.asa")
@@ -181,6 +181,7 @@ namespace :bipa do
 
     desc "Import van der Waals Contacts"
     task :contacts => [:environment] do
+
       pdb_codes = Bipa::Structure.find(:all).map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
@@ -202,7 +203,7 @@ namespace :bipa do
 
             structure = Bipa::Structure.find_by_pdb_code(pdb_code)
             pdb_bio   = Bio::PDB.new(IO.readlines(pdb_file).join)
-            kdtree    = Bipa::KDTree.new
+            kdtree    = Bipa::Kdtree.new
             aa_points = Array.new
 
             pdb_bio.models.first.each do |chain|
@@ -231,8 +232,8 @@ namespace :bipa do
               for neighbor in neighbors
                 if neighbor.point.type == :na
                   dist    = aa_point - neighbor.point
-                  aa_atom = structure.atoms.find_by_atom_code(aa_point.serial)
-                  na_atom = structure.atoms.find_by_atom_code(neighbor.point.serial)
+                  aa_atom = structure.aa_atoms.detect { |a| a.atom_code == aa_point.serial }
+                  na_atom = structure.na_atoms.detect { |a| a.atom_code == neighbor.point.serial }
                   contacts << [aa_atom[:id], na_atom[:id], dist]
                 end
               end
@@ -240,9 +241,10 @@ namespace :bipa do
 
             columns = [:atom_id, :contacting_atom_id, :distance]
             Bipa::Contact.import(columns, contacts)
-            structure.save!
 
+            structure.save!
             $logger.info("Importing CONTACTS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+
             ActiveRecord::Base.remove_connection
           end # fork_manager.fork
         end # pdb_codes.each_with_index
