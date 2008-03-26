@@ -23,12 +23,12 @@ module Bio
 
     class Model
 
-      def na_chains
-        chains.select { |c| c.na? }
-      end
-
       def aa_chains
         chains.select { |c| c.aa? }
+      end
+      
+      def na_chains
+        chains.select { |c| c.na? }
       end
     end
 
@@ -39,11 +39,11 @@ module Bio
       end
 
       def dna?
-        residues.all? { |r| r.dna? } && !id.empty? && rna?
+        residues.any? { |r| r.dna? } && residues.all? { |r| !r.rna? } && !id.empty?
       end
 
       def rna?
-        residues.all? { |r| r.rna? } && !id.empty? && dna?
+        residues.any? { |r| r.rna? } && residues.all? { |r| !r.dna? } && !id.empty?
       end
 
       def hna?
