@@ -3,6 +3,7 @@ require File.dirname(__FILE__) + '/../../test_helper'
 class Bipa::StructureTest < Test::Unit::TestCase
 
   context "A Stucture instance" do
+    
     should "have correct models" do
       structure = Bipa::Structure.new(valid_structure_params)
       model1    = Bipa::Model.new(valid_model_params)

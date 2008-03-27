@@ -1,17 +1,17 @@
 module Bipa
-  class Kdnode
-    attr_reader   :point
-    attr_accessor :left, :right
-
-    def initialize(point)
-      @point = point
-      @left   = nil
-      @right  = nil
-    end
-  end
-
   class Kdtree
+    class Kdnode
 
+      attr_reader   :point
+      attr_accessor :left, :right
+
+      def initialize(point)
+        @point  = point
+        @left   = nil
+        @right  = nil
+      end
+    end
+    
     def initialize
       @root       = nil
       @neighbors  = []
@@ -80,6 +80,5 @@ module Bipa
       find_neighbors(@root, 0, point, range)
       @results
     end
-
   end
 end

@@ -1,5 +1,6 @@
 require "rubygems"
 require "matrix"
+require "inline"
 require "fork_manager"
 require "ar-extensions"
 require "bio_extensions"

@@ -140,4 +140,33 @@ class Bipa::Atom < ActiveRecord::Base
             element,
             charge)
   end
+  
+  # Vector calculation & KDTree algorithm related
+  def xyz
+    @xyz ||= [self.x, self.y, self.z]
+  end
+  
+  def size
+    @xyz.size
+  end
+  
+  def [](index)
+    @xyz[index]
+  end
+  
+  def -(other)
+    self.c_distance(self.x, self.y, self.z, other.x, other.y, other.z)
+  end
+
+  inline do |builder|
+    builder.include "<math.h>"
+    builder.c <<-C_CODE
+        double c_distance(double sx, double sy, double sz, 
+                          double ox, double oy, double oz) {
+          return  sqrt( pow(sx - ox, 2) + 
+                        pow(sy - oy, 2) + 
+                        pow(sz - oz, 2) );
+        }
+    C_CODE
+  end
 end # class Atom

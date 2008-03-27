@@ -190,48 +190,20 @@ namespace :bipa do
 
           fmanager.fork do
 
-            pdb_file = File.join(PDB_DIR, "#{pdb_code.downcase}.pdb")
-            if !File.exist?(pdb_file)
-              puts "Skip #{pdb_code} (#{i + 1}/#{pdb_codes.size}): #{pdb_file} doesn't exist!"
-              next
-            end
-
             ActiveRecord::Base.establish_connection(config)
 
             structure = Bipa::Structure.find_by_pdb_code(pdb_code)
-            pdb_bio   = Bio::PDB.new(IO.readlines(pdb_file).join)
             kdtree    = Bipa::Kdtree.new
-            aa_points = Array.new
-
-            pdb_bio.models.first.each do |chain|
-              next if chain.chain_id =~ /^\s*$/
-              chain.each do |residue|
-                type = case
-                       when residue.na?
-                         :na
-                       when residue.aa?
-                         :aa
-                       else
-                         raise "Unknown type of residue!"
-                       end
-                residue.each do |atom|
-                  point = Bipa::Point.new(atom.x, atom.y, atom.z, atom.serial, type)
-                  kdtree.insert(point)
-                  aa_points << point if type ==:aa
-                end
-              end
-            end
-
-            contacts = Array.new
-
-            for aa_point in aa_points
-              neighbors = kdtree.neighbors(aa_point, MAX_DISTANCE)
-              for neighbor in neighbors
-                if neighbor.point.type == :na
-                  dist    = aa_point - neighbor.point
-                  aa_atom = structure.aa_atoms.detect { |a| a.atom_code == aa_point.serial }
-                  na_atom = structure.na_atoms.detect { |a| a.atom_code == neighbor.point.serial }
-                  contacts << [aa_atom[:id], na_atom[:id], dist]
+            contacts  = Array.new
+            
+            structure.atoms.each { |a| kdtree.insert(a) }
+            
+            stucture.aa_atoms.each do |aa_atom|
+              neighbor_atoms = kdtree.neighbors(aa_atom, MAX_DISTANCE).map(&:point)
+              neighbor_atoms.each do |neighbor_atom|
+                if neighbor_atom.na?
+                  dist = aa_atom - neighbor_atom
+                  contacts << [aa_atom.id, neighbor_atom.id, dist]
                 end
               end
             end
@@ -243,10 +215,10 @@ namespace :bipa do
             $logger.info("Importing CONTACTS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
 
             ActiveRecord::Base.remove_connection
-          end # fork_manager.fork
-        end # pdb_codes.each_with_index
+          end 
+        end
         ActiveRecord::Base.establish_connection(config)
-      end # fork_manager.manage
+      end
     end
 
 
