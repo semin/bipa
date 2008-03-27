@@ -219,6 +219,7 @@ namespace :bipa do
           ActiveRecord::Base.remove_connection
         end
       end
+
       ActiveRecord::Base.establish_connection(config)
     end
   end
