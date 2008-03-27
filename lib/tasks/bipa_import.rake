@@ -200,12 +200,12 @@ namespace :bipa do
 
           structure.atoms.each { |a| kdtree.insert(a) }
 
-          structure.aa_atoms.each do |aa_atom|
-            neighbor_atoms = kdtree.neighbors(aa_atom, MAX_DISTANCE).map(&:point)
+          structure.na_atoms.each do |na_atom|
+            neighbor_atoms = kdtree.neighbors(na_atom, MAX_DISTANCE).map(&:point)
             neighbor_atoms.each do |neighbor_atom|
-              if neighbor_atom.na?
-                dist = aa_atom - neighbor_atom
-                contacts << [aa_atom.id, neighbor_atom.id, dist]
+              if neighbor_atom.aa?
+                dist = na_atom - neighbor_atom
+                contacts << [neighbor_atom.id, na_atom.id, dist]
               end
             end
           end
