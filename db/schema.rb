@@ -12,7 +12,7 @@
 include Bipa::Constants
 
 ActiveRecord::Schema.define(:version => 1) do
-  
+
   # 'scops' table
   create_table "scops", :force => true do |t|
     t.belongs_to  "parent"
@@ -129,13 +129,13 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "position_type"
     t.integer     "atom_code",    :null => false
     t.string      "atom_name",    :null => false
-    t.string      "altloc"        
+    t.string      "altloc"
     t.float       "x",            :null => false
     t.float       "y",            :null => false
     t.float       "z",            :null => false
     t.float       "occupancy"
     t.float       "tempfactor"
-    t.string      "element"      
+    t.string      "element"
     t.string      "charge"
     t.float       "bound_asa"
     t.float       "unbound_asa"

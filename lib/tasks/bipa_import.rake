@@ -1,8 +1,10 @@
-require "logger"
-$logger = Logger.new(STDOUT)
-
 namespace :bipa do
   namespace :import do
+
+  require "logger"
+
+  $logger = Logger.new(STDOUT)
+
 
     desc "Import protein-nucleic acid complex PDB files to BIPA tables"
     task :pdb => [:environment] do
@@ -195,10 +197,10 @@ namespace :bipa do
             structure = Bipa::Structure.find_by_pdb_code(pdb_code)
             kdtree    = Bipa::Kdtree.new
             contacts  = Array.new
-            
+
             structure.atoms.each { |a| kdtree.insert(a) }
-            
-            stucture.aa_atoms.each do |aa_atom|
+
+            structure.aa_atoms.each do |aa_atom|
               neighbor_atoms = kdtree.neighbors(aa_atom, MAX_DISTANCE).map(&:point)
               neighbor_atoms.each do |neighbor_atom|
                 if neighbor_atom.na?
@@ -215,7 +217,7 @@ namespace :bipa do
             $logger.info("Importing CONTACTS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
 
             ActiveRecord::Base.remove_connection
-          end 
+          end
         end
         ActiveRecord::Base.establish_connection(config)
       end

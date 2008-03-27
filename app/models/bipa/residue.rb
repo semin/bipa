@@ -7,7 +7,7 @@ class Bipa::Residue < ActiveRecord::Base
   belongs_to  :chain,
               :class_name   => "Bipa::Chain",
               :foreign_key  => "chain_id"
-              
+
   belongs_to  :chain_interface,
               :class_name   => "Bipa::ChainInterface",
               :foreign_key  => "chain_interface_id"
@@ -27,20 +27,20 @@ class Bipa::Residue < ActiveRecord::Base
   end
 
   def buried?
-    not on_surface?
+    !on_surface?
   end
 
   # Residue specific properties
   def dna?
-    self.class == DnaResidue
+    self.class == Bipa::DnaResidue
   end
 
   def rna?
-    self.class == RnaResidue
+    self.class == Bipa::RnaResidue
   end
 
   def aa?
-    self.class == AaResidue
+    self.class == Bipa::AaResidue
   end
 
   def justified_residue_name
@@ -67,13 +67,13 @@ end
 
 
 class Bipa::AaResidue < Bipa::StdResidue
-  
+
   include Bipa::NucleicAcidBinding
 
   belongs_to  :domain,
               :class_name   => "Bipa::ScopDomain",
               :foreign_key  => "scop_id"
-              
+
   belongs_to  :domain_interface,
               :class_name   => "Bipa::DomainInterface",
               :foreign_key  => "domain_interface_id"

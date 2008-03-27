@@ -1,17 +1,18 @@
 module Bipa
-  class Kdtree
-    class Kdnode
+  class Kdnode
 
-      attr_reader   :point
-      attr_accessor :left, :right
+    attr_reader   :point
+    attr_accessor :left, :right
 
-      def initialize(point)
-        @point  = point
-        @left   = nil
-        @right  = nil
-      end
+    def initialize(point)
+      @point  = point
+      @left   = nil
+      @right  = nil
     end
-    
+  end
+
+  class Kdtree
+
     def initialize
       @root       = nil
       @neighbors  = []
@@ -27,8 +28,8 @@ module Bipa
         begin
           tmp_node      = current_node
           discriminator = depth % point.size
-          ordinate1     = point[discriminator]
-          ordinate2     = tmp_node.point[discriminator]
+          ordinate1     = point.dimension(discriminator)
+          ordinate2     = tmp_node.point.dimension(discriminator)
           if ordinate1 > ordinate2
             current_node = tmp_node.right
           else
@@ -50,7 +51,7 @@ module Bipa
         nil
       elsif ((root.point - point) < eps)
         root
-      elsif (point[d] > root.point[d])
+      elsif (point.dimension(d) > root.point.dimension(d))
         find_neighbor(root.right, depth + 1, point, eps)
       else
         find_neighbor(root.left, depth + 1, point, eps)
@@ -67,10 +68,10 @@ module Bipa
       if ((point - root.point) < range)
         @results << root
       end
-      if (root.point[d] > (point[d] - range))
+      if (root.point.dimension(d) > (point.dimension(d) - range))
         find_neighbors(root.left, depth + 1, point, range)
       end
-      if (root.point[d] < (point[d] + range))
+      if (root.point.dimension(d) < (point.dimension(d) + range))
         find_neighbors(root.right, depth + 1, point, range)
       end
     end

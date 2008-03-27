@@ -52,6 +52,10 @@ class Bipa::Atom < ActiveRecord::Base
   end
 
   # Atom specific properties
+  def aa?
+    residue.aa?
+  end
+
   def dna?
     residue.dna?
   end
@@ -60,8 +64,8 @@ class Bipa::Atom < ActiveRecord::Base
     residue.rna?
   end
 
-  def aa?
-    residue.aa?
+  def na?
+    dna? || rna?
   end
 
   def polar?
@@ -140,31 +144,31 @@ class Bipa::Atom < ActiveRecord::Base
             element,
             charge)
   end
-  
+
   # Vector calculation & KDTree algorithm related
   def xyz
-    @xyz ||= [self.x, self.y, self.z]
+    @xyz ||= [x, y, z]
   end
-  
+
   def size
-    @xyz.size
+    xyz.size
   end
-  
-  def [](index)
-    @xyz[index]
+
+  def dimension(index)
+    xyz[index]
   end
-  
+
   def -(other)
-    self.c_distance(self.x, self.y, self.z, other.x, other.y, other.z)
+    c_distance(x, y, z, other.x, other.y, other.z)
   end
 
   inline do |builder|
     builder.include "<math.h>"
     builder.c <<-C_CODE
-        double c_distance(double sx, double sy, double sz, 
+        double c_distance(double sx, double sy, double sz,
                           double ox, double oy, double oz) {
-          return  sqrt( pow(sx - ox, 2) + 
-                        pow(sy - oy, 2) + 
+          return  sqrt( pow(sx - ox, 2) +
+                        pow(sy - oy, 2) +
                         pow(sz - oz, 2) );
         }
     C_CODE
