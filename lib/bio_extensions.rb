@@ -2,6 +2,17 @@ require "bio"
 require File.expand_path(File.dirname(__FILE__) + '/bipa/constants')
 
 module Bio
+
+  # Patch for weird method 'three2one'
+  class AminoAcid
+    module Data
+
+      def three2one(x)
+        reverse[x]
+      end
+    end
+  end
+
   class PDB
 
     def deposition_date
