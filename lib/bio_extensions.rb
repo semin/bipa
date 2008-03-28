@@ -50,7 +50,7 @@ module Bio
       end
 
       def na?
-        dna? or rna? or hna?
+        dna? || rna? || hna?
       end
     end
 
@@ -106,18 +106,18 @@ module Bio
         def position_type
           if residue.na?
             if NucleicAcids::Atoms::PHOSPHATE.include?(name.strip)
-                'phosphate'
+              'phosphate'
             elsif NucleicAcids::Atoms::SUGAR.include?(name.strip)
-                'sugar'
+              'sugar'
             else
-                'base'
+              'base'
             end
             # what should I do for heterogens (especially for modified amino acids)?
           elsif residue.aa?
             if AminoAcids::Atoms::BACKBONE.include?(name.strip)
-                'backbone'
+              'backbone'
             else
-                'sidechain'
+              'sidechain'
             end
           else
             nil
