@@ -241,7 +241,7 @@ namespace :bipa do
 
           hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
           unless File.exist?(hbplus_file)
-            puts "Skip #{pdb_code} (#{i + 1}/#{total_pdb}): #{hbplus_file} doesn't exist!"
+            puts "Skip #{pdb_code} (#{i + 1}/#{pdb_codes.size}): #{hbplus_file} doesn't exist!"
             next
           end
 
@@ -249,26 +249,21 @@ namespace :bipa do
 
           structure = Bipa::Structure.find_by_pdb_code(pdb_code)
 
-          if structure.has_complete_hbonds
-            puts "Skip #{pdb_code} (#{i + 1}/#{total_pdb}): complete hbonds already!"
-            next
-          end
-
-          hbonds = Array.new
+          hbonds      = Array.new
           hbonds_bipa = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).hbonds
 
           hbonds_bipa.each do |hbond|
             if ((hbond.donor.aa? && hbond.acceptor.na?) || (hbond.donor.na? && hbond.acceptor.aa?))
               begin
-                donor_atom = structure.models[0].chains.find_by_chain_code(hbond.donor.chain_code).residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).atoms.find_by_atom_name(hbond.donor.atom_name)
-                acceptor_atom = structure.models[0].chains.find_by_chain_code(hbond.acceptor.chain_code).residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).atoms.find_by_atom_name(hbond.acceptor.atom_name)
+                donor_atom = structure.models.first.chains.find_by_chain_code(hbond.donor.chain_code).residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).atoms.find_by_atom_name(hbond.donor.atom_name)
+                acceptor_atom = structure.models.first.chains.find_by_chain_code(hbond.acceptor.chain_code).residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).atoms.find_by_atom_name(hbond.acceptor.atom_name)
               rescue
                 puts "Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}!"
                 next
               else
                 if donor_atom && acceptor_atom
                   hbonds << [
-                    donor_atom[:id], acceptor_atom[:id], hbond.da_distance,
+                    donor_atom.id, acceptor_atom.id, hbond.da_distance,
                     hbond.category, hbond.gap, hbond.ca_distance, hbond.dha_angle,
                     hbond.ha_distance, hbond.haaa_angle, hbond.daaa_angle
                   ]
@@ -284,18 +279,14 @@ namespace :bipa do
           ]
 
           Bipa::Hbond.import(columns, hbonds)
-          # Tag for presence/absence of hbonds
-          if hbonds.size > 0
-            structure.has_complete_hbonds = true
-            structure.save!
-          end
-          $logger.info("Importing HBONDS in #{pdb_code} (#{i + 1}/#{total_pdb}): done")
+
+          $logger.info("Importing HBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
 
           ActiveRecord::Base.remove_connection
-        end # fork_manager.fork
+        end # fmanager.fork
       end # pdb_codes.each_with_index
       ActiveRecord::Base.establish_connection(config)
-    end # fork_manager.manage
+    end # fmanager.manage
   end
 
 
@@ -510,7 +501,7 @@ namespace :bipa do
             end
           end
 
-          puts "Importing 'Chain Interfaces' from #{pdb_code} (#{i + 1}/#{total_pdb}): done"
+          puts "Importing 'Chain Interfaces' from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
           ActiveRecord::Base.remove_connection
         end
       end

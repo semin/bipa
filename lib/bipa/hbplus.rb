@@ -1,4 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/constants')
+require "rubygems"
+require "active_support"
+require File.expand_path(File.dirname(__FILE__) + "/constants")
 
 module Bipa
   class Hbplus
@@ -6,43 +8,50 @@ module Bipa
     attr_reader :hbonds, :whbonds
 
     class Atom
-      
-      include Constants
 
-      attr_reader :chain_code, :residue_code, :insertion_code,
-                  :residue_name, :atom_name
+      include Bipa::Constants
 
-      def initialize(chain_code, residue_code, insertion_code,
-                     residue_name, atom_name)
+      attr_reader :chain_code,
+                  :residue_code,
+                  :insertion_code,
+                  :residue_name,
+                  :atom_name
+
+      def initialize(chain_code,
+                     residue_code,
+                     insertion_code,
+                     residue_name,
+                     atom_name)
+
         @chain_code     = chain_code
         @residue_code   = residue_code
-        @insertion_code = insertion_code
+        @insertion_code = insertion_code == "-" ? nil : insertion_code
         @residue_name   = residue_name
         @atom_name      = atom_name
       end
 
-      def is_water?
-        @residue_name == 'HOH'
+      def water?
+        @residue_name == "HOH"
       end
 
-      def is_dna?
-        NucleicAcids::DNA::Residues::ALL.include?(@residue_name)
+      def dna?
+        NucleicAcids::Dna::Residues::ALL.include?(@residue_name)
       end
 
-      def is_rna?
-        NucleicAcids::RNA::Residues::ALL.include?(@residue_name)
+      def rna?
+        NucleicAcids::Rna::Residues::ALL.include?(@residue_name)
       end
 
-      def is_na?
-        self.is_dna? || self.is_rna?
+      def na?
+        dna? || rna?
       end
 
-      def is_aa?
+      def aa?
         AminoAcids::Residues::STANDARD.include?(@residue_name)
       end
 
       def ==(other)
-        raise "Cannot compare to #{other.class} type!" unless other.kind_of?(BIPA::Hbplus::Atom)
+        raise "Cannot compare to #{other.class} type!" unless other.kind_of?(Bipa::Hbplus::Atom)
         return  @chain_code == other.chain_code &&
                 @residue_code == other.residue_code &&
                 @insertion_code == other.insertion_code &&
@@ -55,13 +64,26 @@ module Bipa
       end
     end
 
-    Hbond = Struct.new('Hbond', :donor, :acceptor, :da_distance,
-                       :category, :gap, :ca_distance, :dha_angle,
-                       :ha_distance, :haaa_angle, :daaa_angle, :hbond_code)
+    Hbond   = Struct.new("Hbond",
+                         :donor,
+                         :acceptor,
+                         :da_distance,
+                         :category,
+                         :gap,
+                         :ca_distance,
+                         :dha_angle,
+                         :ha_distance,
+                         :haaa_angle,
+                         :daaa_angle,
+                         :hbond_code)
 
-    WHbond = Struct.new('WHbond', :aa_atom, :na_atom, :water_atom)
+    WHbond  = Struct.new("WHbond",
+                         :aa_atom,
+                         :na_atom,
+                         :water_atom)
 
     def initialize(file_str)
+
       @hbonds = []
 
       file_str.each do |line|
@@ -91,23 +113,25 @@ module Bipa
 
       aa_neighbors = {}
       na_neighbors = {}
+
       hbonds.each do |hbond|
-        if hbond.donor.is_water? && hbond.acceptor.is_aa?
+        if hbond.donor.water? && hbond.acceptor.aa?
           aa_neighbors[hbond.donor.to_s] = [] if aa_neighbors[hbond.donor.to_s].nil?
           aa_neighbors[hbond.donor.to_s] << hbond.acceptor.to_s
-        elsif hbond.donor.is_aa? && hbond.acceptor.is_water?
+        elsif hbond.donor.aa? && hbond.acceptor.water?
           aa_neighbors[hbond.acceptor.to_s] = [] if aa_neighbors[hbond.acceptor.to_s].nil?
           aa_neighbors[hbond.acceptor.to_s] << hbond.donor.to_s
-        elsif hbond.donor.is_water? && hbond.acceptor.is_na?
+        elsif hbond.donor.water? && hbond.acceptor.na?
           na_neighbors[hbond.donor.to_s] = [] if na_neighbors[hbond.donor.to_s].nil?
           na_neighbors[hbond.donor.to_s] << hbond.acceptor.to_s
-        elsif hbond.donor.is_na? && hbond.acceptor.is_water?
+        elsif hbond.donor.na? && hbond.acceptor.water?
           na_neighbors[hbond.acceptor.to_s] = [] if na_neighbors[hbond.acceptor.to_s].nil?
           na_neighbors[hbond.acceptor.to_s] << hbond.donor.to_s
         end
       end
 
       @whbonds = []
+
       water_bridges = aa_neighbors.keys & na_neighbors.keys
 
       water_bridges.each do |water|
@@ -123,6 +147,7 @@ module Bipa
 
     def self.parse_hbplus_line(line)
       hbline = {}
+
       hbline[:donor_chain_code]         = line[0..0]
       hbline[:donor_residue_code]       = line[1..4].to_i
       hbline[:donor_insertion_code]     = line[5..5]
@@ -148,8 +173,8 @@ module Bipa
 end # module Bipa
 
 if $0 == __FILE__
-  require 'test/unit'
-  
+  require "test/unit"
+
   include Bipa
 
   class TestHbplus < Test::Unit::TestCase
@@ -188,18 +213,18 @@ END
     def test_parse_hbplus_line
       test_line = "-2015-HOH O   A0008-GLY O   3.38 HM  -2 -1.00  -1.0 -1.00  -1.0 107.9    15"
       hbline = Hbplus.parse_hbplus_line(test_line)
-      assert_equal('-',     hbline[:donor_chain_code])
+      assert_equal("-",     hbline[:donor_chain_code])
       assert_equal(2015,    hbline[:donor_residue_code])
-      assert_equal('-',     hbline[:donor_insertion_code])
-      assert_equal('HOH',   hbline[:donor_residue_name])
-      assert_equal('O',     hbline[:donor_atom_name])
-      assert_equal('A',     hbline[:acceptor_chain_code])
+      assert_equal("-",     hbline[:donor_insertion_code])
+      assert_equal("HOH",   hbline[:donor_residue_name])
+      assert_equal("O",     hbline[:donor_atom_name])
+      assert_equal("A",     hbline[:acceptor_chain_code])
       assert_equal(8,       hbline[:acceptor_residue_code])
-      assert_equal('-',     hbline[:acceptor_insertion_code])
-      assert_equal('GLY',   hbline[:acceptor_residue_name])
-      assert_equal('O',     hbline[:acceptor_atom_name])
+      assert_equal("-",     hbline[:acceptor_insertion_code])
+      assert_equal("GLY",   hbline[:acceptor_residue_name])
+      assert_equal("O",     hbline[:acceptor_atom_name])
       assert_equal(3.38,    hbline[:da_distance])
-      assert_equal('HM',    hbline[:category])
+      assert_equal("HM",    hbline[:category])
       assert_equal(nil,     hbline[:gap])
       assert_equal(nil,     hbline[:ca_distance])
       assert_equal(nil,     hbline[:dha_angle])
@@ -215,33 +240,34 @@ END
       assert_equal(2032, hbplus.hbonds.first.donor.residue_code)
     end
 
-    def test_is_aa?
+    def test_aa?
       hbplus = Hbplus.new(@test_str)
-      assert(hbplus.hbonds[0].acceptor.is_aa?)
+      assert(hbplus.hbonds[0].acceptor.aa?)
     end
 
-    def test_is_dna?
+    def test_dna?
       hbplus = Hbplus.new(@test_str)
-      assert(hbplus.hbonds[17].acceptor.is_dna?)
+      assert(hbplus.hbonds[17].acceptor.dna?)
     end
 
-    def test_is_rna?
+    def test_rna?
     end
 
-    def test_is_na?
+    def test_na?
       hbplus = Hbplus.new(@test_str)
-      assert(hbplus.hbonds[17].acceptor.is_na?)
+      assert(hbplus.hbonds[17].acceptor.na?)
     end
 
-    def test_is_water?
+    def test_water?
       hbplus = Hbplus.new(@test_str)
-      assert(hbplus.hbonds[0].donor.is_water?)
+      assert(hbplus.hbonds[0].donor.water?)
     end
 
-    def test_equality
-      atom1 = Hbplus::Atom.new('A', '1', nil, 'GLY', 'O')
-      atom2 = Hbplus::Atom.new('A', '1', nil, 'GLY', 'O')
-      atom3 = Hbplus::Atom.new('A', '1', 'A', 'GLY', 'O')
+    def test_equality_between_atoms
+      atom1 = Hbplus::Atom.new("A", "1", nil, "GLY", "O")
+      atom2 = Hbplus::Atom.new("A", "1", nil, "GLY", "O")
+      atom3 = Hbplus::Atom.new("A", "1", "A", "GLY", "O")
+
       assert_equal(atom1, atom2)
       assert_not_equal(atom1, atom3)
       assert_raise RuntimeError do
