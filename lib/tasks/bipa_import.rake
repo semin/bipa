@@ -100,7 +100,7 @@ namespace :bipa do
                 :chain_id             => chain_id,
                 :residue_code         => residue.residue_id,
                 :icode                => (residue.iCode.empty? ? nil : residue.iCode),
-                :residue_name         => residue.resName,
+                :residue_name         => residue.resName.strip,
                 :hydrophobicity       => residue.hydrophobicity,
                 :secondary_structure  => sstruc
               }

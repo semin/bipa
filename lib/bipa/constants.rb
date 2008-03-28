@@ -3,16 +3,18 @@ module Bipa
     module AminoAcids
       module Residues
 
-        POSITIVE    = %w(ARG LYS)
-        NEGATIVE    = %w(ASP GLU)
-        POLAR       = %w(ASN GLN HIS SER THR)
-        ALIPHATIC   = %w(ALA ILE LEU MET VAL)
-        AROMATIC    = %w(PHE TRP TYR)
-        PARTICULAR  = %w(CYS GLY PRO)
-        UNKNOWN     = %w(UNK)
-        HYDROPHILIC = POSITIVE + NEGATIVE + POLAR
-        HYDROPHOBIC = ALIPHATIC + AROMATIC + PARTICULAR
-        STANDARD    = HYDROPHILIC + HYDROPHOBIC
+        POSITIVE      = %w(ARG LYS)
+        NEGATIVE      = %w(ASP GLU)
+        POLAR         = %w(ASN GLN HIS SER THR)
+        ALIPHATIC     = %w(ALA ILE LEU MET VAL)
+        AROMATIC      = %w(PHE TRP TYR)
+        PARTICULAR    = %w(CYS GLY PRO)
+        UNKNOWN       = %w(UNK)
+        HYDROPHILIC   = POSITIVE + NEGATIVE + POLAR
+        HYDROPHOBIC   = ALIPHATIC + AROMATIC + PARTICULAR
+        STANDARD      = HYDROPHILIC + HYDROPHOBIC
+        NON_STANDARD  = %w(ASX XLE XAA UNK GLZ SEC PYL)
+        ALL           = STANDARD + NON_STANDARD + UNKNOWN
 
         STANDARD_ASA = {
           "ALA" =>  107.95,

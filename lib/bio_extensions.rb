@@ -1,5 +1,4 @@
-require 'rubygems'
-require 'bio'
+require "bio"
 require File.expand_path(File.dirname(__FILE__) + '/bipa/constants')
 
 module Bio
@@ -60,37 +59,35 @@ module Bio
       include Bipa::Constants
 
       def dna?
-        NucleicAcids::Dna::Residues::ALL.include?(resName)
+        NucleicAcids::Dna::Residues::ALL.include?(resName.strip)
       end
 
       def rna?
-        NucleicAcids::Rna::Residues::ALL.include?(resName)
+        NucleicAcids::Rna::Residues::ALL.include?(resName.strip)
       end
 
       def na?
-        NucleicAcids::Residues::ALL.include?(resName)
+        NucleicAcids::Residues::ALL.include?(resName.strip)
       end
 
       def aa?
-        !na?
+        AminoAcids::Residues::STANDARD.include?(resName.strip)
       end
 
       def hydrophobicity
-        if self.aa?
-          if AminoAcids::Residues::POSITIVE.include? resName
-            'positive'
-          elsif AminoAcids::Residues::NEGATIVE.include? resName
-            'negative'
-          elsif AminoAcids::Residues::POLAR.include? resName
-            'polar'
-          elsif AminoAcids::Residues::ALIPHATIC.include? resName
-            'aliphatic'
-          elsif AminoAcids::Residues::AROMATIC.include? resName
-            'aromatic'
-          elsif AminoAcids::Residues::PARTICULAR.include? resName
-            'particular'
-          elsif AminoAcids::Residues::UNKNOWN.include? resName
-            nil
+        if aa?
+          if AminoAcids::Residues::POSITIVE.include?(resName.strip)
+              'positive'
+          elsif AminoAcids::Residues::NEGATIVE.include?(resName.strip)
+              'negative'
+          elsif AminoAcids::Residues::POLAR.include?(resName.strip)
+              'polar'
+          elsif AminoAcids::Residues::ALIPHATIC.include?(resName.strip)
+              'aliphatic'
+          elsif AminoAcids::Residues::AROMATIC.include?(resName.strip)
+              'aromatic'
+          elsif AminoAcids::Residues::PARTICULAR.include?(resName.strip)
+              'particular'
           else
             nil
           end
@@ -108,21 +105,22 @@ module Bio
 
         def position_type
           if residue.na?
-            if NucleicAcids::Atoms::PHOSPHATE.include? name
-              'phosphate'
-            elsif NucleicAcids::Atoms::SUGAR.include? name
-              'sugar'
+            if NucleicAcids::Atoms::PHOSPHATE.include?(name.strip)
+                'phosphate'
+            elsif NucleicAcids::Atoms::SUGAR.include?(name.strip)
+                'sugar'
             else
-              'base'
+                'base'
             end
+            # what should I do for heterogens (especially for modified amino acids)?
           elsif residue.aa?
-            if AminoAcids::Atoms::BACKBONE.include? name
-              'backbone'
+            if AminoAcids::Atoms::BACKBONE.include?(name.strip)
+                'backbone'
             else
-              'sidechain'
+                'sidechain'
             end
           else
-            raise "#{residue} is unknown type of residue"
+            nil
           end
         end
       end

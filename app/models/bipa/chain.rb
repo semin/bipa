@@ -9,9 +9,10 @@ class Bipa::Chain < ActiveRecord::Base
               :foreign_key  => "model_id"
 
   has_many  :residues,
-            :class_name => "Bipa::Residue",
-            :dependent  => :destroy
-  
+            :class_name   => "Bipa::Residue",
+            :foreign_key  => "chain_id",
+            :dependent    => :destroy
+
   def atoms
     residues.inject([]) { |s, r| s.concat(r.atoms) }
   end
@@ -57,11 +58,11 @@ class Bipa::HnaChain < Bipa::NaChain
   has_many  :rna_residues,
             :class_name   => "Bipa::RnaResidue",
             :foreign_key  => "chain_id"
-  
+
   def dna_atoms
     dna_residues.inject([]) { |s, r| s.concat(r.atoms) }
   end
-  
+
   def rna_atoms
     rna_residues.inject([]) { |s, r| s.concat(r.atoms) }
   end
