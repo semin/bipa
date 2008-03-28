@@ -247,16 +247,24 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          structure = Bipa::Structure.find_by_pdb_code(pdb_code)
-
+          structure   = Bipa::Structure.find_by_pdb_code(pdb_code)
           hbonds      = Array.new
           hbonds_bipa = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).hbonds
 
           hbonds_bipa.each do |hbond|
             if ((hbond.donor.aa? && hbond.acceptor.na?) || (hbond.donor.na? && hbond.acceptor.aa?))
               begin
-                donor_atom = structure.models.first.chains.find_by_chain_code(hbond.donor.chain_code).residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).atoms.find_by_atom_name(hbond.donor.atom_name)
-                acceptor_atom = structure.models.first.chains.find_by_chain_code(hbond.acceptor.chain_code).residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).atoms.find_by_atom_name(hbond.acceptor.atom_name)
+                donor_atom    = structure.
+                                models.first.
+                                chains.find_by_chain_code(hbond.donor.chain_code).
+                                residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).
+                                atoms.find_by_atom_name(hbond.donor.atom_name)
+
+                acceptor_atom = structure.
+                                models.first.
+                                chains.find_by_chain_code(hbond.acceptor.chain_code).
+                                residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).
+                                atoms.find_by_atom_name(hbond.acceptor.atom_name)
               rescue
                 puts "Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}!"
                 next
