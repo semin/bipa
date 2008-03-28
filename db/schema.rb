@@ -81,7 +81,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table "chains", :force => true do |t|
     t.belongs_to  "model",      :null => false
     t.string      "type",       :null => false
-    t.string      "chain_code",
+    t.string      "chain_code"
     t.integer     "mol_code"
     t.string      "molecule"
   end
