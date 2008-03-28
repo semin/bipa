@@ -19,7 +19,7 @@ ActiveRecord::Schema.define(:version => 1) do
     (10..100).step(10) { |i| t.belongs_to  "subfamily#{i}" }
     t.integer     "lft"
     t.integer     "rgt"
-    t.string      "type"
+    t.string      "type",       :null => false
     t.integer     "sunid",      :null => false
     t.string      "stype",      :null => false
     t.string      "sccs"
@@ -42,7 +42,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'subfamilies' table
   create_table "subfamilies", :force => true do |t|
     t.belongs_to  "scop_family"
-    t.string      "type"
+    t.string      "type",       :null => false
   end
 
   add_index "subfamilies", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
@@ -80,8 +80,8 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'chains' table
   create_table "chains", :force => true do |t|
     t.belongs_to  "model",      :null => false
-    t.string      "type"
-    t.string      "chain_code", :null => false
+    t.string      "type",       :null => false
+    t.string      "chain_code",
     t.integer     "mol_code"
     t.string      "molecule"
   end
@@ -195,7 +195,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :interfaces, :force => true do |t|
     t.belongs_to  "scop"
     t.belongs_to  "chain"
-    t.string      "type"
+    t.string      "type",     :null => false
     t.float       "asa"
     t.float       "polarity"
 

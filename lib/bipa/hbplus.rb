@@ -23,7 +23,7 @@ module Bipa
                      residue_name,
                      atom_name)
 
-        @chain_code     = chain_code
+        @chain_code     = chain_code == "-" ? nil : chain_code
         @residue_code   = residue_code
         @insertion_code = insertion_code == "-" ? nil : insertion_code
         @residue_name   = residue_name

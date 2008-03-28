@@ -35,19 +35,19 @@ module Bio
     class Chain
 
       def aa?
-        residues.any? { |r| r.aa? } && !id.empty?
+        residues.any? { |r| r.aa? } && !id.blank?
       end
 
       def dna?
-        residues.any? { |r| r.dna? } && residues.all? { |r| !r.rna? } && !id.empty?
+        residues.any? { |r| r.dna? } && residues.all? { |r| !r.rna? } && !id.blank?
       end
 
       def rna?
-        residues.any? { |r| r.rna? } && residues.all? { |r| !r.dna? } && !id.empty?
+        residues.any? { |r| r.rna? } && residues.all? { |r| !r.dna? } && !id.blank?
       end
 
       def hna?
-        residues.any? { |r| r.dna? } && residues.any? { |r| r.rna? } && !id.empty?
+        residues.any? { |r| r.dna? } && residues.any? { |r| r.rna? } && !id.blank?
       end
 
       def na?

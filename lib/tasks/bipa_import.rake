@@ -74,7 +74,7 @@ namespace :bipa do
 
           model_bio.each do |chain_bio|
 
-            chain_code = chain_bio.chain_id.empty? ? '-' : chain_bio.chain_id
+            chain_code = chain_bio.chain_id.blank? ? nil : chain_bio.chain_id
 
             chain_type = if chain_bio.aa?
                            Bipa::AaChain
