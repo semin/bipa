@@ -23,11 +23,11 @@ module Bipa
                      residue_name,
                      atom_name)
 
-        @chain_code     = chain_code == "-" ? nil : chain_code
+        @chain_code     = chain_code
         @residue_code   = residue_code
-        @insertion_code = insertion_code == "-" ? nil : insertion_code
-        @residue_name   = residue_name
-        @atom_name      = atom_name
+        @insertion_code = insertion_code
+        @residue_name   = residue_name.strip
+        @atom_name      = atom_name.strip
       end
 
       def water?
@@ -52,11 +52,11 @@ module Bipa
 
       def ==(other)
         raise "Cannot compare to #{other.class} type!" unless other.kind_of?(Bipa::Hbplus::Atom)
-        return  @chain_code == other.chain_code &&
-                @residue_code == other.residue_code &&
+        return  @chain_code     == other.chain_code &&
+                @residue_code   == other.residue_code &&
                 @insertion_code == other.insertion_code &&
-                @residue_name == other.residue_name &&
-                @atom_name == other.atom_name
+                @residue_name   == other.residue_name &&
+                @atom_name      == other.atom_name
       end
 
       def to_s
@@ -148,14 +148,14 @@ module Bipa
     def self.parse_hbplus_line(line)
       hbline = {}
 
-      hbline[:donor_chain_code]         = line[0..0]
+      hbline[:donor_chain_code]         = line[0..0] == "-" ? nil : line[0..0]
       hbline[:donor_residue_code]       = line[1..4].to_i
-      hbline[:donor_insertion_code]     = line[5..5]
+      hbline[:donor_insertion_code]     = line[5..5] == "-" ? nil : line[5..5]
       hbline[:donor_residue_name]       = line[6..8].strip
       hbline[:donor_atom_name]          = line[9..12].strip
-      hbline[:acceptor_chain_code]      = line[14..14]
+      hbline[:acceptor_chain_code]      = line[14..14] == "-" ? nil : line[14..14]
       hbline[:acceptor_residue_code]    = line[15..18].to_i
-      hbline[:acceptor_insertion_code]  = line[19..19]
+      hbline[:acceptor_insertion_code]  = line[19..19] == "-" ? nil : line[19..19]
       hbline[:acceptor_residue_name]    = line[20..22].strip
       hbline[:acceptor_atom_name]       = line[23..26].strip
       hbline[:da_distance]              = line[27..31].to_f
@@ -213,14 +213,14 @@ END
     def test_parse_hbplus_line
       test_line = "-2015-HOH O   A0008-GLY O   3.38 HM  -2 -1.00  -1.0 -1.00  -1.0 107.9    15"
       hbline = Hbplus.parse_hbplus_line(test_line)
-      assert_equal("-",     hbline[:donor_chain_code])
+      assert_equal(nil,     hbline[:donor_chain_code])
       assert_equal(2015,    hbline[:donor_residue_code])
-      assert_equal("-",     hbline[:donor_insertion_code])
+      assert_equal(nil,     hbline[:donor_insertion_code])
       assert_equal("HOH",   hbline[:donor_residue_name])
       assert_equal("O",     hbline[:donor_atom_name])
       assert_equal("A",     hbline[:acceptor_chain_code])
       assert_equal(8,       hbline[:acceptor_residue_code])
-      assert_equal("-",     hbline[:acceptor_insertion_code])
+      assert_equal(nil,     hbline[:acceptor_insertion_code])
       assert_equal("GLY",   hbline[:acceptor_residue_name])
       assert_equal("O",     hbline[:acceptor_atom_name])
       assert_equal(3.38,    hbline[:da_distance])

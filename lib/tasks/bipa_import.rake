@@ -99,7 +99,7 @@ namespace :bipa do
               {
                 :chain_id             => chain_id,
                 :residue_code         => residue.residue_id,
-                :icode                => (residue.iCode.empty? ? nil : residue.iCode),
+                :icode                => (residue.iCode.blank? ? nil : residue.iCode),
                 :residue_name         => residue.resName.strip,
                 :hydrophobicity       => residue.hydrophobicity,
                 :secondary_structure  => sstruc
@@ -114,15 +114,15 @@ namespace :bipa do
                 :residue_id     => residue_id,
                 :position_type  => atom.position_type,
                 :atom_code      => atom.serial,
-                :atom_name      => atom.name,
-                :altloc         => atom.altLoc.empty? ? nil : atom.altLoc,
+                :atom_name      => atom.name.strip,
+                :altloc         => atom.altLoc.blank? ? nil : atom.altLoc,
                 :x              => atom.x,
                 :y              => atom.y,
                 :z              => atom.z,
                 :occupancy      => atom.occupancy,
                 :tempfactor     => atom.tempFactor,
                 :element        => atom.element,
-                :charge         => atom.charge.empty? ? nil : atom.charge,
+                :charge         => atom.charge.blank? ? nil : atom.charge,
                 :bound_asa      => bound_asa,
                 :unbound_asa    => unbound_asa,
                 :delta_asa      => delta_asa
@@ -379,7 +379,7 @@ namespace :bipa do
     # 14982   px      a.1.1.1 d1dlwa_ 1dlw A:
     # 100068  px      a.1.1.1 d1uvya_ 1uvy A:
     IO.foreach(description_file) do |line|
-      next if line =~ /^#/ || line =~ /^\s*$/ # Skip empty lines
+      next if line =~ /^#/ || line.blank?
         sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
       sccs  = '-' if sccs =~ /unassigned/
         sid   = '-' if sid  =~ /unassigned/
