@@ -21,6 +21,8 @@ require_dependency "bipa/subfamily"
 RESUME          = ENV["RESUME"].to_i > 0 ? ENV["RESUME"].to_i : false
 MAX_FORK        = ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i : 2
 
+EPSILON         = 1.0E-6
+
 PDB_SRC         = :remote
 PDB_MIRROR_DIR  = "/BiO/Mirror/PDB"
 PDB_ENTRY_FILE  = "./derived_data/pdb_entry_type.txt"

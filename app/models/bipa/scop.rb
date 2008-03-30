@@ -279,43 +279,43 @@ class Bipa::ScopDomain < Bipa::Scop
   has_many  :dna_interfaces,
             :class_name   => "Bipa::DomainDnaInterface",
             :foreign_key  => 'scop_id'
-            
+
   has_many  :rna_interfaces,
             :class_name   => 'Bipa::DomainRnaInterface',
             :foreign_key  => 'scop_id'
-            
+
   has_many  :residues,
             :class_name   => 'Bipa::AaResidue',
             :foreign_key  => 'scop_id'
-            
+
   has_many  :chains,
             :through      => :residues,
             :uniq         => true
-            
+
   has_many  :atoms,
             :through      => :residues
-            
+
   has_many  :contacts,
             :through      => :atoms
-            
-  has_many  :contacting_atoms, 
+
+  has_many  :contacting_atoms,
             :through      => :contacts
-            
+
   has_many  :whbonds,
             :through      => :atoms
-            
+
   has_many  :whbonding_atoms,
             :through      => :whbonds
-            
+
   has_many  :hbonds_as_donor,
             :through      => :atoms
-            
+
   has_many  :hbonds_as_acceptor,
             :through      => :atoms
-            
+
   has_many  :hbonding_donors,
             :through      => :hbonds_as_acceptor
-            
+
   has_many  :hbonding_acceptors,
             :through      => :hbonds_as_donor
 

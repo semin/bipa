@@ -23,11 +23,11 @@ module Bipa
                      residue_name,
                      atom_name)
 
-        @chain_code     = chain_code
+        @chain_code     = chain_code.blank? ? nil : chain_code
         @residue_code   = residue_code
-        @insertion_code = insertion_code
-        @residue_name   = residue_name.strip
-        @atom_name      = atom_name.strip
+        @insertion_code = insertion_code.blank? ? nil : insertion_code
+        @residue_name   = residue_name
+        @atom_name      = atom_name
       end
 
       def water?

@@ -174,8 +174,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "daaa_angle"
   end
 
-  add_index "hbonds", ["hbonding_donor_id", "hbonding_acceptor_id"],  :name => "index_hbonds_on_hbonding_donor_id_and_hbonding_acceptor_id", :unique => true
-  add_index "hbonds", ["hbonding_acceptor_id", "hbonding_donor_id"],  :name => "index_hbonds_on_hbonding_acceptor_id_and_hbonding_donor_id", :unique => true
+  add_index "hbonds", ["hbonding_donor_id", "hbonding_acceptor_id"],  :name => "index_hbonds_on_hbonding_donor_id_and_hbonding_acceptor_id"
+  add_index "hbonds", ["hbonding_acceptor_id", "hbonding_donor_id"],  :name => "index_hbonds_on_hbonding_acceptor_id_and_hbonding_donor_id"
   add_index "hbonds", ["hbonding_donor_id"],                          :name => "index_hbonds_on_hbonding_donor_id"
   add_index "hbonds", ["hbonding_acceptor_id"],                       :name => "index_hbonds_on_hbonding_acceptor_id"
 
@@ -186,8 +186,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to "water_atom",     :null => false
   end
 
-  add_index "whbonds", ["atom_id", "whbonding_atom_id"],  :name => "index_whbonds_on_atom_id_and_whbonding_atom_id", :unique => true
-  add_index "whbonds", ["whbonding_atom_id", "atom_id"],  :name => "index_whbonds_on_whbonding_atom_id_and_atom_id", :unique => true
+  add_index "whbonds", ["atom_id", "whbonding_atom_id"],  :name => "index_whbonds_on_atom_id_and_whbonding_atom_id"
+  add_index "whbonds", ["whbonding_atom_id", "atom_id"],  :name => "index_whbonds_on_whbonding_atom_id_and_atom_id"
   add_index "whbonds", ["atom_id"],                       :name => "index_whbonds_on_atom_id"
   add_index "whbonds", ["whbonding_atom_id"],             :name => "index_whbonds_on_whbonding_atom_id"
 

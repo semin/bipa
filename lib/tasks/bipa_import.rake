@@ -5,7 +5,6 @@ namespace :bipa do
 
   $logger = Logger.new(STDOUT)
 
-
   desc "Import protein-nucleic acid complex PDB files to BIPA tables"
   task :pdb => [:environment] do
 
@@ -30,12 +29,25 @@ namespace :bipa do
           unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
           unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
 
+          if (!File.exists?(bound_asa_file) ||
+              !File.exists?(unbound_aa_asa_file) ||
+              !File.exist?(unbound_na_asa_file))
+            $logger.warn("Skip #{pdb_code} due to missing NACCESS result files")
+            next
+          end
+
           bound_atom_asa      = Bipa::Naccess.new(IO.readlines(bound_asa_file).join).atom_asa
           unbound_aa_atom_asa = Bipa::Naccess.new(IO.readlines(unbound_aa_asa_file).join).atom_asa
           unbound_na_atom_asa = Bipa::Naccess.new(IO.readlines(unbound_na_asa_file).join).atom_asa
 
           # Load DSSP results for every amino acid residue in the structure
-          dssp_file   = File.join(DSSP_DIR, "#{pdb_code}.dssp")
+          dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
+
+          if (!File.exists?(dssp_file))
+            $logger.warn("Skip #{pdb_code} due to missing DSSP result file")
+            next
+          end
+
           dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
 
           # Parse molecule and chain information
@@ -58,7 +70,7 @@ namespace :bipa do
             :classification => pdb_bio.classification,
             :title          => pdb_bio.definition,
             :exp_method     => pdb_bio.exp_method,
-            :resolution     => pdb_bio.resolution.to_f < 0.0000001 ? nil : pdb_bio.resolution,
+            :resolution     => pdb_bio.resolution.to_f < EPSILON ? nil : pdb_bio.resolution,
             :deposited_at   => pdb_bio.deposition_date
           )
 
@@ -248,8 +260,8 @@ namespace :bipa do
           ActiveRecord::Base.establish_connection(config)
 
           structure   = Bipa::Structure.find_by_pdb_code(pdb_code)
-          hbonds      = Array.new
           hbonds_bipa = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).hbonds
+          hbonds      = Array.new
 
           hbonds_bipa.each do |hbond|
             if ((hbond.donor.aa? && hbond.acceptor.na?) || (hbond.donor.na? && hbond.acceptor.aa?))
@@ -266,14 +278,21 @@ namespace :bipa do
                                 residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).
                                 atoms.find_by_atom_name(hbond.acceptor.atom_name)
               rescue
-                puts "Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}!"
+                $logger.warn("Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}")
                 next
               else
                 if donor_atom && acceptor_atom
                   hbonds << [
-                    donor_atom.id, acceptor_atom.id, hbond.da_distance,
-                    hbond.category, hbond.gap, hbond.ca_distance, hbond.dha_angle,
-                    hbond.ha_distance, hbond.haaa_angle, hbond.daaa_angle
+                    donor_atom.id,
+                    acceptor_atom.id,
+                    hbond.da_distance,
+                    hbond.category,
+                    hbond.gap,
+                    hbond.ca_distance,
+                    hbond.dha_angle,
+                    hbond.ha_distance,
+                    hbond.haaa_angle,
+                    hbond.daaa_angle
                   ]
                 end
               end
@@ -281,12 +300,33 @@ namespace :bipa do
           end
 
           columns = [
-            :hbonding_donor_id, :hbonding_acceptor_id,
-            :da_distance, :category, :gap, :ca_distance,
-            :dha_angle, :ha_distance, :haaa_angle, :daaa_angle
+            :hbonding_donor_id,
+            :hbonding_acceptor_id,
+            :da_distance,
+            :category,
+            :gap,
+            :ca_distance,
+            :dha_angle,
+            :ha_distance,
+            :haaa_angle,
+            :daaa_angle
           ]
 
-          Bipa::Hbond.import(columns, hbonds)
+          Bipa::Hbond.import(columns,
+                             hbonds,
+                             :on_duplicate_update => [
+                               :hbonding_donor_id,
+                               :hbonding_acceptor_id,
+                               :da_distance,
+                               :category,
+                               :gap,
+                               :ca_distance,
+                               :dha_angle,
+                               :ha_distance,
+                               :haaa_angle,
+                               :daaa_angle
+                              ]
+                            )
 
           $logger.info("Importing HBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
 
@@ -320,35 +360,45 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          structure   = Structure.find_by_pdb_code(pdb_code)
-          whbonds     = Array.new
+          structure   = Bipa::Structure.find_by_pdb_code(pdb_code)
           whbonds_bio = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).whbonds
+          whbonds     = Array.new
 
           whbonds_bio.each do |whbond|
-            aa_atom = structure.models[0].chains.find_by_chain_code(whbond.aa_atom.chain_code).residues.find_by_residue_code_and_icode(whbond.aa_atom.residue_code, whbond.aa_atom.insertion_code).atoms.find_by_atom_name(whbond.aa_atom.atom_name)
-            na_atom = structure.models[0].chains.find_by_chain_code(whbond.na_atom.chain_code).residues.find_by_residue_code_and_icode(whbond.na_atom.residue_code, whbond.na_atom.insertion_code).atoms.find_by_atom_name(whbond.na_atom.atom_name)
-            water_atom = structure.models[0].chains.find_by_chain_code(whbond.water_atom.chain_code).residues.find_by_residue_code_and_icode(whbond.water_atom.residue_code, whbond.water_atom.insertion_code).atoms.find_by_atom_name(whbond.water_atom.atom_name)
+            aa_atom = structure.
+                      models.first.
+                      chains.find_by_chain_code(whbond.aa_atom.chain_code).
+                      residues.find_by_residue_code_and_icode(whbond.aa_atom.residue_code, whbond.aa_atom.insertion_code).
+                      atoms.find_by_atom_name(whbond.aa_atom.atom_name)
+
+            na_atom = structure.
+                      models.first.
+                      chains.find_by_chain_code(whbond.na_atom.chain_code).
+                      residues.find_by_residue_code_and_icode(whbond.na_atom.residue_code, whbond.na_atom.insertion_code).
+                      atoms.find_by_atom_name(whbond.na_atom.atom_name)
+
+            water_atom =  structure.
+                          models.first.
+                          chains.find_by_chain_code(whbond.water_atom.chain_code).
+                          residues.find_by_residue_code_and_icode(whbond.water_atom.residue_code, whbond.water_atom.insertion_code).
+                          atoms.find_by_atom_name(whbond.water_atom.atom_name)
 
             if aa_atom && na_atom && water_atom
-              whbonds << [aa_atom[:id], na_atom[:id], water_atom[:id]]
+              whbonds << [aa_atom.id, na_atom.id, water_atom.id]
             end
           end
 
           columns = [:atom_id, :whbonding_atom_id, :water_atom_id]
-          Bipa::Whbond.import(columns, whbonds, :on_duplicate_key_update => [:water_atom_id])
 
-          if whbonds.size > 0
-            structure.has_complete_whbonds = true
-            structure.save!
-          end
+          Bipa::Whbond.import(columns, whbonds)
 
-          puts "Importing WHBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
+          $logger.info("Importing WHBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
 
           ActiveRecord::Base.remove_connection
-        end # fork_manager.fork
+        end # fmanager.fork
       end # pdb_codes.each_with_index
       ActiveRecord::Base.establish_connection(config)
-    end # fork_manager.manage
+    end # fmanager.manage
   end
 
 
@@ -427,7 +477,7 @@ namespace :bipa do
           ActiveRecord::Base.establish_connection(config)
           structure = Bipa::Structure.find_by_pdb_code(pdb_code)
 
-          structure.domains.each do |domain|
+          structure.models.first.domains.each do |domain|
 
             registered = false
 
