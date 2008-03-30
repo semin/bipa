@@ -14,7 +14,6 @@ class Bipa::Residue < ActiveRecord::Base
 
   has_many  :atoms,
             :class_name   => "Bipa::Atom",
-            :foreign_key  => "residue_id",
             :dependent    => :destroy
 
   has_many  :contacts,
@@ -27,7 +26,7 @@ class Bipa::Residue < ActiveRecord::Base
             :through      => :atoms
 
   has_many  :whbonding_atoms,
-            :through      => :whbonds
+            :through      => :atoms
 
   has_many  :hbonds_as_donor,
             :through      => :atoms
@@ -36,10 +35,10 @@ class Bipa::Residue < ActiveRecord::Base
             :through      => :atoms
 
   has_many  :hbonding_donors,
-            :through      => :hbonds_as_acceptor
+            :through      => :atoms
 
   has_many  :hbonding_acceptors,
-            :through      => :hbonds_as_donor
+            :through      => :atoms
 
   # ASA related
   def on_surface?
