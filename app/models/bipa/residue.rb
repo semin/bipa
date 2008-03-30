@@ -14,6 +14,7 @@ class Bipa::Residue < ActiveRecord::Base
 
   has_many  :atoms,
             :class_name   => "Bipa::Atom",
+            :foreign_key  => "residue_id",
             :dependent    => :destroy
 
   has_many  :contacts,
