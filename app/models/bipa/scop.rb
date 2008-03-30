@@ -297,7 +297,7 @@ class Bipa::ScopDomain < Bipa::Scop
             :through      => :atoms
 
   has_many  :contacting_atoms,
-            :source       => :atom
+            :through      => :contacts
 
   has_many  :whbonds,
             :through      => :atoms
