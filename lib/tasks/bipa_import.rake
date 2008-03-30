@@ -475,9 +475,10 @@ namespace :bipa do
         fmanager.fork do
 
           ActiveRecord::Base.establish_connection(config)
-          structure = Bipa::Structure.find_by_pdb_code(pdb_code)
 
-          structure.models.first.domains.each do |domain|
+          domains = Bipa::ScopDomain.find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
+
+          domains.each do |domain|
 
             registered = false
 
@@ -509,7 +510,7 @@ namespace :bipa do
             end
           end # structure.domains.each
 
-          $logger.info("Populating 'interfaces' table from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+          $logger.info("Extracting domain interfaces from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           ActiveRecord::Base.remove_connection
         end # fork_manager.fork
       end # pdb_codes.each_with_index

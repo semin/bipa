@@ -38,33 +38,24 @@ class Bipa::Model < ActiveRecord::Base
             :foreign_key  => "model_id"
 
   def residues
-    residues = []
-    chains.each { |c| residues.concat(c.residues) }
-    residues
+    @residues ||= chains.inject([]) { |s, c| s.concat(c.residues) }
   end
 
   def aa_residues
-    aa_residues = []
-    aa_chains.each { |c| aa_residues.concat(c.residues) }
-    aa_residues
+    residues.select { |r| r.is_a?(Bipa::AaResidue) }
   end
 
   def na_residues
-    na_residues = []
-    na_chains.each { |c| na_residues.concat(c.residues) }
-    na_residues
+    residues.select { |r| r.is_a?(Bipa::NaResidue) }
   end
 
   def atoms
-    atoms = []
-    residues.each { |r| atoms.concat(r.atoms) }
-    atoms
+    @atoms ||= residues.inject([]) { |s, r| s.concat(r.atoms) }
   end
 
   def aa_atoms
     aa_atoms = []
     aa_residues.each { |r| aa_atoms.concat(r.atoms) }
-    aa_atoms
   end
 
   def na_atoms
