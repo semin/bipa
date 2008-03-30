@@ -4,8 +4,6 @@ class Bipa::Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  is_indexed :fields => ["sccs", "sunid", "pdb_code", "description", "registered"]
-
   scope_out :registered
 
   def self.factory_create!(opt={})
@@ -278,15 +276,15 @@ class Bipa::ScopDomain < Bipa::Scop
 
   has_many  :dna_interfaces,
             :class_name   => "Bipa::DomainDnaInterface",
-            :foreign_key  => 'scop_id'
+            :foreign_key  => "scop_id"
 
   has_many  :rna_interfaces,
-            :class_name   => 'Bipa::DomainRnaInterface',
-            :foreign_key  => 'scop_id'
+            :class_name   => "Bipa::DomainRnaInterface",
+            :foreign_key  => "scop_id"
 
   has_many  :residues,
-            :class_name   => 'Bipa::AaResidue',
-            :foreign_key  => 'scop_id'
+            :class_name   => "Bipa::AaResidue",
+            :foreign_key  => "scop_id"
 
   has_many  :chains,
             :through      => :residues,
@@ -299,7 +297,7 @@ class Bipa::ScopDomain < Bipa::Scop
             :through      => :atoms
 
   has_many  :contacting_atoms,
-            :through      => :contacts
+            :source       => :atom
 
   has_many  :whbonds,
             :through      => :atoms

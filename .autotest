@@ -4,30 +4,3 @@ require "autotest/growl"
 Autotest.add_hook :initialize do |at|
   %w{.svn .hg .git}.each { |e| at.add_exception(e) }
 end
-
-module Autotest::Growl
-  def self.growl title, msg, pri = 0, img = nil
-    # title += " in #{Dir.pwd.split(/\//)[-3..-1].join("/")}"
-    msg += " at #{Time.now.strftime('%Y-%m-%d %H:%M:%S')}"
-    # TODO: parameterize default image
-    img ||= "/Users/semin/Pictures/autotest/pending.png"
-    cmd = "growlnotify --image #{img} -p #{pri} -n autotest -m #{msg.inspect} -t #{title}"
-    system cmd
-  end
-
-  Autotest.add_hook :initialize do  |at|
-    growl "autotest running", "Started"
-  end
-
-  Autotest.add_hook :red do |at|
-    growl "Tests Failed", "#{at.files_to_test.size} tests failed", 2, "/Users/semin/Pictures/autotest/fail.png"
-  end
-
-  Autotest.add_hook :green do |at|
-    growl "Tests Passed", "Tests passed", at.tainted ? -2 : 2, "/Users/semin/Pictures/autotest/pass.png"
-  end
-
-  Autotest.add_hook :all_good do |at|
-    growl "Tests Passed", "All tests passed", at.tainted ? -2 : 2, "/Users/semin/Pictures/autotest/pass.png"
-  end
-end
