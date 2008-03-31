@@ -1,4 +1,4 @@
-class Bipa::Scop < ActiveRecord::Base
+class Scop < ActiveRecord::Base
 
   include Bipa::Constants
 
@@ -227,23 +227,23 @@ class Bipa::Scop < ActiveRecord::Base
 end # class Scop
 
 
-class Bipa::ScopRoot < Bipa::Scop
+class ScopRoot < Scop
 end
 
 
-class Bipa::ScopClass < Bipa::Scop
+class ScopClass < Scop
 end
 
 
-class Bipa::ScopFold < Bipa::Scop
+class ScopFold < Scop
 end
 
 
-class Bipa::ScopSuperFamily < Bipa::Scop
+class ScopSuperFamily < Scop
 end
 
 
-class Bipa::ScopFamily < Bipa::Scop
+class ScopFamily < Scop
 
   (10..100).step(10) do |si|
     has_many  :"subfamily#{si}s",
@@ -253,15 +253,15 @@ class Bipa::ScopFamily < Bipa::Scop
 end
 
 
-class Bipa::ScopProtein < Bipa::Scop
+class ScopProtein < Scop
 end
 
 
-class Bipa::ScopSpecies < Bipa::Scop
+class ScopSpecies < Scop
 end
 
 
-class Bipa::ScopDomain < Bipa::Scop
+class ScopDomain < Scop
 
   include Bipa::Usr
   include Bipa::NucleicAcidBinding
@@ -388,5 +388,4 @@ class Bipa::ScopDomain < Bipa::Scop
   def update_delta_asa
     delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
   end
-
 end # class ScopDomain

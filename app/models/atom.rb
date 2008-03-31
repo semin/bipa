@@ -1,35 +1,25 @@
-class Bipa::Atom < ActiveRecord::Base
+class Atom < ActiveRecord::Base
 
   include Bipa::NucleicAcidBinding
 
-  belongs_to  :residue,
-              :class_name   => "Bipa::Residue",
-              :foreign_key  => "residue_id"
-
+  belongs_to  :residue
+  
   has_many  :contacts,
-            :class_name   => "Bipa::Contact",
-            :foreign_key  => "atom_id",
             :dependent    => :destroy
 
   has_many  :contacting_atoms,
             :through      => :contacts
 
   has_many  :whbonds,
-            :class_name   => "Bipa::Whbond",
-            :foreign_key  => "atom_id",
             :dependent    => :destroy
 
   has_many  :whbonding_atoms,
             :through      => :whbonds
 
   has_many  :hbonds_as_donor,
-            :class_name   => 'Bipa::Hbond',
-            :foreign_key  => 'hbonding_donor_id',
             :dependent    => :destroy
 
   has_many  :hbonds_as_acceptor,
-            :class_name   => 'Bipa::Hbond',
-            :foreign_key  => 'hbonding_acceptor_id',
             :dependent    => :destroy
 
   has_many  :hbonding_donors,

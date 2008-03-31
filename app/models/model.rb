@@ -1,41 +1,25 @@
-class Bipa::Model < ActiveRecord::Base
+class Model < ActiveRecord::Base
 
   include Bipa::Usr
   include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
 
-  belongs_to  :structure,
-              :class_name   => "Bipa::Structure",
-              :foreign_key  => "structure_id"
+  belongs_to  :structure
 
   has_many  :chains,
-            :class_name   => "Bipa::Chain",
-            :foreign_key  => "model_id",
-            :dependent    => :destroy
+            :dependent => :destroy
 
-  has_many  :aa_chains,
-            :class_name   => "Bipa::AaChain",
-            :foreign_key  => "model_id"
+  has_many  :aa_chains
 
-  has_many  :na_chains,
-            :class_name   => "Bipa::NaChain",
-            :foreign_key  => "model_id"
+  has_many  :na_chains
 
-  has_many  :dna_chains,
-            :class_name   => "Bipa::DnaChain",
-            :foreign_key  => "model_id"
+  has_many  :dna_chains
 
-  has_many  :rna_chains,
-            :class_name   => "Bipa::RnaChain",
-            :foreign_key  => "model_id"
+  has_many  :rna_chains
 
-  has_many  :hna_chains,
-            :class_name   => "Bipa::HnaChain",
-            :foreign_key  => "model_id"
+  has_many  :hna_chains
 
-  has_many  :het_chains,
-            :class_name   => "Bipa::HetChain",
-            :foreign_key  => "model_id"
+  has_many  :het_chains
 
   def residues
     @residues ||= chains.inject([]) { |s, c| s.concat(c.residues) }

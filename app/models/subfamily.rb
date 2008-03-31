@@ -1,4 +1,4 @@
-class Bipa::Subfamily < ActiveRecord::Base
+class Subfamily < ActiveRecord::Base
 
   belongs_to  :scop_family,
               :class_name   => "Bipa::ScopFamily",

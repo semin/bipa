@@ -1,24 +1,17 @@
-class Bipa::Residue < ActiveRecord::Base
+class Residue < ActiveRecord::Base
 
   include Bipa::Usr
   include Bipa::Constants
   include Bipa::ComposedOfAtoms
 
-  belongs_to  :chain,
-              :class_name   => "Bipa::Chain",
-              :foreign_key  => "chain_id"
+  belongs_to  :chain
 
-  belongs_to  :chain_interface,
-              :class_name   => "Bipa::ChainInterface",
-              :foreign_key  => "chain_interface_id"
+  belongs_to  :chain_interface
 
   has_many  :atoms,
-            :class_name   => "Bipa::Atom",
-            :foreign_key  => "residue_id",
             :dependent    => :destroy
 
   has_many  :contacts,
-            :class_name   => "Bipa::Contact",
             :through      => :atoms
 
   has_many  :contacting_atoms,
@@ -83,24 +76,24 @@ class Bipa::Residue < ActiveRecord::Base
 end # class Bipa::Residue
 
 
-class Bipa::StdResidue < Bipa::Residue
+class StdResidue < Residue
 end
 
 
-class Bipa::HetResidue < Bipa::Residue
+class HetResidue < Residue
 end
 
 
-class Bipa::AaResidue < Bipa::StdResidue
+class AaResidue < StdResidue
 
   include Bipa::NucleicAcidBinding
 
   belongs_to  :domain,
-              :class_name   => "Bipa::ScopDomain",
+              :class_name   => "ScopDomain",
               :foreign_key  => "scop_id"
 
   belongs_to  :domain_interface,
-              :class_name   => "Bipa::DomainInterface",
+              :class_name   => "DomainInterface",
               :foreign_key  => "domain_interface_id"
 
   def relative_unbound_asa
@@ -135,13 +128,13 @@ class Bipa::AaResidue < Bipa::StdResidue
 end
 
 
-class Bipa::NaResidue < Bipa::StdResidue
+class NaResidue < StdResidue
 end
 
 
-class Bipa::DnaResidue < Bipa::NaResidue
+class DnaResidue < NaResidue
 end
 
 
-class Bipa::RnaResidue < Bipa::NaResidue
+class RnaResidue < NaResidue
 end

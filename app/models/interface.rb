@@ -1,4 +1,4 @@
-class Bipa::Interface < ActiveRecord::Base
+class Interface < ActiveRecord::Base
 
   include Bipa::Constants
   include Bipa::Usr
@@ -14,16 +14,16 @@ class Bipa::Interface < ActiveRecord::Base
   end
 end
 
-class Bipa::DomainInterface < Bipa::Interface
+class DomainInterface < Bipa::Interface
 
   include Bipa::NucleicAcidBinding
 
   belongs_to  :domain,
-              :class_name   => "Bipa::ScopDomain",
+              :class_name   => "ScopDomain",
               :foreign_key  => 'scop_id'
 
   has_many  :residues,
-            :class_name   => "Bipa::AaResidue",
+            :class_name   => "AaResidue",
             :foreign_key  => 'domain_interface_id'
 
   # Callbacks
@@ -263,7 +263,7 @@ class Bipa::DomainInterface < Bipa::Interface
 end # class Bipa::DomainInterface
 
 
-class Bipa::DomainDnaInterface < Bipa::DomainInterface
+class DomainDnaInterface < DomainInterface
 
   %w(hbond whbond contact).each do |int|
     NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna|
@@ -316,10 +316,10 @@ class Bipa::DomainDnaInterface < Bipa::DomainInterface
     sum += frequency_of_contact_between_sugar_and_(aa)
     sum += frequency_of_contact_between_phosphate_and_(aa)
   end
-end # class Bipa::DomainDnaInterface
+end # class DomainDnaInterface
 
 
-class Bipa::DomainRnaInterface < Bipa::DomainInterface
+class DomainRnaInterface < DomainInterface
 
   %w(hbond whbond contact).each do |int|
     NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna|
@@ -372,10 +372,10 @@ class Bipa::DomainRnaInterface < Bipa::DomainInterface
     sum += frequency_of_contact_between_sugar_and_(aa)
     sum += frequency_of_contact_between_phosphate_and_(aa)
   end
-end # class Bipa::DomainRnaInterface
+end # class DomainRnaInterface
 
 
-class Bipa::ChainInterface < Bipa::Interface
+class ChainInterface < Interface
 
   belongs_to :chain
 
@@ -385,9 +385,9 @@ class Bipa::ChainInterface < Bipa::Interface
 end
 
 
-class Bipa::ChainDnaInterface < Bipa::ChainInterface
+class ChainDnaInterface < ChainInterface
 end
 
 
-class Bipa::ChainRnaInterface < Bipa::ChainInterface
+class ChainRnaInterface < ChainInterface
 end

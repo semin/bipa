@@ -1,4 +1,4 @@
-class Bipa::Structure < ActiveRecord::Base
+class Structure < ActiveRecord::Base
 
   #is_indexed :fields => ["pdb_code", "classification", "title", "exp_method", "resolution"]
 
