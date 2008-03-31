@@ -1,6 +1,6 @@
 class Bipa::Structure < ActiveRecord::Base
 
-  is_indexed :fields => ["pdb_code", "classification", "title", "exp_method", "resolution"]
+  #is_indexed :fields => ["pdb_code", "classification", "title", "exp_method", "resolution"]
 
   has_many  :models,
             :class_name   => "Bipa::Model",
