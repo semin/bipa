@@ -1,4 +1,4 @@
-module Bipa::ScopsHelper
+module ScopsHelper
   def subcategories(arg)
     "#{arg}_subcategories"
   end

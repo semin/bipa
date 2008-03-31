@@ -1,2 +1,2 @@
-module Bipa::ChainsHelper
+module ChainsHelper
 end
