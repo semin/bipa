@@ -65,7 +65,7 @@ namespace :bipa do
             end
           end
 
-          structure = Bipa::Structure.create!(
+          structure = Structure.create!(
             :pdb_code       => pdb_bio.accession,
             :classification => pdb_bio.classification,
             :title          => pdb_bio.definition,
@@ -76,7 +76,7 @@ namespace :bipa do
 
           model_bio = pdb_bio.models[0]
 
-          model = Bipa::Model.create!(
+          model = Model.create!(
             :structure_id => structure.id,
             :model_code   => model_bio.serial ? model_bio.serial : 1
           )
@@ -145,19 +145,19 @@ namespace :bipa do
             chain_bio.each_residue do |residue_bio|
 
               if residue_bio.dna?
-                residue = Bipa::DnaResidue.create!(residue_params(chain.id, residue_bio))
+                residue = DnaResidue.create!(residue_params(chain.id, residue_bio))
               elsif residue_bio.rna?
-                residue = Bipa::RnaResidue.create!(residue_params(chain.id, residue_bio))
+                residue = RnaResidue.create!(residue_params(chain.id, residue_bio))
               else
                 dssp_hash_key = chain_bio.chain_id + residue_bio.residue_id
                 # In some cases, there are no 'dssp_hash_key', you should check!
                 sstruc        = dssp_sstruc[dssp_hash_key] ? dssp_sstruc[dssp_hash_key] : "L"
-                residue       = Bipa::AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
+                residue       = AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
               end
 
               residue_bio.each do |atom_bio|
 
-                atoms << Bipa::Atom.new(
+                atoms << Atom.new(
                   atom_params(
                     residue.id,
                     atom_bio,
@@ -169,15 +169,15 @@ namespace :bipa do
 
             chain_bio.each_heterogen do |het_residue_bio|
 
-              het_residue = Bipa::HetResidue.create!(residue_params(chain.id, het_residue_bio))
+              het_residue = HetResidue.create!(residue_params(chain.id, het_residue_bio))
 
               het_residue_bio.each do |het_atom_bio|
-                atoms << Bipa::Atom.new(atom_params(het_residue.id, het_atom_bio))
+                atoms << Atom.new(atom_params(het_residue.id, het_atom_bio))
               end
             end
           end
 
-          Bipa::Atom.import(atoms, :validate => false)
+          Atom.import(atoms, :validate => false)
 
           structure.save!
 
@@ -193,7 +193,7 @@ namespace :bipa do
   desc "Import van der Waals Contacts"
   task :contacts => [:environment] do
 
-    pdb_codes = Bipa::Structure.find(:all).map(&:pdb_code)
+    pdb_codes = Structure.find(:all).map(&:pdb_code)
     fmanager  = ForkManager.new(MAX_FORK)
 
     fmanager.manage do
@@ -206,7 +206,7 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          structure = Bipa::Structure.find_by_pdb_code(pdb_code)
+          structure = Structure.find_by_pdb_code(pdb_code)
           kdtree    = Bipa::Kdtree.new
           contacts  = Array.new
 
@@ -223,7 +223,7 @@ namespace :bipa do
           end
 
           columns = [:atom_id, :contacting_atom_id, :distance]
-          Bipa::Contact.import(columns, contacts)
+          Contact.import(columns, contacts)
 
           structure.save!
           $logger.info("Importing CONTACTS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
@@ -240,7 +240,7 @@ namespace :bipa do
   desc "Import Hydrogen Bonds"
   task :hbonds => [:environment] do
 
-    pdb_codes = Bipa::Structure.find(:all).map(&:pdb_code)
+    pdb_codes = Structure.find(:all).map(&:pdb_code)
     fmanager  = ForkManager.new(MAX_FORK)
 
     fmanager.manage do
@@ -259,7 +259,7 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          structure   = Bipa::Structure.find_by_pdb_code(pdb_code)
+          structure   = Structure.find_by_pdb_code(pdb_code)
           hbonds_bipa = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).hbonds
           hbonds      = Array.new
 
@@ -312,7 +312,7 @@ namespace :bipa do
             :daaa_angle
           ]
 
-          Bipa::Hbond.import(columns,
+          Hbond.import(columns,
                              hbonds,
                              :on_duplicate_update => [
                                :hbonding_donor_id,
@@ -341,7 +341,7 @@ namespace :bipa do
   desc "Import Water-mediated hydrogen bonds"
   task :whbonds => [:environment] do
 
-    pdb_codes = Bipa::Structure.find(:all).map(&:pdb_code)
+    pdb_codes = Structure.find(:all).map(&:pdb_code)
     fmanager  = ForkManager.new(MAX_FORK)
 
     fmanager.manage do
@@ -360,7 +360,7 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          structure   = Bipa::Structure.find_by_pdb_code(pdb_code)
+          structure   = Structure.find_by_pdb_code(pdb_code)
           whbonds_bio = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).whbonds
           whbonds     = Array.new
 
@@ -390,7 +390,7 @@ namespace :bipa do
 
           columns = [:atom_id, :whbonding_atom_id, :water_atom_id]
 
-          Bipa::Whbond.import(columns, whbonds)
+          Whbond.import(columns, whbonds)
 
           $logger.info("Importing WHBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
 
@@ -448,11 +448,11 @@ namespace :bipa do
     IO.readlines(hierarchy_file).each_with_index do |line, i|
       next if line =~ /^#/ || line =~ /^\s*$/
 
-        self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
-      current_scop = Bipa::Scop.factory_create!(descriptions[self_sunid])
+      self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
+      current_scop = Scop.factory_create!(descriptions[self_sunid])
 
       unless self_sunid.to_i == 0
-        parent_scop = Bipa::Scop.find_by_sunid(parent_sunid)
+        parent_scop = Scop.find_by_sunid(parent_sunid)
         current_scop.move_to_child_of parent_scop
       end
       $logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
@@ -523,7 +523,7 @@ namespace :bipa do
   desc "Import Chain Interfaces"
   task :chain_interfaces => [:environment] do
 
-    pdb_codes = Bipa::Structure.find(:all).map(&:pdb_code)
+    pdb_codes = Structure.find(:all).map(&:pdb_code)
     fmanager  = ForkManager.new(MAX_FORK)
 
     fmanager.manage do
@@ -536,7 +536,7 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          structure = Bipa::Structure.find_by_pdb_code(pdb_code)
+          structure = Structure.find_by_pdb_code(pdb_code)
 
           structure.chains.each do |chain|
 
@@ -544,13 +544,13 @@ namespace :bipa do
             rna_residues = chain.rna_binding_interface_residues
 
             if dna_residues.length > 0
-              (chain.dna_interface = Bipa::ChainDnaInterface.new).residues << dna_residues
+              (chain.dna_interface = ChainDnaInterface.new).residues << dna_residues
               chain.save!
               puts "#{pdb_code}: #{chain.chain_code} has an dna interface"
             end
 
             if rna_residues.length > 0
-              (chain.rna_interface = Bipa::ChainRnaInterface.new).residues << rna_residues
+              (chain.rna_interface = ChainRnaInterface.new).residues << rna_residues
               chain.save!
               puts "#{pdb_code}: #{chain.chain_code} has an rna interface"
             end
@@ -573,7 +573,7 @@ namespace :bipa do
   desc "Import Clusters for each SCOP family"
   task :clusters => [:environment] do
 
-    families = Bipa::ScopFamily.find_registered(:all)
+    families = ScopFamily.find_registered(:all)
 
     families.each_with_index do |family, i|
 
@@ -585,11 +585,11 @@ namespace :bipa do
 
         IO.readlines(cluster_file).each do |line|
 
-          cluster = "Bipa::Cluster#{si}".constantize.new
+          cluster = "Cluster#{si}".constantize.new
 
           members = line.split(/\s+/)
           members.each do |member|
-            scop_domain = Bipa::ScopDomain.find_by_sunid(member)
+            scop_domain = ScopDomain.find_by_sunid(member)
             cluster.scop_domains << scop_domain
           end
 
