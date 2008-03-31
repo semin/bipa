@@ -1,13 +1,13 @@
 require File.dirname(__FILE__) + '/../../test_helper'
 
-class Bipa::StructureTest < Test::Unit::TestCase
+class StructureTest < Test::Unit::TestCase
 
   context "A Stucture instance" do
 
     should "have correct models" do
-      structure = Bipa::Structure.new(valid_structure_params)
-      model1    = Bipa::Model.new(valid_model_params)
-      model2    = Bipa::Model.new(valid_model_params)
+      structure = Structure.new(valid_structure_params)
+      model1    = Model.new(valid_model_params)
+      model2    = Model.new(valid_model_params)
 
       structure.models << model1
       structure.models << model2
@@ -20,10 +20,10 @@ class Bipa::StructureTest < Test::Unit::TestCase
     end
 
     should "have correct chains" do
-      structure = Bipa::Structure.new(valid_structure_params)
-      model     = Bipa::Model.new(valid_model_params)
-      chain1    = Bipa::AaChain.new(valid_chain_params)
-      chain2    = Bipa::AaChain.new(valid_chain_params)
+      structure = Structure.new(valid_structure_params)
+      model     = Model.new(valid_model_params)
+      chain1    = AaChain.new(valid_chain_params)
+      chain2    = AaChain.new(valid_chain_params)
 
       structure.models << model
       structure.models.first.aa_chains << chain1
@@ -41,11 +41,11 @@ class Bipa::StructureTest < Test::Unit::TestCase
     end
 
     should "have correct residues" do
-      structure = Bipa::Structure.new(valid_structure_params)
-      model     = Bipa::Model.new(valid_model_params)
-      chain     = Bipa::AaChain.new(valid_chain_params)
-      residue1  = Bipa::AaResidue.new(valid_residue_params)
-      residue2  = Bipa::AaResidue.new(valid_residue_params)
+      structure = Structure.new(valid_structure_params)
+      model     = Model.new(valid_model_params)
+      chain     = AaChain.new(valid_chain_params)
+      residue1  = AaResidue.new(valid_residue_params)
+      residue2  = AaResidue.new(valid_residue_params)
 
       structure.models << model
       structure.models.first.aa_chains << chain
@@ -64,12 +64,12 @@ class Bipa::StructureTest < Test::Unit::TestCase
     end
 
     should "have correct atoms" do
-      structure = Bipa::Structure.new(valid_structure_params)
-      model     = Bipa::Model.new(valid_model_params)
-      chain     = Bipa::AaChain.new(valid_chain_params)
-      residue   = Bipa::AaResidue.new(valid_residue_params)
-      atom1     = Bipa::Atom.new(valid_atom_params)
-      atom2     = Bipa::Atom.new(valid_atom_params)
+      structure = Structure.new(valid_structure_params)
+      model     = Model.new(valid_model_params)
+      chain     = AaChain.new(valid_chain_params)
+      residue   = AaResidue.new(valid_residue_params)
+      atom1     = Atom.new(valid_atom_params)
+      atom2     = Atom.new(valid_atom_params)
 
       structure.models << model
       structure.models.first.aa_chains << chain
