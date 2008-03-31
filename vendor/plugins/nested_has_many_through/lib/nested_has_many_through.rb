@@ -60,6 +60,7 @@ module ActiveRecord #:nodoc:
 
       def find(*args)
         options = Base.send(:extract_options_from_args!, args)
+        #options = args.extract_options!
 
         conditions = construct_conditions
         if sanitized_conditions = sanitize_sql(options[:conditions])
@@ -157,7 +158,8 @@ module ActiveRecord #:nodoc:
             
             conditions = ''
             # Add filter for single-table inheritance, if applicable.
-            conditions += " AND #{remote_table_alias}.#{association_class.inheritance_column} = #{association_class.quote_value(association_class.name.demodulize)}" unless association_class.descends_from_active_record?
+            # conditions += " AND #{remote_table_alias}.#{association_class.inheritance_column} = #{association_class.quote_value(association_class.name.demodulize)}" unless association_class.descends_from_active_record?
+            conditions += " AND #{association_class.send(:type_condition)}" unless association_class.descends_from_active_record?
             # Add custom conditions
             conditions += " AND (#{interpolate_sql(association_class.send(:sanitize_sql, reflection.options[:conditions]))})" if reflection.options[:conditions]
             
