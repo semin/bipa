@@ -32,11 +32,11 @@ end
 
 (10..100).step(10) do |si|
   eval <<-EVAL
-    class Bipa::Subfamily#{si} < Bipa::Subfamily
+    class Subfamily#{si} < Subfamily
 
       has_many  :scop_domains,
-                :class_name   => "Bipa::ScopDomains",
-                :foreign_key  => "subfamily_id"
+                :class_name   => "ScopDomains",
+                :foreign_key  => "subfamily#{si}_id"
     end
   EVAL
 end

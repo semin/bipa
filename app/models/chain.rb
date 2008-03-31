@@ -15,7 +15,7 @@ class Chain < ActiveRecord::Base
 end
 
 
-class AaChain < Bipa::Chain
+class AaChain < Chain
 
   include Bipa::NucleicAcidBinding
 
@@ -65,5 +65,5 @@ class HnaChain < NaChain
 end
 
 
-class Bipa::HetChain < Bipa::Chain
+class HetChain < Chain
 end

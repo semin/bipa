@@ -3,8 +3,6 @@ class Structure < ActiveRecord::Base
   #is_indexed :fields => ["pdb_code", "classification", "title", "exp_method", "resolution"]
 
   has_many  :models,
-            :class_name   => "Bipa::Model",
-            :foreign_key  => "structure_id",
             :dependent    => :destroy
 
   def chains

@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) + '/../../test_helper'
+require File.dirname(__FILE__) + '/../test_helper'
 
-class Bipa::ScopDomainTest < Test::Unit::TestCase
+class ScopDomainTest < Test::Unit::TestCase
 
   should_have_many  :dna_interfaces
   

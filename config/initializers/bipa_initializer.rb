@@ -11,11 +11,11 @@ require "composite_primary_keys"
 require "bipa"
 
 # STI dependency
-require_dependency "bipa/scop"
-require_dependency "bipa/chain"
-require_dependency "bipa/residue"
-require_dependency "bipa/interface"
-require_dependency "bipa/subfamily"
+require_dependency "scop"
+require_dependency "chain"
+require_dependency "residue"
+require_dependency "interface"
+require_dependency "subfamily"
 
 # Constants for BIPA
 RESUME          = ENV["RESUME"].to_i > 0 ? ENV["RESUME"].to_i : false

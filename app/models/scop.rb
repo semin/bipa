@@ -247,7 +247,7 @@ class ScopFamily < Scop
 
   (10..100).step(10) do |si|
     has_many  :"subfamily#{si}s",
-              :class_name   => "Bipa::Subfamily#{si}",
+              :class_name   => "Subfamily#{si}",
               :foreign_key  => "scop_family_id"
   end
 end
@@ -270,20 +270,20 @@ class ScopDomain < Scop
 
   (10..100).step(10) do |si|
     belongs_to  :"subfamily#{si}",
-                :class_name   => "Bipa::Subfamiy#{si}",
+                :class_name   => "Subfamiy#{si}",
                 :foreign_key  => "subfamily#{si}_id"
   end
 
   has_many  :dna_interfaces,
-            :class_name   => "Bipa::DomainDnaInterface",
+            :class_name   => "DomainDnaInterface",
             :foreign_key  => "scop_id"
 
   has_many  :rna_interfaces,
-            :class_name   => "Bipa::DomainRnaInterface",
+            :class_name   => "DomainRnaInterface",
             :foreign_key  => "scop_id"
 
   has_many  :residues,
-            :class_name   => "Bipa::AaResidue",
+            :class_name   => "AaResidue",
             :foreign_key  => "scop_id"
 
   has_many  :chains,

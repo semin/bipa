@@ -14,7 +14,7 @@ class Interface < ActiveRecord::Base
   end
 end
 
-class DomainInterface < Bipa::Interface
+class DomainInterface < Interface
 
   include Bipa::NucleicAcidBinding
 
@@ -260,7 +260,7 @@ class DomainInterface < Bipa::Interface
     sum
   end
 
-end # class Bipa::DomainInterface
+end # class DomainInterface
 
 
 class DomainDnaInterface < DomainInterface
