@@ -4,7 +4,7 @@ namespace :bipa do
     desc "Associate Residue with SCOP"
     task :residues_scops => [:environment] do
 
-      pdb_codes = Bipa::Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.find(:all).map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -17,8 +17,8 @@ namespace :bipa do
 
             ActiveRecord::Base.establish_connection(config)
 
-            structure = Bipa::Structure.find_by_pdb_code(pdb_code)
-            domains   = Bipa::ScopDomain.find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
+            structure = Structure.find_by_pdb_code(pdb_code)
+            domains   = ScopDomain.find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
 
             if domains.empty?
               puts "No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
@@ -55,7 +55,6 @@ namespace :bipa do
           puts "Found"
         end
       end
-
     end
 
   end

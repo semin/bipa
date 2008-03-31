@@ -1,15 +1,15 @@
 class Subfamily < ActiveRecord::Base
 
   belongs_to  :scop_family,
-              :class_name   => "Bipa::ScopFamily",
+              :class_name   => "ScopFamily",
               :foreign_key  => "scop_family_id"
 
   has_one :alignment,
-          :class_name   => "Bipa::Alignment",
+          :class_name   => "Alignment",
           :foreign_key  => "subfamily_id"
 
   has_many  :scop_domains,
-            :class_name   => "Bipa::ScopDomains",
+            :class_name   => "ScopDomains",
             :foreign_key  => "subfamily_id"
 
   def representative

@@ -106,22 +106,5 @@ namespace :bipa do
       end
     end
 
-
-#    desc "Get NCBI Taxonomy dataset from NCBI ftp"
-#    task :taxonomy => [:environment] do
-#      refresh_dir(BIPA_ENV[:TAXONOMY_DIR])
-#
-#      require 'net/ftp'
-#
-#      Net::FTP.open(BIPA_ENV[:NCBI_FTP]) do |ftp|
-#        ftp.login('anonymous')
-#        ftp.chdir(BIPA_ENV[:TAXONOMY_FTP])
-#        ftp.nlst('tax*').each do |file|
-#          ftp.getbinaryfile(file, File.join(BIPA_ENV[:TAXONOMY_DIR], file))
-#          puts "Downloading #{file} to #{BIPA_ENV[:TAXONOMY_DIR]}: done"
-#        end
-#      end
-#    end
-
   end
 end

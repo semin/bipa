@@ -26,11 +26,11 @@ class Model < ActiveRecord::Base
   end
 
   def aa_residues
-    residues.select { |r| r.is_a?(Bipa::AaResidue) }
+    residues.select { |r| r.is_a?(AaResidue) }
   end
 
   def na_residues
-    residues.select { |r| r.is_a?(Bipa::NaResidue) }
+    residues.select { |r| r.is_a?(NaResidue) }
   end
 
   def atoms

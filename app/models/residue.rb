@@ -50,15 +50,15 @@ class Residue < ActiveRecord::Base
 
   # Residue specific properties
   def dna?
-    self.class == Bipa::DnaResidue
+    self.class == DnaResidue
   end
 
   def rna?
-    self.class == Bipa::RnaResidue
+    self.class == RnaResidue
   end
 
   def aa?
-    self.class == Bipa::AaResidue
+    self.class == AaResidue
   end
 
   def justified_residue_name

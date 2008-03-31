@@ -68,7 +68,7 @@ class Test::Unit::TestCase
                            
     residue_names = AminoAcids::Residues::STANDARD +
                     NucleicAcids::Residues::STANDARD
-    residue_types = Bipa::Residue.send(:subclasses).map(&:to_s)
+    residue_types = Residue.send(:subclasses).map(&:to_s)
     
     {
       :residue_code => residue_code || rand(100),

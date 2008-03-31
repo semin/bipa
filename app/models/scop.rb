@@ -8,14 +8,14 @@ class Scop < ActiveRecord::Base
 
   def self.factory_create!(opt={})
     case opt[:stype]
-    when 'root' then Bipa::ScopRoot.create!(opt)
-    when 'cl'   then Bipa::ScopClass.create!(opt)
-    when 'cf'   then Bipa::ScopFold.create!(opt)
-    when 'sf'   then Bipa::ScopSuperFamily.create!(opt)
-    when 'fa'   then Bipa::ScopFamily.create!(opt)
-    when 'dm'   then Bipa::ScopProtein.create!(opt)
-    when 'sp'   then Bipa::ScopSpecies.create!(opt)
-    when 'px'   then Bipa::ScopDomain.create!(opt)
+    when 'root' then ScopRoot.create!(opt)
+    when 'cl'   then ScopClass.create!(opt)
+    when 'cf'   then ScopFold.create!(opt)
+    when 'sf'   then ScopSuperFamily.create!(opt)
+    when 'fa'   then ScopFamily.create!(opt)
+    when 'dm'   then ScopProtein.create!(opt)
+    when 'sp'   then ScopSpecies.create!(opt)
+    when 'px'   then ScopDomain.create!(opt)
     else; raise "Unknown SCOP hierarchy: #{opt[:stype]}"; end
   end
 
