@@ -463,7 +463,7 @@ namespace :bipa do
   desc "Import Domain Interfaces"
   task :domain_interfaces => [:environment] do
 
-    pdb_codes = Bipa::Structure.find(:all).map(&:pdb_code)
+    pdb_codes = Structure.find(:all).map(&:pdb_code)
     fmanager  = ForkManager.new(MAX_FORK)
 
     fmanager.manage do
@@ -476,7 +476,7 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          domains = Bipa::ScopDomain.find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
+          domains = ScopDomain.find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
 
           domains.each do |domain|
 
