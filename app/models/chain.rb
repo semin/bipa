@@ -79,10 +79,12 @@ class HnaChain < NaChain
             :foreign_key  => "chain_id"
   
   has_many  :dna_atoms,
-            :through      => :dna_residues
+            :through      => :dna_residues,
+            :source       => :atoms
             
   has_many  :rna_atoms,
-            :through      => :rna_residues
+            :through      => :rna_residues,
+            :source       => :atoms
 end
 
 

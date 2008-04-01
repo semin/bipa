@@ -173,7 +173,7 @@ class StructureTest < Test::Unit::TestCase
       assert_equal atom1, structure.models.first.chains.first.residues.first.atoms[0]
       assert_equal atom2, structure.models.first.chains.first.residues.first.atoms[1]
 
-      assert_equal 2, structure.atoms.size
+      assert_equal 2, structure.atoms.length
       assert_equal atom1, structure.atoms[0]
       assert_equal atom2, structure.atoms[1]
     end
