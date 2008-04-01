@@ -1,37 +1,104 @@
 class Structure < ActiveRecord::Base
 
-  #is_indexed :fields => ["pdb_code", "classification", "title", "exp_method", "resolution"]
-
   has_many  :models,
-            :dependent    => :destroy
+            :dependent  => :destroy
+            
+  has_many  :chains,
+            :through    => :models
 
-  def chains
-    chains = []
-    models.each { |m| chains.concat(m.chains) }
-    chains
-  end
+  has_many  :aa_chains,
+            :through    => :models
 
-  def residues
-    residues = []
-    models.each { |m| residues.concat(m.residues) }
-    residues
-  end
+  has_many  :na_chains,
+            :through    => :models
 
-  def atoms
-    atoms = []
-    models.each { |m| atoms.concat(m.atoms) }
-    atoms
-  end
+  has_many  :dna_chains,
+            :through    => :models
 
-  def aa_atoms
-    aa_atoms = []
-    models.each { |m| aa_atoms.concat(m.aa_atoms) }
-    aa_atoms
-  end
+  has_many  :rna_chains,
+            :through    => :models
 
-  def na_atoms
-    na_atoms = []
-    models.each { |m| na_atoms.concat(m.na_atoms) }
-    na_atoms
-  end
+  has_many  :hna_chains,
+            :through    => :models
+
+  has_many  :het_chains,
+            :through    => :models
+
+  has_many  :residues,
+            :through    => :chains
+
+  has_many  :aa_residues,
+            :through    => :aa_chains,
+            :source     => :residues
+
+  has_many  :na_residues,
+            :through    => :na_chains,
+            :source     => :residues
+
+  has_many  :dna_residues,
+            :through    => :dna_chains,
+            :source     => :residues
+
+  has_many  :rna_residues,
+            :through    => :rna_chains,
+            :source     => :residues
+
+  has_many  :hna_residues,
+            :through    => :hna_chains,
+            :source     => :residues
+
+  has_many  :het_residues,
+            :through    => :het_chains,
+            :source     => :residues
+
+  has_many  :atoms,
+            :through    => :residues
+
+  has_many  :aa_atoms,
+            :through    => :aa_residues,
+            :source     => :atoms
+
+  has_many  :na_atoms,
+            :through    => :na_residues,
+            :source     => :atoms
+
+  has_many  :dna_atoms,
+            :through    => :dna_residues,
+            :source     => :atoms
+
+  has_many  :rna_atoms,
+            :through    => :rna_residues,
+            :source     => :atoms
+
+  has_many  :hna_atoms,
+            :through    => :hna_residues,
+            :source     => :atoms
+
+  has_many  :het_atoms,
+            :through    => :het_residues,
+            :source     => :atoms
+
+  has_many  :contacts,
+            :through    => :atoms
+
+  has_many  :contacting_atoms,
+            :through    => :contacts
+
+  has_many  :hbonds_as_donor,
+            :through    => :atoms
+
+  has_many  :hbonds_as_acceptor,
+            :through    => :atoms
+
+  has_many  :hbonding_donors,
+            :through    => :hbonds_as_acceptor
+
+  has_many  :hbonding_acceptors,
+            :through    => :hbonds_as_donor
+
+  has_many  :whbonds,
+            :through    => :atoms
+
+  has_many  :whbonding_atoms,
+            :through    => :whbonds
 end

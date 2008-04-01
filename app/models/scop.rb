@@ -263,7 +263,6 @@ end
 
 class ScopDomain < Scop
 
-  include Bipa::Usr
   include Bipa::NucleicAcidBinding
   include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
@@ -352,7 +351,7 @@ class ScopDomain < Scop
         else
           raise "#{self.description} should be added to Scop class!"
         end # case
-    end # each des
+    end # each
     result
   end
 

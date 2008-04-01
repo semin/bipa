@@ -1,6 +1,5 @@
 class Model < ActiveRecord::Base
 
-  include Bipa::Usr
   include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
 
@@ -21,30 +20,81 @@ class Model < ActiveRecord::Base
 
   has_many  :het_chains
 
-  def residues
-    @residues ||= chains.inject([]) { |s, c| s.concat(c.residues) }
-  end
+  has_many  :residues,
+            :through  => :chains
+  
+  has_many  :aa_residues,
+            :through  => :aa_chains,
+            :source   => :residues
+  
+  has_many  :na_residues,
+            :through  => :na_chains,
+            :source   => :residues
+            
+  has_many  :dna_residues,
+            :through  => :dna_chains,
+            :source   => :residues
+            
+  has_many  :rna_residues,
+            :through  => :rna_chains,
+            :source   => :residues
+  
+  has_many  :hna_residues,
+            :through  => :hna_chains,
+            :source   => :residues
+            
+  has_many  :het_residues,
+            :through  => :het_chains,
+            :source   => :residues
+            
+  has_many  :atoms,
+            :through  => :residues
+  
+  has_many  :aa_atoms,
+            :through  => :aa_residues,
+            :source   => :atoms
+  
+  has_many  :na_atoms,
+            :through  => :na_residues,
+            :source   => :atoms
+            
+  has_many  :dna_atoms,
+            :through  => :dna_residues,
+            :source   => :atoms
+            
+  has_many  :rna_atoms,
+            :through  => :rna_residues,
+            :source   => :atoms
+            
+  has_many  :hna_atoms,
+            :through  => :hna_residues,
+            :source   => :atoms
+  
+  has_many  :het_atoms,
+            :through  => :het_residues,
+            :source   => :atoms
+  
+  has_many  :contacts,
+            :through  => :atoms
 
-  def aa_residues
-    residues.select { |r| r.is_a?(AaResidue) }
-  end
+  has_many  :contacting_atoms,
+            :through  => :contacts
+            
+  has_many  :hbonds_as_donor,
+            :through  => :atoms
 
-  def na_residues
-    residues.select { |r| r.is_a?(NaResidue) }
-  end
+  has_many  :hbonds_as_acceptor,
+            :through  => :atoms
 
-  def atoms
-    @atoms ||= residues.inject([]) { |s, r| s.concat(r.atoms) }
-  end
+  has_many  :hbonding_donors,
+            :through  => :hbonds_as_acceptor
 
-  def aa_atoms
-    aa_atoms = []
-    aa_residues.each { |r| aa_atoms.concat(r.atoms) }
-  end
+  has_many  :hbonding_acceptors,
+            :through  => :hbonds_as_donor
 
-  def na_atoms
-    na_atoms = []
-    na_residues.each { |r| na_atoms.concat(r.atoms) }
-    na_atoms
-  end
+  has_many  :whbonds,
+            :through  => :atoms
+
+  has_many  :whbonding_atoms,
+            :through  => :whbonds
 end

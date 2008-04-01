@@ -1,6 +1,5 @@
 class Residue < ActiveRecord::Base
 
-  include Bipa::Usr
   include Bipa::Constants
   include Bipa::ComposedOfAtoms
 

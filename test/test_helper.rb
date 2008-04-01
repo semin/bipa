@@ -40,9 +40,24 @@ class Test::Unit::TestCase
   include Bipa::Constants
   
   # Dummy parameters for models
+  def random_alphabet(count = 1)
+    result = ""
+    alphabets = ("a".."z").to_a + ("A".."Z").to_a
+    count.times { result += alphabets[rand(alphabets.size)] }
+    result
+  end
+  
+  def random_number(digit = 1)
+    eval("rand(1E#{digit})").to_i
+  end
+  
+  def random_pdb_code
+    random_number(2).to_s + random_alphabet(2)
+  end
+  
   def valid_structure_params
     {
-      :pdb_code       => "10mh",
+      :pdb_code       => random_pdb_code,
       :exp_method     => "X-ray",
       :classification => "protein-DNA",
       :deposited_at   => "1998-10-12"
@@ -56,9 +71,8 @@ class Test::Unit::TestCase
   end
   
   def valid_chain_params(chain_code = nil)
-    alphabets = ("a".."z").to_a + ("A".."Z").to_a
     {
-      :chain_code     => chain_code || alphabets[rand(alphabets.size)]
+      :chain_code     => chain_code || random_alphabet
     }
   end
   

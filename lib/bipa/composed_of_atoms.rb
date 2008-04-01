@@ -1,5 +1,8 @@
 module Bipa
   module ComposedOfAtoms
+    
+    include Bipa::Usr
+    
     #
     # a specific set of atoms
     #
