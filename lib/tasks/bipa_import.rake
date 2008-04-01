@@ -29,8 +29,8 @@ namespace :bipa do
           unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
           unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
 
-          if (!File.exists?(bound_asa_file) ||
-              !File.exists?(unbound_aa_asa_file) ||
+          if (!File.exists?(bound_asa_file)       ||
+              !File.exists?(unbound_aa_asa_file)  ||
               !File.exist?(unbound_na_asa_file))
             $logger.warn("Skip #{pdb_code} due to missing NACCESS result files")
             next
@@ -89,15 +89,15 @@ namespace :bipa do
             chain_code = chain_bio.chain_id.blank? ? nil : chain_bio.chain_id
 
             chain_type = if chain_bio.aa?
-                           Bipa::AaChain
+                           AaChain
                          elsif chain_bio.dna?
-                           Bipa::DnaChain
+                           DnaChain
                          elsif chain_bio.rna?
-                           Bipa::RnaChain
+                           RnaChain
                          elsif chain_bio.hna?
-                           Bipa::HnaChain
+                           HnaChain
                          else
-                           Bipa::HetChain
+                           HetChain
                          end
 
             chain = chain_type.create!(
