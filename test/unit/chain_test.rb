@@ -43,6 +43,20 @@ class AaChainTest < Test::Unit::TestCase
   
   should_have_many  :domains,
                     :through => :residues
+                    
+  context "A AaChain instance" do
+    
+    should "have correct residues" do
+      aa_chain = AaChain.new(valid_chain_params)
+      aa_residue1 = AaResidue.new(valid_residue_params(1, "ARG"))
+      aa_residue2 = AaResidue.new(valid_residue_params(1, "PHE"))
+      
+      assert aa_chain.save
+      assert_true 2, aa_chain.residues.size
+      assert_true aa_residue1, aa_chain.residues[0]
+      assert_true aa_residue2, aa_chain.residues[1]
+    end
+  end
 end
 
 class HnaChainTest < Test::Unit::TestCase

@@ -93,37 +93,34 @@ class AaResidue < StdResidue
 
   def one_letter_code
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
-    raise "Error: No one letter code for residue: #{residue_name}"
+    raise "No one letter code for residue: #{residue_name}"
   end
   
   def relative_unbound_asa
-    @relative_unbound_asa ||=
-      if AminoAcids::Residues::STANDARD.include? residue_name
-        atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /
-          AminoAcids::Residues::STANDARD_ASA[residue_name]
-      else
-        raise "Unknown residue type: #{id}, #{residue_name}"
-      end
+    @relative_unbound_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
+      atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /
+        AminoAcids::Residues::STANDARD_ASA[residue_name]
+    else
+      raise "Unknown residue type: #{id}, #{residue_name}"
+    end
   end
 
   def relative_bound_asa
-    @relative_bound_asa ||=
-      if AminoAcids::Residues::STANDARD.include? residue_name
-        atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s } /
-          AminoAcids::Residues::STANDARD_ASA[residue_name]
-      else
-        raise "Unknown residue type: #{id}, #{residue_name}"
-      end
+    @relative_bound_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
+      atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s } /
+        AminoAcids::Residues::STANDARD_ASA[residue_name]
+    else
+      raise "Unknown residue type: #{id}, #{residue_name}"
+    end
   end
 
   def relative_delta_asa
-    @relative_delta_asa ||=
-      if AminoAcids::Residues::STANDARD.include? residue_name
-        atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
-          AminoAcids::Residues::STANDARD_ASA[residue_name]
-      else
-        raise "Unknown residue type: #{id}, #{residue_name}"
-      end
+    @relative_delta_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
+      atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
+        AminoAcids::Residues::STANDARD_ASA[residue_name]
+    else
+      raise "Unknown residue type: #{id}, #{residue_name}"
+    end
   end
 end
 

@@ -19,9 +19,9 @@ ActiveRecord::Schema.define(:version => 1) do
     (10..100).step(10) { |i| t.belongs_to  "subfamily#{i}" }
     t.integer     "lft"
     t.integer     "rgt"
-    t.string      "type",       :null => false
-    t.integer     "sunid",      :null => false
-    t.string      "stype",      :null => false
+    t.string      "type", :null => false
+    t.integer     "sunid"
+    t.string      "stype"
     t.string      "sccs"
     t.string      "sid"
     t.string      "description"
@@ -42,7 +42,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'subfamilies' table
   create_table "subfamilies", :force => true do |t|
     t.belongs_to  "scop_family"
-    t.string      "type",       :null => false
+    t.string      "type", :null => false
   end
 
   add_index "subfamilies", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
@@ -54,13 +54,13 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'structures' table
   create_table  "structures", :force => true do |t|
-    t.string    "pdb_code",       :null => false
-    t.string    "classification", :null => false
+    t.string    "pdb_code",
+    t.string    "classification",
     t.string    "title"
-    t.string    "exp_method",     :null => false
+    t.string    "exp_method",
     t.float     "resolution"
-    t.date      "deposited_at",   :null => false
-    t.boolean   "obsolete",       :default => false
+    t.date      "deposited_at",
+    t.boolean   "obsolete", :default => false
     t.timestamps
   end
 
@@ -69,8 +69,8 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'models' table
   create_table "models", :force => true do |t|
-    t.belongs_to  "structure",  :null => false
-    t.integer     "model_code", :null => false
+    t.belongs_to  "structure"
+    t.integer     "model_code"
   end
 
   add_index "models", ["model_code"],   :name => "index_models_on_model_code"
@@ -79,8 +79,8 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'chains' table
   create_table "chains", :force => true do |t|
-    t.belongs_to  "model",      :null => false
-    t.string      "type",       :null => false
+    t.belongs_to  "model"
+    t.string      "type", :null => false
     t.string      "chain_code"
     t.integer     "mol_code"
     t.string      "molecule"
@@ -93,16 +93,16 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'resdiues' table
   create_table "residues", :force => true do |t|
-    t.belongs_to  "chain",              :null => false
+    t.belongs_to  "chain",
     t.belongs_to  "scop"
     t.belongs_to  "chain_interface"
     t.belongs_to  "domain_interface"
     t.belongs_to  "res_map"
     t.belongs_to  "residue_map"
-    t.string      "type",               :null => false
+    t.string      "type", :null => false
     t.string      "icode"
-    t.integer     "residue_code",       :null => false
-    t.string      "residue_name",       :null => false
+    t.integer     "residue_code"
+    t.string      "residue_name"
     t.string      "secondary_structure"
     t.string      "hydrophobicity"
   end
@@ -125,14 +125,14 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'atoms' table
   create_table "atoms", :force => true do |t|
-    t.belongs_to  "residue",      :null => false
+    t.belongs_to  "residue"
     t.string      "position_type"
-    t.integer     "atom_code",    :null => false
-    t.string      "atom_name",    :null => false
+    t.integer     "atom_code"
+    t.string      "atom_name"
     t.string      "altloc"
-    t.float       "x",            :null => false
-    t.float       "y",            :null => false
-    t.float       "z",            :null => false
+    t.float       "x"
+    t.float       "y"
+    t.float       "z"
     t.float       "occupancy"
     t.float       "tempfactor"
     t.string      "element"
@@ -150,9 +150,9 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'contacts' table
   create_table "contacts", :force => true do |t|
-    t.belongs_to  "atom",             :null => false
-    t.belongs_to  "contacting_atom",  :null => false
-    t.float       "distance",         :null => false
+    t.belongs_to  "atom"
+    t.belongs_to  "contacting_atom"
+    t.float       "distance"
   end
 
   add_index "contacts", ["atom_id"],                        :name => "index_contacts_on_atom_id"
@@ -162,10 +162,10 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'hbonds' table
   create_table "hbonds", :force => true do |t|
-    t.belongs_to  "hbonding_donor",    :null => false
-    t.belongs_to  "hbonding_acceptor", :null => false
-    t.float       "da_distance",       :null => false
-    t.string      "category",          :null => false
+    t.belongs_to  "hbonding_donor"
+    t.belongs_to  "hbonding_acceptor"
+    t.float       "da_distance"
+    t.string      "category"
     t.integer     "gap"
     t.float       "ca_distance"
     t.float       "dha_angle"
@@ -181,9 +181,9 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'whbonds' table
   create_table "whbonds", :force => true do |t|
-    t.belongs_to "atom",           :null => false
-    t.belongs_to "whbonding_atom", :null => false
-    t.belongs_to "water_atom",     :null => false
+    t.belongs_to "atom"
+    t.belongs_to "whbonding_atom"
+    t.belongs_to "water_atom" 
   end
 
   add_index "whbonds", ["atom_id", "whbonding_atom_id"],  :name => "index_whbonds_on_atom_id_and_whbonding_atom_id"
@@ -195,7 +195,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :interfaces, :force => true do |t|
     t.belongs_to  "scop"
     t.belongs_to  "chain"
-    t.string      "type",     :null => false
+    t.string      "type", :null => false
     t.float       "asa"
     t.float       "polarity"
 
