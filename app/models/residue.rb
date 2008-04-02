@@ -67,11 +67,6 @@ class Residue < ActiveRecord::Base
   def justified_residue_code
     residue_code.to_s.rjust(4, '0')
   end
-
-  def one_letter_code
-    AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
-    raise "Error: No one letter code for residue: #{residue_name}"
-  end
 end # class Bipa::Residue
 
 
@@ -85,6 +80,7 @@ end
 
 class AaResidue < StdResidue
 
+  include Bipa::Constants
   include Bipa::NucleicAcidBinding
 
   belongs_to  :domain,
@@ -95,6 +91,11 @@ class AaResidue < StdResidue
               :class_name   => "DomainInterface",
               :foreign_key  => "domain_interface_id"
 
+  def one_letter_code
+    AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
+    raise "Error: No one letter code for residue: #{residue_name}"
+  end
+  
   def relative_unbound_asa
     @relative_unbound_asa ||=
       if AminoAcids::Residues::STANDARD.include? residue_name

@@ -83,17 +83,14 @@ class Test::Unit::TestCase
   end
   
   def valid_residue_params(residue_code = nil,
-                           residue_name = nil,
-                           type = nil)
+                           residue_name = nil)
                            
     residue_names = AminoAcids::Residues::STANDARD +
                     NucleicAcids::Residues::STANDARD
-    residue_types = Residue.send(:subclasses).map(&:to_s)
     
     {
       :residue_code => residue_code || rand(100),
-      :residue_name => residue_name || residue_names[rand(residue_names.size)],
-      :type         => type || residue_types[rand(residue_types.size)]
+      :residue_name => residue_name || residue_names[rand(residue_names.size)]
     }
   end
   
