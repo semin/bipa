@@ -54,12 +54,12 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'structures' table
   create_table  "structures", :force => true do |t|
-    t.string    "pdb_code",
-    t.string    "classification",
+    t.string    "pdb_code"
+    t.string    "classification"
     t.string    "title"
-    t.string    "exp_method",
+    t.string    "exp_method"
     t.float     "resolution"
-    t.date      "deposited_at",
+    t.date      "deposited_at"
     t.boolean   "obsolete", :default => false
     t.timestamps
   end
@@ -93,7 +93,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'resdiues' table
   create_table "residues", :force => true do |t|
-    t.belongs_to  "chain",
+    t.belongs_to  "chain"
     t.belongs_to  "scop"
     t.belongs_to  "chain_interface"
     t.belongs_to  "domain_interface"

@@ -31,7 +31,28 @@ class ResidueTest < Test::Unit::TestCase
 
   should_have_many  :hbonding_acceptors,
                     :through => :hbonds_as_donor
+                    
   
+  context "A Residue instance" do
+    
+    setup do
+      @residue = Residue.new(valid_residue_params)
+    end
+    
+    should "properly saved" do
+      assert @residue.save
+    end
+
+    context "with two atoms" do
+
+      setup do
+        @atom1 = Atom.new(valid_atom_params)
+        @atom2 = Atom.new(Valid_atom_params)
+        @residue.atoms << @atom1
+        @residue.atoms << @atom2
+      end
+    end
+  end
 end
 
 

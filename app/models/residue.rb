@@ -12,25 +12,25 @@ class Residue < ActiveRecord::Base
 
   has_many  :contacts,
             :through      => :atoms
-
+  
   has_many  :contacting_atoms,
             :through      => :contacts
-
+  
   has_many  :whbonds,
             :through      => :atoms
-
+  
   has_many  :whbonding_atoms,
             :through      => :whbonds
-
+  
   has_many  :hbonds_as_donor,
             :through      => :atoms
-
+  
   has_many  :hbonds_as_acceptor,
             :through      => :atoms
-
+  
   has_many  :hbonding_donors,
             :through      => :hbonds_as_acceptor
-
+  
   has_many  :hbonding_acceptors,
             :through      => :hbonds_as_donor
 
@@ -80,7 +80,6 @@ end
 
 class AaResidue < StdResidue
 
-  include Bipa::Constants
   include Bipa::NucleicAcidBinding
 
   belongs_to  :domain,
