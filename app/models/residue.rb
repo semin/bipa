@@ -3,7 +3,9 @@ class Residue < ActiveRecord::Base
   include Bipa::Constants
   include Bipa::ComposedOfAtoms
 
-  belongs_to  :chain
+  belongs_to  :chain,
+              :class_name   => "Chain",
+              :foreign_key  => "chain_id"
 
   belongs_to  :chain_interface
 
@@ -12,24 +14,27 @@ class Residue < ActiveRecord::Base
 
   has_many  :contacts,
             :through      => :atoms
-  
+
+  has_many  :contacting_atoms,
+            :through      => :contacts
+
   has_many  :whbonds,
             :through      => :atoms
-  
-  # has_many  :whbonding_atoms,
-  #           :through      => :whbonds
-  
+
+  has_many  :whbonding_atoms,
+            :through      => :whbonds
+
   has_many  :hbonds_as_donor,
             :through      => :atoms
-  
+
   has_many  :hbonds_as_acceptor,
             :through      => :atoms
-  
-  # has_many  :hbonding_donors,
-  #           :through      => :hbonds_as_acceptor
-  # 
-  # has_many  :hbonding_acceptors,
-  #           :through      => :hbonds_as_donor
+
+  has_many  :hbonding_donors,
+            :through      => :hbonds_as_acceptor
+
+  has_many  :hbonding_acceptors,
+            :through      => :hbonds_as_donor
 
   # ASA related
   def on_surface?
@@ -48,11 +53,11 @@ class Residue < ActiveRecord::Base
   def aa?
     is_a?(AaResidue)
   end
-  
+
   def na?
     is_a?(NaResidue)
   end
-  
+
   def dna?
     is_a?(DnaResidue)
   end
@@ -60,7 +65,7 @@ class Residue < ActiveRecord::Base
   def rna?
     is_a?(RnaResidue)
   end
-  
+
   def het?
     is_a?(HetResidue)
   end
@@ -99,7 +104,7 @@ class AaResidue < StdResidue
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "No one letter code for residue: #{residue_name}"
   end
-  
+
   def relative_unbound_asa
     @relative_unbound_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
       atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /

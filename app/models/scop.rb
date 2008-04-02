@@ -261,9 +261,9 @@ end
 
 class ScopDomain < Scop
 
-  include Bipa::NucleicAcidBinding
-  include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
+  include Bipa::ComposedOfResidues
+  include Bipa::NucleicAcidBinding
 
   (10..100).step(10) do |si|
     belongs_to  :"subfamily#{si}",
@@ -280,7 +280,7 @@ class ScopDomain < Scop
             :foreign_key  => "scop_id"
 
   has_many  :residues,
-            :class_name   => "AaResidue",
+            :class_name   => "Residue",
             :foreign_key  => "scop_id"
 
   has_many  :chains,

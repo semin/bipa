@@ -7,7 +7,7 @@ class Interface < ActiveRecord::Base
     res.upcase!
     residues.inject(0) { |s, r| r.residue_name == res ? s + r.delta_asa : s }
   end
-  
+
   def asa_of_sse(sse)
     sse.upcase!
     residues.inject(0) { |s, r| r.secondary_structure == sse ? s + r.delta_asa : s }
@@ -23,7 +23,7 @@ class DomainInterface < Interface
               :foreign_key  => 'scop_id'
 
   has_many  :residues,
-            :class_name   => "AaResidue",
+            :class_name   => "Residue",
             :foreign_key  => 'domain_interface_id'
 
   # Callbacks
@@ -379,9 +379,7 @@ class ChainInterface < Interface
 
   belongs_to :chain
 
-  has_many  :residues,
-            :class_name   => "Bipa::Residue",
-            :foreign_key  => "chain_interface_id"
+  has_many  :residues
 end
 
 

@@ -2,7 +2,7 @@ class Structure < ActiveRecord::Base
 
   has_many  :models,
             :dependent  => :destroy
-            
+
   has_many  :chains,
             :through    => :models
 

@@ -4,9 +4,9 @@ module Bipa
     #
     # Van der Waals contacts
     #
-    def contacting_atoms
-      raise "'contacting_atoms' method or association needs to be implemented in your class"
-    end
+#    def contacting_atoms
+#      raise "'contacting_atoms' method or association needs to be implemented in your class"
+#    end
     
     def contacting_dna?
       contacting_atoms.each { |a| return true if a.dna? }
