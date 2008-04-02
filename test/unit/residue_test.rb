@@ -43,6 +43,7 @@ class ResidueTest < Test::Unit::TestCase
       assert @residue.save
     end
 
+
     context "with two atoms added" do
 
       setup do
@@ -78,14 +79,39 @@ class ResidueTest < Test::Unit::TestCase
         end
       end
       
+      
       context "hbonding each other" do
         
         setup do
-          @hbond = Hbond.new
-          @hbond.donor = @atom1
-          @hbond.acceptor = @atom2
+          @hbond              = Hbond.new
+          @hbond.donor        = @atom1
+          @hbond.acceptor     = @atom2
           @hbond.da_distance  = @atom1 - @atom2
           @hbond.save
+        end
+        
+        should "have one hbonds_as_donor" do
+          assert_equal 1, @residue.hbonds_as_donor.size
+        end
+        
+        should "have one hbonds_as_acceptor" do
+          assert_equal 1, @residue.hbonds_as_acceptor.size
+        end
+      end
+      
+      
+      context "whbonding each other" do
+        
+        setup do
+          @whbond                 = Whbond.new
+          @whbond.atom            = @atom1
+          @whbond.whbonding_atom  = @atom2
+          @whbond.water_atom      = Atom.new(valid_atom_params(random_number(3), "HOH"))
+          @whbond.save
+        end
+        
+        should "have one whbond" do
+          assert_equal 1, @residue.whbonds.size
         end
       end
     end
@@ -107,7 +133,7 @@ class AaResidueTest < Test::Unit::TestCase
         assert_equal AminoAcids::Residues::ONE_LETTER_CODE[aa], standard_aa.one_letter_code
       end
     end
-  
+
     should "raise Error when it is non-standard amino acid when #one_letter_code" do
       non_standard_aa = AaResidue.new(valid_residue_params(1, "HEL"))
       assert_raise(RuntimeError) { non_standard_aa.one_letter_code }

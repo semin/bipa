@@ -14,16 +14,16 @@ class Chain < ActiveRecord::Base
             :through      => :residues
             
   has_many  :contacts,
-            :through      => :atoms
-            
+            :through      => :residues
+
   # has_many  :contacting_atoms,
   #           :through      => :contacts
             
   has_many  :hbonds_as_donor,
-            :through      => :atoms
+            :through      => :residues
             
   has_many  :hbonds_as_acceptor,
-            :through      => :atoms
+            :through      => :residues
 
   # has_many  :hbonding_donors,
   #           :through      => :hbonds_as_acceptor
@@ -32,7 +32,7 @@ class Chain < ActiveRecord::Base
   #           :through      => :hbonds_as_donor
 
   has_many  :whbonds,
-            :through      => :atoms
+            :through      => :residues
     
   # has_many  :whbonding_atoms,
   #           :through      => :whbonds

@@ -10,16 +10,16 @@ class ChainTest < Test::Unit::TestCase
                     :through => :residues
 
   should_have_many  :contacts,
-                    :through => :atoms
+                    :through => :residues
 
   # should_have_many  :contacting_atoms,
   #                   :through => :contacts
                     
   should_have_many  :hbonds_as_donor,
-                    :through => :atoms
+                    :through => :residues
                     
   should_have_many  :hbonds_as_acceptor,
-                    :through => :atoms
+                    :through => :residues
   
   # should_have_many  :hbonding_donors,
   #                   :through => :hbonds_as_acceptor
@@ -28,7 +28,7 @@ class ChainTest < Test::Unit::TestCase
   #                   :through => :hbonds_as_donor
 
   should_have_many  :whbonds,
-                    :through => :atoms
+                    :through => :residues
   
   # should_have_many  :whbonding_atoms,
   #                   :through => :whbonds
@@ -47,7 +47,7 @@ class AaChainTest < Test::Unit::TestCase
 
   context "A AaChain instance" do
     
-    context "with two amino acid residues having two atoms for each" do
+    context "with two amino acid residues having two atoms each" do
       
       setup do
         @aa_chain     = AaChain.new(valid_chain_params)
@@ -57,10 +57,6 @@ class AaChainTest < Test::Unit::TestCase
         @aa_atom2     = Atom.new(valid_atom_params)
         @aa_atom3     = Atom.new(valid_atom_params)
         @aa_atom4     = Atom.new(valid_atom_params)
-        @contact1     = Contact.new(:atom_id            => @aa_atom1,
-                                    :contacting_atom_id => @aa_atom2)
-        @contact2     = Contact.new(:atom_id            => @aa_atom3,
-                                    :contacting_atom_id => @aa_atom4)
         
         @aa_residue1.atoms << @aa_atom1
         @aa_residue1.atoms << @aa_atom2
@@ -78,22 +74,43 @@ class AaChainTest < Test::Unit::TestCase
         assert_equal 2, @aa_chain.residues.size
       end
       
-      should "have residues in the order of input" do
+      should "include all the residues" do
         assert_equal @aa_residue1, @aa_chain.residues[0]
         assert_equal @aa_residue2, @aa_chain.residues[1]
       end
       
-      should "directly access every atom of the residue" do
+      should "have four atoms" do
         assert_equal 4, @aa_chain.atoms.size
+      end
+      
+      should "include all the atoms" do
         assert @aa_chain.atoms.include?(@aa_atom1)
         assert @aa_chain.atoms.include?(@aa_atom2)
         assert @aa_chain.atoms.include?(@aa_atom3)
         assert @aa_chain.atoms.include?(@aa_atom4)
       end
-      # 
-      # should "directly access contacts between atoms" do
-      #   assert_equal 2, @aa_chain.contacts.length
-      # end
+      
+      
+      context "contacting each other" do
+        
+        setup do
+          @contact1 = Contact.new
+          @contact1.atom = @aa_atom1
+          @contact1.contacting_atom = @aa_atom2
+          @contact1.distance = @aa_atom1 - @aa_atom2
+          @contact1.save
+          
+          @contact2 = Contact.new
+          @contact2.atom = @aa_atom3
+          @contact2.contacting_atom = @aa_atom4
+          @contact2.distance = @aa_atom3 - @aa_atom4
+          @contact2.save
+        end
+        
+        # should "have two contacts" do
+        #   assert_equal 2, @aa_chain.contacts.size
+        # end
+      end
     end
   end
 end

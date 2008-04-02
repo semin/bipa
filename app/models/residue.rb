@@ -45,16 +45,24 @@ class Residue < ActiveRecord::Base
   end
 
   # Residue specific properties
+  def aa?
+    is_a?(AaResidue)
+  end
+  
+  def na?
+    is_a?(NaResidue)
+  end
+  
   def dna?
-    self.class == DnaResidue
+    is_a?(DnaResidue)
   end
 
   def rna?
-    self.class == RnaResidue
+    is_a?(RnaResidue)
   end
-
-  def aa?
-    self.class == AaResidue
+  
+  def het?
+    is_a?(HetResidue)
   end
 
   def justified_residue_name
