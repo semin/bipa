@@ -1,10 +1,10 @@
 class Hbond < ActiveRecord::Base
   
-  belongs_to  :hbonding_donor,
+  belongs_to  :donor,
               :class_name   => "Atom",
-              :foreign_key  => "hbonding_donor_id"
+              :foreign_key  => "donor_id"
               
-  belongs_to  :hbonding_acceptor,
+  belongs_to  :acceptor,
               :class_name   => "Atom",
-              :foreign_key  => "hbonding_acceptor_id"
+              :foreign_key  => "acceptor_id"
 end

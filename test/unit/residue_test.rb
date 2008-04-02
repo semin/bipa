@@ -11,14 +11,14 @@ class ResidueTest < Test::Unit::TestCase
   should_have_many  :contacts,
                     :through => :atoms
 
-  should_have_many  :contacting_atoms,
-                    :through => :contacts
+  # should_have_many  :contacting_atoms,
+  #                   :through => :contacts
 
   should_have_many  :whbonds,
                     :through => :atoms
 
-  should_have_many  :whbonding_atoms,
-                    :through => :whbonds
+  # should_have_many  :whbonding_atoms,
+  #                   :through => :whbonds
 
   should_have_many  :hbonds_as_donor,
                     :through => :atoms
@@ -26,11 +26,11 @@ class ResidueTest < Test::Unit::TestCase
   should_have_many  :hbonds_as_acceptor,
                     :through => :atoms
 
-  should_have_many  :hbonding_donors,
-                    :through => :hbonds_as_acceptor
-
-  should_have_many  :hbonding_acceptors,
-                    :through => :hbonds_as_donor
+  # should_have_many  :hbonding_donors,
+  #                   :through => :hbonds_as_acceptor
+  # 
+  # should_have_many  :hbonding_acceptors,
+  #                   :through => :hbonds_as_donor
                     
   
   context "A Residue instance" do
@@ -43,13 +43,50 @@ class ResidueTest < Test::Unit::TestCase
       assert @residue.save
     end
 
-    context "with two atoms" do
+    context "with two atoms added" do
 
       setup do
         @atom1 = Atom.new(valid_atom_params)
-        @atom2 = Atom.new(Valid_atom_params)
+        @atom2 = Atom.new(valid_atom_params)
         @residue.atoms << @atom1
         @residue.atoms << @atom2
+        @residue.save
+      end
+      
+      should "have two atoms" do
+        assert_equal 2, @residue.atoms.size
+      end
+
+      should "include every atom" do
+        assert @residue.atoms.include?(@atom1)
+        assert @residue.atoms.include?(@atom2)
+      end
+      
+      
+      context "contacting each other" do
+      
+        setup do
+          @contact                  = Contact.new
+          @contact.atom             = @atom1
+          @contact.contacting_atom  = @atom2
+          @contact.distance         = @atom1 - @atom2
+          @contact.save
+        end
+        
+        should "have one contact" do
+          assert_equal 1, @residue.contacts.size
+        end
+      end
+      
+      context "hbonding each other" do
+        
+        setup do
+          @hbond = Hbond.new
+          @hbond.donor = @atom1
+          @hbond.acceptor = @atom2
+          @hbond.da_distance  = @atom1 - @atom2
+          @hbond.save
+        end
       end
     end
   end

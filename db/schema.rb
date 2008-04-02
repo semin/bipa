@@ -17,15 +17,15 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table "scops", :force => true do |t|
     t.belongs_to  "parent"
     (10..100).step(10) { |i| t.belongs_to  "subfamily#{i}" }
-    t.integer     "lft"
-    t.integer     "rgt"
-    t.string      "type", :null => false
-    t.integer     "sunid"
-    t.string      "stype"
-    t.string      "sccs"
-    t.string      "sid"
-    t.string      "description"
-    t.boolean     "registered", :default => false
+    t.integer "lft"
+    t.integer "rgt"
+    t.string  "type"
+    t.integer "sunid"
+    t.string  "stype"
+    t.string  "sccs"
+    t.string  "sid"
+    t.string  "description"
+    t.boolean "registered", :default => false
   end
 
   add_index "scops", ["sunid"],                   :name => "index_scops_on_sunid", :unique => true
@@ -42,7 +42,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'subfamilies' table
   create_table "subfamilies", :force => true do |t|
     t.belongs_to  "scop_family"
-    t.string      "type", :null => false
+    t.string      "type"
   end
 
   add_index "subfamilies", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
@@ -80,7 +80,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'chains' table
   create_table "chains", :force => true do |t|
     t.belongs_to  "model"
-    t.string      "type", :null => false
+    t.string      "type"
     t.string      "chain_code"
     t.integer     "mol_code"
     t.string      "molecule"
@@ -99,7 +99,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  "domain_interface"
     t.belongs_to  "res_map"
     t.belongs_to  "residue_map"
-    t.string      "type", :null => false
+    t.string      "type"
     t.string      "icode"
     t.integer     "residue_code"
     t.string      "residue_name"
@@ -162,8 +162,8 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'hbonds' table
   create_table "hbonds", :force => true do |t|
-    t.belongs_to  "hbonding_donor"
-    t.belongs_to  "hbonding_acceptor"
+    t.belongs_to  "donor"
+    t.belongs_to  "acceptor"
     t.float       "da_distance"
     t.string      "category"
     t.integer     "gap"
@@ -174,10 +174,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "daaa_angle"
   end
 
-  add_index "hbonds", ["hbonding_donor_id", "hbonding_acceptor_id"],  :name => "index_hbonds_on_hbonding_donor_id_and_hbonding_acceptor_id"
-  add_index "hbonds", ["hbonding_acceptor_id", "hbonding_donor_id"],  :name => "index_hbonds_on_hbonding_acceptor_id_and_hbonding_donor_id"
-  add_index "hbonds", ["hbonding_donor_id"],                          :name => "index_hbonds_on_hbonding_donor_id"
-  add_index "hbonds", ["hbonding_acceptor_id"],                       :name => "index_hbonds_on_hbonding_acceptor_id"
+  add_index "hbonds", ["donor_id", "acceptor_id"],  :name => "index_hbonds_on_donor_id_and_acceptor_id"
+  add_index "hbonds", ["acceptor_id", "donor_id"],  :name => "index_hbonds_on_acceptor_id_and_donor_id"
+  add_index "hbonds", ["donor_id"],                 :name => "index_hbonds_on_donor_id"
+  add_index "hbonds", ["acceptor_id"],              :name => "index_hbonds_on_acceptor_id"
 
   # 'whbonds' table
   create_table "whbonds", :force => true do |t|
@@ -195,7 +195,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :interfaces, :force => true do |t|
     t.belongs_to  "scop"
     t.belongs_to  "chain"
-    t.string      "type", :null => false
+    t.string      "type"
     t.float       "asa"
     t.float       "polarity"
 
