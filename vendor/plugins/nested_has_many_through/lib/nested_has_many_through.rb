@@ -27,7 +27,7 @@ module ActiveRecord #:nodoc:
           if through_reflection.nil?
             raise HasManyThroughAssociationNotFoundError.new(active_record.name, self)
           end
-          
+
           if source_reflection.nil?
             raise HasManyThroughSourceAssociationNotFoundError.new(self)
           end
@@ -35,11 +35,11 @@ module ActiveRecord #:nodoc:
           if options[:source_type] && source_reflection.options[:polymorphic].nil?
             raise HasManyThroughAssociationPointlessSourceTypeError.new(active_record.name, self, source_reflection)
           end
-          
+
           if source_reflection.options[:polymorphic] && options[:source_type].nil?
             raise HasManyThroughAssociationPolymorphicError.new(active_record.name, self, source_reflection)
           end
-          
+
           # override check_validity! here to always permit has_many associations
           # (including has_many :through) to be used as through/source associations
           unless [:belongs_to, :has_many].include?(source_reflection.macro)
@@ -52,14 +52,15 @@ module ActiveRecord #:nodoc:
 
   module Associations #:nodoc:
     class HasManyThroughAssociation < AssociationProxy #:nodoc:
-    
+
       def initialize(owner, reflection)
         super
         reflection.check_validity!
       end
 
       def find(*args)
-        options = Base.send(:extract_options_from_args!, args)
+        #options = Base.send(:extract_options_from_args!, args)
+        options = args.extract_options!
 
         conditions = construct_conditions
         if sanitized_conditions = sanitize_sql(options[:conditions])
@@ -112,7 +113,7 @@ module ActiveRecord #:nodoc:
         # conditions: any additional conditions (e.g. filtering by type for a polymorphic association,
         #    or a :conditions clause explicitly given in the association), including a leading AND
         def construct_join_components(reflection = @reflection, association_class = reflection.klass, table_ids = {association_class.table_name => 1})
-        
+
           if reflection.macro == :has_many and reflection.through_reflection
             # Construct the join components of the source association, so that we have a path from
             # the eventual target table of the association up to the table named in :through, and
@@ -127,19 +128,32 @@ module ActiveRecord #:nodoc:
             # the active record's table.
             through_join_components = construct_join_components(reflection.through_reflection, reflection.through_reflection.klass, table_ids)
 
-            # Any subsequent joins / filters on owner attributes will act on the through association,
-            # so that's what we return for the conditions/keys of the overall association.
-            conditions = through_join_components[:conditions]
-            conditions += " AND #{interpolate_sql(reflection.klass.send(:sanitize_sql, reflection.options[:conditions]))}" if reflection.options[:conditions]
+
+            # Source local key should be the through table primary key
+            # if the source reflection is a :has_many association
+            source_local_key = reflection.source_reflection.macro == :belongs_to ?
+              source_join_components[:local_key] : reflection.through_reflection.klass.primary_key
+
+            # Any subsequent joins / filters on owner attributes will
+            # act on the through association, so that's what we return
+            # for the conditions/keys of the overall association.
+            conditions = through_join_components[:conditions].dup
+            conditions << " AND #{interpolate_sql(reflection.klass.send(:sanitize_sql, reflection.options[:conditions]))}" if reflection.options[:conditions]
+
+            # CHECKME: Is it really correct for source_join_components[:conditions]
+            #   to go into :joins instead of :conditions?
+            # I guess it's equivalent for INNER JOIN, right?
+
+            through_table_key = quote_pair(through_table_alias, source_local_key)
             {
-              :joins => "#{source_join_components[:joins]} INNER JOIN #{table_name_with_alias(through_table_name, through_table_alias)} ON (#{source_join_components[:remote_key]} = #{through_table_alias}.#{source_join_components[:local_key]}#{source_join_components[:conditions]}) #{through_join_components[:joins]} #{reflection.options[:joins]}",
+              :joins => "#{source_join_components[:joins]} INNER JOIN #{table_alias_for(through_table_name, through_table_alias)} ON (#{source_join_components[:remote_key]} = #{through_table_key} #{source_join_components[:conditions]}) #{through_join_components[:joins]} #{reflection.options[:joins]}",
               :remote_key => through_join_components[:remote_key],
               :local_key => through_join_components[:local_key],
               :conditions => conditions
             }
           else
             # reflection is not has_many :through; it's a standard has_many / belongs_to instead
-            
+
             # Determine the alias used for remote_table_name, if any. In all cases this will already
             # have been assigned an ID in table_ids (either through being involved in a previous join,
             # or - if it's the first table in the query - as the default value of table_ids)
@@ -154,37 +168,48 @@ module ActiveRecord #:nodoc:
             else
               table_ids[local_table_name] = 1
             end
-            
+
             conditions = ''
             # Add filter for single-table inheritance, if applicable.
-            conditions += " AND #{remote_table_alias}.#{association_class.inheritance_column} = #{association_class.quote_value(association_class.name.demodulize)}" unless association_class.descends_from_active_record?
+
+            conditions << " AND #{association_class.send(:type_condition)}" if association_class.finder_needs_type_condition?
             # Add custom conditions
-            conditions += " AND (#{interpolate_sql(association_class.send(:sanitize_sql, reflection.options[:conditions]))})" if reflection.options[:conditions]
-            
+            conditions << " AND (#{interpolate_sql(association_class.send(:sanitize_sql, reflection.options[:conditions]))})" if reflection.options[:conditions]
+
             if reflection.macro == :belongs_to
               if reflection.options[:polymorphic]
-                conditions += " AND #{local_table_alias}.#{reflection.options[:foreign_type]} = #{reflection.active_record.quote_value(association_class.base_class.name.to_s)}"
+                local_table_key = quote_pair(local_table_alias, reflection.options[:foreign_type])
+                conditions << " AND #{local_table_key} = #{reflection.active_record.quote_value(association_class.base_class.name.to_s)}"
               end
-              {
-                :joins => reflection.options[:joins],
-                :remote_key => "#{remote_table_alias}.#{association_class.primary_key}",
-                :local_key => reflection.primary_key_name,
-                :conditions => conditions
-              }
+              remote_key = quote_pair(remote_table_alias, association_class.primary_key)
+              local_key = reflection.primary_key_name
             else
               # Association is has_many (without :through)
               if reflection.options[:as]
-                conditions += " AND #{remote_table_alias}.#{reflection.options[:as]}_type = #{reflection.active_record.quote_value(reflection.active_record.base_class.name.to_s)}"
+                remote_table_key = quote_pair(remote_table_alias, "#{reflection.options[:as]}_type")
+                conditions << " AND #{remote_table_key} = #{reflection.active_record.quote_value(reflection.active_record.base_class.name.to_s)}"
               end
-              {
-                :joins => "#{reflection.options[:joins]}",
-                :remote_key => "#{remote_table_alias}.#{reflection.primary_key_name}",
-                :local_key => reflection.klass.primary_key,
-                :conditions => conditions
-              }
+              remote_key = quote_pair(remote_table_alias, reflection.primary_key_name)
+              local_key = reflection.klass.primary_key
             end
+            {
+              :joins => "#{reflection.options[:joins]}",
+              :remote_key => remote_key,
+              :local_key => local_key,
+              :conditions => conditions
+            }
           end
         end
+
+        def table_alias_for(table_name, table_alias)
+          "#{@reflection.klass.connection.quote_table_name(table_name)} #{table_alias if table_name != table_alias}".strip
+        end
+
+        def quote_pair(table_name, key)
+          conn = @reflection.klass.connection
+          "#{conn.quote_table_name(table_name)}.#{conn.quote_column_name(key)}"
+        end
+        private :table_alias_for, :quote_pair
 
         def table_name_with_alias(table_name, table_alias)
           table_name == table_alias ? table_name : "#{table_name} #{table_alias}"
