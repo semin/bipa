@@ -1,12 +1,13 @@
 class Chain < ActiveRecord::Base
 
-  include Bipa::Usr
   include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
 
-  belongs_to  :model
+  belongs_to  :model,
+              :foreign_key  => "model_id"
 
   has_many  :residues,
+            :foreign_key  => "chain_id",
             :dependent    => :destroy
             
   has_many  :atoms,
@@ -41,11 +42,11 @@ end
 class AaChain < Chain
 
   include Bipa::NucleicAcidBinding
-
+  
   has_many  :dna_interfaces,
             :class_name   => "ChainDnaInterface",
             :foreign_key  => "chain_id"
-
+  
   has_many  :rna_interfaces,
             :class_name   => "ChainRnaInterface",
             :foreign_key  => "chain_id"
@@ -71,11 +72,9 @@ end
 class HnaChain < NaChain
 
   has_many  :dna_residues,
-            :class_name   => "DnaResidue",
             :foreign_key  => "chain_id"
 
   has_many  :rna_residues,
-            :class_name   => "RnaResidue",
             :foreign_key  => "chain_id"
   
   has_many  :dna_atoms,

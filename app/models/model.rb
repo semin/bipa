@@ -3,10 +3,12 @@ class Model < ActiveRecord::Base
   include Bipa::ComposedOfResidues
   include Bipa::ComposedOfAtoms
 
-  belongs_to  :structure
+  belongs_to  :structure,
+              :class_name   => "Structure",
+              :foreign_key  => "structure_id"
 
   has_many  :chains,
-            :dependent => :destroy
+            :dependent    => :destroy
 
   has_many  :aa_chains
 

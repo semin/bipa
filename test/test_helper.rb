@@ -3,6 +3,12 @@ require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
 require 'test_help'
 require 'mocha'
 
+require_dependency "scop"
+require_dependency "chain"
+require_dependency "residue"
+require_dependency "interface"
+require_dependency "subfamily"
+
 class Test::Unit::TestCase
   # Transactional fixtures accelerate your tests by wrapping each test method
   # in a transaction that's rolled back on completion.  This ensures that the

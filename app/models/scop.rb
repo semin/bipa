@@ -4,8 +4,6 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  scope_out :registered
-
   def self.factory_create!(opt={})
     case opt[:stype]
     when 'root' then ScopRoot.create!(opt)
