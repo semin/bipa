@@ -2,12 +2,41 @@ module Bipa
   module ComposedOfAtoms
     
     include Bipa::Usr
-    
-    #
-    # a specific set of atoms
-    #
+
     def atoms
-      raise "You should implement this 'atoms' method in your class!"
+      raise "'atoms' method has to be implemented in your class"
+    end
+    
+    def contacts
+      atoms.inject([]) { |s, a| s.concat(a.contacts) }
+    end
+    
+    def whbonds
+      atoms.inject([]) { |s, a| s.concat(a.whbonds) }
+    end
+    
+    def hbonds_as_donor
+      atoms.inject([]) { |s, a| s.concat(a.hbonds_as_donor) }
+    end
+    
+    def hbonds_as_acceptor
+      atoms.inject([]) { |s, a| s.concat(a.hbonds_as_acceptor) }
+    end
+    
+    def contacting_atoms
+      atoms.inject([]) { |s, a| s.concat(a.contacting_atoms) }
+    end
+    
+    def whbonding_atoms
+      atoms.inject([]) { |s, a| s.concat(a.whbonding_atoms) }
+    end
+    
+    def hbonding_donors
+      atoms.inject([]) { |s, a| s.concat(a.hbonding_donors) }
+    end
+    
+    def hbonding_acceptors
+      atoms.inject([]) { |s, a| s.concat(a.hbonding_acceptors) }
     end
     
     def surface_atoms

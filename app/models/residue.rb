@@ -17,18 +17,14 @@ class Residue < ActiveRecord::Base
   has_many  :contacts,
             :through      => :atoms
 
-#  has_many  :contacting_atoms,
-#            :through      => :atoms
-
-  def contacting_atoms
-    atoms.inject([]) { |arr, a| arr << a.contacting_atoms }.flatten
-  end
+  # has_many  :contacting_atoms,
+  #          :through      => :atoms
 
   has_many  :whbonds,
             :through      => :atoms
 
-  has_many  :whbonding_atoms,
-            :through      => :whbonds
+  # has_many  :whbonding_atoms,
+  #           :through      => :whbonds
 
   has_many  :hbonds_as_donor,
             :through      => :atoms
@@ -36,12 +32,12 @@ class Residue < ActiveRecord::Base
   has_many  :hbonds_as_acceptor,
             :through      => :atoms
 
-  has_many  :hbonding_donors,
-            :through      => :hbonds_as_acceptor
-
-  has_many  :hbonding_acceptors,
-            :through      => :hbonds_as_donor
-
+  # has_many  :hbonding_donors,
+  #           :through      => :hbonds_as_acceptor
+  
+  # has_many  :hbonding_acceptors,
+  #           :through      => :hbonds_as_donor
+  
   # ASA related
   def on_surface?
     surface_atoms.size > 0
@@ -83,7 +79,7 @@ class Residue < ActiveRecord::Base
   def justified_residue_code
     residue_code.to_s.rjust(4, '0')
   end
-end # class Bipa::Residue
+end # class Residue
 
 
 class StdResidue < Residue

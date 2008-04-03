@@ -1,13 +1,10 @@
 class Model < ActiveRecord::Base
 
   include Bipa::ComposedOfResidues
-  include Bipa::ComposedOfAtoms
 
   belongs_to  :structure
 
   has_many  :chains,
-            :class_name   => "Chain",
-            :foreign_key  => "chain_id",
             :dependent    => :destroy
 
   has_many  :aa_chains
@@ -49,54 +46,54 @@ class Model < ActiveRecord::Base
             :through  => :het_chains,
             :source   => :residues
 
-  has_many  :atoms,
-            :through  => :residues
-
-  has_many  :aa_atoms,
-            :through  => :aa_residues,
-            :source   => :atoms
-
-  has_many  :na_atoms,
-            :through  => :na_residues,
-            :source   => :atoms
-
-  has_many  :dna_atoms,
-            :through  => :dna_residues,
-            :source   => :atoms
-
-  has_many  :rna_atoms,
-            :through  => :rna_residues,
-            :source   => :atoms
-
-  has_many  :hna_atoms,
-            :through  => :hna_residues,
-            :source   => :atoms
-
-  has_many  :het_atoms,
-            :through  => :het_residues,
-            :source   => :atoms
-
-  has_many  :contacts,
-            :through  => :atoms
-
-  has_many  :contacting_atoms,
-            :through  => :contacts
-
-  has_many  :hbonds_as_donor,
-            :through  => :atoms
-
-  has_many  :hbonds_as_acceptor,
-            :through  => :atoms
-
-  has_many  :hbonding_donors,
-            :through  => :hbonds_as_acceptor
-
-  has_many  :hbonding_acceptors,
-            :through  => :hbonds_as_donor
-
-  has_many  :whbonds,
-            :through  => :atoms
-
-  has_many  :whbonding_atoms,
-            :through  => :whbonds
+#   has_many  :atoms,
+#             :through  => :residues
+# 
+#   has_many  :aa_atoms,
+#             :through  => :aa_residues,
+#             :source   => :atoms
+# 
+#   has_many  :na_atoms,
+#             :through  => :na_residues,
+#             :source   => :atoms
+# 
+#   has_many  :dna_atoms,
+#             :through  => :dna_residues,
+#             :source   => :atoms
+# 
+#   has_many  :rna_atoms,
+#             :through  => :rna_residues,
+#             :source   => :atoms
+# 
+#   has_many  :hna_atoms,
+#             :through  => :hna_residues,
+#             :source   => :atoms
+# 
+#   has_many  :het_atoms,
+#             :through  => :het_residues,
+#             :source   => :atoms
+# 
+#   has_many  :contacts,
+#             :through  => :atoms
+# 
+#   has_many  :contacting_atoms,
+#             :through  => :contacts
+# 
+#   has_many  :hbonds_as_donor,
+#             :through  => :atoms
+# 
+#   has_many  :hbonds_as_acceptor,
+#             :through  => :atoms
+# 
+#   has_many  :hbonding_donors,
+#             :through  => :hbonds_as_acceptor
+# 
+#   has_many  :hbonding_acceptors,
+#             :through  => :hbonds_as_donor
+# 
+#   has_many  :whbonds,
+#             :through  => :atoms
+# 
+#   has_many  :whbonding_atoms,
+#             :through  => :whbonds
 end

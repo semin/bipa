@@ -4,22 +4,22 @@ class ChainTest < Test::Unit::TestCase
   
   should_belong_to  :model
   
-  should_have_many  :residues
-  
-  should_have_many  :atoms,
-                    :through => :residues
-
-  should_have_many  :contacts,
-                    :through => :residues
+  # should_have_many  :residues
+  # 
+  # should_have_many  :atoms,
+  #                   :through => :residues
+  # 
+  # should_have_many  :contacts,
+  #                   :through => :residues
 
   # should_have_many  :contacting_atoms,
   #                   :through => :contacts
-                    
-  should_have_many  :hbonds_as_donor,
-                    :through => :residues
-                    
-  should_have_many  :hbonds_as_acceptor,
-                    :through => :residues
+  #                   
+  # should_have_many  :hbonds_as_donor,
+  #                   :through => :residues
+  #                   
+  # should_have_many  :hbonds_as_acceptor,
+  #                   :through => :residues
   
   # should_have_many  :hbonding_donors,
   #                   :through => :hbonds_as_acceptor
@@ -27,9 +27,9 @@ class ChainTest < Test::Unit::TestCase
   # should_have_many  :hbonding_acceptors,
   #                   :through => :hbonds_as_donor
 
-  should_have_many  :whbonds,
-                    :through => :residues
-  
+  # should_have_many  :whbonds,
+  #                   :through => :residues
+  # 
   # should_have_many  :whbonding_atoms,
   #                   :through => :whbonds
 end
@@ -107,9 +107,9 @@ class AaChainTest < Test::Unit::TestCase
           @contact2.save
         end
         
-        # should "have two contacts" do
-        #   assert_equal 2, @aa_chain.contacts.size
-        # end
+        should "have two contacts" do
+          assert_equal 2, @aa_chain.contacts.size
+        end
       end
     end
   end
