@@ -63,21 +63,17 @@ module Bipa
       interface_atoms.select { |ia| ia.binding_rna? }
     end
 
-    # ASA related
-    def calculate_unbound_asa
-      atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
-    end
-
-    def calculate_bound_asa
-      atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
-    end
-
-    def calculate_delta_asa
-      calculate_unbound_asa - calculate_bound_asa
-    end
-    
-    def asa_of_atom(atm)
-      surface_atom.inject(0) { |s, a| a.atom_name == atm ? s + a.unbound_asa : s + 0 }
+    # ASA related    
+    %w(unbound bound delta).each do |stat|
+      module_eval <<-END
+        def #{stat}_asa
+          @#{stat}_asa ||= atoms.inject(0) { |s, a| a.#{stat}_asa ? s + a.#{stat}_asa : s }
+        end
+      
+        def #{stat}_of_atom(atm)
+          atoms.inject(0) { |s, a| a.atom_name == atm ? s + a.#{stat}_asa : s }
+        end
+      END
     end
   end
 end
