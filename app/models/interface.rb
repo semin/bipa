@@ -15,8 +15,8 @@ class DomainInterface < Interface
 
   has_many  :residues
   
-  before_save :update_singlet_propensities,
-              :update_sse_propensities
+  # before_save :update_singlet_propensities,
+  #             :update_sse_propensities
 
   # Callbacks
   def update_singlet_propensities
@@ -53,15 +53,25 @@ class DomainInterface < Interface
   end
 
   def singlet_propensity_of(res)
-    result = ((delta_asa_of_residue(res) / delta_asa) /
-              (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
-    result.to_f.nan? ? 1 : result
+    begin
+      result = ((delta_asa_of_residue(res) / delta_asa) /
+                (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
+    rescue ZeroDivisionError
+      result = 1
+    ensure
+      result.to_f.nan? ? 1 : result
+    end
   end
 
   def sse_propensity_of(sse)
-    result = ((delta_asa_of_sse(sse) / delta_asa) /
-              (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
-    result.to_f.nan? ? 1 : result
+    begin
+      result = ((delta_asa_of_sse(sse) / delta_asa) /
+                (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
+    rescue ZeroDivisionError
+      result = 1
+    ensure
+      result.to_f.nan? ? 1 : result
+    end
   end
 
   def frequency_of_hbond_between(aa, na)
