@@ -14,20 +14,20 @@ class DomainInterface < Interface
               :foreign_key  => 'scop_id'
 
   has_many  :residues
-  
+
   before_save :update_singlet_propensities,
               :update_sse_propensities
 
   # Callbacks
   def update_singlet_propensities
-    AminoAcids::Residues::STANDARD.each do |aa|
-      self.send("singlet_propensity_of_#{aa}=", singlet_propensity_of(aa))
+    AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
+      send("singlet_propensity_of_#{aa}=", singlet_propensity_of(aa))
     end
   end
 
   def update_sse_propensities
-    DSSP::SSES.map(&:downcase).each do |sse|
-      self.send("sse_propensity_of_#{sse}=", sse_propensity_of(sse))
+    Dssp::SSES.map(&:downcase).each do |sse|
+      send("sse_propensity_of_#{sse}=", sse_propensity_of(sse))
     end
   end
 
@@ -232,67 +232,79 @@ class DomainDnaInterface < DomainInterface
   %w(hbond whbond contact).each do |intact|
     NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna|
 
-      before_save :"update_frequency_of_#{intact}_between_amino_acids_and_#{dna}"
+      class_eval <<-END
+        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{dna}
 
-      define_method :"update_frequency_of_#{intact}_between_amino_acids_and_#{dna}" do
-        send("frequency_of_#{intact}_between_amino_acids_and_#{dna}=",
-            send("frequency_of_#{intact}_between_amino_acids_and_", dna))
-      end
+        def update_frequency_of_#{intact}_between_amino_acids_and_#{dna}
+          frequency_of_#{intact}_between_amino_acids_and_#{dna} =
+          frequency_of_#{intact}_between_amino_acids_and_(#{dna})
+        end
+      END
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
 
-        before_save :"update_frequency_of_#{intact}_between_#{aa}_and_#{dna}"
+        class_eval <<-END
+          before_save :update_frequency_of_#{intact}_between_#{aa}_and_#{dna}
 
-        define_method :"update_frequency_of_#{intact}_between_#{aa}_and_#{dna}" do
-          send("frequency_of_#{intact}_between_#{aa}_and_#{dna}=",
-              send("frequency_of_#{intact}_between", aa, dna))
+          def update_frequency_of_#{intact}_between_#{aa}_and_#{dna}
+            frequency_of_#{intact}_between_#{aa}_and_#{dna} =
+            frequency_of_#{intact}_between(#{aa}, #{dna})
+          end
+        END
+      end
+    end
+
+    class_eval <<-END
+      def frequency_of_#{intact}_between_nucleic_acids_and(aa)
+        sum = 0
+        NucleicAcids::Dna::Residues::STANDARD.each do |dna|
+          sum += frequency_of_#{intact}_between(aa, dna)
         end
+        sum += frequency_of_hbond_between_sugar_and_(aa)
+        sum += frequency_of_hbond_between_phosphate_and_(aa)
       end
-    end
-    
-    define_method :"frequency_of_#{intact}_between_nucleic_acids_and", aa do
-      sum = 0
-      NucleicAcids::Dna::Residues::STANDARD.each do |dna|
-        sum += send("frequency_of_#{intact}_between", aa, dna)
-      end
-      sum += send("frequency_of_hbond_between_sugar_and_", aa)
-      sum += send("frequency_of_hbond_between_phosphate_and_", aa)
-    end
+    END
   end
 end # class DomainDnaInterface
 
 
 class DomainRnaInterface < DomainInterface
 
-  %w(hbond whbond contact).each do |int|
+  %w(hbond whbond contact).each do |intact|
     NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna|
 
-      before_save :"update_frequency_of_#{int}_between_amino_acids_and_#{rna}"
+      class_eval <<-END
+        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{rna}
 
-      define_method :"update_frequency_of_#{int}_between_amino_acids_and_#{rna}" do
-        self.send("frequency_of_#{int}_between_amino_acids_and_#{rna}=",
-                  self.send("frequency_of_#{int}_between_amino_acids_and_", rna))
-      end
+        def update_frequency_of_#{intact}_between_amino_acids_and_#{rna}
+          frequency_of_#{intact}_between_amino_acids_and_#{rna} =
+          frequency_of_#{intact}_between_amino_acids_and_(#{rna})
+        end
+      END
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
 
-        before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{rna}"
+        class_eval <<-END
+          before_save :update_frequency_of_#{intact}_between_#{aa}_and_#{rna}
 
-        define_method :"update_frequency_of_#{int}_between_#{aa}_and_#{rna}" do
-          self.send("frequency_of_#{int}_between_#{aa}_and_#{rna}=",
-                    self.send("frequency_of_#{int}_between", aa, rna))
+          def update_frequency_of_#{intact}_between_#{aa}_and_#{rna}
+            frequency_of_#{intact}_between_#{aa}_and_#{rna} =
+            frequency_of_#{intact}_between(#{aa}, #{rna})
+          end
+        END
+      end
+    end
+
+    class_eval <<-END
+      def frequency_of_#{intact}_between_nucleic_acids_and(aa)
+        sum = 0
+        NucleicAcids::Rna::Residues::STANDARD.each do |rna|
+          sum += frequency_of_#{intact}_between(aa, rna)
         end
+        sum += frequency_of_hbond_between_sugar_and_(aa)
+        sum += frequency_of_hbond_between_phosphate_and_(aa)
       end
-    end
-    
-    define_method :"frequency_of_#{intact}_between_nucleic_acids_and", aa do
-      sum = 0
-      NucleicAcids::Rna::Residues::STANDARD.each do |dna|
-        sum += send("frequency_of_#{intact}_between", aa, dna)
-      end
-      sum += send("frequency_of_hbond_between_sugar_and_", aa)
-      sum += send("frequency_of_hbond_between_phosphate_and_", aa)
-    end
+    END
   end
 end # class DomainRnaInterface
 
