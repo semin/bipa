@@ -255,7 +255,7 @@ class DomainDnaInterface < DomainInterface
     end
 
     class_eval <<-END
-      def frequency_of_#{intact}_between_nucleic_acids_and(aa)
+      def frequency_of_#{intact}_between_nucleic_acids_and_(aa)
         sum = 0
         NucleicAcids::Dna::Residues::STANDARD.each do |dna|
           sum += frequency_of_#{intact}_between(aa, dna)
@@ -296,7 +296,7 @@ class DomainRnaInterface < DomainInterface
     end
 
     class_eval <<-END
-      def frequency_of_#{intact}_between_nucleic_acids_and(aa)
+      def frequency_of_#{intact}_between_nucleic_acids_and_(aa)
         sum = 0
         NucleicAcids::Rna::Residues::STANDARD.each do |rna|
           sum += frequency_of_#{intact}_between(aa, rna)
