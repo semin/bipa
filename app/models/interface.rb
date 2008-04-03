@@ -21,34 +21,40 @@ class DomainInterface < Interface
   # Callbacks
   def update_singlet_propensities
     AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-      send("singlet_propensity_of_#{aa}=", singlet_propensity_of(aa))
+      send(:"singlet_propensity_of_#{aa}=", singlet_propensity_of(aa))
     end
   end
 
   def update_sse_propensities
     Dssp::SSES.map(&:downcase).each do |sse|
-      send("sse_propensity_of_#{sse}=", sse_propensity_of(sse))
+      send(:"sse_propensity_of_#{sse}=", sse_propensity_of(sse))
     end
   end
 
   AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-    %w(hbond whbond contact).each do |int|
+
+    %w(hbond whbond contact).each do |intact|
+
       %w(sugar phosphate).each do |moiety|
 
-        before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{moiety}"
+        class_eval <<-END
+          before_save :update_frequency_of_#{intact}_between_#{aa}_and_#{moiety}
 
-        define_method "update_frequency_of_#{int}_between_#{aa}_and_#{moiety}" do
-          send("frequency_of_#{int}_between_#{aa}_and_#{moiety}=",
-               send("frequency_of_#{int}_between_#{moiety}_and_", aa))
+          def update_frequency_of_#{intact}_between_#{aa}_and_#{moiety}
+            frequency_of_#{intact}_between_#{aa}_and_#{moiety} =
+            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
+          end
+        END
+      end
+
+      class_eval <<-END
+        before_save :update_frequency_of_#{intact}_between_#{aa}_and_nucleic_acids
+
+        def update_frequency_of_#{intact}_between_#{aa}_and_nucleic_acids
+          frequency_of_#{intact}_between_#{aa}_and_nucleic_acids =
+          frequency_of_#{intact}_between_nucleic_acids_and_("#{aa}")
         end
-      end
-
-      before_save :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids"
-
-      define_method :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids" do
-        send("frequency_of_#{int}_between_#{aa}_and_nucleic_acids=",
-            send("frequency_of_#{int}_between_nucleic_acids_and_", aa))
-      end
+      END
     end
   end
 
@@ -58,7 +64,6 @@ class DomainInterface < Interface
                 (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     rescue ZeroDivisionError
       result = 1
-      puts "#{domain.sid} has some problems"
     ensure
       result.to_f.nan? ? 1 : result
     end
@@ -70,7 +75,6 @@ class DomainInterface < Interface
                 (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
     rescue ZeroDivisionError
       result = 1
-      puts "#{domain.sid} has some problems"
     ensure
       result.to_f.nan? ? 1 : result
     end
@@ -237,7 +241,7 @@ class DomainDnaInterface < DomainInterface
 
         def update_frequency_of_#{intact}_between_amino_acids_and_#{dna}
           frequency_of_#{intact}_between_amino_acids_and_#{dna} =
-          frequency_of_#{intact}_between_amino_acids_and_(#{dna})
+          frequency_of_#{intact}_between_amino_acids_and_("#{dna}")
         end
       END
 
@@ -248,7 +252,7 @@ class DomainDnaInterface < DomainInterface
 
           def update_frequency_of_#{intact}_between_#{aa}_and_#{dna}
             frequency_of_#{intact}_between_#{aa}_and_#{dna} =
-            frequency_of_#{intact}_between(#{aa}, #{dna})
+            frequency_of_#{intact}_between("#{aa}", "#{dna}")
           end
         END
       end
@@ -278,7 +282,7 @@ class DomainRnaInterface < DomainInterface
 
         def update_frequency_of_#{intact}_between_amino_acids_and_#{rna}
           frequency_of_#{intact}_between_amino_acids_and_#{rna} =
-          frequency_of_#{intact}_between_amino_acids_and_(#{rna})
+          frequency_of_#{intact}_between_amino_acids_and_("#{rna}")
         end
       END
 
@@ -289,7 +293,7 @@ class DomainRnaInterface < DomainInterface
 
           def update_frequency_of_#{intact}_between_#{aa}_and_#{rna}
             frequency_of_#{intact}_between_#{aa}_and_#{rna} =
-            frequency_of_#{intact}_between(#{aa}, #{rna})
+            frequency_of_#{intact}_between("#{aa}", "#{rna}")
           end
         END
       end
