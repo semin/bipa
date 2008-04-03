@@ -53,14 +53,14 @@ class DomainInterface < Interface
   end
 
   def singlet_propensity_of(res)
-    result = ((asa_of_residue(res) / atoms.to_a.sum(&:delta_asa)) /
-              (domain.asa_of_residue(res) / domain.unbound_asa))
+    result = ((unbound_asa_of_residue(res) / atoms.sum(&:delta_asa)) /
+              (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
 
   def sse_propensity_of(sse)
-    result = ((asa_of_sse(sse) / atoms.to_a.sum(&:delta_asa)) /
-              (domain.asa_of_sse(sse) / domain.unbound_asa))
+    result = ((unbound_asa_of_sse(sse) / atoms.sum(&:delta_asa)) /
+              (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
 
