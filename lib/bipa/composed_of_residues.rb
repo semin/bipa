@@ -34,13 +34,17 @@ module Bipa
     def interface_residues_binding_rna
       interface_residues.select { |r| r.binding_rna? }
     end
-
-    def asa_of_residue(res)
-      surface_residues.inject(0) { |s, r| r.residue_name == res ? s + r.unbound_asa : s }
-    end
-     
-    def asa_of_sse(sse)
-      surface_residues.inject(0) { |s, r| r.secondary_structure == sse ? s + r.unbound_asa : s }
+    
+    %w(unbound bound delta).each do |stat|
+      module_eval <<-END
+        def #{stat}_asa_of_residue(res)
+          residues.inject(0) { |s, r| r.residue_name == res.upcase ? s + r.#{stat}_asa : s }
+        end
+    
+        def #{stat}_asa_of_sse(sse)
+          residues.inject(0) { |s, r| r.secondary_structure == sse.upcase ? s + r.#{stat}_asa : s }
+        end
+      END
     end
   end
 end
