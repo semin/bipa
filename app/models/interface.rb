@@ -38,16 +38,16 @@ class DomainInterface < Interface
         before_save :"update_frequency_of_#{int}_between_#{aa}_and_#{moiety}"
 
         define_method "update_frequency_of_#{int}_between_#{aa}_and_#{moiety}" do
-          self.send("frequency_of_#{int}_between_#{aa}_and_#{moiety}=",
-                    self.send("frequency_of_#{int}_between_#{moiety}_and_", aa))
+          send("frequency_of_#{int}_between_#{aa}_and_#{moiety}=",
+               send("frequency_of_#{int}_between_#{moiety}_and_", aa))
         end
       end
 
       before_save :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids"
 
       define_method :"update_frequency_of_#{int}_between_#{aa}_and_nucleic_acids" do
-        self.send("frequency_of_#{int}_between_#{aa}_and_nucleic_acids=",
-                  self.send("frequency_of_#{int}_between_nucleic_acids_and_", aa))
+        send("frequency_of_#{int}_between_#{aa}_and_nucleic_acids=",
+            send("frequency_of_#{int}_between_nucleic_acids_and_", aa))
       end
     end
   end
@@ -87,6 +87,7 @@ class DomainInterface < Interface
         sum += 1
       end
     end
+    
     hbonds_as_acceptor.each do |h|
       if h.hbonding_acceptor.residue.residue_name == aa &&
         h.hbonding_donor.residue.residue_name == na &&
