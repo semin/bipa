@@ -17,8 +17,12 @@ class Residue < ActiveRecord::Base
   has_many  :contacts,
             :through      => :atoms
 
-  has_many  :contacting_atoms,
-            :through      => :contacts
+#  has_many  :contacting_atoms,
+#            :through      => :atoms
+
+  def contacting_atoms
+    atoms.inject([]) { |arr, a| arr << a.contacting_atoms }.flatten
+  end
 
   has_many  :whbonds,
             :through      => :atoms
