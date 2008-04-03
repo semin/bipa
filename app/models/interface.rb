@@ -2,10 +2,6 @@ class Interface < ActiveRecord::Base
 
   include Bipa::Constants
   include Bipa::ComposedOfResidues
-  
-  def asa
-    residues.inject(0) { |s, r| r.delta_asa ? s + r.delta_asa : s }
-  end
 end
 
 
@@ -57,13 +53,13 @@ class DomainInterface < Interface
   end
 
   def singlet_propensity_of(res)
-    result = ((delta_asa_of_residue(res) / asa) /
+    result = ((delta_asa_of_residue(res) / delta_asa) /
               (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
 
   def sse_propensity_of(sse)
-    result = ((delta_asa_of_sse(sse) / asa) /
+    result = ((delta_asa_of_sse(sse) / delta_asa) /
               (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
