@@ -497,6 +497,7 @@ namespace :bipa do
               if registered
                 domain.registered = true
                 domain.save!
+
                 domain.ancestors.each do |a|
                   a.registered = true
                   a.save!
