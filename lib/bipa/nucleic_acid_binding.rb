@@ -1,9 +1,6 @@
 module Bipa
   module NucleicAcidBinding
 
-    #
-    # Van der Waals contacts
-    #
     def contacting_dna?
       contacting_atoms.each { |a| return true if a.dna? }
       false
@@ -18,9 +15,6 @@ module Bipa
       contacting_dna? or contacting_rna?
     end
 
-    #
-    # Hydrogen bond
-    #
     def hbonding_dna_as_donor?
       hbonding_donors.each { |a| return true if a.dna? }
       false
@@ -49,9 +43,6 @@ module Bipa
       hbonding_rna_as_donor? or hbonding_rna_as_acceptor?
     end
 
-    #
-    # Water-mediated hydrogen bonds
-    #
     def whbonding_dna?
       whbonding_atoms.each { |a| return true if a.dna? }
       false
@@ -66,9 +57,6 @@ module Bipa
       whbonding_dna? or whbonding_rna?
     end
 
-    #
-    # Any one of those bindings occur?
-    #
     def binding_dna?
       contacting_dna? or whbonding_dna?
     end

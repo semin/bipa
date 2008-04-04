@@ -35,6 +35,14 @@ module Bipa
       residues.select { |r| r.binding_rna? }
     end
 
+    def dna_binding_interface_residues
+      interface_residues.select { |r| r.binding_dna? }
+    end
+
+    def rna_binding_interface_residues
+      interface_residues.select { |r| r.binding_rna? }
+    end
+
     %w(unbound bound delta).each do |stat|
       module_eval <<-END
         def #{stat}_asa_of_residue(res)

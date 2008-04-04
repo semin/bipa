@@ -183,7 +183,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table "whbonds", :force => true do |t|
     t.belongs_to "atom"
     t.belongs_to "whbonding_atom"
-    t.belongs_to "water_atom" 
+    t.belongs_to "water_atom"
   end
 
   add_index "whbonds", ["atom_id", "whbonding_atom_id"],  :name => "index_whbonds_on_atom_id_and_whbonding_atom_id"
@@ -199,18 +199,39 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "asa"
     t.float       "polarity"
 
-    AminoAcids::Residues::STANDARD.map(&:downcase).each { |a| t.float "singlet_propensity_of_#{a}" }
-    Dssp::SSES.map(&:downcase).each { |s| t.float "sse_propensity_of_#{s}" }
+    AminoAcids::Residues::STANDARD.each do |aa|
+      t.float "singlet_propensity_of_#{aa.downcase}"
+    end
 
-    %w(hbond whbond contact).each do |int|
+    Dssp::SSES.each do |sse|
+      t.float "sse_propensity_of_#{sse.downcase}"
+    end
+
+    %w(hbond whbond contact).each do |intact|
+
+      %w(sugar phosphate).each do |moiety|
+        t.integer "frequency_of_#{intact}_between_amino_acids_and_#{moiety}"
+      end
+
+      AminoAcids::Residues::STANDARD.each do |aa|
+        t.integer "frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids"
+
+        %w(sugar phosphate).each do |moiety|
+          t.integer "frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}"
+        end
+      end
+
       %w(dna rna).each do |na|
-        na_residues = "NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize.map(&:downcase)
-        na_residues.each { |r| t.integer "frequency_of_#{int}_between_amino_acids_and_#{r}" }
-        %w(sugar phosphate).each { |m| t.integer "frequency_of_#{int}_between_amino_acids_and_#{m}" }
 
-        AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-          %w(sugar phosphate).each { |m| t.integer "frequency_of_#{int}_between_#{aa}_and_#{m}" }
-          na_residues.each { |r| t.integer "frequency_of_#{int}_between_#{aa}_and_#{r}" }
+        na_residues = "NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize
+
+        na_residues.each do |nar|
+
+          t.integer "frequency_of_#{intact}_between_amino_acids_and_#{nar.downcase}"
+
+          AminoAcids::Residues::STANDARD.each do |aa|
+            t.integer "frequency_of_#{intact}_between_#{aa.downcase}_and_#{nar.downcase}"
+          end
         end
       end
     end

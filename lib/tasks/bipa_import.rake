@@ -448,7 +448,7 @@ namespace :bipa do
       IO.readlines(hierarchy_file).each_with_index do |line, i|
         next if line =~ /^#/ || line =~ /^\s*$/
 
-          self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
+        self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
         current_scop = Scop.factory_create!(descriptions[self_sunid])
 
         unless self_sunid.to_i == 0
@@ -482,16 +482,16 @@ namespace :bipa do
 
               registered = false
 
-              if domain.dna_binding_residues.length > 0
+              if domain.dna_binding_interface_residues.length > 0
                 (domain.dna_interfaces.create).residues << domain.dna_binding_residues
                 registered = true
-                puts "#{domain.sid} has an dna interface"
+                puts "#{domain.sid} has a dna interface"
               end
 
-              if domain.rna_binding_residues.length > 0
+              if domain.rna_binding_interface_residues.length > 0
                 (domain.rna_interfaces.create).residues << domain.rna_binding_residues
                 registered = true
-                puts "#{domain.sid} has an rna interface"
+                puts "#{domain.sid} has a rna interface"
               end
 
               if registered

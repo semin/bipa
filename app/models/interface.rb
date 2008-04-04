@@ -16,59 +16,10 @@ class DomainInterface < Interface
 
   has_many  :residues
 
-  before_save :update_singlet_propensities,
-              :update_sse_propensities
-
   before_save :update_asa,
-              :update_polarity
-
-  def update_asa
-    self.asa = delta_asa
-  end
-
-  def update_polarity
-    self.polarity = delta_asa_polar / delta_asa
-  end
-
-  # Callbacks
-  def update_singlet_propensities
-    AminoAcids::Residues::STANDARD.each do |aa|
-      send("singlet_propensity_of_#{aa.downcase}=", singlet_propensity_of(aa))
-    end
-  end
-
-  def update_sse_propensities
-    Dssp::SSES.each do |sse|
-      send("sse_propensity_of_#{sse.downcase}=", sse_propensity_of(sse))
-    end
-  end
-
-  AminoAcids::Residues::STANDARD.each do |aa|
-
-    %w(hbond whbond contact).each do |intact|
-
-      %w(sugar phosphate).each do |moiety|
-
-        class_eval <<-END
-          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-
-          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-            frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
-            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
-          end
-        END
-      end
-
-      class_eval <<-END
-        before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
-
-        def update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
-          frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids =
-          frequency_of_#{intact}_between_nucleic_acids_and_("#{aa}")
-        end
-      END
-    end
-  end
+              :update_polarity,
+              :update_singlet_propensities,
+              :update_sse_propensities
 
   def singlet_propensity_of(res)
     begin
@@ -79,7 +30,6 @@ class DomainInterface < Interface
     ensure
       result.to_f.nan? ? 1 : result
     end
-    result
   end
 
   def sse_propensity_of(sse)
@@ -91,7 +41,6 @@ class DomainInterface < Interface
     ensure
       result.to_f.nan? ? 1 : result
     end
-    result
   end
 
   def frequency_of_hbond_between(aa, na)
@@ -119,9 +68,9 @@ class DomainInterface < Interface
     sum = 0
     whbonds.each do |wh|
       if wh.atom.residue.residue_name == aa &&
-        wh.watom.residue.residue_name == na &&
-        !NucleicAcids::Atoms::SUGAR.include?(wh.watom) &&
-        !NucleicAcids::Atoms::SUGAR.include?(wh.watom)
+        wh.whbonding_atom.residue.residue_name == na &&
+        !NucleicAcids::Atoms::SUGAR.include?(wh.whbonding_atom) &&
+        !NucleicAcids::Atoms::PHOSPHATE.include?(wh.whbonding_atom)
         sum += 1
       end
     end
@@ -134,7 +83,7 @@ class DomainInterface < Interface
       if c.atom.residue.residue_name == aa &&
         c.contacting_atom.residue.residue_name == na &&
         !NucleicAcids::Atoms::SUGAR.include?(c.contacting_atom) &&
-        !NucleicAcids::Atoms::SUGAR.include?(c.contacting_atom)
+        !NucleicAcids::Atoms::PHOSPHATE.include?(c.contacting_atom)
         sum += 1
       end
     end
@@ -162,7 +111,7 @@ class DomainInterface < Interface
     sum = 0
     whbonds.each do |wh|
       if wh.atom.residue.residue_name == aa &&
-        NucleicAcids::Atoms::SUGAR.include?(wh.watom.atom_name)
+        NucleicAcids::Atoms::SUGAR.include?(wh.whbonding_atom.atom_name)
         sum += 1
       end
     end
@@ -201,7 +150,7 @@ class DomainInterface < Interface
     sum = 0
     whbonds.each do |wh|
       if wh.atom.residue.residue_name == aa &&
-        NucleicAcids::Atoms::PHOSPHATE.include?(wh.watom.atom_name)
+        NucleicAcids::Atoms::PHOSPHATE.include?(wh.whbonding_atom.atom_name)
         sum += 1
       end
     end
@@ -242,6 +191,62 @@ class DomainInterface < Interface
     end
     sum
   end
+
+
+  protected
+
+  # Callbacks
+  def update_asa
+    self.asa = delta_asa
+  end
+
+  def update_polarity
+    begin
+      self.polarity = delta_asa_polar / delta_asa
+    rescue ZeroDivisionError
+      self.polarity = 1
+    end
+  end
+
+  def update_singlet_propensities
+    AminoAcids::Residues::STANDARD.each do |aa|
+      send("singlet_propensity_of_#{aa.downcase}=", singlet_propensity_of(aa))
+    end
+  end
+
+  def update_sse_propensities
+    Dssp::SSES.each do |sse|
+      send("sse_propensity_of_#{sse.downcase}=", sse_propensity_of(sse))
+    end
+  end
+
+  AminoAcids::Residues::STANDARD.each do |aa|
+
+    %w(hbond whbond contact).each do |intact|
+
+      %w(sugar phosphate).each do |moiety|
+
+        class_eval <<-END
+          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+
+          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
+            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
+          end
+        END
+      end
+
+      class_eval <<-END
+        before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
+
+        def update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
+          self.frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids =
+          frequency_of_#{intact}_between_nucleic_acids_and_("#{aa}")
+        end
+      END
+    end
+  end
+
 end # class DomainInterface
 
 
@@ -254,7 +259,7 @@ class DomainDnaInterface < DomainInterface
         before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{dna.downcase}
 
         def update_frequency_of_#{intact}_between_amino_acids_and_#{dna.downcase}
-          frequency_of_#{intact}_between_amino_acids_and_#{dna.downcase} =
+          self.frequency_of_#{intact}_between_amino_acids_and_#{dna.downcase} =
           frequency_of_#{intact}_between_amino_acids_and_("#{dna}")
         end
       END
@@ -265,7 +270,7 @@ class DomainDnaInterface < DomainInterface
           before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{dna.downcase}
 
           def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{dna.downcase}
-            frequency_of_#{intact}_between_#{aa.downcase}_and_#{dna.downcase} =
+            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{dna.downcase} =
             frequency_of_#{intact}_between("#{aa}", "#{dna}")
           end
         END
@@ -295,7 +300,7 @@ class DomainRnaInterface < DomainInterface
         before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{rna.downcase}
 
         def update_frequency_of_#{intact}_between_amino_acids_and_#{rna.downcase}
-          frequency_of_#{intact}_between_amino_acids_and_#{rna.downcase} =
+          self.frequency_of_#{intact}_between_amino_acids_and_#{rna.downcase} =
           frequency_of_#{intact}_between_amino_acids_and_("#{rna}")
         end
       END
@@ -306,7 +311,7 @@ class DomainRnaInterface < DomainInterface
           before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{rna.downcase}
 
           def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{rna.downcase}
-            frequency_of_#{intact}_between_#{aa.downcase}_and_#{rna.downcase} =
+            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{rna.downcase} =
             frequency_of_#{intact}_between("#{aa}", "#{rna}")
           end
         END
