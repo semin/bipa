@@ -22,22 +22,14 @@ class DomainInterface < Interface
               :update_sse_propensities
 
   def singlet_propensity_of(res)
-    begin
-      result = ((delta_asa_of_residue(res) / delta_asa) /
-                (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
-    rescue ZeroDivisionError
-      result = 1
-    end
+    result = ((delta_asa_of_residue(res) / delta_asa) /
+              (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
 
   def sse_propensity_of(sse)
-    begin
-      result = ((delta_asa_of_sse(sse) / delta_asa) /
-                (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
-    rescue ZeroDivisionError
-      result = 1
-    end
+    result = ((delta_asa_of_sse(sse) / delta_asa) /
+              (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
 
@@ -185,21 +177,9 @@ class DomainInterface < Interface
     end
   end
 
-  AminoAcids::Residues::STANDARD.each do |aa|
+  %w(hbond whbond contact).each do |intact|
 
-    %w(hbond whbond contact).each do |intact|
-
-      %w(sugar phosphate).each do |moiety|
-
-        class_eval <<-END
-          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-
-          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
-            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
-          end
-        END
-      end
+    AminoAcids::Residues::STANDARD.each do |aa|
 
       class_eval <<-END
         before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
@@ -210,8 +190,33 @@ class DomainInterface < Interface
         end
       END
     end
-  end
 
+    %w(sugar phosphate).each do |moiety|
+
+      class_eval <<-END
+        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
+
+        def update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
+          self.frequency_of_#{intact}_between_amino_acids_and_#{moiety} =
+            AminoAcids::Residues::STANDARD.inject(0) { |sum, aa|
+              sum + frequency_of_#{intact}_between_#{moiety}_and_(aa)
+            }
+        end
+      END
+
+      AminoAcids::Residues::STANDARD.each do |aa|
+
+        class_eval <<-END
+          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+
+          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
+            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
+          end
+        END
+      end
+    end
+  end
 end # class DomainInterface
 
 

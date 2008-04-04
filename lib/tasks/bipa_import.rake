@@ -482,21 +482,21 @@ namespace :bipa do
 
             domains.each do |domain|
 
-              registered = false
+              iface_found = false
 
-              if domain.dna_binding_interface_residues.length > 0
-                (domain.dna_interfaces.create).residues << domain.dna_binding_residues
-                registered = true
-                puts "#{domain.sid} has a dna interface"
+              %w(dna rna).each do |na|
+                if domain.send("#{na}_binding_interface_residues").size > 0
+                  iface = "Domain#{na.camelize}Interface".constantize.new
+                  iface.domain = domain
+                  iface.residues << domain.send("#{na}_binding_interface_residues")
+                  iface.save!
+                  iface_found = true
+
+                  puts "#{domain.sid} has a #{na} interface"
+                end
               end
 
-              if domain.rna_binding_interface_residues.length > 0
-                (domain.rna_interfaces.create).residues << domain.rna_binding_residues
-                registered = true
-                puts "#{domain.sid} has a rna interface"
-              end
-
-              if registered
+              if iface_found == true
                 domain.registered = true
                 domain.save!
 
