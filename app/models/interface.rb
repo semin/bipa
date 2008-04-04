@@ -2,6 +2,7 @@ class Interface < ActiveRecord::Base
 
   include Bipa::Constants
   include Bipa::ComposedOfResidues
+
 end
 
 
@@ -17,6 +18,17 @@ class DomainInterface < Interface
 
   before_save :update_singlet_propensities,
               :update_sse_propensities
+
+  before_save :update_asa,
+              :update_polarity
+
+  def update_asa
+    self.asa = delta_asa
+  end
+
+  def update_polarity
+    self.polarity = delta_asa_polar / delta_asa
+  end
 
   # Callbacks
   def update_singlet_propensities

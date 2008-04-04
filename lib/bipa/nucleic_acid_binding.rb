@@ -4,10 +4,6 @@ module Bipa
     #
     # Van der Waals contacts
     #
-    def contacting_atoms
-      raise "'contacting_atoms' method has to be implemented in your class"
-    end
-
     def contacting_dna?
       contacting_atoms.each { |a| return true if a.dna? }
       false
@@ -25,14 +21,6 @@ module Bipa
     #
     # Hydrogen bond
     #
-    def hbonding_donors
-      raise "'hbonding_donors' method has to be implemented in your class"
-    end
-
-    def hbonding_acceptors
-      raise "'hbonding_acceptors' method or association needs to be implemented in your class"
-    end
-
     def hbonding_dna_as_donor?
       hbonding_donors.each { |a| return true if a.dna? }
       false
@@ -64,10 +52,6 @@ module Bipa
     #
     # Water-mediated hydrogen bonds
     #
-    def wbhonding_atoms
-      raise "'whbonding_atoms' method has to be implemented in your class"
-    end
-
     def whbonding_dna?
       whbonding_atoms.each { |a| return true if a.dna? }
       false

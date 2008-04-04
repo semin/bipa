@@ -8,7 +8,7 @@ module Bipa
     end
 
     def atoms
-      residues.inject([]) { |s, a| s.concat(r.atoms) }
+      residues.inject([]) { |s, r| s.concat(r.atoms) }
     end
 
     def surface_residues

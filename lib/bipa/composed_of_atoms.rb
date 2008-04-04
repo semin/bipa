@@ -70,6 +70,10 @@ module Bipa
           @#{stat}_asa ||= atoms.inject(0) { |s, a| a.#{stat}_asa ? s + a.#{stat}_asa : s }
         end
 
+        def #{stat}_asa_polar
+          @#{stat}_asa_polar ||= atoms.inject(0) { |s, a| (a.#{stat}_asa && a.polar?) ? s + a.#{stat}_asa : s }
+        end
+
         def #{stat}_of_atom(atm)
           atoms.inject(0) { |s, a| a.atom_name == atm.upcase ? s + a.#{stat}_asa : s }
         end
