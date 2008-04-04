@@ -59,7 +59,9 @@ class Scop < ActiveRecord::Base
 
   # Statistical properties
   %w(dna rna).each do |na|
+
     %w(mean stddev).each do |property|
+
       define_method "#{property}_#{na}_interface_asa" do
         "%.2f" % send("#{na}_interfaces").map { |i|
           i.asa

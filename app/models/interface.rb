@@ -27,9 +27,8 @@ class DomainInterface < Interface
                 (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     rescue ZeroDivisionError
       result = 1
-    ensure
-      result.to_f.nan? ? 1 : result
     end
+    result.to_f.nan? ? 1 : result
   end
 
   def sse_propensity_of(sse)
@@ -38,9 +37,8 @@ class DomainInterface < Interface
                 (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
     rescue ZeroDivisionError
       result = 1
-    ensure
-      result.to_f.nan? ? 1 : result
     end
+    result.to_f.nan? ? 1 : result
   end
 
   def frequency_of_hbond_between(aa, na)
@@ -166,10 +164,13 @@ class DomainInterface < Interface
 
   def update_polarity
     begin
-      self.polarity = delta_asa_polar / delta_asa
+      result = delta_asa_polar / delta_asa
     rescue ZeroDivisionError
-      self.polarity = 1
+      result = 1
+    ensure
+      result = result.to_f.nan? ? 1 : result
     end
+    self.polarity = result
   end
 
   def update_singlet_propensities
