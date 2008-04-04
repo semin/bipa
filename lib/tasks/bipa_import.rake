@@ -267,13 +267,15 @@ namespace :bipa do
             hbonds_bipa.each do |hbond|
               if ((hbond.donor.aa? && hbond.acceptor.na?) || (hbond.donor.na? && hbond.acceptor.aa?))
                 begin
-                  donor_atom    = structure.
+                  donor_atom    =
+                    structure.
                     models.first.
                     chains.find_by_chain_code(hbond.donor.chain_code).
                     residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).
                     atoms.find_by_atom_name(hbond.donor.atom_name)
 
-                  acceptor_atom = structure.
+                  acceptor_atom =
+                    structure.
                     models.first.
                     chains.find_by_chain_code(hbond.acceptor.chain_code).
                     residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).
@@ -301,8 +303,8 @@ namespace :bipa do
             end
 
             columns = [
-              :hbonding_donor_id,
-              :hbonding_acceptor_id,
+              :donor_id,
+              :acceptor_id,
               :da_distance,
               :category,
               :gap,
@@ -315,8 +317,8 @@ namespace :bipa do
 
             Hbond.import(columns, hbonds,
                          :on_duplicate_update => [
-                           :hbonding_donor_id,
-                           :hbonding_acceptor_id,
+                           :donor_id,
+                           :acceptor_id,
                            :da_distance,
                            :category,
                            :gap,

@@ -45,151 +45,115 @@ class DomainInterface < Interface
 
   def frequency_of_hbond_between(aa, na)
     sum = 0
-    hbonds_as_donor.each do |h|
-      if h.donor.residue.residue_name == aa &&
-        h.acceptor.residue.residue_name == na &&
-        !NucleicAcids::Atoms::SUGAR.include?(h.acceptor.atom_name) &&
-        !NucleicAcids::Atoms::PHOSPHATE.include?(h.acceptor.atom_name)
-        sum += 1
-      end
+    hbonds_as_donor.each do |hbond|
+      sum += 1 if (hbond.donor.residue.residue_name == aa &&
+                   hbond.acceptor.residue.residue_name == na &&
+                   !NucleicAcids::Atoms::SUGAR.include?(hbond.acceptor.atom_name) &&
+                   !NucleicAcids::Atoms::PHOSPHATE.include?(hbond.acceptor.atom_name))
     end
-    hbonds_as_acceptor.each do |h|
-      if h.acceptor.residue.residue_name == aa &&
-        h.donor.residue.residue_name == na &&
-        !NucleicAcids::Atoms::SUGAR.include?(h.donor.atom_name) &&
-        !NucleicAcids::Atoms::PHOSPHATE.include?(h.donor.atom_name)
-        sum += 1
-      end
+    hbonds_as_acceptor.each do |hbond|
+      sum += 1 if (hbond.acceptor.residue.residue_name == aa &&
+                   hbond.donor.residue.residue_name == na &&
+                   !NucleicAcids::Atoms::SUGAR.include?(hbond.donor.atom_name) &&
+                   !NucleicAcids::Atoms::PHOSPHATE.include?(hbond.donor.atom_name))
     end
     sum
   end
 
   def frequency_of_whbond_between(aa, na)
     sum = 0
-    whbonds.each do |wh|
-      if wh.atom.residue.residue_name == aa &&
-        wh.whbonding_atom.residue.residue_name == na &&
-        !NucleicAcids::Atoms::SUGAR.include?(wh.whbonding_atom) &&
-        !NucleicAcids::Atoms::PHOSPHATE.include?(wh.whbonding_atom)
-        sum += 1
-      end
+    whbonds.each do |whbond|
+      sum += 1 if (whbond.atom.residue.residue_name == aa &&
+                   whbond.whbonding_atom.residue.residue_name == na &&
+                   !NucleicAcids::Atoms::SUGAR.include?(whbond.whbonding_atom) &&
+                   !NucleicAcids::Atoms::PHOSPHATE.include?(whbond.whbonding_atom))
     end
     sum
   end
 
   def frequency_of_contact_between(aa, na)
     sum = 0
-    contacts.each do |c|
-      if c.atom.residue.residue_name == aa &&
-        c.contacting_atom.residue.residue_name == na &&
-        !NucleicAcids::Atoms::SUGAR.include?(c.contacting_atom) &&
-        !NucleicAcids::Atoms::PHOSPHATE.include?(c.contacting_atom)
-        sum += 1
-      end
+    contacts.each do |contact|
+      sum += 1 if (contact.atom.residue.residue_name == aa &&
+                   contact.contacting_atom.residue.residue_name == na &&
+                   !NucleicAcids::Atoms::SUGAR.include?(contact.contacting_atom) &&
+                   !NucleicAcids::Atoms::PHOSPHATE.include?(contact.contacting_atom))
     end
     sum - frequency_of_hbond_between(aa, na)
   end
 
   def frequency_of_hbond_between_sugar_and_(aa)
     sum = 0
-    hbonds_as_donor.each do |h|
-      if h.donor.residue.residue_name == aa &&
-        NucleicAcids::Atoms::SUGAR.include?(h.acceptor.atom_name)
-        sum += 1
-      end
+    hbonds_as_donor.each do |hbond|
+      sum += 1 if (hbond.donor.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::SUGAR.include?(hbond.acceptor.atom_name))
     end
-    hbonds_as_acceptor.each do |h|
-      if h.acceptor.residue.residue_name == aa &&
-        NucleicAcids::Atoms::SUGAR.include?(h.donor.atom_name)
-        sum += 1
-      end
+    hbonds_as_acceptor.each do |hbond|
+      sum += 1 if (hbond.acceptor.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::SUGAR.include?(hbond.donor.atom_name))
     end
     sum
   end
 
   def frequency_of_whbond_between_sugar_and_(aa)
     sum = 0
-    whbonds.each do |wh|
-      if wh.atom.residue.residue_name == aa &&
-        NucleicAcids::Atoms::SUGAR.include?(wh.whbonding_atom.atom_name)
-        sum += 1
-      end
+    whbonds.each do |whbond|
+      sum += 1 if (whbond.atom.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::SUGAR.include?(whbond.whbonding_atom.atom_name))
     end
     sum
   end
 
   def frequency_of_contact_between_sugar_and_(aa)
     sum = 0
-    contacts.each do |c|
-      if c.atom.residue.residue_name == aa &&
-        NucleicAcids::Atoms::SUGAR.include?(c.contacting_atom.atom_name)
-        sum += 1
-      end
+    contacts.each do |contact|
+      sum += 1 if (contact.atom.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::SUGAR.include?(contact.contacting_atom.atom_name))
     end
     sum
   end
 
   def frequency_of_hbond_between_phosphate_and_(aa)
     sum = 0
-    hbonds_as_donor.each do |h|
-      if h.donor.residue.residue_name == aa &&
-        NucleicAcids::Atoms::PHOSPHATE.include?(h.acceptor.atom_name)
-        sum += 1
-      end
+    hbonds_as_donor.each do |hbond|
+      sum += 1 if (hbond.donor.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::PHOSPHATE.include?(hbond.acceptor.atom_name))
     end
-    hbonds_as_acceptor.each do |h|
-      if h.acceptor.residue.residue_name == aa &&
-        NucleicAcids::Atoms::PHOSPHATE.include?(h.donor.atom_name)
-        sum += 1
-      end
+    hbonds_as_acceptor.each do |hbond|
+      sum += 1 if (hbond.acceptor.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::PHOSPHATE.include?(hbond.donor.atom_name))
     end
     sum
   end
 
   def frequency_of_whbond_between_phosphate_and_(aa)
     sum = 0
-    whbonds.each do |wh|
-      if wh.atom.residue.residue_name == aa &&
-        NucleicAcids::Atoms::PHOSPHATE.include?(wh.whbonding_atom.atom_name)
-        sum += 1
-      end
+    whbonds.each do |whbond|
+      sum += 1 if (whbond.atom.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::PHOSPHATE.include?(whbond.whbonding_atom.atom_name))
     end
     sum
   end
 
   def frequency_of_contact_between_phosphate_and_(aa)
     sum = 0
-    contacts.each do |c|
-      if c.atom.residue.residue_name == aa &&
-        NucleicAcids::Atoms::PHOSPHATE.include?(c.contacting_atom.atom_name)
-        sum += 1
-      end
+    contacts.each do |contact|
+      sum += 1 if (contact.atom.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::PHOSPHATE.include?(contact.contacting_atom.atom_name))
     end
     sum
   end
 
   def frequency_of_hbond_between_amino_acids_and_(na)
-    sum = 0
-    AminoAcids::Residues::STANDARD.each do |aa|
-      sum += frequency_of_hbond_between(aa, na)
-    end
-    sum
+    AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_hbond_between(r, na) }
   end
 
   def frequency_of_whbond_between_amino_acids_and_(na)
-    sum = 0
-    AminoAcids::Residues::STANDARD.each do |aa|
-      sum += frequency_of_whbond_between(aa, na)
-    end
-    sum
+    AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_whbond_between(r, na) }
   end
 
   def frequency_of_contact_between_amino_acids_and_(na)
-    sum = 0
-    AminoAcids::Residues::STANDARD.each do |aa|
-      sum += frequency_of_contact_between(aa, na)
-    end
-    sum
+    AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_contact_between(r, na) }
   end
 
 
