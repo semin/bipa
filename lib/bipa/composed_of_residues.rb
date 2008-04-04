@@ -27,12 +27,12 @@ module Bipa
       surface_residues - interface_residues
     end
 
-    def interface_residues_binding_dna
-      interface_residues.select { |r| r.binding_dna? }
+    def dna_binding_residues
+      residues.select { |r| r.binding_dna? }
     end
 
-    def interface_residues_binding_rna
-      interface_residues.select { |r| r.binding_rna? }
+    def rna_binding_residues
+      residues.select { |r| r.binding_rna? }
     end
 
     %w(unbound bound delta).each do |stat|

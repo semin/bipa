@@ -4,10 +4,10 @@ module Bipa
     #
     # Van der Waals contacts
     #
-#    def contacting_atoms
-#      raise "'contacting_atoms' method or association needs to be implemented in your class"
-#    end
-    
+    def contacting_atoms
+      raise "'contacting_atoms' method has to be implemented in your class"
+    end
+
     def contacting_dna?
       contacting_atoms.each { |a| return true if a.dna? }
       false
@@ -17,7 +17,7 @@ module Bipa
       contacting_atoms.each { |a| return true if a.rna? }
       false
     end
-  
+
     def contacting_na?
       contacting_dna? or contacting_rna?
     end
@@ -26,13 +26,13 @@ module Bipa
     # Hydrogen bond
     #
     def hbonding_donors
-      raise "'hbonding_donors' method or association needs to be implemented in your class"
+      raise "'hbonding_donors' method has to be implemented in your class"
     end
-    
+
     def hbonding_acceptors
       raise "'hbonding_acceptors' method or association needs to be implemented in your class"
     end
-    
+
     def hbonding_dna_as_donor?
       hbonding_donors.each { |a| return true if a.dna? }
       false
@@ -42,7 +42,7 @@ module Bipa
       hbonding_acceptors.each { |a| return true if a.dna? }
       false
     end
-  
+
     def hbonding_dna?
       hbonding_dna_as_donor? or hbonding_dna_as_acceptor?
     end
@@ -56,7 +56,7 @@ module Bipa
       hbonding_acceptors.each { |a| return true if a.rna? }
       false
     end
-  
+
     def hbonding_rna?
       hbonding_rna_as_donor? or hbonding_rna_as_acceptor?
     end
@@ -65,9 +65,9 @@ module Bipa
     # Water-mediated hydrogen bonds
     #
     def wbhonding_atoms
-      raise "'whbonding_atoms' method or assocation needs to be implemented in your class"
+      raise "'whbonding_atoms' method has to be implemented in your class"
     end
-    
+
     def whbonding_dna?
       whbonding_atoms.each { |a| return true if a.dna? }
       false
@@ -77,7 +77,7 @@ module Bipa
       whbonding_atoms.each { |a| return true if a.rna? }
       false
     end
-  
+
     def whbonding_na?
       whbonding_dna? or whbonding_rna?
     end
@@ -92,7 +92,7 @@ module Bipa
     def binding_rna?
       contacting_rna? or whbonding_rna?
     end
-    
+
     def binding_na?
       binding_dna? or binding_rna?
     end

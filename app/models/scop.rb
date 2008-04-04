@@ -261,8 +261,8 @@ end
 
 class ScopDomain < Scop
 
-  include Bipa::ComposedOfResidues
   include Bipa::NucleicAcidBinding
+  include Bipa::ComposedOfResidues
 
   (10..100).step(10) do |si|
     belongs_to  :"subfamily#{si}",
@@ -314,6 +314,11 @@ class ScopDomain < Scop
   #           :through      => :hbonds_as_donor
 
   # Methods
+
+  def self.find_all_by_pdb_code(pdb_code)
+    find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
+  end
+
   def ranges_on_chains
     # "2hz1 A:2-124, B:1-50" => [A:2-124, B:1-50]
     description.gsub(/^\S{4}\s+/, '').split(',')

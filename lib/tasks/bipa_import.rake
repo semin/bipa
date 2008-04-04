@@ -476,24 +476,20 @@ namespace :bipa do
 
           ActiveRecord::Base.establish_connection(config)
 
-          domains = ScopDomain.find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
+          domains = ScopDomain.find_all_by_pdb_code(pdb_code)
 
           domains.each do |domain|
 
             registered = false
 
-            dna_binding_residues = domain.residues.select(&:binding_dna?)
-
             if dna_binding_residues.length > 0
-              (domain.dna_interfaces.create).residues << dna_binding_residues
+              (domain.dna_interfaces.create).residues << domain.dna_binding_residues
               registered = true
               puts "#{domain.sid} has an dna interface"
             end
 
-            rna_binding_residues = domain.residues.select(&:binding_rna?)
-
             if rna_binding_residues.length > 0
-              (domain.rna_interfaces).create.residues << rna_binding_residues
+              (domain.rna_interfaces).create.residues << domain.rna_binding_residues
               registered = true
               puts "#{domain.sid} has an rna interface"
             end
@@ -566,7 +562,6 @@ namespace :bipa do
       end
       ActiveRecord::Base.establish_connection(config)
     end
-  end
   end
 
 
