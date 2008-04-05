@@ -171,7 +171,7 @@ namespace :bipa do
 
       refresh_dir(BLASTCLUST_DIR)
 
-      families = Bipa::ScopFamily.find_registered(:all)
+      families = ScopFamily.registered
       families.each_with_index do |family, i|
 
         family_dir    = File.join(BLASTCLUST_DIR, "#{family.sunid}")

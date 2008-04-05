@@ -2,6 +2,8 @@ class Scop < ActiveRecord::Base
 
   include Bipa::Constants
 
+  has_finder :registered, :conditions => { :registered => true }
+
   acts_as_nested_set
 
   def self.factory_create!(opt={})
