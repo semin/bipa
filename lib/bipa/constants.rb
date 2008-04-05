@@ -97,6 +97,7 @@ module Bipa
             "DG" => %w(C5 C6 C8 N7 O6),
             "DC" => %w(C4 C5 C6 N4)
           }
+          
           MINOR_GROOVE = {
             "DA" => %w(C2 C4 N3 N9),
             "DT" => %w(C2 N1 O2),

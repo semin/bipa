@@ -63,6 +63,10 @@ class Atom < ActiveRecord::Base
   def na?
     dna? || rna?
   end
+  
+  def het?
+    residue.het?
+  end
 
   def polar?
     atom_name =~ /O|N/

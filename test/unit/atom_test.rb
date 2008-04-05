@@ -53,7 +53,7 @@ class AtomTest < Test::Unit::TestCase
     context "with a delta ASA bigger than MIN_INTATM_DASA threshold" do
       # MIN_INTATM_DASA = 0.1
       setup do
-        @atom = Atom.new
+        @atom = Atom.new(valid_atom_params)
         @atom.stubs(:delta_asa).returns(0.2)
       end
       
@@ -61,41 +61,86 @@ class AtomTest < Test::Unit::TestCase
         assert @atom.on_interface?
       end
     end
-  end
+    
+    context "belongs to an AaResidue" do
+
+      should "respond to #aa?, #dna?, #rna?, and #na? correctly" do
+        @atom         = Atom.new(valid_atom_params)
+        @residue      = AaResidue.new(valid_residue_params)
+        @atom.residue = @residue
+        @atom.save
         
-  # def test_on_surface?
-  #   unbound_asa ? unbound_asa > MIN_SRFATM_SASA : false
-  # end
-  # 
-  # def buried?
-  #   not on_surface?
-  # end
-  # 
-  # def on_interface?
-  #   delta_asa ? delta_asa > MIN_INTATM_DASA : false
-  # end
-  # 
-  # # Atom specific properties
-  # def aa?
-  #   residue.aa?
-  # end
-  # 
-  # def dna?
-  #   residue.dna?
-  # end
-  # 
-  # def rna?
-  #   residue.rna?
-  # end
-  # 
-  # def na?
-  #   dna? || rna?
-  # end
-  # 
-  # def polar?
-  #   atom_name =~ /O|N/
-  # end
-  # 
+        assert @atom.aa?
+        assert !@atom.dna?
+        assert !@atom.rna?
+        assert !@atom.na?
+        assert !@atom.het?
+      end
+    end
+    
+    context "belongs to an DnaResidue" do
+      
+      should "correctly respond to #aa?, #dna?, #rna?, and #na? " do
+        @atom         = Atom.new(valid_atom_params)
+        @residue      = DnaResidue.new(valid_residue_params)
+        @atom.residue = @residue
+        @atom.save
+        
+        assert !@atom.aa?
+        assert @atom.dna?
+        assert !@atom.rna?
+        assert @atom.na?
+        assert !@atom.het?
+      end
+      
+      # should "correctly respond to #on_major_groove? and #on_minor_groove?" do
+      #   assert true
+      # end
+    end
+    
+    context "belongs to an RnaResidue" do
+      
+      should "respond to #aa?, #dna?, #rna?, and #na? correctly" do
+        @atom = Atom.new(valid_atom_params)
+        @residue = RnaResidue.new(valid_residue_params)
+        @atom.residue = @residue
+        @atom.save
+        
+        assert !@atom.aa?
+        assert !@atom.dna?
+        assert @atom.rna?
+        assert @atom.na?
+        assert !@atom.het?
+      end
+    end
+    
+    context "belongs to an HetResidue" do
+
+      should "respond to #aa?, #dna?, #rna?, and #na? correctly" do
+        @atom = Atom.new(valid_atom_params)
+        @residue = HetResidue.new(valid_residue_params)
+        @atom.residue = @residue
+        @atom.save
+        
+        assert !@atom.aa?
+        assert !@atom.dna?
+        assert !@atom.rna?
+        assert !@atom.na?
+        assert @atom.het?
+      end
+    end
+    
+    should "be true when sending #polar? only it is a polar atom" do
+      oxygen_atom = Atom.new(valid_atom_params(1, "O1"))
+      nitrogen_atom = Atom.new(valid_atom_params(2, "N3"))
+      non_polar_atom = Atom.new(valid_atom_params(3, "C1"))
+      
+      assert oxygen_atom.polar?
+      assert nitrogen_atom.polar?
+      assert !non_polar_atom.polar?
+    end
+  end
+
   # def on_major_groove?
   #   raise "Not implemented yet"
   # end
