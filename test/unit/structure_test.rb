@@ -112,8 +112,8 @@ class StructureTest < Test::Unit::TestCase
     should "have correct chains" do
       structure = Structure.new(valid_structure_params)
       model     = Model.new(valid_model_params)
-      chain1    = AaChain.new(valid_chain_params("A"))
-      chain2    = AaChain.new(valid_chain_params("B"))
+      chain1    = AaChain.new(valid_chain_params(:chain_code => "A"))
+      chain2    = AaChain.new(valid_chain_params(:chain_code => "B")) 
 
       structure.models << model
       structure.models.first.aa_chains << chain1
@@ -148,9 +148,9 @@ class StructureTest < Test::Unit::TestCase
       assert_equal residue1, structure.models.first.aa_chains.first.residues[0]
       assert_equal residue2, structure.models.first.aa_chains.first.residues[1]
 
-      # assert_equal 2, structure.aa_residues.size
-      # assert_equal residue1, structure.aa_residues[0]
-      # assert_equal residue2, structure.aa_residues[1]
+      assert_equal 2, structure.residues.size
+      assert structure.residues.include?(residue1)
+      assert structure.residues.include?(residue2)
     end
 
     should "have correct atoms" do
@@ -173,9 +173,9 @@ class StructureTest < Test::Unit::TestCase
       assert_equal atom1, structure.models.first.aa_chains.first.residues.first.atoms[0]
       assert_equal atom2, structure.models.first.aa_chains.first.residues.first.atoms[1]
     
-      # assert_equal 2, structure.atoms.size
-      # assert_equal atom1, structure.atoms[0]
-      # assert_equal atom2, structure.atoms[1]
+      assert_equal 2, structure.atoms.size
+      assert structure.atoms.include?(atom1)
+      assert structure.atoms.include?(atom2)
     end
   end
 end

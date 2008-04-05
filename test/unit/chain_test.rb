@@ -51,8 +51,8 @@ class AaChainTest < Test::Unit::TestCase
       
       setup do
         @aa_chain     = AaChain.new(valid_chain_params)
-        @aa_residue1  = AaResidue.new(valid_residue_params(1, "ARG"))
-        @aa_residue2  = AaResidue.new(valid_residue_params(1, "PHE"))
+        @aa_residue1  = AaResidue.new(valid_residue_params(:residue_name => "ARG"))
+        @aa_residue2  = AaResidue.new(valid_residue_params(:residue_name => "PHE"))
         @aa_atom1     = Atom.new(valid_atom_params)
         @aa_atom2     = Atom.new(valid_atom_params)
         @aa_atom3     = Atom.new(valid_atom_params)
@@ -94,16 +94,16 @@ class AaChainTest < Test::Unit::TestCase
       context "contacting each other" do
         
         setup do
-          @contact1 = Contact.new
-          @contact1.atom = @aa_atom1
+          @contact1                 = Contact.new
+          @contact1.atom            = @aa_atom1
           @contact1.contacting_atom = @aa_atom2
-          @contact1.distance = @aa_atom1 - @aa_atom2
+          @contact1.distance        = @aa_atom1 - @aa_atom2
           @contact1.save
           
-          @contact2 = Contact.new
-          @contact2.atom = @aa_atom3
+          @contact2                 = Contact.new
+          @contact2.atom            = @aa_atom3
           @contact2.contacting_atom = @aa_atom4
-          @contact2.distance = @aa_atom3 - @aa_atom4
+          @contact2.distance        = @aa_atom3 - @aa_atom4
           @contact2.save
         end
         

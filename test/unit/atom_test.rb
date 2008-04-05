@@ -1,7 +1,9 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
 class AtomTest < Test::Unit::TestCase
-
+        
+  include Bipa::Constants
+        
   should_belong_to  :residue
 
   should_have_many  :contacts
@@ -28,219 +30,168 @@ class AtomTest < Test::Unit::TestCase
     
     context "with a unbound ASA bigger than MIN_SRFATM_SASA threshold" do
       # MIN_SRFATM_SASA = 0.1
-      setup do
-        @atom = Atom.new
-        @atom.stubs(:unbound_asa).returns(10)
-      end
-      
       should "be on surface" do
-        assert @atom.on_surface?
+        atom = Atom.new
+        atom.stubs(:unbound_asa).returns(10)
+        assert atom.on_surface?
       end
     end
     
     context "with a unbound ASA smaller than MIN_SRFATM_SASA threshold" do
       
-      setup do
-        @atom = Atom.new
-        @atom.stubs(:unbound_asa).returns(0.01)
-      end
-      
       should "not be on surface" do
-        assert !@atom.on_surface?
+        atom = Atom.new
+        atom.stubs(:unbound_asa).returns(0.01)
+        assert !atom.on_surface?
       end
     end
     
     context "with a delta ASA bigger than MIN_INTATM_DASA threshold" do
       # MIN_INTATM_DASA = 0.1
-      setup do
-        @atom = Atom.new(valid_atom_params)
-        @atom.stubs(:delta_asa).returns(0.2)
-      end
       
       should "be on interface" do
-        assert @atom.on_interface?
+        atom = Atom.new(valid_atom_params)
+        atom.stubs(:delta_asa).returns(0.2)
+        assert atom.on_interface?
       end
     end
     
     context "belongs to an AaResidue" do
 
       should "respond to #aa?, #dna?, #rna?, and #na? correctly" do
-        @atom         = Atom.new(valid_atom_params)
-        @residue      = AaResidue.new(valid_residue_params)
-        @atom.residue = @residue
-        @atom.save
+        atom         = Atom.new(valid_atom_params)
+        residue      = AaResidue.new(valid_residue_params)
+        atom.residue = residue
         
-        assert @atom.aa?
-        assert !@atom.dna?
-        assert !@atom.rna?
-        assert !@atom.na?
-        assert !@atom.het?
+        assert atom.aa?
+        assert !atom.dna?
+        assert !atom.rna?
+        assert !atom.na?
+        assert !atom.het?
       end
     end
     
     context "belongs to an DnaResidue" do
       
       should "correctly respond to #aa?, #dna?, #rna?, and #na? " do
-        @atom         = Atom.new(valid_atom_params)
-        @residue      = DnaResidue.new(valid_residue_params)
-        @atom.residue = @residue
-        @atom.save
+        atom         = Atom.new(valid_atom_params)
+        residue      = DnaResidue.new(valid_residue_params)
+        atom.residue = residue
         
-        assert !@atom.aa?
-        assert @atom.dna?
-        assert !@atom.rna?
-        assert @atom.na?
-        assert !@atom.het?
+        assert !atom.aa?
+        assert atom.dna?
+        assert !atom.rna?
+        assert atom.na?
+        assert !atom.het?
       end
       
-      # should "correctly respond to #on_major_groove? and #on_minor_groove?" do
-      #   assert true
-      # end
+      should "correctly respond to #on_major_groove? and #on_minor_groove?" do
+
+        NucleicAcids::Dna::Atoms::MAJOR_GROOVE.each do |residue, atoms|
+          residue      = DnaResidue.new(valid_residue_params(:residue_name => residue))
+          
+          atoms.each do |atom|
+            atom         = Atom.new(valid_atom_params(:atom_name => atom))
+            atom.residue = residue
+            assert atom.on_major_groove?
+            assert !atom.on_minor_groove?
+          end
+        end
+        
+        NucleicAcids::Dna::Atoms::MINOR_GROOVE.each do |residue, atoms|
+          residue      = DnaResidue.new(valid_residue_params(:residue_name => residue))
+          
+          atoms.each do |atom|
+            atom         = Atom.new(valid_atom_params(:atom_name => atom))
+            atom.residue = residue
+            assert !atom.on_major_groove?
+            assert atom.on_minor_groove?
+          end
+        end
+      end
     end
     
     context "belongs to an RnaResidue" do
       
       should "respond to #aa?, #dna?, #rna?, and #na? correctly" do
-        @atom = Atom.new(valid_atom_params)
-        @residue = RnaResidue.new(valid_residue_params)
-        @atom.residue = @residue
-        @atom.save
+        atom         = Atom.new(valid_atom_params)
+        residue      = RnaResidue.new(valid_residue_params)
+        atom.residue = residue
+        atom.save
         
-        assert !@atom.aa?
-        assert !@atom.dna?
-        assert @atom.rna?
-        assert @atom.na?
-        assert !@atom.het?
+        assert !atom.aa?
+        assert !atom.dna?
+        assert atom.rna?
+        assert atom.na?
+        assert !atom.het?
       end
     end
     
     context "belongs to an HetResidue" do
 
       should "respond to #aa?, #dna?, #rna?, and #na? correctly" do
-        @atom = Atom.new(valid_atom_params)
-        @residue = HetResidue.new(valid_residue_params)
-        @atom.residue = @residue
-        @atom.save
+        atom         = Atom.new(valid_atom_params)
+        residue      = HetResidue.new(valid_residue_params)
+        atom.residue = residue
         
-        assert !@atom.aa?
-        assert !@atom.dna?
-        assert !@atom.rna?
-        assert !@atom.na?
-        assert @atom.het?
+        assert !atom.aa?
+        assert !atom.dna?
+        assert !atom.rna?
+        assert !atom.na?
+        assert atom.het?
       end
     end
     
     should "be true when sending #polar? only it is a polar atom" do
-      oxygen_atom = Atom.new(valid_atom_params(1, "O1"))
-      nitrogen_atom = Atom.new(valid_atom_params(2, "N3"))
-      non_polar_atom = Atom.new(valid_atom_params(3, "C1"))
+      oxygen_atom     = Atom.new(valid_atom_params(:atom_name => "O1"))
+      nitrogen_atom   = Atom.new(valid_atom_params(:atom_name => "N3"))
+      non_polar_atom  = Atom.new(valid_atom_params(:atom_name => "C1"))
       
       assert oxygen_atom.polar?
       assert nitrogen_atom.polar?
       assert !non_polar_atom.polar?
     end
+    
+    should "return a correct PDB ATOM record when sending #to_pdb" do
+      chain   = AaChain.new(:chain_code => "A")
+      residue = AaResidue.new(:residue_name => "ILE",
+                              :residue_code => 308)
+      atom    = Atom.new( :atom_code => 2449,
+                          :atom_name => "CD1",
+                          :x => -25.003,
+                          :y => 31.966,
+                          :z => 77.389,
+                          :occupancy => 1.00,
+                          :tempfactor => 2.00,
+                          :element => "C")
+                          
+      atom.residue  = residue
+      residue.chain = chain
+      
+      assert_equal  "ATOM   2449  CD1 ILE A 308     -25.003  31.966  77.389  1.00  2.00           C  ",
+                    atom.to_pdb
+    end
+    
+    context "instanciated with :x, :y, and :z" do
+      
+      should "return a correct [x, y, z] when sending #xyz" do
+        atom = Atom.new(valid_atom_params(:x => 1.1, :y => 2.2, :z => 3.3))
+        assert_equal [1.1, 2.2, 3.3], atom.xyz
+      end
+      
+      should "return a correct element of [x, y, z] when sending #dimension(i)" do
+        atom = Atom.new(valid_atom_params(:x => 1.1, :y => 2.2, :z => 3.3))
+        assert_equal 1.1, atom.dimension(0)
+        assert_equal 2.2, atom.dimension(1)
+        assert_equal 3.3, atom.dimension(2)
+      end
+      
+      should "return a correct distance from other instance of Atom" do
+        atom1 = Atom.new(valid_atom_params(:x => 1.1, :y => 2.2, :z => 3.3))
+        atom2 = Atom.new(valid_atom_params(:x => 3.3, :y => 2.2, :z => 1.1))
+        
+        assert_equal Math.sqrt((1.1 - 3.3)**2 + (3.3 - 1.1)**2), atom1 - atom2
+      end
+    end
   end
-
-  # def on_major_groove?
-  #   raise "Not implemented yet"
-  # end
-  # 
-  # def on_minor_groove?
-  #   raise "Not implemented yet"
-  # end
-  # 
-  # def justified_atom_name
-  #   an = self[:atom_name]
-  #   return an[0, 4] if an.length >= 4
-  # 
-  #   case an.length
-  #   when 0
-  #     return '    '
-  #   when 1
-  #     return ' ' + an + '  '
-  #   when 2
-  #     if /\A[0-9]/ =~ an then
-  #       return sprintf('%-4s', an)
-  #     elsif /[0-9]\z/ =~ an then
-  #       return sprintf(' %-3s', an)
-  #     end
-  #   when 3
-  #     if /\A[0-9]/ =~ an then
-  #       return sprintf('%-4s', an)
-  #     end
-  #   end
-  # 
-  #   # ambiguous case for two- or three-letter name
-  #   elem = self.element.strip
-  #   if elem.size > 0 and i = an.index(elem) then
-  #     if i == 0 and elem.size == 1 then
-  #       return sprintf(' %-3s', an)
-  #     else
-  #       return sprintf('%-4s', an)
-  #     end
-  #   end
-  #   if self.kind_of?(HetAtom)
-  #     if /\A(B[^AEHIKR]|C[^ADEFLMORSU]|F[^EMR]|H[^EFGOS]|I[^NR]|K[^R]|N[^ABDEIOP]|O[^S]|P[^ABDMORTU]|S[^BCEGIMNR]|V|W|Y[^B])/ =~ an
-  #       return sprintf(' %-3s', an)
-  #     else
-  #       return sprintf('%-4s', an)
-  #     end
-  #   else # StdAtom
-  #     if (/\A[CHONSP]/ =~ an)
-  #       return sprintf(' %-3s', an)
-  #     else
-  #       return sprintf('%-4s', an)
-  #     end
-  #   end
-  #   # could not be reached here
-  #   raise "Cannot justify the atom name: #{an}"
-  # end
-  # 
-  # def to_pdb
-  #   sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s\n",
-  #           'ATOM',
-  #           atom_code,
-  #           justified_atom_name,
-  #           altloc,
-  #           residue.residue_name,
-  #           residue.chain.chain_code,
-  #           residue.residue_code,
-  #           residue.icode,
-  #           x, y, z,
-  #           occupancy,
-  #           tempfactor,
-  #           "",
-  #           element,
-  #           charge)
-  # end
-  # 
-  # # Vector calculation & KDTree algorithm related
-  # def xyz
-  #   @xyz ||= [x, y, z]
-  # end
-  # 
-  # def size
-  #   xyz.size
-  # end
-  # 
-  # def dimension(index)
-  #   xyz[index]
-  # end
-  # 
-  # def -(other)
-  #   c_distance(x, y, z, other.x, other.y, other.z)
-  # end
-  # 
-  # inline do |builder|
-  #   builder.include "<math.h>"
-  #   builder.c <<-C_CODE
-  #       double c_distance(double sx, double sy, double sz,
-  #                         double ox, double oy, double oz) {
-  #         return  sqrt( pow(sx - ox, 2) +
-  #                       pow(sy - oy, 2) +
-  #                       pow(sz - oz, 2) );
-  #       }
-  #   C_CODE
-  # end
-
 end

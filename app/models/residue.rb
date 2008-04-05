@@ -106,32 +106,18 @@ class AaResidue < StdResidue
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "No one letter code for residue: #{residue_name}"
   end
-
-  def relative_unbound_asa
-    @relative_unbound_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
-      atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s } /
-        AminoAcids::Residues::STANDARD_ASA[residue_name]
-    else
-      raise "Unknown residue type: #{id}, #{residue_name}"
-    end
-  end
-
-  def relative_bound_asa
-    @relative_bound_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
-      atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s } /
-        AminoAcids::Residues::STANDARD_ASA[residue_name]
-    else
-      raise "Unknown residue type: #{id}, #{residue_name}"
-    end
-  end
-
-  def relative_delta_asa
-    @relative_delta_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
-      atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s } /
-        AminoAcids::Residues::STANDARD_ASA[residue_name]
-    else
-      raise "Unknown residue type: #{id}, #{residue_name}"
-    end
+  
+  %w(unbound bound delta).each do |stat|
+    class_eval <<-END
+      def relative_#{stat}_asa
+        @relative_#{stat}_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
+          atoms.inject(0) { |s, a| a.#{stat}_asa ? s + a.#{stat}_asa : s } /
+            AminoAcids::Residues::STANDARD_ASA[residue_name]
+        else
+          raise "Unknown residue type: \#{id}, \#{residue_name}"
+        end
+      end
+    END
   end
 end
 

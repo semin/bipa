@@ -62,53 +62,50 @@ class Test::Unit::TestCase
     random_number(2).to_s + random_alphabet(2)
   end
   
-  def valid_structure_params
+  def valid_structure_params(opts = {})
     {
       :pdb_code       => random_pdb_code,
       :exp_method     => "X-ray",
       :classification => "protein-DNA",
       :deposited_at   => "1998-10-12"
-    }
+    }.merge!(opts)
   end
   
-  def valid_model_params(model_code = nil)
+  def valid_model_params(opts = {})
     {
-      :model_code     => model_code || rand(100)
-    }
+      :model_code     => rand(100)
+    }.merge!(opts)
   end
   
-  def valid_chain_params(chain_code = nil)
+  def valid_chain_params(opts = {})
     {
-      :chain_code     => chain_code || random_alphabet
-    }
+      :chain_code     => random_alphabet
+    }.merge!(opts)
   end
   
-  def valid_residue_params(residue_code = nil,
-                           residue_name = nil)
+  def valid_residue_params(opts = {})
                            
     residue_names = AminoAcids::Residues::STANDARD +
                     NucleicAcids::Residues::STANDARD
     
     {
-      :residue_code => residue_code || rand(100),
-      :residue_name => residue_name || residue_names[rand(residue_names.size)]
-    }
+      :residue_code => rand(100),
+      :residue_name => residue_names[rand(residue_names.size)]
+    }.merge!(opts)
   end
   
-  def valid_atom_params(atom_code = nil,
-                        atom_name = nil,
-                        x = nil, y = nil, z = nil)
+  def valid_atom_params(opts = {})
     
     atom_names =  AminoAcids::Atoms::BACKBONE + 
                   NucleicAcids::Atoms::PHOSPHATE +
                   NucleicAcids::Atoms::SUGAR
                   
     {
-      :atom_code  => atom_code || rand(1000),
-      :atom_name  => atom_name || atom_names[rand(atom_names.size)],
-      :x          => x || rand(0) + rand(100),
-      :y          => y || rand(0) + rand(100),
-      :z          => z || rand(0) + rand(100)
-    }
+      :atom_code  => rand(1000),
+      :atom_name  => atom_names[rand(atom_names.size)],
+      :x          => rand(0) + rand(100),
+      :y          => rand(0) + rand(100),
+      :z          => rand(0) + rand(100)
+    }.merge!(opts)
   end
 end

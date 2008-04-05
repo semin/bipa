@@ -1,5 +1,6 @@
 class Atom < ActiveRecord::Base
 
+  include Bipa::Constants
   include Bipa::NucleicAcidBinding
 
   belongs_to  :residue,
@@ -40,7 +41,7 @@ class Atom < ActiveRecord::Base
   end
 
   def buried?
-    not on_surface?
+    !on_surface?
   end
 
   def on_interface?
@@ -67,17 +68,19 @@ class Atom < ActiveRecord::Base
   def het?
     residue.het?
   end
-
+  
   def polar?
     atom_name =~ /O|N/
   end
 
   def on_major_groove?
-    raise "Not implemented yet"
+    residue.dna? && 
+    NucleicAcids::Dna::Atoms::MAJOR_GROOVE[residue.residue_name].include?(atom_name)
   end
 
   def on_minor_groove?
-    raise "Not implemented yet"
+    residue.dna? && 
+    NucleicAcids::Dna::Atoms::MINOR_GROOVE[residue.residue_name].include?(atom_name)
   end
 
   def justified_atom_name
@@ -128,12 +131,12 @@ class Atom < ActiveRecord::Base
   end
 
   def to_pdb
-    sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s\n",
+    sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s",
             'ATOM',
             atom_code,
             justified_atom_name,
             altloc,
-            residue.residue_name,
+            residue.justified_residue_name,
             residue.chain.chain_code,
             residue.residue_code,
             residue.icode,

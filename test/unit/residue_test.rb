@@ -35,18 +35,57 @@ class ResidueTest < Test::Unit::TestCase
   
   context "A Residue instance" do
     
-    setup do
-      @residue = Residue.new(valid_residue_params)
+    should "return a correct justified residue name when sending #justified_residue_name" do
+      residue = Residue.new(valid_residue_params(:residue_name => "DA"))
+      
+      assert_equal " DA", residue.justified_residue_name
     end
     
-    should "properly saved" do
-      assert @residue.save
+    should "return a correct justified residue code when sending #justified_residue_code" do
+      residue = Residue.new(valid_residue_params(:residue_code => 1))
+      assert_equal "0001", residue.justified_residue_code
+    end
+    
+    
+    context "with one or more surface atoms" do
+      
+      should "be true when sending #on_surface?" do
+        residue       = Residue.new
+        surface_atoms = stub(:size => 100)
+        residue.stubs(:surface_atoms).returns(surface_atoms)
+        
+        assert residue.on_surface?
+      end
+    end
+    
+    
+    context "with one or more interface atoms" do
+      
+      should "be true when sending #on_interface?" do
+        residue         = Residue.new
+        interface_atoms = stub(:size => 10)
+        residue.stubs(:interface_atoms).returns(interface_atoms)
+        
+        assert residue.on_interface?
+      end
+    end
+    
+    context "with no surface atoms" do
+      
+      should "be true when sending #buried?" do
+        residue       = Residue.new
+        surface_atoms = stub(:size => 0)
+        residue.stubs(:surface_atoms).returns(surface_atoms)
+        
+        assert residue.buried?
+      end
     end
 
 
     context "with two atoms added" do
 
       setup do
+        @residue = Residue.new
         @atom1 = Atom.new(valid_atom_params)
         @atom2 = Atom.new(valid_atom_params)
         @residue.atoms << @atom1
@@ -106,7 +145,7 @@ class ResidueTest < Test::Unit::TestCase
           @whbond                 = Whbond.new
           @whbond.atom            = @atom1
           @whbond.whbonding_atom  = @atom2
-          @whbond.water_atom      = Atom.new(valid_atom_params(random_number(3), "HOH"))
+          @whbond.water_atom      = Atom.new(valid_atom_params(:atom_name => "HOH"))
           @whbond.save
         end
         
@@ -127,16 +166,77 @@ class AaResidueTest < Test::Unit::TestCase
   
   context "An AaResidue instance" do
     
+    should "repond to #aa?, #na?, #dna?, #rna?, and #het? properly" do
+      residue = AaResidue.new
+      
+      assert residue.aa?
+      assert !residue.na?
+      assert !residue.dna?
+      assert !residue.rna?
+      assert !residue.het?
+    end
+    
     should "have correct one letter code when #one_letter_code" do
       AminoAcids::Residues::STANDARD.each do |aa|
-        standard_aa = AaResidue.new(valid_residue_params(1, aa))
+        standard_aa = AaResidue.new(valid_residue_params(:residue_name => aa))
         assert_equal AminoAcids::Residues::ONE_LETTER_CODE[aa], standard_aa.one_letter_code
       end
     end
 
     should "raise Error when it is non-standard amino acid when #one_letter_code" do
-      non_standard_aa = AaResidue.new(valid_residue_params(1, "HEL"))
+      non_standard_aa = AaResidue.new(valid_residue_params(:residue_name => "HEL"))
       assert_raise(RuntimeError) { non_standard_aa.one_letter_code }
+    end
+  end
+end
+
+
+class DnaResidueTest < Test::Unit::TestCase
+  
+  context "An DnaResidue instance" do
+    
+    should "repond to #aa?, #na?, #dna?, #rna?, and #het? properly" do
+      residue = DnaResidue.new
+      
+      assert !residue.aa?
+      assert residue.na?
+      assert residue.dna?
+      assert !residue.rna?
+      assert !residue.het?
+    end
+  end
+end
+
+
+class RnaResidueTest < Test::Unit::TestCase
+  
+  context "An RnaResidue instance" do
+    
+    should "repond to #aa?, #na?, #dna?, #rna?, and #het? properly" do
+      residue = RnaResidue.new
+      
+      assert !residue.aa?
+      assert residue.na?
+      assert !residue.dna?
+      assert residue.rna?
+      assert !residue.het?
+    end
+  end
+end
+
+
+class HetResidueTest < Test::Unit::TestCase
+  
+  context "An HetResidue instance" do
+    
+    should "repond to #aa?, #na?, #dna?, #rna?, and #het? properly" do
+      residue = HetResidue.new
+      
+      assert !residue.aa?
+      assert !residue.na?
+      assert !residue.dna?
+      assert !residue.rna?
+      assert residue.het?
     end
   end
 end
