@@ -510,7 +510,7 @@ namespace :bipa do
                   a.save!
                 end
               else
-                puts "#{domain.sid} has no interface"
+                puts "#{domain.sid} has no newly found interface"
               end
             end # domains.each
 
