@@ -485,6 +485,11 @@ namespace :bipa do
               iface_found = false
 
               %w(dna rna).each do |na|
+                if domain.send("#{na}_interfaces").size > 0
+                  $logger.info("#{domain.sid} has #{na} interfaces detected")
+                  next
+                end
+
                 if domain.send("#{na}_binding_interface_residues").size > 0
                   iface = "Domain#{na.camelize}Interface".constantize.new
                   iface.domain = domain
