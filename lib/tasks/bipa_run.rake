@@ -214,29 +214,69 @@ namespace :bipa do
     end
 
 
-#    desc "Run Baton for each SCOP family"
-#    task :baton => [:environment] do
-#
-#      fmanager = ForkManager.new(MAX_FORK)
-#
-#      fmanager.manage do
-#
-#        family_sunids.each_with_index do |family_sunid, i|
-#
-#          fmanager.fork do
-#
-#            cwd = pwd
-#            family_dir = File.join(nr_dir, "#{family_sunid}")
-#            chdir(family_dir)
-#            system("Baton *.pdb")
-#            system("joy baton.ali")
-#            chdir(cwd)
-#
-#            $logger.info("NR(#{nr_cutoff}): Running Baton and JOY on PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
-#          end
-#        end
-#      end
-#    end
-#
+    desc "Run Baton for each SCOP family"
+    task :baton => [:environment] do
+
+      family_sunids = ScopFamily.registered.map(&:sunid)
+      fmanager      = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+
+        config = ActiveRecord::Base.remove_connection
+
+        family_sunids.each_with_index do |family_sunid, i|
+
+          fmanager.fork do
+
+            ActiveRecord::Base.establish_connection(config)
+
+            (10..100).step(10) do |si|
+
+              cwd = pwd
+              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
+              chdir(family_dir)
+              system("Baton *.pdb")
+              #system("joy baton.ali")
+              chdir(cwd)
+
+              $logger.info("BATON on NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Run JOY for each SCOP family"
+    task :baton => [:environment] do
+
+      family_sunids = ScopFamily.registered.map(&:sunid)
+      fmanager      = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+
+        config = ActiveRecord::Base.remove_connection
+
+        family_sunids.each_with_index do |family_sunid, i|
+
+          fmanager.fork do
+
+            ActiveRecord::Base.establish_connection(config)
+
+            (10..100).step(10) do |si|
+
+              cwd = pwd
+              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
+              chdir(family_dir)
+              system("joy baton.ali")
+              chdir(cwd)
+
+              $logger.info("BATON on NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+            end
+          end
+        end
+      end
+    end
+
   end
 end
