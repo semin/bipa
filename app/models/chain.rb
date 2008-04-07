@@ -11,27 +11,31 @@ class Chain < ActiveRecord::Base
   has_many  :atoms,
             :through      => :residues
 
+  validates_uniqueness_of :chain_code,
+                          :scope          => :model_id,
+                          :allow_nil      => true,
+                          :case_sensitive => true
   # has_many  :contacts,
   #           :through      => :atoms
-  # 
+  #
   # has_many  :contacting_atoms,
   #                 :through      => :contacts
-  # 
+  #
   # has_many  :whbonds,
   #             :through      => :atoms
-  # 
+  #
   # has_many  :whbonding_atoms,
   #           :through      => :whbonds
-  # 
+  #
   # has_many  :hbonds_as_donor,
   #           :through      => :atoms
-  # 
+  #
   # has_many  :hbonds_as_acceptor,
   #           :through      => :atoms
-  # 
+  #
   # has_many  :hbonding_donors,
   #           :through      => :hbonds_as_acceptor
-  # 
+  #
   # has_many  :hbonding_acceptors,
   #           :through      => :hbonds_as_donor
 end
