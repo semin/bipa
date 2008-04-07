@@ -214,49 +214,9 @@ namespace :bipa do
     end
 
 
-    desc "Run Baton and JOY for each SCOP family"
-    task :baton_and_joy => [:environment] do
+    desc "Run Baton for each SCOP family"
+    task :baton => [:environment] do
 
-      nr_cutoff     = 100
-      nr_dir        = File.join(BATON_DIR, "nr#{nr_cutoff}")
-      family_sunids = ScopFamily.registered.map(&:sunid)
-      fmanager      = ForkManager.new(MAX_FORK)
-
-      refresh_dir(nr_dir)
-
-      fmanager.manage do
-
-        config = ActiveRecord::Base.remove_connection
-
-        family_sunids.each_with_index do |family_sunid, i|
-
-          fmanager.fork do
-
-            ActiveRecord::Base.establish_connection(config)
-
-            family      = ScopFamily.find_by_sunid(family_sunid)
-            family_dir  = File.join(nr_dir, "#{family_sunid}")
-
-            mkdir(family_dir)
-
-            subfamilies = family.send("subfamilies#{nr_cutoff}")
-            subfamilies.each do |subfamily|
-              domain = subfamily.representative
-              next if domain.nil?
-              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
-                file.puts domain.to_pdb
-              end
-            end
-
-            ActiveRecord::Base.remove_connection
-          end
-
-          ActiveRecord::Base.establish_connection(config)
-          $logger.info("NR(#{nr_cutoff}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
-        end
-      end
-
-      # Baton & JOY
       fmanager = ForkManager.new(MAX_FORK)
 
       fmanager.manage do

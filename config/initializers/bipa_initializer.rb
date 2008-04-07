@@ -66,3 +66,5 @@ SUBFAM_CUTOFF   = ENV["SUBFAM_CUTOFF"].to_i > 0 ? ENV["SUBFAM_CUTOFF"].to_i : 90
 JOY_BIN         = `which joy`.chomp
 
 BLASTCLUST_DIR  = File.join(RAILS_ROOT, "/public/blastclust/")
+
+FAMILY_DIR      = File.join(RAILS_ROOT, "/public/families")
