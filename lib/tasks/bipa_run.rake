@@ -167,7 +167,7 @@ namespace :bipa do
 
 
     desc "Run blastclust for each SCOP family"
-    task :blastclust_scop_families => [:environment] do
+    task :blastclust => [:environment] do
 
       refresh_dir(BLASTCLUST_DIR)
 
@@ -187,7 +187,7 @@ namespace :bipa do
             sunid = domain.sunid
             fasta = domain.to_fasta
 
-            if fasta.include? "X"
+            if fasta.include?("X")
               puts "Skip: SCOP domain, #{sunid} has some unknown residues!"
               next
             end
@@ -215,12 +215,12 @@ namespace :bipa do
 
 
     desc "Run Baton and JOY for each SCOP family"
-    task :baton_and_joy_scop_families => [:environment] do
+    task :baton_and_joy => [:environment] do
 
       nr_cutoff     = 100
       nr_dir        = File.join(BATON_DIR, "nr#{nr_cutoff}")
-      family_sunids = ScopFamily.find_registered(:all).map(&:sunid)
-      fmanager      = ForkManager.new(BIPA_ENV[:MAX_FORK])
+      family_sunids = ScopFamily.registered.map(&:sunid)
+      fmanager      = ForkManager.new(MAX_FORK)
 
       refresh_dir(nr_dir)
 
@@ -239,12 +239,12 @@ namespace :bipa do
 
             mkdir(family_dir)
 
-            subfamilies = family.send("subfamily#{nr_cutoff}s")
+            subfamilies = family.send("subfamilies#{nr_cutoff}")
             subfamilies.each do |subfamily|
               domain = subfamily.representative
               next if domain.nil?
-              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |pdb|
-                pdb.puts domain.to_pdb
+              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
+                file.puts domain.to_pdb
               end
             end
 

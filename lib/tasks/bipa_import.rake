@@ -574,9 +574,9 @@ namespace :bipa do
 
 
     desc "Import Clusters for each SCOP family"
-    task :clusters => [:environment] do
+    task :subfamilies => [:environment] do
 
-      families = ScopFamily.find_registered(:all)
+      families = ScopFamily.registered
 
       families.each_with_index do |family, i|
 
@@ -584,26 +584,26 @@ namespace :bipa do
 
         (10..100).step(10) do |si|
 
-          cluster_file = File.join(family_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')
+          subfamily_file = File.join(family_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')
 
-          IO.readlines(cluster_file).each do |line|
+          IO.readlines(subfamily_file).each do |line|
 
-            cluster = "Cluster#{si}".constantize.new
+            subfamily = "Subfamily#{si}".constantize.new
 
             members = line.split(/\s+/)
             members.each do |member|
-              scop_domain = ScopDomain.find_by_sunid(member)
-              cluster.scop_domains << scop_domain
+              domain = ScopDomain.find_by_sunid(member)
+              subfamily.domains << domain
             end
 
-            cluster.scop_family = family
-            cluster.save!
+            subfamily.family = family
+            subfamily.save!
 
-            $logger.info("Cluster#{si} (#{cluster.id}): created")
+            $logger.info("Subfamily#{si} (#{subfamily.id}): created")
           end
         end
 
-        $logger.info("Import clusters for #{family.sunid} : done (#{i + 1}/#{families.size})")
+        $logger.info("Importing subfamilies for #{family.sunid} : done (#{i + 1}/#{families.size})")
       end
     end
   end

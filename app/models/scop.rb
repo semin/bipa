@@ -248,7 +248,7 @@ end
 class ScopFamily < Scop
 
   (10..100).step(10) do |si|
-    has_many  :"subfamily#{si}s",
+    has_many  :"subfamilies#{si}",
               :class_name   => "Subfamily#{si}",
               :foreign_key  => "scop_family_id"
   end
@@ -292,28 +292,28 @@ class ScopDomain < Scop
 
   # has_many  :atoms,
   #           :through      => :residues
-  # 
+  #
   # has_many  :contacts,
   #           :through      => :atoms
-  # 
+  #
   # has_many  :contacting_atoms,
   #           :through      => :contacts
-  # 
+  #
   # has_many  :whbonds,
   #           :through      => :atoms
-  # 
+  #
   # has_many  :whbonding_atoms,
   #           :through      => :whbonds
-  # 
+  #
   # has_many  :hbonds_as_donor,
   #           :through      => :atoms
-  # 
+  #
   # has_many  :hbonds_as_acceptor,
   #           :through      => :atoms
-  # 
+  #
   # has_many  :hbonding_donors,
   #           :through      => :hbonds_as_acceptor
-  # 
+  #
   # has_many  :hbonding_acceptors,
   #           :through      => :hbonds_as_donor
 
@@ -370,7 +370,7 @@ class ScopDomain < Scop
   end
 
   def to_pdb
-    atoms.sort_by(&:atom_code).inject("") { |p, a| p + a.to_pdb }
+    atoms.sort_by(&:atom_code).inject("") { |p, a| p + (a.to_pdb + "\n") }
   end
 
   def to_fasta

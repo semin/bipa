@@ -1,20 +1,12 @@
 class Subfamily < ActiveRecord::Base
 
-  belongs_to  :scop_family,
+  belongs_to  :family,
               :class_name   => "ScopFamily",
               :foreign_key  => "scop_family_id"
 
-  has_one :alignment,
-          :class_name   => "Alignment",
-          :foreign_key  => "subfamily_id"
-
-  has_many  :scop_domains,
-            :class_name   => "ScopDomains",
-            :foreign_key  => "subfamily_id"
-
   def representative
     rep = nil
-    scop_domains.each do |domain|
+    domains.each do |domain|
       next if domain.calpha_only?
       if domain.resolution
         if rep && rep.resolution
@@ -34,10 +26,14 @@ end
   eval <<-EVAL
     class Subfamily#{si} < Subfamily
 
-      has_many  :scop_domains,
-                :class_name   => "ScopDomains",
+      has_one :alignment,
+              :class_name   => "Alignment",
+              :foreign_key  => "subfamily_id"
+
+
+      has_many  :domains,
+                :class_name   => "ScopDomain",
                 :foreign_key  => "subfamily#{si}_id"
     end
   EVAL
 end
-
