@@ -2,7 +2,7 @@ namespace :bipa do
   namespace :generate do
 
     desc "Generate PDB files for each SCOP family"
-    task :family => [:environment] do
+    task :families => [:environment] do
 
       family_sunids = ScopFamily.registered.map(&:sunid)
       fmanager      = ForkManager.new(MAX_FORK)
@@ -21,11 +21,11 @@ namespace :bipa do
 
             (10..100).step(10) do |si|
 
-              nr_dir      = File.join(FAMILY_DIR, "nr#{si}")
               family      = ScopFamily.find_by_sunid(family_sunid)
+              nr_dir      = File.join(FAMILY_DIR, "nr#{si}")
               family_dir  = File.join(nr_dir, "#{family_sunid}")
 
-              mkdir(family_dir)
+              mkdir_p(family_dir)
 
               subfamilies = family.send("subfamilies#{si}")
               subfamilies.each do |subfamily|
@@ -35,17 +35,17 @@ namespace :bipa do
                   file.puts domain.to_pdb
                 end
               end
+
+              $logger.info("NR(#{si}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
             end
 
             ActiveRecord::Base.remove_connection
           end
 
           ActiveRecord::Base.establish_connection(config)
-          $logger.info("NR(#{nr_cutoff}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
         end
       end
     end
 
   end
 end
-
