@@ -17,6 +17,8 @@ require_dependency "chain"
 require_dependency "residue"
 require_dependency "interface"
 require_dependency "subfamily"
+require_dependency "gloria"
+require_dependency "mmcif"
 
 # Constants for BIPA
 RESUME          = ENV["RESUME"].to_i > 0 ? ENV["RESUME"].to_i : false
