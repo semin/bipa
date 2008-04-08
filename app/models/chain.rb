@@ -6,6 +6,8 @@ class Chain < ActiveRecord::Base
   belongs_to  :model
 
   has_many  :residues,
+            :class_name   => "Residue",
+            :foreign_key  => "chain_id",
             :dependent    => :destroy
 
   has_many  :atoms,

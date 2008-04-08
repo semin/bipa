@@ -86,8 +86,8 @@ class ResidueTest < Test::Unit::TestCase
 
       setup do
         @residue = Residue.new
-        @atom1 = Atom.new(valid_atom_params)
-        @atom2 = Atom.new(valid_atom_params)
+        @atom1 = Atom.create(valid_atom_params)
+        @atom2 = Atom.create(valid_atom_params)
         @residue.atoms << @atom1
         @residue.atoms << @atom2
         @residue.save

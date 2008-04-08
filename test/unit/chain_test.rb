@@ -4,10 +4,10 @@ class ChainTest < Test::Unit::TestCase
   
   should_belong_to  :model
   
-  # should_have_many  :residues
-  # 
-  # should_have_many  :atoms,
-  #                   :through => :residues
+  should_have_many  :residues
+  
+  should_have_many  :atoms,
+                    :through => :residues
   # 
   # should_have_many  :contacts,
   #                   :through => :residues
@@ -50,23 +50,24 @@ class AaChainTest < Test::Unit::TestCase
     context "with two amino acid residues having two atoms each" do
       
       setup do
-        @aa_chain     = AaChain.new(valid_chain_params)
-        @aa_residue1  = AaResidue.new(valid_residue_params(:residue_name => "ARG"))
-        @aa_residue2  = AaResidue.new(valid_residue_params(:residue_name => "PHE"))
-        @aa_atom1     = Atom.new(valid_atom_params)
-        @aa_atom2     = Atom.new(valid_atom_params)
-        @aa_atom3     = Atom.new(valid_atom_params)
-        @aa_atom4     = Atom.new(valid_atom_params)
+        @aa_chain     = AaChain.create(valid_chain_params)
+        @aa_residue1  = AaResidue.create(valid_residue_params(:residue_name => "ARG"))
+        @aa_residue2  = AaResidue.create(valid_residue_params(:residue_name => "PHE"))
+        @aa_atom1     = Atom.create(valid_atom_params)
+        @aa_atom2     = Atom.create(valid_atom_params)
+        @aa_atom3     = Atom.create(valid_atom_params)
+        @aa_atom4     = Atom.create(valid_atom_params)
         
         @aa_residue1.atoms << @aa_atom1
         @aa_residue1.atoms << @aa_atom2
+        @aa_residue1.save
         
         @aa_residue2.atoms << @aa_atom3
         @aa_residue2.atoms << @aa_atom4
+        @aa_residue2.save
         
         @aa_chain.residues << @aa_residue1
         @aa_chain.residues << @aa_residue2
-        
         @aa_chain.save
       end
 
@@ -75,8 +76,8 @@ class AaChainTest < Test::Unit::TestCase
       end
       
       should "include all the residues" do
-        assert_equal @aa_residue1, @aa_chain.residues[0]
-        assert_equal @aa_residue2, @aa_chain.residues[1]
+        assert @aa_chain.residues.include?(@aa_residue1)
+        assert @aa_chain.residues.include?(@aa_residue2)
       end
       
       should "have four atoms" do
