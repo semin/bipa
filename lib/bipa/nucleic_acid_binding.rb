@@ -1,6 +1,10 @@
 module Bipa
   module NucleicAcidBinding
 
+    # def contacting_atoms
+    #   raise "#{this_method} has to be implemented in your class"
+    # end
+    
     def contacting_dna?
       contacting_atoms.each { |a| return true if a.dna? }
       false
@@ -14,6 +18,14 @@ module Bipa
     def contacting_na?
       contacting_dna? or contacting_rna?
     end
+    
+    # def hbonding_donors
+    #   raise "#{this_method} has to be implemented in your class"
+    # end
+    # 
+    # def hbonding_acceptors
+    #   raise "#{this_method} has to be implemented in your class"
+    # end
 
     def hbonding_dna_as_donor?
       hbonding_donors.each { |a| return true if a.dna? }
@@ -43,6 +55,10 @@ module Bipa
       hbonding_rna_as_donor? or hbonding_rna_as_acceptor?
     end
 
+    # def whbonding_atoms
+    #   raise "#{this_method} has to be implemented in your class"
+    # end
+    
     def whbonding_dna?
       whbonding_atoms.each { |a| return true if a.dna? }
       false

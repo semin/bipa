@@ -9,6 +9,15 @@ require File.expand_path(File.dirname(__FILE__) + "/bipa/nucleic_acid_binding")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_residues")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_atoms")
 
+module Kernel
+  
+  private
+  
+  def this_method
+   caller[0] =~ /`([^']*)'/ and $1
+  end
+end
+
 def refresh_dir(dir)
   include FileUtils
 

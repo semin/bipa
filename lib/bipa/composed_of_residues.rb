@@ -4,7 +4,7 @@ module Bipa
     include Bipa::ComposedOfAtoms
 
     def residues
-      raise "'residues' method has to be implemented in your class"
+      raise "#residues has to be implemented in your class"
     end
 
     def atoms
