@@ -101,7 +101,7 @@ class AaResidue < StdResidue
               :foreign_key  => "domain_interface_id"
 
   belongs_to  :res_map,
-              :class_name   => "Gloria::ResMap",
+              :class_name   => "ResMap",
               :foreign_key  => "res_map_id"
 
   def one_letter_code
