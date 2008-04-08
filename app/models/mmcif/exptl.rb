@@ -1,4 +1,4 @@
-class Mmcif::Exptl < Mmcif::Base
+class Exptl < Mmcif
 
   set_primary_keys :Structure, :entry_id
 

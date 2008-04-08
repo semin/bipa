@@ -1,4 +1,4 @@
-class Mmcif::Refine < Mmcif::Base
+class Refine < Mmcif
 
   set_primary_keys :Structure_ID, :entry_id
 

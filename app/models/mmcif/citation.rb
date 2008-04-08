@@ -1,4 +1,4 @@
-class Mmcif::Citation < Mmcif::Base
+class Citation < Mmcif
 
   set_primary_keys :Structure_ID, :id
 
