@@ -79,6 +79,7 @@ class Test::Unit::TestCase
   
   def valid_chain_params(opts = {})
     {
+      :model_id       => random_number(5),
       :chain_code     => random_alphabet
     }.merge!(opts)
   end

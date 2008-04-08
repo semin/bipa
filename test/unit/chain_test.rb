@@ -60,15 +60,15 @@ class AaChainTest < Test::Unit::TestCase
         
         @aa_residue1.atoms << @aa_atom1
         @aa_residue1.atoms << @aa_atom2
-        @aa_residue1.save
+        @aa_residue1.save!
         
         @aa_residue2.atoms << @aa_atom3
         @aa_residue2.atoms << @aa_atom4
-        @aa_residue2.save
+        @aa_residue2.save!
         
         @aa_chain.residues << @aa_residue1
         @aa_chain.residues << @aa_residue2
-        @aa_chain.save
+        @aa_chain.save!
       end
 
       should "have two amino acid residues" do
@@ -99,13 +99,13 @@ class AaChainTest < Test::Unit::TestCase
           @contact1.atom            = @aa_atom1
           @contact1.contacting_atom = @aa_atom2
           @contact1.distance        = @aa_atom1 - @aa_atom2
-          @contact1.save
+          @contact1.save!
           
           @contact2                 = Contact.new
           @contact2.atom            = @aa_atom3
           @contact2.contacting_atom = @aa_atom4
           @contact2.distance        = @aa_atom3 - @aa_atom4
-          @contact2.save
+          @contact2.save!
         end
         
         should "have two contacts" do
