@@ -3,6 +3,7 @@ class Interface < ActiveRecord::Base
   include Bipa::Constants
   include Bipa::ComposedOfResidues
 
+  has_many  :residues
 end
 
 
@@ -13,8 +14,6 @@ class DomainInterface < Interface
   belongs_to  :domain,
               :class_name   => "ScopDomain",
               :foreign_key  => 'scop_id'
-
-  has_many  :residues
 
   before_save :update_asa,
               :update_polarity,
@@ -305,8 +304,6 @@ end # class DomainRnaInterface
 class ChainInterface < Interface
 
   belongs_to :chain
-
-  has_many  :residues
 end
 
 

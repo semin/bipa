@@ -44,7 +44,7 @@ module Bipa
     end
 
     %w(unbound bound delta).each do |stat|
-      module_eval <<-END
+      class_eval <<-END
         def #{stat}_asa_of_residue(res)
           residues.inject(0) { |s, r| r.residue_name == res.upcase ? s + r.#{stat}_asa : s }
         end
