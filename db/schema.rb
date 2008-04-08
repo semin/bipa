@@ -84,9 +84,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "chain_code"
     t.integer     "mol_code"
     t.string      "molecule"
+    t.boolean     "registered"
   end
 
   add_index "chains", ["chain_code"],             :name => "index_chains_on_chain_code"
+  add_index "chains", ["registered"],             :name => "index_chains_on_registered"
   add_index "chains", ["model_id"],               :name => "index_chains_on_model_id"
   add_index "chains", ["model_id", "chain_code"], :name => "index_chains_on_model_id_and_chain_code"
 

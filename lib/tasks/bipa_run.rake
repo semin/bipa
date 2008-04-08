@@ -235,11 +235,10 @@ namespace :bipa do
               cwd = pwd
               family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
               chdir(family_dir)
-              system("Baton *.pdb")
-              #system("joy baton.ali")
+              system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
               chdir(cwd)
 
-              $logger.info("BATON on NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+              $logger.info("BATON with NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
             end
           end
         end
@@ -248,7 +247,7 @@ namespace :bipa do
 
 
     desc "Run JOY for each SCOP family"
-    task :baton => [:environment] do
+    task :joy => [:environment] do
 
       family_sunids = ScopFamily.registered.map(&:sunid)
       fmanager      = ForkManager.new(MAX_FORK)
@@ -268,10 +267,10 @@ namespace :bipa do
               cwd = pwd
               family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
               chdir(family_dir)
-              system("joy baton.ali")
+              system("joy baton.ali 1> joy.log 2>&1")
               chdir(cwd)
 
-              $logger.info("BATON on NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+              $logger.info("JOY with NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
             end
           end
         end
