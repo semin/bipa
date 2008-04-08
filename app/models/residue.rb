@@ -34,10 +34,10 @@ class Residue < ActiveRecord::Base
 
   # has_many  :hbonding_donors,
   #           :through      => :hbonds_as_acceptor
-  
+
   # has_many  :hbonding_acceptors,
   #           :through      => :hbonds_as_donor
-  
+
   # ASA related
   def on_surface?
     surface_atoms.size > 0
@@ -100,11 +100,15 @@ class AaResidue < StdResidue
               :class_name   => "DomainInterface",
               :foreign_key  => "domain_interface_id"
 
+  belongs_to  :res_map,
+              :class_name   => "Gloria::ResMap",
+              :foreign_key  => "res_map_id"
+
   def one_letter_code
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "No one letter code for residue: #{residue_name}"
   end
-  
+
   %w(unbound bound delta).each do |stat|
     class_eval <<-END
       def relative_#{stat}_asa
