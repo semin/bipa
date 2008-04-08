@@ -92,8 +92,6 @@ end
 
 class AaResidue < StdResidue
 
-  include Bipa::NucleicAcidBinding
-
   belongs_to  :domain,
               :class_name   => "ScopDomain",
               :foreign_key  => "scop_id"

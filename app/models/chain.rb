@@ -1,7 +1,6 @@
 class Chain < ActiveRecord::Base
 
   include Bipa::ComposedOfResidues
-  include Bipa::ComposedOfAtoms
 
   belongs_to  :model
 
@@ -44,8 +43,6 @@ end
 
 
 class AaChain < Chain
-
-  include Bipa::NucleicAcidBinding
 
   has_many  :dna_interfaces,
             :class_name   => "ChainDnaInterface",

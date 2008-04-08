@@ -265,7 +265,6 @@ end
 
 class ScopDomain < Scop
 
-  include Bipa::NucleicAcidBinding
   include Bipa::ComposedOfResidues
 
   (10..100).step(10) do |si|
