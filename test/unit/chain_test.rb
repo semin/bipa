@@ -116,6 +116,7 @@ class AaChainTest < Test::Unit::TestCase
   end
 end
 
+
 class HnaChainTest < Test::Unit::TestCase
                     
   should_have_many  :dna_residues
