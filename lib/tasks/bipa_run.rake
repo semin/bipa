@@ -234,7 +234,7 @@ namespace :bipa do
             cwd = pwd
             family_dir = File.join(full_dir, family_sunid.to_s)
             chdir(family_dir)
-            system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.atm 1> baton.log 2>&1")
+            system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1")
             chdir(cwd)
 
             $logger.info("BATON with full set of SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
