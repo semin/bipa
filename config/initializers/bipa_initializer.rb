@@ -33,6 +33,7 @@ PDB_DIR         = File.join(RAILS_ROOT, "/public/pdb")
 
 SCOP_URI        = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
 SCOP_DIR        = File.join(RAILS_ROOT, "/public/scop")
+SCOP_PDB_DIR    = "/BiO/Store/SCOP/pdbstyle"
 
 PRESCOP_URI     = "http://www.mrc-lmb.cam.ac.uk/agm/pre-scop/parseable/"
 PRESCOP_DIR     = File.join(RAILS_ROOT, "/public/pre-scop")

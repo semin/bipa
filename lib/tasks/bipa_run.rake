@@ -217,6 +217,7 @@ namespace :bipa do
     desc "Run Baton for each SCOP family"
     task :baton => [:environment] do
 
+      full_dir      = File.join(FAMILY_DIR, "full")
       family_sunids = ScopFamily.registered.map(&:sunid)
       fmanager      = ForkManager.new(MAX_FORK)
 
@@ -230,16 +231,24 @@ namespace :bipa do
 
             ActiveRecord::Base.establish_connection(config)
 
-            (10..100).step(10) do |si|
+            cwd = pwd
+            family_dir = File.join(full_dir, family_sunid.to_s)
+            chdir(family_dir)
+            system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+            chdir(cwd)
 
-              cwd = pwd
-              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
-              chdir(family_dir)
-              system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
-              chdir(cwd)
+            $logger.info("BATON with full set of SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
 
-              $logger.info("BATON with NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
-            end
+#            (10..100).step(10) do |si|
+#
+#              cwd = pwd
+#              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
+#              chdir(family_dir)
+#              system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+#              chdir(cwd)
+#
+#              $logger.info("BATON with NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+#            end
           end
         end
       end
@@ -249,7 +258,8 @@ namespace :bipa do
     desc "Run JOY for each SCOP family"
     task :joy => [:environment] do
 
-      family_sunids = ScopFamily.registered.map(&:sunid)
+      full_dir      = File.join(FAMILY_DIR, "full")
+      family_sunids = ScopFamily.registered.find(:all).map(&:sunid)
       fmanager      = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -262,17 +272,26 @@ namespace :bipa do
 
             ActiveRecord::Base.establish_connection(config)
 
-            (10..100).step(10) do |si|
-
               cwd = pwd
-              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
+              family_dir = File.join(full_dir, family_sunid.to_s)
               chdir(family_dir)
               system("joy baton.ali 1> joy.log 2>&1")
               chdir(cwd)
 
-              $logger.info("JOY with NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
-            end
-          end
+              $logger.info("JOY with full set of SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+
+#            (10..100).step(10) do |si|
+#
+#              cwd = pwd
+#              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{family_sunid}")
+#              chdir(family_dir)
+#              system("joy baton.ali 1> joy.log 2>&1")
+#              chdir(cwd)
+#
+#              $logger.info("JOY with NR: #{si}, SCOP Family: #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+#            end
+
+          end # fmanager.fork
         end
       end
     end
