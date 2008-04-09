@@ -38,6 +38,8 @@ class Residue < ActiveRecord::Base
   # has_many  :hbonding_acceptors,
   #           :through      => :hbonds_as_donor
 
+  has_many  :columns
+
   # ASA related
   def on_surface?
     surface_atoms.size > 0

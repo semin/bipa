@@ -47,9 +47,18 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index "subfamilies", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
 
-  #
+  # 'alignments' table
   create_table "alignments", :force => true do |t|
-    t.belongs_to "subfamily"
+    t.belongs_to  "subfamily"
+    t.integer     "length"
+  end
+
+  # 'columns' table
+  create_table "columns", :force => true do |t|
+    t.belongs_to  "alignment"
+    t.belongs_to  "residue"
+    t.integer     "position"
+    t.string      "residue_name"
   end
 
   # 'structures' table

@@ -4,7 +4,7 @@ class Scop < ActiveRecord::Base
 
   has_finder :registered, :conditions => { :registered => true }
 
-  #acts_as_nested_set
+  acts_as_nested_set
 
   def self.factory_create!(opt={})
     case opt[:stype]
@@ -248,9 +248,9 @@ end
 class ScopFamily < Scop
 
   (10..100).step(10) do |si|
-    has_many  :"subfamilies#{si}",
-              :class_name   => "Subfamily#{si}",
-              :foreign_key  => "scop_family_id"
+    has_one :"subfamily#{si}",
+            :class_name   => "Subfamily#{si}",
+            :foreign_key  => "scop_family_id"
   end
 end
 
