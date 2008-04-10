@@ -37,25 +37,27 @@ namespace :bipa do
             end
             $logger.info("Copying PDB files for SCOP Family, #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
 
-#            # for non-redundant sets
-#            (10..100).step(10) do |si|
-#
-#              nr_dir      = File.join(FAMILY_DIR, "nr#{si}")
-#              family_dir  = File.join(nr_dir, "#{family_sunid}")
-#
-#              mkdir_p(family_dir)
-#
-#              subfamily = family.send("subfamily#{si}")
-#              repdomain = subfamily.representative
-#
-#              next if domain.nil?
-#
-#              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
-#                file.puts domain.to_pdb
-#              end
-#
-#              $logger.info("NR(#{si}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
-#            end
+            # for non-redundant sets
+            (10..100).step(10) do |si|
+
+              nr_dir      = File.join(FAMILY_DIR, "nr#{si}")
+              family_dir  = File.join(nr_dir, "#{family_sunid}")
+
+              mkdir_p(family_dir)
+
+              subfamilies = family.send("subfamilies#{si}")
+              subfamilies.each do |subfamily|
+
+                domain = subfamily.representative
+                next if domain.nil?
+
+                File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
+                  file.puts domain.to_pdb
+                end
+              end
+
+              $logger.info("NR(#{si}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+            end
 
             ActiveRecord::Base.remove_connection
           end
