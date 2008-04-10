@@ -4,7 +4,7 @@ class Scop < ActiveRecord::Base
 
   has_finder :registered, :conditions => { :registered => true }
 
-  #acts_as_nested_set
+  acts_as_nested_set
 
   def self.factory_create!(opt={})
     case opt[:stype]
