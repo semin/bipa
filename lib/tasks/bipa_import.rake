@@ -659,14 +659,14 @@ namespace :bipa do
                   column = alignment.columns.build
                   if (res == "-")
                     column.residue_name = res
-                    column.position     = fi
+                    column.position     = fi + 1
                     column.save!
                     #$logger.info("Importing alignment position, #{i} of subfamily#{si} of SCOP family, #{family.sunid}: done")
                   else
                     if (db_residues[pos].one_letter_code == res)
                       column.residue      = db_residues[pos]
                       column.residue_name = res
-                      column.position     = fi
+                      column.position     = fi + 1
                       column.save!
                       pos += 1
                       #$logger.info("Importing alignment position, #{i} of subfamily#{si} of SCOP family, #{family.sunid}: done")
