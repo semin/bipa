@@ -248,8 +248,12 @@ end
 class ScopFamily < Scop
 
   (10..100).step(10) do |si|
-    has_many  :"subfamilies#{si}",
-              :class_name   => "Subfamily#{si}",
+    has_one :"rep#{si}_alignment",
+            :class_name   => "Rep#{si}Alignment",
+            :foreign_key  => "scop_family_id"
+
+    has_many  :"rep#{si}_subfamilies",
+              :class_name   => "Rep#{si}Subfamily",
               :foreign_key  => "scop_family_id"
   end
 end
@@ -268,9 +272,9 @@ class ScopDomain < Scop
   include Bipa::ComposedOfResidues
 
   (10..100).step(10) do |si|
-    belongs_to  :"subfamily#{si}",
-                :class_name   => "Subfamiy#{si}",
-                :foreign_key  => "subfamily#{si}_id"
+    belongs_to  :"rep#{si}_subfamily",
+                :class_name   => "Rep#{si}Subfamiy",
+                :foreign_key  => "rep#{si}_subfamily#{si}_id"
   end
 
   has_many  :dna_interfaces,

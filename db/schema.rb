@@ -16,7 +16,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'scops' table
   create_table "scops", :force => true do |t|
     t.belongs_to  "parent"
-    (10..100).step(10) { |i| t.belongs_to  "subfamily#{i}" }
+    (10..100).step(10) { |i| t.belongs_to "rep#{i}_subfamily" }
     t.integer "lft"
     t.integer "rgt"
     t.string  "type"
@@ -49,7 +49,8 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'alignments' table
   create_table "alignments", :force => true do |t|
-    t.belongs_to  "subfamily"
+    t.belongs_to  "scop_family"
+    t.string      "type"
     t.integer     "length"
   end
 
