@@ -30,9 +30,10 @@ namespace :bipa do
 
             domains = family.all_registered_leaf_children
             domains.each do |domain|
-              mid_stem = domain.sid[2..3]
+              mid_stem        = domain.sid[2..3]
               domain_pdb_file = File.join(SCOP_PDB_DIR, mid_stem, "#{domain.sid}.ent")
               raise "Cannot find #{domain_pdb_file}" unless File.exists?(domain_pdb_file)
+
               system("cp #{domain_pdb_file} #{File.join(family_dir, domain.sunid.to_s + '.pdb')}")
             end
             $logger.info("Copying PDB files for SCOP Family, #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
@@ -51,12 +52,17 @@ namespace :bipa do
                 domain = subfamily.representative
                 next if domain.nil?
 
-                File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
-                  file.puts domain.to_pdb
-                end
+                  mid_stem        = domain.sid[2..3]
+                  domain_pdb_file = File.join(SCOP_PDB_DIR, mid_stem, "#{domain.sid}.ent")
+                  raise "Cannot find #{domain_pdb_file}" unless File.exists?(domain_pdb_file)
+
+                  system("cp #{domain_pdb_file} #{File.join(family_dir, domain.sunid.to_s + '.pdb')}")
+#                File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
+#                  file.puts domain.to_pdb
+#                end
               end
 
-              $logger.info("NR(#{si}): Creating PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+              $logger.info("NR(#{si}): Copying PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
             end
 
             ActiveRecord::Base.remove_connection

@@ -22,6 +22,7 @@ class Subfamily < ActiveRecord::Base
   end
 end
 
+
 (10..100).step(10) do |si|
   eval <<-EVAL
     class Subfamily#{si} < Subfamily
