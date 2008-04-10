@@ -47,12 +47,17 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index "subfamilies", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
 
+
   # 'alignments' table
   create_table "alignments", :force => true do |t|
     t.belongs_to  "scop_family"
     t.belongs_to  "subfamily"
     t.string      "type"
   end
+
+  add_index "alignments", ["scop_family_id", "type"],  :name => "index_alignments_on_scop_family_id_and_type"
+  add_index "alignments", ["subfamily_id", "type"],    :name => "index_alignments_on_subfamily_id_and_type"
+
 
   # 'sequnece' table
   create_table "sequences", :force => true do |t|
@@ -61,6 +66,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  "chain"
   end
 
+  add_index "sequences", ["alignment_id"],    :name => "index_sequences_on_alignment_id"
+  add_index "sequences", ["scop_domain_id"],  :name => "index_sequences_on_scop_domain_id"
+  add_index "sequences", ["chain_id"],        :name => "index_sequences_on_chain_id"
+
+
   # 'columns' table
   create_table "columns", :force => true do |t|
     t.belongs_to  "sequence"
@@ -68,6 +78,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     "position"
     t.string      "residue_name"
   end
+
+  add_index "columns", ["sequence_id"], :name => "index_columns_on_sequence_id"
+  add_index "columns", ["residue_id"],  :name => "index_columns_on_residue_id"
+
 
   # 'structures' table
   create_table  "structures", :force => true do |t|
@@ -142,6 +156,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "residues", ["id", "domain_interface_id"],          :name => "index_residues_on_id_and_domain_interface_id"
   add_index "residues", ["id", "chain_interface_id"],           :name => "index_residues_on_id_and_chain_interface_id"
 
+
   # 'atoms' table
   create_table "atoms", :force => true do |t|
     t.belongs_to  "residue"
@@ -167,6 +182,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "atoms", ["atom_code"],               :name => "index_atoms_on_atom_code"
   add_index "atoms", ["atom_name"],               :name => "index_atoms_on_atom_name"
 
+
   # 'contacts' table
   create_table "contacts", :force => true do |t|
     t.belongs_to  "atom"
@@ -178,6 +194,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "contacts", ["contacting_atom_id"],             :name => "index_contacts_on_contacting_atom_id"
   add_index "contacts", ["atom_id", "contacting_atom_id"],  :name => "index_contacts_on_atom_id_and_contacting_atom_id"
   add_index "contacts", ["contacting_atom_id", "atom_id"],  :name => "index_contacts_on_contacting_atom_id_and_atom_id"
+
 
   # 'hbonds' table
   create_table "hbonds", :force => true do |t|
@@ -198,6 +215,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "hbonds", ["donor_id"],                 :name => "index_hbonds_on_donor_id"
   add_index "hbonds", ["acceptor_id"],              :name => "index_hbonds_on_acceptor_id"
 
+
   # 'whbonds' table
   create_table "whbonds", :force => true do |t|
     t.belongs_to "atom"
@@ -209,6 +227,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "whbonds", ["whbonding_atom_id", "atom_id"],  :name => "index_whbonds_on_whbonding_atom_id_and_atom_id"
   add_index "whbonds", ["atom_id"],                       :name => "index_whbonds_on_atom_id"
   add_index "whbonds", ["whbonding_atom_id"],             :name => "index_whbonds_on_whbonding_atom_id"
+
 
   # 'interface' table
   create_table :interfaces, :force => true do |t|
