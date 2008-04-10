@@ -231,6 +231,7 @@ namespace :bipa do
 
             ActiveRecord::Base.establish_connection(config)
 
+            # for full set of SCOP Family PDB files
             cwd = pwd
             family_dir = File.join(full_dir, sunid.to_s)
             chdir(family_dir)
@@ -239,6 +240,7 @@ namespace :bipa do
 
             $logger.info("BATON with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
 
+            # for representative set of SCOP Family PDB files
 #            (10..100).step(10) do |si|
 #
 #              cwd = pwd
