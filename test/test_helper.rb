@@ -9,6 +9,9 @@ require_dependency "chain"
 require_dependency "residue"
 require_dependency "interface"
 require_dependency "subfamily"
+require_dependency "alignment"
+require_dependency "mmcif"
+require_dependency "gloria"
 
 class Test::Unit::TestCase
   # Transactional fixtures accelerate your tests by wrapping each test method

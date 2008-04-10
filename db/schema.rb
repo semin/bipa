@@ -50,6 +50,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'alignments' table
   create_table "alignments", :force => true do |t|
     t.belongs_to  "scop_family"
+    t.belongs_to  "subfamily"
     t.string      "type"
     t.integer     "length"
   end

@@ -21,11 +21,11 @@ end
 
 (10..100).step(10) do |si|
   eval <<-END
-    class Subfamily#{si}Test < SubfamilyTest
+    class Rep#{si}SubfamilyTest < SubfamilyTest
 
       should_have_one :alignment
 
-      should_have_many  :domains
+      should_have_many :domains
     end
   END
 end
