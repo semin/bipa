@@ -12,6 +12,8 @@ class Chain < ActiveRecord::Base
   has_many  :atoms,
             :through      => :residues
 
+  has_many  :sequences
+
   validates_uniqueness_of :chain_code,
                           :scope          => :model_id,
                           :allow_nil      => true,

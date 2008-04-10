@@ -52,12 +52,18 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  "scop_family"
     t.belongs_to  "subfamily"
     t.string      "type"
-    t.integer     "length"
+  end
+
+  # 'sequnece' table
+  create_table "sequences", :force => true do |t|
+    t.belongs_to  "alignment"
+    t.belongs_to  "scop_domain"
+    t.belongs_to  "chain"
   end
 
   # 'columns' table
   create_table "columns", :force => true do |t|
-    t.belongs_to  "alignment"
+    t.belongs_to  "sequence"
     t.belongs_to  "residue"
     t.integer     "position"
     t.string      "residue_name"

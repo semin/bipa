@@ -648,20 +648,22 @@ namespace :bipa do
 
                 next unless entry.seq_type == "P1"
 
-                domain            = ScopDomain.find_by_sunid(entry.entry_id)
-                db_residues       = domain.residues
-                ff_residues       = entry.data.split("")
-                alignment.length  = ff_residues.length unless alignment.length
+                domain          = ScopDomain.find_by_sunid(entry.entry_id)
+                db_residues     = domain.residues
+                ff_residues     = entry.data.split("")
+                sequence        = alignment.sequences.build
+                sequence.domain = domain
 
                 pos = 0
 
                 ff_residues.each_with_index do |res, fi|
-                  column = alignment.columns.build
+
+                  column = sequence.columns.build
+
                   if (res == "-")
                     column.residue_name = res
                     column.position     = fi + 1
                     column.save!
-                    #$logger.info("Importing alignment position, #{i} of subfamily#{si} of SCOP family, #{family.sunid}: done")
                   else
                     if (db_residues[pos].one_letter_code == res)
                       column.residue      = db_residues[pos]
@@ -669,13 +671,12 @@ namespace :bipa do
                       column.position     = fi + 1
                       column.save!
                       pos += 1
-                      #$logger.info("Importing alignment position, #{i} of subfamily#{si} of SCOP family, #{family.sunid}: done")
                     else
                       raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
                     end
                   end
                 end # ff_residues.each_with_index
-                #$logger.info("Importing alignment entry, #{entry.entry_id} of subfamily#{si} of SCOP family, #{family.sunid}: done")
+                sequence.save!
               end # flat_file.each_entry
               alignment.save!
             end # (10..100).step(10)

@@ -293,6 +293,8 @@ class ScopDomain < Scop
             :through      => :residues,
             :uniq         => true
 
+  has_many  :sequences
+
   # has_many  :atoms,
   #           :through      => :residues
   #
