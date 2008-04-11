@@ -59,10 +59,11 @@ namespace :bipa do
 
         if resmap
           aa.resmap = resmap
+          aa.save!
           cnt += 1
-          $logger.info("AaResidue, #{aa.id} has been associated to ResMap, #{resmap.id}")
+          #$logger.info("AaResidue, #{aa.id} has been associated to ResMap, #{resmap.id}")
         else
-          $logger.info("Cannot associate AaResidue, #{aa.id} to ResMap")
+          #$logger.info("Cannot associate AaResidue, #{aa.id} to ResMap")
           next
         end
 
@@ -89,15 +90,15 @@ namespace :bipa do
 
         if residue_map
           aa.residue_map = residue_map
+          aa.save!
           cnt += 1
-          $logger.info("AaResidue, #{aa.id} has been associated to ResidueMap, #{residue_map.id}")
+          #$logger.info("AaResidue, #{aa.id} has been associated to ResidueMap, #{residue_map.id}")
         else
-          $logger.info("Cannot associate AaResidue, #{aa.id} to ResidueMap")
+          #$logger.info("Cannot associate AaResidue, #{aa.id} to ResidueMap")
           next
         end
-
-        $logger.info("Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResidueMap")
       end
+      $logger.info("Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResidueMap")
     end
 
   end
