@@ -15,7 +15,7 @@ end
 class SubfamilyAlignment < Alignment
 
   belongs_to  :subfamily,
-              :class_name   => "SubFamily",
+              :class_name   => "Subfamily",
               :foreign_key  => "subfamily_id"
 end
 
