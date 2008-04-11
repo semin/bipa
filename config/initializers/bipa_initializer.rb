@@ -1,14 +1,19 @@
 require "rubygems"
+
 require "matrix"
 require "inline"
 require "has_finder"
+require "will_paginate"
 require "fork_manager"
 require "ar-extensions"
+require "composite_primary_keys"
+
 require "bio_extensions"
 require "array_extensions"
 require "vector_extensions"
 require "math_extensions"
-require "composite_primary_keys"
+require "active_record_extensions"
+
 require "bipa"
 
 # STI dependency
