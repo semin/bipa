@@ -42,18 +42,61 @@ namespace :bipa do
 
 
     desc "Associate Residue with ResMap"
-    task :residues_resmap => [:environment] do
+    task :residues_res_map => [:environment] do
 
-      AaResidue.find(:all, :include => [{:chain => { :model => :structure }}]).each do |aa|
-        resmap = ResMap.find(:first, :conditions => { :pdb => aa.chain.model.structure.pdb_code,
-                                                      :pdb_chain_id => aa.chain.chain_code,
-                                                      :res_num => aa.residue_code,
-                                                      :ins_code => aa.icode})
-        if !resmap or resmap.size > 1
-          puts "Error"
+      cnt = 0
+
+      AaResidue.find_all_in_chunks do |aa|
+        res_map = ResMap.find(
+          :first,
+          :conditions => {
+            :pdb          => aa.chain.model.structure.pdb_code,
+            :pdb_chain_id => aa.chain.chain_code,
+            :res_num      => aa.residue_code,
+            :ins_code     => aa.icode
+          }
+        )
+
+        if resmap
+          aa.resmap = resmap
+          cnt += 1
+          $logger.info("AaResidue, #{aa.id} has been associated to ResMap, #{resmap.id}")
         else
-          puts "Found"
+          $logger.info("Cannot associate AaResidue, #{aa.id} to ResMap")
+          next
         end
+
+        $logger.info("Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResMap")
+      end
+    end
+
+
+    desc "Associate Residue with ResMap"
+    task :residues_residue_map => [:environment] do
+
+      cnt = 0
+
+      AaResidue.find_all_in_chunks do |aa|
+        residue_map = ResidueMap.find(
+          :first,
+          :conditions => {
+            :pdb          => aa.chain.model.structure.pdb_code,
+            :pdb_chain_id => aa.chain.chain_code,
+            :res_num      => aa.residue_code,
+            :ins_code     => aa.icode
+          }
+        )
+
+        if residue_map
+          aa.residue_map = residue_map
+          cnt += 1
+          $logger.info("AaResidue, #{aa.id} has been associated to ResidueMap, #{residue_map.id}")
+        else
+          $logger.info("Cannot associate AaResidue, #{aa.id} to ResidueMap")
+          next
+        end
+
+        $logger.info("Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResidueMap")
       end
     end
 

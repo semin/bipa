@@ -106,6 +106,10 @@ class AaResidue < StdResidue
               :class_name   => "ResMap",
               :foreign_key  => "res_map_id"
 
+  belongs_to  :residue_map,
+              :class_name   => "ResidueMap",
+              :foreign_key  => "residue_map_id"
+
   def one_letter_code
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "No one letter code for residue: #{residue_name}"
