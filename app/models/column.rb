@@ -1,6 +1,6 @@
 class Column < ActiveRecord::Base
 
-  belongs_to :sequnece
+  belongs_to :sequence
 
   belongs_to :residue
 end
