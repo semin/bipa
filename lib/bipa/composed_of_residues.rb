@@ -43,6 +43,10 @@ module Bipa
       interface_residues.select { |r| r.binding_rna? }
     end
 
+    def has_unks?
+      residues.select { |r| r.residue_name == "UNK" }.size > 0
+    end
+
     %w(unbound bound delta).each do |stat|
       class_eval <<-END
         def #{stat}_asa_of_residue(res)

@@ -7,7 +7,7 @@ class Subfamily < ActiveRecord::Base
   def representative
     rep = nil
     domains.each do |domain|
-      next if domain.calpha_only?
+      next if domain.calpha_only? || domain.has_unks?
       if domain.resolution
         if rep && rep.resolution
           rep = domain if domain.resolution < rep.resolution

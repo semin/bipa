@@ -370,10 +370,6 @@ class ScopDomain < Scop
     chains.first.model.structure.resolution
   end
 
-  def calpha_only?
-    atoms.map(&:atom_name).uniq == ["CA"]
-  end
-
   def to_pdb
     atoms.sort_by(&:atom_code).inject("") { |p, a| p + (a.to_pdb + "\n") }
   end

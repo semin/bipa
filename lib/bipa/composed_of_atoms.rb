@@ -64,6 +64,10 @@ module Bipa
       interface_atoms.select { |ia| ia.binding_rna? }
     end
 
+    def calpha_only?
+      atoms.map(&:atom_name).uniq == ["CA"]
+    end
+
     # ASA related
     %w(unbound bound delta).each do |stat|
       module_eval <<-END
@@ -80,6 +84,6 @@ module Bipa
         end
       END
     end
-    
+
   end
 end

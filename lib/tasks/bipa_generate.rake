@@ -30,6 +30,9 @@ namespace :bipa do
 
             domains = family.all_registered_leaf_children
             domains.each do |domain|
+
+              next if domain.has_unks?
+
               File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
                 file.puts domain.to_pdb + "END\n"
               end
@@ -52,6 +55,9 @@ namespace :bipa do
 
                 domains = subfamily.domains
                 domains.each do |domain|
+
+                  next if domain.has_unks?
+
                   domain_pdb_file = File.join(full_dir, family_sunid, domain.sunid.to_s + '.pdb')
                   raise "Cannot find #{domain_pdb_file}" unless File.exists?(domain_pdb_file)
 
@@ -63,7 +69,6 @@ namespace :bipa do
               end # subfamilies.each
             end # (10..100).step(10)
             $logger.info("Generating full set of PDB files for every Subfamily, #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
-
 
             # for non-redundant sets
             (10..100).step(10) do |si|
