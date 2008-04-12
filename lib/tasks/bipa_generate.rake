@@ -1,8 +1,8 @@
 namespace :bipa do
   namespace :generate do
 
-    desc "Generate non-redundant set of PDB files for each SCOP Family"
-    task :nr_pdb => [:environment] do
+    desc "Generate representative set of PDB files for each SCOP Family"
+    task :rep_pdb => [:environment] do
 
       family_sunids = ScopFamily.registered.find(:all).map(&:sunid)
       fmanager      = ForkManager.new(MAX_FORK)
@@ -22,13 +22,12 @@ namespace :bipa do
 
             (10..100).step(10) do |si|
 
-              nr_dir      = File.join(FAMILY_DIR, "nr#{si}")
-              family_dir  = File.join(nr_dir, "#{family_sunid}")
+              rep_dir     = File.join(FAMILY_DIR, "rep#{si}")
+              family_dir  = File.join(rep_dir, "#{family_sunid}")
 
-              refresh_dir(nr_dir)
               mkdir_p(family_dir)
 
-              subfamilies = family.send("subfamilies#{si}")
+              subfamilies = family.send("rep#{si}_subfamilies")
               subfamilies.each do |subfamily|
 
                 domain = subfamily.representative
@@ -39,10 +38,11 @@ namespace :bipa do
 
                 system("cp #{domain_pdb_file} #{family_dir}")
               end
-              $logger.info("NR(#{si}): Copying PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
             end
             ActiveRecord::Base.remove_connection
           end
+
+          $logger.info("Generating representative PDB files for #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
           ActiveRecord::Base.establish_connection(config)
         end
       end
@@ -75,7 +75,8 @@ namespace :bipa do
             mkdir_p(family_dir)
 
             (10..100).step(10) do |si|
-              rep_dir = File.join(family_dir, si.to_s)
+
+              rep_dir = File.join(family_dir, "rep#{si}")
               mkdir_p(rep_dir)
 
               subfamilies = family.send("rep#{si}_subfamilies")
@@ -97,9 +98,11 @@ namespace :bipa do
                 end # domains.each
               end # subfamilies.each
             end # (10..100).step(10)
+
             $logger.info("Generating PDB files for subfamilies of each SCOP Family, #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
             ActiveRecord::Base.remove_connection
           end
+
           ActiveRecord::Base.establish_connection(config)
         end
       end
