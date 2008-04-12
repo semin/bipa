@@ -89,10 +89,12 @@ namespace :bipa do
 
                 domains.each do |domain|
 
-                  next if domain.calpha_only? || domain.has_unks?
-
                   domain_pdb_file = File.join(full_dir, family_sunid.to_s, domain.sunid.to_s + '.pdb')
-                  raise "Cannot find #{domain_pdb_file}" unless File.exists?(domain_pdb_file)
+
+                  if !File.exists?(domain_pdb_file)
+                    $logger.warn("Scop Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues")
+                    next
+                  end
 
                   system("cp #{domain_pdb_file} #{subfamily_dir}")
                 end # domains.each
