@@ -758,24 +758,19 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            family  = ScopFamily.find_by_sunid(sunid)
-            fam_dir = File.join(FAMILY_DIR, "sub", "#{family.sunid}")
-
             (10..100).step(10) do |si|
-              rep_dir     = File.join(fam_dir, "rep#{si}")
+              rep_dir     = File.join(FAMILY_DIR, "sub", sunid.to_s, "rep#{si}")
               subfam_ids  = Dir[rep_dir + "/*"].map { |d| d.match(/(\d+)$/)[1] }
 
               subfam_ids.each do |subfam_id|
-                subfam_dir  = File.join(rep_dir, subfam_id)
-                ali_file    = File.join(subfam_dir, "baton.ali")
+                ali_file = File.join(rep_dir, subfam_id, "baton.ali")
 
                 unless File.exists?(ali_file)
                   $logger.warn("Cannot find #{ali_file}")
                   next
                 end
 
-                subfamily = Subfamily.find(subfam_id)
-                alignment = subfamily.build_alignment
+                alignment = Subfamily.find(subfam_id).build_alignment
                 flat_file = Bio::FlatFile.auto(ali_file)
 
                 flat_file.each_entry do |entry|
