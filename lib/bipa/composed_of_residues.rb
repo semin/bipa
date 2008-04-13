@@ -44,7 +44,10 @@ module Bipa
     end
 
     def has_unks?
-      residues.select { |r| r.residue_name == "UNK" }.size > 0
+      residues.find(:all, :select => "residue_name").each do |r|
+        return true if r.residue_name == "UNK"
+      end
+      false
     end
 
     %w(unbound bound delta).each do |stat|

@@ -65,7 +65,7 @@ module Bipa
     end
 
     def calpha_only?
-      atoms.map(&:atom_name).uniq == ["CA"]
+      atoms.find(:all, :select => "atom_name").map(&:atom_name).uniq == ["CA"]
     end
 
     # ASA related
