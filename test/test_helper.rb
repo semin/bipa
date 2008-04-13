@@ -27,7 +27,7 @@ class Test::Unit::TestCase
   # don't care one way or the other, switching from MyISAM to InnoDB tables
   # is recommended.
   #
-  # The only drawback to using transactional fixtures is when you actually 
+  # The only drawback to using transactional fixtures is when you actually
   # need to test transactions.  Since your test is bracketed by a transaction,
   # any transactions started in your code will be automatically rolled back.
   self.use_transactional_fixtures = true
@@ -46,9 +46,9 @@ class Test::Unit::TestCase
   # fixtures :all
 
   # Add more helper methods to be used by all tests here...
-  
+
   include Bipa::Constants
-  
+
   # Dummy parameters for models
   def random_alphabet(count = 1)
     result = ""
@@ -56,15 +56,15 @@ class Test::Unit::TestCase
     count.times { result += alphabets[rand(alphabets.size)] }
     result
   end
-  
+
   def random_number(digit = 1)
     eval("rand(1E#{digit})").to_i
   end
-  
+
   def random_pdb_code
     random_number(2).to_s + random_alphabet(2)
   end
-  
+
   def valid_structure_params(opts = {})
     {
       :pdb_code       => random_pdb_code,
@@ -73,37 +73,37 @@ class Test::Unit::TestCase
       :deposited_at   => "1998-10-12"
     }.merge!(opts)
   end
-  
+
   def valid_model_params(opts = {})
     {
       :model_code     => rand(100)
     }.merge!(opts)
   end
-  
+
   def valid_chain_params(opts = {})
     {
       :model_id       => random_number(5),
       :chain_code     => random_alphabet
     }.merge!(opts)
   end
-  
+
   def valid_residue_params(opts = {})
-                           
+
     residue_names = AminoAcids::Residues::STANDARD +
                     NucleicAcids::Residues::STANDARD
-    
+
     {
       :residue_code => rand(100),
       :residue_name => residue_names[rand(residue_names.size)]
     }.merge!(opts)
   end
-  
+
   def valid_atom_params(opts = {})
-    
-    atom_names =  AminoAcids::Atoms::BACKBONE + 
+
+    atom_names =  AminoAcids::Atoms::BACKBONE +
                   NucleicAcids::Atoms::PHOSPHATE +
                   NucleicAcids::Atoms::SUGAR
-                  
+
     {
       :atom_code  => rand(1000),
       :atom_name  => atom_names[rand(atom_names.size)],
