@@ -210,7 +210,7 @@ namespace :bipa do
             system blastclust_cmd
         end
 
-        $logger.info("Creating non-redundant fasta files for SCOP family, #{family.sunid} : done (#{i+1}/#{families.size})")
+        $logger.info("Creating non-redundant fasta files for SCOP family, #{family.sunid}: done (#{i+1}/#{families.size})")
       end
     end
 
@@ -229,13 +229,23 @@ namespace :bipa do
           sunids.each_with_index do |sunid, i|
 
             fmanager.fork do
-              cwd     = pwd
-              fam_dir = File.join(full_dir, sunid.to_s)
+              cwd       = pwd
+              fam_dir   = File.join(full_dir, sunid.to_s)
+              pdb_list  = Dir[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
+
+              next unless pdb_list.size > 0
+
+              clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, "#{sunid}.nr90.fa")
+              clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
+              list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
+
               chdir(fam_dir)
-              system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1")
+              ENV["PDB_EXT"] = ".pdb"
+              File.open("LIST", "w") { |f| f.puts list.join("\n") }
+              system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1")
               chdir(cwd)
 
-              $logger.info("BATON with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+              $logger.info("Baton with full set of SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
             end
           end
         end
@@ -287,8 +297,7 @@ namespace :bipa do
               (10..100).step(10) do |si|
                 rep_dir = File.join(fam_dir, "rep#{si}")
 
-                Dir[rep_dir + "/*"].each do |subfam_id|
-                  subfam_dir = File.join(rep_dir, subfam_id)
+                Dir[rep_dir + "/*"].each do |subfam_dir|
                   chdir(subfam_dir)
                   system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
                   chdir(cwd)
