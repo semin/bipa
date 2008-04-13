@@ -78,11 +78,11 @@ namespace :bipa do
 #            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
 
             system("#{HBPLUS_BIN} #{pdb_file} 1>#{pdb_code}.hbplus.log 2>&1")
-            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
-
             move(Dir["*"], "..")
             chdir(cwd)
             rm_rf(work_dir)
+
+            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
           end
         end
       end
@@ -149,10 +149,12 @@ namespace :bipa do
       refresh_dir(DSSP_DIR)
 
       pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
+      fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager = ForkManager.new(MAX_FORK)
       fmanager.manage do
+
         pdb_files.each_with_index do |pdb_file, i|
+
           fmanager.fork do
             cwd = pwd
             chdir(DSSP_DIR)
@@ -172,18 +174,17 @@ namespace :bipa do
       refresh_dir(BLASTCLUST_DIR)
 
       families = ScopFamily.registered
+
       families.each_with_index do |family, i|
+        fam_dir   = File.join(BLASTCLUST_DIR, "#{family.sunid}")
+        fam_fasta = File.join(fam_dir, "#{family.sunid}.fa")
 
-        family_dir    = File.join(BLASTCLUST_DIR, "#{family.sunid}")
-        family_fasta  = File.join(family_dir, "#{family.sunid}.fa")
+        mkdir(fam_dir)
 
-        mkdir(family_dir)
-
-        File.open(family_fasta, "w") do |file|
-
+        File.open(fam_fasta, "w") do |file|
           domains = family.all_registered_leaf_children
-          domains.each do |domain|
 
+          domains.each do |domain|
             sunid = domain.sunid
             fasta = domain.to_fasta
 
@@ -200,8 +201,8 @@ namespace :bipa do
         (10..100).step(10) do |si|
           blastclust_cmd =
             "blastclust " +
-            "-i #{family_fasta} "+
-            "-o #{File.join(family_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')} " +
+            "-i #{fam_fasta} "+
+            "-o #{File.join(fam_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')} " +
             "-L .9 " +
             "-S #{si} " +
             "-a 2 " +
@@ -214,82 +215,125 @@ namespace :bipa do
     end
 
 
-    desc "Run Baton for each SCOP family"
-    task :baton => [:environment] do
+    namespace :baton do
 
-      full_dir  = File.join(FAMILY_DIR, "full")
-      sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
-      fmanager  = ForkManager.new(MAX_FORK)
+      desc "Run Baton for each SCOP family"
+      task :full_pdb => [:environment] do
 
-      fmanager.manage do
+        sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
+        full_dir  = File.join(FAMILY_DIR, "full")
+        fmanager  = ForkManager.new(MAX_FORK)
 
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
 
-        sunids.each_with_index do |sunid, i|
+          sunids.each_with_index do |sunid, i|
 
-          fmanager.fork do
+            fmanager.fork do
+              cwd     = pwd
+              fam_dir = File.join(full_dir, sunid.to_s)
+              chdir(fam_dir)
+              system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1")
+              chdir(cwd)
 
-            ActiveRecord::Base.establish_connection(config)
-
-            # for full set of SCOP Family PDB files
-            cwd = pwd
-            family_dir = File.join(full_dir, sunid.to_s)
-            chdir(family_dir)
-            system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1")
-            chdir(cwd)
-
-            $logger.info("BATON with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
-
-            # for representative set of SCOP Family PDB files
-#            (10..100).step(10) do |si|
-#
-#              cwd = pwd
-#              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{sunid}")
-#              chdir(family_dir)
-#              system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
-#              chdir(cwd)
-#
-#              $logger.info("BATON with NR: #{si}, SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
-#            end
+              $logger.info("BATON with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+            end
           end
         end
       end
-    end
+
+
+      desc "Run Baton for representative PDB files for each SCOP Family"
+      task :rep_pdb => [:environment] do
+
+        sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
+        fmanager  = ForkManager.new(MAX_FORK)
+
+        fmanager.manage do
+
+          sunids.each_with_index do |sunid, i|
+
+            fmanager.fork do
+
+              (10..100).step(10) do |si|
+                cwd     = pwd
+                rep_dir = File.join(FAMILY_DIR, "rep#{si}", "#{sunid}")
+                chdir(rep_dir)
+                system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+                chdir(cwd)
+              end
+
+              $logger.info("BATON with representative PDB files for SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+            end
+          end
+        end
+      end
+
+
+      desc "Run Baton for each subfamilies of SCOP families"
+      task :sub_pdb => [:environment] do
+
+        sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
+        sub_dir   = File.join(FAMILY_DIR, "sub")
+        fmanager  = ForkManager.new(MAX_FORK)
+
+        fmanager.manage do
+
+          sunids.each_with_index do |sunid, i|
+
+            fmanager.fork do
+              cwd     = pwd
+              fam_dir = File.join(sub_dir, sunid.to_s)
+
+              (10..100).step(10) do |si|
+                rep_dir = File.join(fam_dir, "rep#{si}")
+
+                Dir[rep_dir + "/*"].each do |subfam_id|
+                  subfam_dir = File.join(rep_dir, subfam_id)
+                  chdir(subfam_dir)
+                  system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+                  chdir(cwd)
+                end
+              end
+
+              $logger.info("BATON with subfamily PDB files for SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+            end
+          end
+        end
+      end
+
+    end # namespace :baton
 
 
     desc "Run JOY for each SCOP family"
     task :joy => [:environment] do
 
-      full_dir  = File.join(FAMILY_DIR, "full")
       sunids    = ScopFamily.registered.find(:all).map(&:sunid)
+      full_dir  = File.join(FAMILY_DIR, "full")
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
 
-        config = ActiveRecord::Base.remove_connection
-
         sunids.each_with_index do |sunid, i|
 
           fmanager.fork do
+            cwd     = pwd
+            fam_dir = File.join(full_dir, sunid.to_s)
 
-            ActiveRecord::Base.establish_connection(config)
+            chdir(fam_dir)
 
-              cwd         = pwd
-              family_dir  = File.join(full_dir, sunid.to_s)
-              chdir(family_dir)
+            Dir["*.pdb"].each do |pdb_file|
+              system("joy #{pdb_file} 1> #{pdb_file.gsub(/\.pdb/, '') + '.joy.log'} 2>&1")
+            end
 
-              Dir["*.pdb"].each do |pdb_file|
-                system("joy #{pdb_file} 1> #{pdb_file.gsub(/\.pdb/, '') + '.joy.log'} 2>&1")
-              end
+            chdir(cwd)
 
-              chdir(cwd)
-              $logger.info("JOY with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+            $logger.info("JOY with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
 
 #            (10..100).step(10) do |si|
 #
 #              cwd = pwd
-#              family_dir = File.join(FAMILY_DIR, "nr#{si}", "#{sunid}")
-#              chdir(family_dir)
+#              fam_dir = File.join(FAMILY_DIR, "nr#{si}", "#{sunid}")
+#              chdir(fam_dir)
 #              system("joy baton.ali 1> joy.log 2>&1")
 #              chdir(cwd)
 #
