@@ -579,15 +579,12 @@ namespace :bipa do
       families = ScopFamily.registered.find(:all)
 
       families.each_with_index do |family, i|
-
         family_dir = File.join(BLASTCLUST_DIR, "#{family.sunid}")
 
         (10..100).step(10) do |si|
-
           subfamily_file = File.join(family_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')
 
           IO.readlines(subfamily_file).each do |line|
-
             subfamily = "Rep#{si}Subfamily".constantize.new
 
             members = line.split(/\s+/)
@@ -602,20 +599,18 @@ namespace :bipa do
             $logger.info("Rep#{si}Subfamily} (#{subfamily.id}): created")
           end
         end
-
         $logger.info("Importing subfamilies for #{family.sunid} : done (#{i + 1}/#{families.size})")
       end
     end
 
 
     desc "Import Full & Representative Alignments for each SCOP Family"
-    task :alignments => [:environment] do
+    task :full_alignments => [:environment] do
 
       sunids    = ScopFamily.registered.find(:all).map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         sunids.each_with_index do |sunid, i|
@@ -624,16 +619,78 @@ namespace :bipa do
 
             ActiveRecord::Base.establish_connection(config)
 
+            family    = ScopFamily.find_by_sunid(sunid)
+            fam_dir   = File.join(FAMILY_DIR, "full", sunid.to_s)
+            ali_file  = File.join(fam_dir, "baton.ali")
+
+            unless File.exists?(ali_file)
+              $logger.warn("Cannot find #{ali_file}")
+              next
+            end
+
+            alignment = family.send("build_full_alignment")
+            flat_file = Bio::FlatFile.auto(ali_file)
+
+            flat_file.each_entry do |entry|
+              next unless entry.seq_type == "P1"
+
+              domain          = ScopDomain.find_by_sunid(entry.entry_id)
+              db_residues     = domain.residues
+              ff_residues     = entry.data.split("")
+              sequence        = alignment.sequences.build
+              sequence.domain = domain
+
+              pos = 0
+
+              ff_residues.each_with_index do |res, fi|
+                column = sequence.columns.build
+
+                if (res == "-")
+                  column.residue_name = res
+                  column.position     = fi + 1
+                  column.save!
+                else
+                  if (db_residues[pos].one_letter_code == res)
+                    column.residue      = db_residues[pos]
+                    column.residue_name = res
+                    column.position     = fi + 1
+                    column.save!
+                    pos += 1
+                  else
+                    raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
+                  end
+                end
+              end # ff_residues.each_with_index
+              sequence.save!
+            end # flat_file.each_entry
+            alignment.save!
+            ActiveRecord::Base.remove_connection
+            $logger.info("Importing full alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+          end # fmanger.fork
+        end # sunids.each
+        ActiveRecord::Base.establish_connection(config)
+      end # fmanager.manage
+    end # task :full_alignments
+
+
+    desc "Import representative alignments for each SCOP Family"
+    task :rep_alignments => [:environment] do
+
+      sunids    = ScopFamily.registered.find(:all).map(&:sunid)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        sunids.each_with_index do |sunid, i|
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
             family = ScopFamily.find_by_sunid(sunid)
 
-            # Importing full alignment here
-            #
-
-            # Importing representative alignments
-            #
             (10..100).step(10) do |si|
-
-              family_dir  = File.join(FAMILY_DIR, "nr#{si}", "#{family.sunid}")
+              family_dir  = File.join(FAMILY_DIR, "rep#{si}", "#{family.sunid}")
               ali_file    = File.join(family_dir, "baton.ali")
 
               unless File.exists?(ali_file)
@@ -645,7 +702,6 @@ namespace :bipa do
               flat_file = Bio::FlatFile.auto(ali_file)
 
               flat_file.each_entry do |entry|
-
                 next unless entry.seq_type == "P1"
 
                 domain          = ScopDomain.find_by_sunid(entry.entry_id)
@@ -657,7 +713,6 @@ namespace :bipa do
                 pos = 0
 
                 ff_residues.each_with_index do |res, fi|
-
                   column = sequence.columns.build
 
                   if (res == "-")
@@ -681,12 +736,90 @@ namespace :bipa do
               alignment.save!
             end # (10..100).step(10)
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+            $logger.info("Importing representative alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
           end # fmanger.fork
         end # sunids.each
         ActiveRecord::Base.establish_connection(config)
       end # fmanager.manage
     end # task :alignments
+
+
+    desc "Import subfamily alignments for each SCOP Family"
+    task :sub_alignments => [:environment] do
+
+      sunids    = ScopFamily.registered.find(:all).map(&:sunid)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        sunids.each_with_index do |sunid, i|
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            family  = ScopFamily.find_by_sunid(sunid)
+            fam_dir = File.join(FAMILY_DIR, "sub", "#{family.sunid}")
+
+            (10..100).step(10) do |si|
+              rep_dir     = File.join(fam_dir, "rep#{si}")
+              subfam_ids  = Dir[rep_dir + "/*"].map { |d| d.match(/(\d+)$/)[1] }
+
+              subfam_ids.each do |subfam_id|
+                subfam_dir  = File.join(rep_dir, subfam_id)
+                ali_file    = File.join(subfam_dir, "baton.ali")
+
+                unless File.exists?(ali_file)
+                  $logger.warn("Cannot find #{ali_file}")
+                  next
+                end
+
+                subfamily = Subfamily.find(subfam_id)
+                alignment = subfamily.build_alignment
+                flat_file = Bio::FlatFile.auto(ali_file)
+
+                flat_file.each_entry do |entry|
+                  next unless entry.seq_type == "P1"
+
+                  domain          = ScopDomain.find_by_sunid(entry.entry_id)
+                  db_residues     = domain.residues
+                  ff_residues     = entry.data.split("")
+                  sequence        = alignment.sequences.build
+                  sequence.domain = domain
+
+                  pos = 0
+
+                  ff_residues.each_with_index do |res, fi|
+                    column = sequence.columns.build
+
+                    if (res == "-")
+                      column.residue_name = res
+                      column.position     = fi + 1
+                      column.save!
+                    else
+                      if (db_residues[pos].one_letter_code == res)
+                        column.residue      = db_residues[pos]
+                        column.residue_name = res
+                        column.position     = fi + 1
+                        column.save!
+                        pos += 1
+                      else
+                        raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
+                      end
+                    end
+                  end # ff_residues.each_with_index
+                  sequence.save!
+                end # flat_file.each_entry
+                alignment.save!
+              end # subfam_ids.each
+            end # (10..100).step(10)
+            ActiveRecord::Base.remove_connection
+            $logger.info("Importing subfamily alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+          end # fmanager.fork
+        end # sunids.each
+        ActiveRecord::Base.establish_connection(config)
+      end # fmanager.manage
+    end # task :sub_alignments
 
   end
 end

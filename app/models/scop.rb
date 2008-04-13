@@ -248,6 +248,10 @@ end
 class ScopFamily < Scop
 
   (10..100).step(10) do |si|
+    has_one :"full_alignment",
+            :class_name   => "FullAlignment",
+            :foreign_key  => "scop_family_id"
+
     has_one :"rep#{si}_alignment",
             :class_name   => "Rep#{si}Alignment",
             :foreign_key  => "scop_family_id"
