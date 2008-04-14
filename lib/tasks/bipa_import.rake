@@ -405,15 +405,15 @@ namespace :bipa do
 
 
     desc "Import SCOP datasets"
-    task :scop => [:environment] do
+    task :scops => [:environment] do
 
-      hierarchy_file    = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
-      description_file  = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
+      hie_file = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
+      des_file = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
 
-      # Create a hash for description of scop entries, 
+      # Create a hash for description of scop entries,
       # and set a description for 'root' scop entry with sunid, '0'
-      descriptions      = Hash.new
-      descriptions['0'] = {
+      scop_des      = Hash.new
+      scop_des['0'] = {
         :sunid        => '0',
         :stype        => 'root',
         :sccs         => 'root',
@@ -430,28 +430,28 @@ namespace :bipa do
       # 46461   sp      a.1.1.1 -       Ciliate (Paramecium caudatum) [TaxId: 5885]
       # 14982   px      a.1.1.1 d1dlwa_ 1dlw A:
       # 100068  px      a.1.1.1 d1uvya_ 1uvy A:
-      IO.foreach(description_file) do |line|
+      IO.foreach(des_file) do |line|
         next if line =~ /^#/ || line.blank?
         sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
-        sccs  = '-' if sccs =~ /unassigned/
-          sid   = '-' if sid  =~ /unassigned/
-          descriptions[sunid] = {
-          :sunid => sunid,
-          :stype => stype,
-          :sccs => sccs,
-          :sid => sid,
-          :description => description
+        sccs  = nil if sccs =~ /unassigned/
+        sid   = nil if sid  =~ /unassigned/
+        scop_des[sunid] = {
+          :sunid        => sunid,
+          :stype        => stype,
+          :sccs         => sccs,
+          :sid          => sid,
+          :description  => description
         }
       end
 
       # # dir.hie.scop.txt
       # 46460   46459   46461,46462,81667,63437,88965,116748
       # 14982   46461   -
-      IO.readlines(hierarchy_file).each_with_index do |line, i|
-        next if line =~ /^#/ || line =~ /^\s*$/
+      IO.readlines(hie_file).each_with_index do |line, i|
+        next if line =~ /^#/ || line.blank?
 
         self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
-        current_scop = Scop.factory_create!(descriptions[self_sunid])
+        current_scop = Scop.factory_create!(scop_des[self_sunid])
 
         unless self_sunid.to_i == 0
           parent_scop = Scop.find_by_sunid(parent_sunid)
@@ -459,29 +459,26 @@ namespace :bipa do
         end
         $logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
       end
-    end # task :scop
+    end # task :scops
 
 
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code).reverse
+      pdb_codes = Structure.find(:all).map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-
             ActiveRecord::Base.establish_connection(config)
 
             domains = ScopDomain.find_all_by_pdb_code(pdb_code)
 
             domains.each do |domain|
-
               iface_found = false
 
               %w(dna rna).each do |na|
@@ -504,7 +501,6 @@ namespace :bipa do
               if iface_found == true
                 domain.registered = true
                 domain.save!
-
                 domain.ancestors.each do |a|
                   a.registered = true
                   a.save!
@@ -518,7 +514,6 @@ namespace :bipa do
             ActiveRecord::Base.remove_connection
           end # fmanager.fork
         end # pdb_codes.each_with_index
-
         ActiveRecord::Base.establish_connection(config)
       end # fmanager.manage
     end

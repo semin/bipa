@@ -1,8 +1,8 @@
 class Scop < ActiveRecord::Base
 
-  acts_as_nested_set
-
   include Bipa::Constants
+
+  acts_as_nested_set
 
   has_finder :registered, :conditions => { :registered => true }
 
