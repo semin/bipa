@@ -1,6 +1,9 @@
 class Alignment < ActiveRecord::Base
 
-  has_many :sequences
+  has_many  :sequences
+
+  has_many  :columns,
+            :through => :sequences
 end
 
 
