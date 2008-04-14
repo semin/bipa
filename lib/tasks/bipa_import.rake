@@ -455,9 +455,9 @@ namespace :bipa do
 
         unless self_sunid.to_i == 0
           parent_scop = Scop.find_by_sunid(parent_sunid)
-          current_scop.move_to_child_of parent_scop
+          current_scop.move_to_child_of(parent_scop)
         end
-        $logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
+        #$logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
       end
     end # task :scops
 
