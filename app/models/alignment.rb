@@ -1,9 +1,44 @@
 class Alignment < ActiveRecord::Base
 
-  has_many  :sequences
+#  include Bio::Alignment::EnumerableExtension
+
+  has_many  :sequences,
+            :order    => "id"
 
   has_many  :columns,
-            :through => :sequences
+            :through  => :sequences,
+            :order    => "position"
+
+  def print
+    sequences.each { |s| puts s.columns.map(&:residue_name).join }
+  end
+
+  def residue_pairs
+    pairs = []
+
+    0.upto(length - 1) do |pos|
+      0.upto(sequences.length - 2) do |seq1|
+        col1 = sequences[seq1].columns[pos]
+        next if col1.residue.nil?
+
+        (seq1 + 1).upto(sequences.length - 1) do |seq2|
+          col2 = sequences[seq2].columns[pos]
+          next if col2.residue.nil?
+          pairs << Set.new([col1.residue, col2.residue])
+        end
+      end
+    end
+    pairs
+  end
+
+  def length
+    @length ||= sequences.first.columns.length
+  end
+
+  # To use Bio::Alignment of BioRuby
+#  def each_seq
+#    sequences.each { |s| yield s.columns.map(&:residue_name).join }
+#  end
 end
 
 

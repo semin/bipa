@@ -8,5 +8,7 @@ class Sequence < ActiveRecord::Base
 
   belongs_to  :chain
 
-  has_many :columns
+  has_many  :columns,
+            :order  => "position"
+
 end
