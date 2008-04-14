@@ -384,6 +384,10 @@ class ScopDomain < Scop
   def to_fasta
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
   end
+  
+  def fasta_header
+    "#{sunid}|#{sid}|#{desciption}"
+  end
 
   # Callbacks
   def update_pdb_code

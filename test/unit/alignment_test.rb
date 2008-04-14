@@ -2,7 +2,10 @@ require File.dirname(__FILE__) + '/../test_helper'
 
 class AlignmentTest < Test::Unit::TestCase
 
-  should_have_many :sequences
+  should_have_many  :sequences
+  
+  should_have_many  :columns,
+                    :through => :sequences
 end
 
 

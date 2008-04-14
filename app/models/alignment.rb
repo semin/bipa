@@ -1,6 +1,6 @@
 class Alignment < ActiveRecord::Base
 
-#  include Bio::Alignment::EnumerableExtension
+  include Bio::Alignment::EnumerableExtension
 
   has_many  :sequences,
             :order    => "id"
@@ -9,8 +9,16 @@ class Alignment < ActiveRecord::Base
             :through  => :sequences,
             :order    => "position"
 
-  def print
-    sequences.each { |s| puts s.columns.map(&:residue_name).join }
+  def to_fasta
+    sequences.each do |seq|
+      header = seq.domain ? seq.domain.fasta_header : seq.chain.fasta_header
+      puts ">#{header}"
+      puts seq.columns.map(&:residue_name).join
+    end
+  end
+  
+  def to_pir
+    raise "Not implemented yet!"
   end
 
   def residue_pairs
@@ -36,9 +44,9 @@ class Alignment < ActiveRecord::Base
   end
 
   # To use Bio::Alignment of BioRuby
-#  def each_seq
-#    sequences.each { |s| yield s.columns.map(&:residue_name).join }
-#  end
+  def each_seq
+    sequences.each { |s| yield s.columns.map(&:residue_name).join }
+  end
 end
 
 

@@ -41,6 +41,10 @@ class Chain < ActiveRecord::Base
   #
   # has_many  :hbonding_acceptors,
   #           :through      => :hbonds_as_donor
+
+  def fasta_header
+    "#{model.structure.pdb_code}:#{chain_code}"
+  end
 end
 
 

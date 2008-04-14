@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/../test_helper'
 
 class SubfamilyTest < Test::Unit::TestCase
   
-  should_belong_to  :family
+  should_belong_to :family
 
   context "A Subfamily instance" do
     
