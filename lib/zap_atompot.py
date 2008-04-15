@@ -56,7 +56,10 @@ def CalcAtomPotentials(itf):
     grid_file = itf.GetString("-grid_file")
     if grid_file:
         grid = OEScalarGrid()
-        OEWriteGrid(grid_file, grid)
+        if zap.CalcPotentialGrid(grid):
+            if itf.GetBool("-mask"):
+                OEMaskGridByMolecule(grid, mol)
+            OEWriteGrid(grid_file, grid)
 
     showAtomTable = itf.GetBool("-atomtable")
     calcType = itf.GetString("-calc_type")
@@ -170,6 +173,12 @@ InterfaceData="""
 !DEFAULT 2.0
 !BRIEF Extra buffer outside extents of molecule.
 !LEGAL_RANGE 0.1 10.0
+!END
+
+!PARAMETER -mask
+!TYPE bool
+!DEFAULT false
+!BRIEF Mask potential grid by the molecule
 !END
 """
 
