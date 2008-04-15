@@ -1,8 +1,50 @@
 namespace :bipa do
   namespace :generate do
 
+    desc "Generate full set of PDB files for each SCOP family"
+    task :full_scop_pdb_files => [:environment] do
+
+      family_sunids = ScopFamily.registered.find(:all).map(&:sunid)
+      fmanager      = ForkManager.new(MAX_FORK)
+      full_dir      = File.join(FAMILY_DIR, "full")
+
+      refresh_dir(full_dir)
+
+      fmanager.manage do
+
+        config = ActiveRecord::Base.remove_connection
+
+        family_sunids.each_with_index do |family_sunid, i|
+
+          fmanager.fork do
+
+            ActiveRecord::Base.establish_connection(config)
+
+            family      = ScopFamily.find_by_sunid(family_sunid)
+            family_dir  = File.join(full_dir, "#{family_sunid}")
+
+            mkdir_p(family_dir)
+
+            domains = family.all_registered_leaf_children
+            domains.each do |domain|
+
+              next if domain.has_unks? || domain.calpha_only?
+
+              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
+                file.puts domain.to_pdb + "END\n"
+              end
+            end
+            $logger.info("Generating full set of PDB files for SCOP Family, #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
+            ActiveRecord::Base.remove_connection
+          end
+          ActiveRecord::Base.establish_connection(config)
+        end
+      end
+    end
+
+
     desc "Generate representative set of PDB files for each SCOP Family"
-    task :rep_pdb => [:environment] do
+    task :rep_scop_pdb_files => [:environment] do
 
       family_sunids = ScopFamily.registered.find(:all).map(&:sunid)
       fmanager      = ForkManager.new(MAX_FORK)
@@ -50,7 +92,7 @@ namespace :bipa do
 
 
     desc "Generate PDB files for each Subfamily of each SCOP Family"
-    task :sub_pdb => [:environment] do
+    task :sub_scop_pdb_files => [:environment] do
 
       family_sunids = ScopFamily.registered.find(:all).map(&:sunid)
       fmanager      = ForkManager.new(MAX_FORK)
@@ -110,47 +152,6 @@ namespace :bipa do
       end
     end
 
-
-    desc "Generate PDB files for each SCOP family"
-    task :full_pdb => [:environment] do
-
-      family_sunids = ScopFamily.registered.find(:all).map(&:sunid)
-      fmanager      = ForkManager.new(MAX_FORK)
-      full_dir      = File.join(FAMILY_DIR, "full")
-
-      refresh_dir(full_dir)
-
-      fmanager.manage do
-
-        config = ActiveRecord::Base.remove_connection
-
-        family_sunids.each_with_index do |family_sunid, i|
-
-          fmanager.fork do
-
-            ActiveRecord::Base.establish_connection(config)
-
-            family      = ScopFamily.find_by_sunid(family_sunid)
-            family_dir  = File.join(full_dir, "#{family_sunid}")
-
-            mkdir_p(family_dir)
-
-            domains = family.all_registered_leaf_children
-            domains.each do |domain|
-
-              next if domain.has_unks? || domain.calpha_only?
-
-              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
-                file.puts domain.to_pdb + "END\n"
-              end
-            end
-            $logger.info("Generating full set of PDB files for SCOP Family, #{family_sunid}: done (#{i + 1}/#{family_sunids.size})")
-            ActiveRecord::Base.remove_connection
-          end
-          ActiveRecord::Base.establish_connection(config)
-        end
-      end
-    end
 
   end
 end

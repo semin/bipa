@@ -400,7 +400,7 @@ namespace :bipa do
 
 
     desc "Import SCOP datasets"
-    task :scops => [:environment] do
+    task :scop => [:environment] do
 
       hie_file = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
       des_file = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
