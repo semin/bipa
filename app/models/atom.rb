@@ -64,22 +64,22 @@ class Atom < ActiveRecord::Base
   def na?
     dna? || rna?
   end
-  
+
   def het?
     residue.het?
   end
-  
+
   def polar?
     atom_name =~ /O|N/
   end
 
   def on_major_groove?
-    residue.dna? && 
+    residue.dna? &&
     NucleicAcids::Dna::Atoms::MAJOR_GROOVE[residue.residue_name].include?(atom_name)
   end
 
   def on_minor_groove?
-    residue.dna? && 
+    residue.dna? &&
     NucleicAcids::Dna::Atoms::MINOR_GROOVE[residue.residue_name].include?(atom_name)
   end
 

@@ -69,11 +69,14 @@ MIN_SRFATM_SASA = 0.1
 DSSP_BIN        = `which dssp`.chomp
 DSSP_DIR        = File.join(RAILS_ROOT, "/public/dssp")
 
-BATON_DIR       = File.join(RAILS_ROOT, "/public/baton")
-SUBFAM_CUTOFF   = ENV["SUBFAM_CUTOFF"].to_i > 0 ? ENV["SUBFAM_CUTOFF"].to_i : 90
-
 JOY_BIN         = `which joy`.chomp
+JOY_DIR         = File.join(RAILS_ROOT, "/public/joy")
 
+BATON_BIN       = `which Baton`.chomp
+BATON_DIR       = File.join(RAILS_ROOT, "/public/baton")
+
+BLASTCLUST_BIN  = `which blastclust`.chomp
 BLASTCLUST_DIR  = File.join(RAILS_ROOT, "/public/blastclust/")
 
 FAMILY_DIR      = File.join(RAILS_ROOT, "/public/families")
+ZAP_DIR         = File.join(RAILS_ROOT, "/public/zap")

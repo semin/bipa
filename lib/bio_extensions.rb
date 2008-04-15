@@ -63,6 +63,11 @@ module Bio
       def na?
         dna? || rna? || hna?
       end
+
+      alias :old_to_s :to_s
+      def to_s
+        atoms.concat(hetatms).sort_by { |a| a.serial }.map { |a| a.to_s }.join + "TER\n"
+      end
     end
 
     class Residue

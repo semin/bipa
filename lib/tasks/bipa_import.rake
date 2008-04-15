@@ -25,7 +25,7 @@ namespace :bipa do
             pdb_bio   = Bio::PDB.new(IO.read(pdb_file))
 
             # Load NACCESS results for every atom in the structure
-            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}.asa")
+            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
             unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
             unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
 

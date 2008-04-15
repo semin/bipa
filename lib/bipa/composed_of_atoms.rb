@@ -8,6 +8,14 @@ module Bipa
       raise "'atoms' method has to be implemented in your class"
     end
 
+    def aa_atoms
+      atoms.select { |a| a.aa? }
+    end
+
+    def na_atoms
+      atoms.select { |a| a.na? }
+    end
+
     def contacts
       atoms.inject([]) { |s, a| s.concat(a.contacts) }
     end

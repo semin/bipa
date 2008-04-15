@@ -174,6 +174,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "bound_asa"
     t.float       "unbound_asa"
     t.float       "delta_asa"
+    t.float       "radius"
+    t.float       "formal_charge"
+    t.float       "partial_charge"
+    t.float       "potential"
   end
 
   add_index "atoms", ["residue_id"],              :name => "index_atoms_on_residue_id"
