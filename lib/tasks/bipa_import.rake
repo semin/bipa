@@ -24,6 +24,15 @@ namespace :bipa do
             pdb_code  = File.basename(pdb_file, ".pdb")
             pdb_bio   = Bio::PDB.new(IO.read(pdb_file))
 
+            # Filter C-alpha only structures using HBPLUS results
+            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
+            hbonds_bipa = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
+
+            if hbonds_bipa.empty?
+              $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results found!")
+              next
+            end
+
             # Load NACCESS results for every atom in the structure
             bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
             unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
@@ -31,8 +40,8 @@ namespace :bipa do
 
             if (!File.exists?(bound_asa_file)       ||
                 !File.exists?(unbound_aa_asa_file)  ||
-                !File.exist?(unbound_na_asa_file))
-              $logger.warn("SKIP: #{pdb_code} due to missing NACCESS result files")
+                !File.exists?(unbound_na_asa_file))
+              $logger.warn("SKIP: #{pdb_code} might be an improper PDB file. No NACCESS result found!")
               next
             end
 
@@ -198,13 +207,11 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code)
@@ -225,14 +232,12 @@ namespace :bipa do
 
             columns = [:atom_id, :contacting_atom_id, :distance]
             Contact.import(columns, contacts)
-
             structure.save!
-            $logger.info("Importing CONTACTS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
-
             ActiveRecord::Base.remove_connection
+
+            $logger.info("Importing 'contacts' in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end
         end
-
         ActiveRecord::Base.establish_connection(config)
       end
     end
@@ -245,23 +250,19 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-
             hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
-            unless File.exist?(hbplus_file)
-              puts "Skip #{pdb_code} (#{i + 1}/#{pdb_codes.size}): #{hbplus_file} doesn't exist!"
-              next
-            end
+
+            raise "Cannot find #{hbplus_file}, this cannot be happend!" if !File.exist? hbplus_file
 
             ActiveRecord::Base.establish_connection(config)
 
             structure   = Structure.find_by_pdb_code(pdb_code)
-            hbonds_bipa = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).hbonds
+            hbonds_bipa = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
             hbonds      = Array.new
 
             hbonds_bipa.each do |hbond|
@@ -329,12 +330,11 @@ namespace :bipa do
                            :daaa_angle]
                         )
 
-            $logger.info("Importing HBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
-
             ActiveRecord::Base.remove_connection
+
+            $logger.info("Importing HBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end # fmanager.fork
         end # pdb_codes.each_with_index
-
         ActiveRecord::Base.establish_connection(config)
       end # fmanager.manage
     end
@@ -347,23 +347,19 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-
             hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
-            unless File.exist?(hbplus_file)
-              puts "Skip #{pdb_code} (#{i + 1}/#{pdb_codes.size}): #{hbplus_file} doesn't exist!"
-              next
-            end
+
+            raise "Cannot find #{hbplus_file}, this cannot be happend!" if !File.exist? hbplus_file
 
             ActiveRecord::Base.establish_connection(config)
 
             structure   = Structure.find_by_pdb_code(pdb_code)
-            whbonds_bio = Bipa::Hbplus.new(IO.readlines(hbplus_file).join).whbonds
+            whbonds_bio = Bipa::Hbplus.new(IO.read(hbplus_file)).whbonds
             whbonds     = Array.new
 
             whbonds_bio.each do |whbond|
@@ -391,12 +387,11 @@ namespace :bipa do
             end
 
             columns = [:atom_id, :whbonding_atom_id, :water_atom_id]
-
             Whbond.import(columns, whbonds)
 
-            $logger.info("Importing WHBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
-
             ActiveRecord::Base.remove_connection
+
+            $logger.info("Importing WHBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
