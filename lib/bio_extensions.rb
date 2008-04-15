@@ -13,6 +13,7 @@ module Bio
     end
   end
 
+
   class PDB
 
     def deposition_date
@@ -31,6 +32,7 @@ module Bio
       record('EXPDTA')[0].technique.join
     end
 
+
     class Model
 
       def aa_chains
@@ -42,22 +44,27 @@ module Bio
       end
     end
 
+
     class Chain
 
       def aa?
-        residues.any? { |r| r.aa? } && !id.blank?
+        (residues.any? { |r| r.aa? } || heterogens.any? { |r| r.aa? }) && !id.blank?
       end
 
       def dna?
-        residues.any? { |r| r.dna? } && residues.all? { |r| !r.rna? } && !id.blank?
+        (residues.any? { |r| r.dna? } || heterogens.any? { |r| r.dna? }) && residues.all? { |r| !r.rna? } && heterogens.all? { |r| !r.rna? } && !id.blank?
       end
 
       def rna?
-        residues.any? { |r| r.rna? } && residues.all? { |r| !r.dna? } && !id.blank?
+        (residues.any? { |r| r.rna? } || heterogens.any? { |r| r.rna? }) && residues.all? { |r| !r.dna? } && heterogens.all? { |r| !r.dna? } && !id.blank?
       end
 
       def hna?
-        residues.any? { |r| r.dna? } && residues.any? { |r| r.rna? } && !id.blank?
+        ((residues.any?   { |r| r.dna? } && residues.any?   { |r| r.rna? }) ||
+         (heterogens.any? { |r| r.dna? } && heterogens.any? { |r| r.rna? }) ||
+         (residues.any?   { |r| r.dna? } && heterogens.an?  { |r| r.rna? }) ||
+         (heterogens.any? { |r| r.dna? } && residues.any?   { |r| r.rna? })) &&
+         !id.blank?
       end
 
       def na?
@@ -69,6 +76,7 @@ module Bio
         atoms.concat(hetatms).sort_by { |a| a.serial }.map { |a| a.to_s }.join + "TER\n"
       end
     end
+
 
     class Residue
 

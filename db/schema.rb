@@ -28,15 +28,15 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean "registered", :default => false
   end
 
-#  add_index "scops", ["sunid"],                   :name => "index_scops_on_sunid", :unique => true
-#  add_index "scops", ["parent_id"],               :name => "index_scops_on_parent_id"
-#  add_index "scops", ["lft"],                     :name => "index_scops_on_lft"
-#  add_index "scops", ["rgt"],                     :name => "index_scops_on_rgt"
-#  add_index "scops", ["lft", "rgt"],              :name => "index_scops_on_lft_and_rgt"
-#  add_index "scops", ["parent_id", "lft"],        :name => "index_scops_on_parent_id_and_lft"
-#  add_index "scops", ["parent_id", "rgt"],        :name => "index_scops_on_parent_id_and_rgt"
-#  add_index "scops", ["parent_id", "lft", "rgt"], :name => "index_scops_on_parent_id_and_lft_and_rgt"
-#  add_index "scops", ["id", "registered"],        :name => "index_scops_on_id_and_registered"
+  add_index "scops", ["sunid"],                   :name => "index_scops_on_sunid", :unique => true
+  add_index "scops", ["parent_id"],               :name => "index_scops_on_parent_id"
+  add_index "scops", ["lft"],                     :name => "index_scops_on_lft"
+  add_index "scops", ["rgt"],                     :name => "index_scops_on_rgt"
+  add_index "scops", ["lft", "rgt"],              :name => "index_scops_on_lft_and_rgt"
+  add_index "scops", ["parent_id", "lft"],        :name => "index_scops_on_parent_id_and_lft"
+  add_index "scops", ["parent_id", "rgt"],        :name => "index_scops_on_parent_id_and_rgt"
+  add_index "scops", ["parent_id", "lft", "rgt"], :name => "index_scops_on_parent_id_and_lft_and_rgt"
+  add_index "scops", ["id", "registered"],        :name => "index_scops_on_id_and_registered"
 
 
   # 'subfamilies' table
@@ -91,7 +91,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string    "exp_method"
     t.float     "resolution"
     t.date      "deposited_at"
-    t.boolean   "obsolete", :default => false
+    t.boolean   "obsolete",   :default => false
+    t.boolean   "registered", :default => false
     t.timestamps
   end
 

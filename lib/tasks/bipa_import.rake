@@ -32,7 +32,7 @@ namespace :bipa do
             if (!File.exists?(bound_asa_file)       ||
                 !File.exists?(unbound_aa_asa_file)  ||
                 !File.exist?(unbound_na_asa_file))
-              $logger.warn("Skip #{pdb_code} due to missing NACCESS result files")
+              $logger.warn("SKIP: #{pdb_code} due to missing NACCESS result files")
               next
             end
 
@@ -74,7 +74,7 @@ namespace :bipa do
               :deposited_at   => pdb_bio.deposition_date
             )
 
-            model_bio = pdb_bio.models[0]
+            model_bio = pdb_bio.models.first
 
             model = Model.create!(
               :structure_id => structure.id,

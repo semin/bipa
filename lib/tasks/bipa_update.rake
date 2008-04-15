@@ -5,6 +5,7 @@ namespace :bipa do
 
     $logger = Logger.new(STDOUT)
 
+
     desc "Update ASA related fields of the 'atoms' table"
     task :asa => [:environment] do
 
@@ -48,6 +49,57 @@ namespace :bipa do
                 atom.delta_asa    = atom.unbound_asa - atom.bound_asa
                 atom.save!
               end
+            end
+
+            $logger.info("Updating ASAs of #{pdb_file}: done (#{i + 1}/#{pdb_codes.size})")
+            ActiveRecord::Base.remove_connection
+          end # fmanager.fork
+        end # pdb_codes.each_with_index
+        ActiveRecord::Base.establish_connection(config)
+      end # fmanager.manage
+    end # task :asa
+
+
+    desc "Update electrostatic potential related fields of the 'atoms' table"
+    task :potential => [:environment] do
+
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_codes.each_with_index do |pdb_code, i|
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            structure = Structure.find_by_pdb_code(pdb_code)
+            ZapAtom   = Struct.new(:index, :serial, :symbol, :radius,
+                                   :formal_charge, :partial_charge, :potential)
+
+            %w(aa na).each do |mol|
+              eval <<-END
+                #{mol}_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_#{mol}.zap")
+                #{mol}_zap_atoms  = Hash.new
+
+                IO.foreach(#{mol}_zap_file) do |line|
+                  elems = line.chomp.split(/\\s+/)
+                  next unless elems.size == 7
+                  zap = ZapAtom.new(elems)
+                  #{mol}_zap_atoms[zap[:serial]] = zap
+                end
+
+                structure.#{mol}_atoms.each do |atom|
+                  next unless #{mol}_zap_atoms[atom.atom_code]
+                  zap_atom            = #{mol}_zap_atoms[atom.atom_code]
+                  atom.radius         = zap_atom[:radius]
+                  atom.formal_charge  = zap_atom[:formal_charge]
+                  atom.partial_charge = zap_atom[:partial_charge]
+                  atom.potential      = zap_atom[:potential]
+                  atom.save!
+                end
+              END
             end
 
             $logger.info("Updating ASAs of #{pdb_file}: done (#{i + 1}/#{pdb_codes.size})")

@@ -112,6 +112,12 @@ namespace :bipa do
             pdb_obj   = Bio::PDB.new(IO.read(pdb_file))
             work_dir  = File.join(NACCESS_DIR, pdb_code)
 
+            if (pdb_obj.models.first.aa_chains.empty? ||
+                pdb_obj.models.first.na_chains.empty?)
+              $logger.warn("SKIP: #{pdb_file} has no amino acid chain or nucleic acid chain")
+              next
+            end
+
             mkdir(work_dir)
             chdir(work_dir)
 
@@ -134,9 +140,9 @@ namespace :bipa do
               f.puts "END\n"
             end
 
-            system("#{NACCESS_BIN} #{co_pdb_file} -r #{NACCESS_VDW} -s #{NACCESS_STD}")
-            system("#{NACCESS_BIN} #{aa_pdb_file} -r #{NACCESS_VDW} -s #{NACCESS_STD}")
-            system("#{NACCESS_BIN} #{na_pdb_file} -r #{NACCESS_VDW} -s #{NACCESS_STD}")
+            system("#{NACCESS_BIN} #{co_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}")
+            system("#{NACCESS_BIN} #{aa_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}")
+            system("#{NACCESS_BIN} #{na_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}")
 
             cp(Dir["#{pdb_code}*"], "..")
             chdir(cwd)
@@ -525,6 +531,9 @@ namespace :bipa do
 
       refresh_dir(ZAP_DIR)
 
+      zap_file = "/tmp/bipa_zap_atompot.py"
+      File.open(zap_file, "w") { |f| f.puts PYCODE }
+
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
@@ -533,13 +542,12 @@ namespace :bipa do
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-            temp_file = Tempfile.new("bipa_temp", "/tmp")
-            temp_file.puts PYCODE
-            temp_file.close
-            system  "python #{temp_file.path} "
-                    "-in #{pdb_file} "
-                    "-atomtable"
-                    "> #{File.join(ZAP_DIR, pdb_stem)}.zap"
+            [ pdb_code + "_aa.pdb", pdb_code + "_na.pdb" ].each do |pdb_file|
+              system  "python #{zap_file} "
+                      "-in #{File.join(NACCESS_DIR, pdb_file)} "
+                      "-atomtable"
+                      "> #{File.join(ZAP_DIR, pdb_stem)}.zap"
+            end
           end
         end
       end
