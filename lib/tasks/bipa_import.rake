@@ -60,9 +60,7 @@ namespace :bipa do
             dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
 
             # Load ZAP results for every atoms
-
-            ZapAtom = Struct.new(:index, :serial, :symbol, :radius,
-                                 :formal_charge, :partial_charge, :potential)
+            ZapAtom = Struct.new(:index, :serial, :symbol, :radius, :partial_charge, :potential)
 
             %w(aa na).each do |mol|
               eval <<-END
@@ -71,21 +69,9 @@ namespace :bipa do
 
                 IO.foreach(#{mol}_zap_file) do |line|
                   elems = line.chomp.split(/\\s+/)
-                  next unless elems.size == 7
+                  next unless elems.size == 6
                   zap = ZapAtom.new(elems)
                   #{mol}_zap_atoms[zap[:serial]] = zap
-                end
-              END
-            end
-
-                structure.#{mol}_atoms.each do |atom|
-                  next unless #{mol}_zap_atoms[atom.atom_code]
-                  zap_atom            = #{mol}_zap_atoms[atom.atom_code]
-                  atom.radius         = zap_atom[:radius]
-                  atom.formal_charge  = zap_atom[:formal_charge]
-                  atom.partial_charge = zap_atom[:partial_charge]
-                  atom.potential      = zap_atom[:potential]
-                  atom.save!
                 end
               END
             end
@@ -182,7 +168,6 @@ namespace :bipa do
                   :unbound_asa    => unbound_asa,
                   :delta_asa      => delta_asa,
                   :radius         => zap_atom ? zap_atom[:radius]         : nil,
-                  :formal_charge  => zap_atom ? zap_atom[:formal_charge]  : nil,
                   :partial_charge => zap_atom ? zap_atom[:partial_charge] : nil,
                   :potential      => zap_atom ? zap_atom[:potential]      : nil
                 }
