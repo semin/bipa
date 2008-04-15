@@ -53,31 +53,57 @@ namespace :bipa do
             dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
 
             if (!File.exists?(dssp_file))
-              $logger.warn("Skip #{pdb_code} due to missing DSSP result file")
+              $logger.warn("SKIP: #{pdb_code} due to missing DSSP result file")
               next
             end
 
             dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
 
             # Load ZAP results for every atoms
-            ZapAtom       = Struct.new(:index, :serial, :symbol, :radius,
-                                       :formal_charge, :partial_charge, :potential)
-            aa_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
-            na_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
+            ZapAtom     = Struct.new(:index, :serial, :symbol, :radius,
+                                     :formal_charge, :partial_charge, :potential)
+            aa_zap_file = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
+            na_zap_file = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
+            aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
+            na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
 
-            if (!File.exists?(aa_zap_file) || !File.exists?(na_zap_file))
-              $logger.warn("Skip #{pdb_code} due to missing ZAP result file")
+            if (!File.size?(aa_zap_file) || !File.size?(na_zap_file))
+              $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
+              next
+            end
+
+            if (File.size?(aa_zap_err) || File.size?(na_zap_err))
+              $logger.warn("SKIP: #{pdb_code} due to errors in ZAP calculation")
               next
             end
 
             aa_zap_atoms  = Hash.new
             na_zap_atoms  = Hash.new
+            tainted_zap   = false
 
             IO.foreach(aa_zap_file) do |line|
               elems = line.chomp.split(/\s+/)
-              next unless elems.size == 7
+              unless elems.size == 7
+                tainted_zap = true
+                break
+              end
               zap = ZapAtom.new(elems)
               aa_zap_atoms[zap[:serial]] = zap
+            end
+
+            IO.foreach(na_zap_file) do |line|
+              elems = line.chomp.split(/\s+/)
+              unless elems.size == 7
+                tainted_zap = true
+                break
+              end
+              zap = ZapAtom.new(elems)
+              na_zap_atoms[zap[:serial]] = zap
+            end
+
+            if tainted_zap
+              $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
+              next
             end
 
             # Parse molecule and chain information
