@@ -59,6 +59,37 @@ namespace :bipa do
 
             dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
 
+            # Load ZAP results for every atoms
+
+            ZapAtom = Struct.new(:index, :serial, :symbol, :radius,
+                                 :formal_charge, :partial_charge, :potential)
+
+            %w(aa na).each do |mol|
+              eval <<-END
+                #{mol}_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_#{mol}.zap")
+                #{mol}_zap_atoms  = Hash.new
+
+                IO.foreach(#{mol}_zap_file) do |line|
+                  elems = line.chomp.split(/\\s+/)
+                  next unless elems.size == 7
+                  zap = ZapAtom.new(elems)
+                  #{mol}_zap_atoms[zap[:serial]] = zap
+                end
+              END
+            end
+
+                structure.#{mol}_atoms.each do |atom|
+                  next unless #{mol}_zap_atoms[atom.atom_code]
+                  zap_atom            = #{mol}_zap_atoms[atom.atom_code]
+                  atom.radius         = zap_atom[:radius]
+                  atom.formal_charge  = zap_atom[:formal_charge]
+                  atom.partial_charge = zap_atom[:partial_charge]
+                  atom.potential      = zap_atom[:potential]
+                  atom.save!
+                end
+              END
+            end
+
             # Parse molecule and chain information
             # Very dirty... it needs refactoring!
             mol_codes = {}
@@ -127,9 +158,12 @@ namespace :bipa do
                 }
               end
 
-              def atom_params(residue_id, atom, bound_asa = nil, unbound_asa = nil)
+              def atom_params(residue_id, atom)
 
-                delta_asa = unbound_asa - bound_asa if bound_asa && unbound_asa
+                bound_asa   = bound_atom_asa[atom.serial]
+                unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial]
+                delta_asa   = unbound_asa - bound_asa if bound_asa && unbound_asa
+                zap_atom    = aa_zap_atoms[atom.serial] || na_zap_atoms[atom.serial]
 
                 {
                   :residue_id     => residue_id,
@@ -146,11 +180,14 @@ namespace :bipa do
                   :charge         => atom.charge.blank? ? nil : atom.charge,
                   :bound_asa      => bound_asa,
                   :unbound_asa    => unbound_asa,
-                  :delta_asa      => delta_asa
+                  :delta_asa      => delta_asa,
+                  :radius         => zap_atom ? zap_atom[:radius]         : nil,
+                  :formal_charge  => zap_atom ? zap_atom[:formal_charge]  : nil,
+                  :partial_charge => zap_atom ? zap_atom[:partial_charge] : nil,
+                  :potential      => zap_atom ? zap_atom[:potential]      : nil
                 }
               end
 
-              # For each standard residue
               chain_bio.each_residue do |residue_bio|
 
                 if residue_bio.dna?
@@ -159,26 +196,16 @@ namespace :bipa do
                   residue = RnaResidue.create!(residue_params(chain.id, residue_bio))
                 else
                   dssp_hash_key = chain_bio.chain_id + residue_bio.residue_id
-                  # In some cases, there are no 'dssp_hash_key', you should check!
-                  sstruc        = dssp_sstruc[dssp_hash_key] ? dssp_sstruc[dssp_hash_key] : "L"
+                  sstruc        = dssp_sstruc[dssp_hash_key] ? dssp_sstruc[dssp_hash_key] : nil
                   residue       = AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
                 end
 
                 residue_bio.each do |atom_bio|
-
-                  atoms << Atom.new(
-                    atom_params(
-                      residue.id,
-                      atom_bio,
-                      bound_atom_asa[atom_bio.serial],
-                      unbound_aa_atom_asa[atom_bio.serial] || unbound_na_atom_asa[atom_bio.serial]
-                    )
-                  )
+                  atoms << Atom.new(atom_params(residue.id, atom_bio))
                 end
               end
 
               chain_bio.each_heterogen do |het_residue_bio|
-
                 het_residue = HetResidue.create!(residue_params(chain.id, het_residue_bio))
 
                 het_residue_bio.each do |het_atom_bio|
@@ -188,7 +215,6 @@ namespace :bipa do
             end
 
             Atom.import(atoms, :validate => false)
-
             structure.save!
 
             $logger.info("Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})")

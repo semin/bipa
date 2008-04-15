@@ -386,7 +386,7 @@ def Output(mol, apot, showAtomTable):
       res = OEAtomGetResidue(atom)
       energy += atom.GetPartialCharge()*apot[atom.GetIdx()]
       if showAtomTable:
-          print "%3d %3d %2s %6.3f %6.3f %6.3f %8.3f"%(atom.GetIdx(),
+          print "%-6d %6d %3s %10.3f %10.3f %10.3f %10.3f"%(atom.GetIdx(),
                 res.GetSerialNumber(),
                 OEGetAtomicSymbol(atom.GetAtomicNum()),
                 atom.GetRadius(),
@@ -403,8 +403,16 @@ def CalcAtomPotentials(itf):
   if not ifs.open(itf.GetString("-in")):
       OEThrow.Fatal("Unable to open %s for reading" % itf.GetString("-in"))
 
-  OEReadMolecule(ifs,mol)
+  # OEReadMolecule(ifs,mol)
+  
+  OEReadPDBFile(ifs,mol)
   OEAssignBondiVdWRadii(mol)
+  OEDetermineConnectivity(mol)
+  OEFindRingAtomsAndBonds(mol)
+  OEPerceiveBondOrders(mol)
+  OEAssignImplicitHydrogens(mol)
+  OEAssignFormalCharges(mol)
+  OEAssignAromaticFlags(mol)
 
   if not itf.GetBool("-file_charges"):
       OEMMFFAtomTypes(mol)
