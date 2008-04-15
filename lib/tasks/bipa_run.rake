@@ -6,7 +6,7 @@ namespace :bipa do
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
-      refresh_dir(HBPLUS_DIR) if !ENV["RESUME"]
+      refresh_dir(HBPLUS_DIR)
 
       pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
       fmanager  = ForkManager.new(MAX_FORK)
@@ -16,16 +16,9 @@ namespace :bipa do
         pdb_files.each_with_index do |pdb_file, i|
 
           fmanager.fork do
-
-            cwd = pwd
-
-            pdb_code = File.basename(pdb_file, ".pdb")
-            work_dir = File.join(HBPLUS_DIR, pdb_code)
-
-            if ENV["RESUME"] && File.exists?(File.join(HBPLUS_DIR, "#{pdb_code}.hb2"))
-              $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): skip")
-              next
-            end
+            cwd       = pwd
+            pdb_code  = File.basename(pdb_file, ".pdb")
+            work_dir  = File.join(HBPLUS_DIR, pdb_code)
 
             mkdir_p(work_dir)
             chdir(work_dir)
@@ -172,8 +165,9 @@ namespace :bipa do
             chdir(DSSP_DIR)
             pdb_code = File.basename(pdb_file, '.pdb')
             system("#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err")
-            $logger.info("Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
             chdir(cwd)
+
+            $logger.info("Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
           end
         end
       end
@@ -339,13 +333,11 @@ namespace :bipa do
           fmanager.fork do
             cwd     = pwd
             fam_dir = File.join(full_dir, sunid.to_s)
-
             chdir(fam_dir)
 
             Dir["*.pdb"].each do |pdb_file|
               system("joy #{pdb_file} 1> #{pdb_file.gsub(/\.pdb/, '') + '.joy.log'} 2>&1")
             end
-
             chdir(cwd)
 
             $logger.info("JOY with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
@@ -372,7 +364,7 @@ namespace :bipa do
 
       refresh_dir(ZAP_DIR)
 
-      pdb_codes = Dir[NACCESS_DIR + "/*_aa.asa"].map { |f| f.match(/(\S{4})_aa/)[1] }
+      pdb_codes = Dir[NACCESS_DIR + "/*_aa.asa"].map { |f| f.match(/(\S{4})_aa/)[1] }.sort
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -383,10 +375,11 @@ namespace :bipa do
 
             [pdb_code + "_aa", pdb_code + "_na"].each do |pdb_stem|
               zap_file = File.join(ZAP_DIR, pdb_stem + '.zap')
+              err_file = File.join(ZAP_DIR, pdb_stem + '.err')
               pdb_file = File.join(NACCESS_DIR, pdb_stem + '.pdb')
               next if File.exists? zap_file
 
-              system "zap_atompot -in #{pdb_file} -atomtable 1> #{zap_file} 2>&1"
+              system "zap_atompot -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
             $logger.info("ZAP: #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end
