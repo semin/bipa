@@ -176,6 +176,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "unbound_asa"
     t.float       "delta_asa"
     t.float       "radius"
+    t.float       "formal_charge"
     t.float       "partial_charge"
     t.float       "potential"
   end

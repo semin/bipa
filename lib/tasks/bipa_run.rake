@@ -224,7 +224,7 @@ namespace :bipa do
     namespace :baton do
 
       desc "Run Baton for each SCOP family"
-      task :full_pdb => [:environment] do
+      task :full_scop_pdb_files => [:environment] do
 
         sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
         full_dir  = File.join(FAMILY_DIR, "full")
@@ -259,7 +259,7 @@ namespace :bipa do
 
 
       desc "Run Baton for representative PDB files for each SCOP Family"
-      task :rep_pdb => [:environment] do
+      task :rep_scop_pdb_files => [:environment] do
 
         sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
         fmanager  = ForkManager.new(MAX_FORK)
@@ -286,7 +286,7 @@ namespace :bipa do
 
 
       desc "Run Baton for each subfamilies of SCOP families"
-      task :sub_pdb => [:environment] do
+      task :sub_scop_pdb_files => [:environment] do
 
         sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
         sub_dir   = File.join(FAMILY_DIR, "sub")
@@ -375,11 +375,12 @@ namespace :bipa do
 
             [pdb_code + "_aa", pdb_code + "_na"].each do |pdb_stem|
               zap_file = File.join(ZAP_DIR, pdb_stem + '.zap')
+              grd_file = File.join(ZAP_DIR, pdb_stem + '.grd')
               err_file = File.join(ZAP_DIR, pdb_stem + '.err')
               pdb_file = File.join(NACCESS_DIR, pdb_stem + '.pdb')
               next if File.exists? zap_file
 
-              system "zap_atompot -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
+              system "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
             $logger.info("ZAP: #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end

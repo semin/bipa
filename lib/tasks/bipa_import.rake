@@ -60,20 +60,24 @@ namespace :bipa do
             dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
 
             # Load ZAP results for every atoms
-            ZapAtom = Struct.new(:index, :serial, :symbol, :radius, :partial_charge, :potential)
+            ZapAtom       = Struct.new(:index, :serial, :symbol, :radius,
+                                       :formal_charge, :partial_charge, :potential)
+            aa_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
+            na_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
 
-            %w(aa na).each do |mol|
-              eval <<-END
-                #{mol}_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_#{mol}.zap")
-                #{mol}_zap_atoms  = Hash.new
+            if (!File.exists?(aa_zap_file) || !File.exists?(na_zap_file))
+              $logger.warn("Skip #{pdb_code} due to missing ZAP result file")
+              next
+            end
 
-                IO.foreach(#{mol}_zap_file) do |line|
-                  elems = line.chomp.split(/\\s+/)
-                  next unless elems.size == 6
-                  zap = ZapAtom.new(elems)
-                  #{mol}_zap_atoms[zap[:serial]] = zap
-                end
-              END
+            aa_zap_atoms  = Hash.new
+            na_zap_atoms  = Hash.new
+
+            IO.foreach(aa_zap_file) do |line|
+              elems = line.chomp.split(/\s+/)
+              next unless elems.size == 7
+              zap = ZapAtom.new(elems)
+              aa_zap_atoms[zap[:serial]] = zap
             end
 
             # Parse molecule and chain information
