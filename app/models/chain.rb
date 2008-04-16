@@ -14,10 +14,10 @@ class Chain < ActiveRecord::Base
 
   has_many  :sequences
 
-  validates_uniqueness_of :chain_code,
-                          :scope          => :model_id,
-                          :allow_nil      => true,
-                          :case_sensitive => true
+#  validates_uniqueness_of :chain_code,
+#                          :scope          => :model_id,
+#                          :allow_nil      => true,
+#                          :case_sensitive => true
   # has_many  :contacts,
   #           :through      => :atoms
   #
