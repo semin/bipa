@@ -62,7 +62,7 @@ module Bio
       def hna?
         ((residues.any?   { |r| r.dna? } && residues.any?   { |r| r.rna? }) ||
          (heterogens.any? { |r| r.dna? } && heterogens.any? { |r| r.rna? }) ||
-         (residues.any?   { |r| r.dna? } && heterogens.an?  { |r| r.rna? }) ||
+         (residues.any?   { |r| r.dna? } && heterogens.any?  { |r| r.rna? }) ||
          (heterogens.any? { |r| r.dna? } && residues.any?   { |r| r.rna? })) &&
          !id.blank?
       end
