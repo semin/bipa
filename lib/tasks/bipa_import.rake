@@ -400,12 +400,10 @@ namespace :bipa do
                            :dha_angle,
                            :ha_distance,
                            :haaa_angle,
-                           :daaa_angle]
-                        )
+                           :daaa_angle])
 
             ActiveRecord::Base.remove_connection
-
-            $logger.info("Importing HBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+            $logger.info("Importing 'hbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
@@ -464,7 +462,7 @@ namespace :bipa do
 
             ActiveRecord::Base.remove_connection
 
-            $logger.info("Importing WHBONDS in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
