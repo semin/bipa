@@ -46,7 +46,8 @@ class Residue < ActiveRecord::Base
   end
 
   def on_interface?
-    interface_atoms.size > 0
+    delta_asa > MIN_INTRES_DASA
+    #interface_atoms.size > 0
   end
 
   def buried?
@@ -109,6 +110,10 @@ class AaResidue < StdResidue
   belongs_to  :residue_map,
               :class_name   => "ResidueMap",
               :foreign_key  => "residue_map_id"
+
+  def on_surface?
+    relative_unbound_asa > MIN_SRFRES_RASA
+  end
 
   def one_letter_code
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or

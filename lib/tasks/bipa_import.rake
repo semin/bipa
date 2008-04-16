@@ -12,13 +12,11 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         pdb_files.each_with_index do |pdb_file, i|
 
           fmanager.fork do
-
             ActiveRecord::Base.establish_connection(config)
 
             pdb_code  = File.basename(pdb_file, ".pdb")
@@ -118,7 +116,7 @@ namespace :bipa do
               next
             end
 
-            # Params
+            # helper methods for params
             def residue_params(chain_id, residue, sstruc = nil)
               {
                 :chain_id             => chain_id,
@@ -170,6 +168,7 @@ namespace :bipa do
             # Very dirty... it needs refactoring!
             mol_codes = {}
             molecules = {}
+
 #            mol_id    = nil
 #            molecule  = nil
 #
