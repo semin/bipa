@@ -8,17 +8,15 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code)
-            domains   = ScopDomain.find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
+            domains   = ScopDomain.find_all_by_pdb_code(pdb_code)
 
             if domains.empty?
               puts "No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
@@ -61,12 +59,9 @@ namespace :bipa do
           aa.resmap = resmap
           aa.save!
           cnt += 1
-          #$logger.info("AaResidue, #{aa.id} has been associated to ResMap, #{resmap.id}")
         else
-          #$logger.info("Cannot associate AaResidue, #{aa.id} to ResMap")
           next
         end
-
         $logger.info("Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResMap")
       end
     end
@@ -92,9 +87,7 @@ namespace :bipa do
           aa.residue_map = residue_map
           aa.save!
           cnt += 1
-          #$logger.info("AaResidue, #{aa.id} has been associated to ResidueMap, #{residue_map.id}")
         else
-          #$logger.info("Cannot associate AaResidue, #{aa.id} to ResidueMap")
           next
         end
       end
