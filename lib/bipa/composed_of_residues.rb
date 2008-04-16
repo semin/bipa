@@ -16,7 +16,7 @@ module Bipa
     end
 
     def buried_residues
-      residues.select { |r| !r.on_surface? }
+      residues.select { |r| r.buried? }
     end
 
     def interface_residues

@@ -179,7 +179,7 @@ namespace :bipa do
 
       refresh_dir(BLASTCLUST_DIR)
 
-      families = ScopFamily.registered
+      families = ScopFamily.registered.find(:all)
 
       families.each_with_index do |family, i|
         fam_dir   = File.join(BLASTCLUST_DIR, "#{family.sunid}")
@@ -199,7 +199,7 @@ namespace :bipa do
               next
             end
 
-            file.puts ">#{sunid}"
+            file.puts ">#{domain.fasta_header}"
             file.puts fasta
           end
         end
@@ -215,7 +215,6 @@ namespace :bipa do
             "-p T"
             system blastclust_cmd
         end
-
         $logger.info("Creating non-redundant fasta files for SCOP family, #{family.sunid}: done (#{i+1}/#{families.size})")
       end
     end

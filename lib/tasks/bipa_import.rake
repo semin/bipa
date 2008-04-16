@@ -605,19 +605,16 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code)
 
             structure.chains.each do |chain|
-
               dna_residues = chain.dna_binding_interface_residues
               rna_residues = chain.rna_binding_interface_residues
 
