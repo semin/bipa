@@ -110,5 +110,40 @@ namespace :bipa do
       end # fmanager.manage
     end # task :asa
 
+
+    desc "Update chain's mole_code, molecule fields"
+    task :chain => [:environment] do
+
+      structures = Structure.find(:all)
+
+      structures.each do |structure|
+        pdb_bio   = Bio::PDB.new(IO.read("./public/pdb/#{structure.pdb_code.downcase}.pdb"))
+        mol_codes = {}
+        molecules = {}
+        mol_id    = nil
+        molecule  = nil
+
+        pdb_bio.record("COMPND")[0].compound.each do |key, value|
+          case
+          when key == "MOL_ID"
+            mol_id = value
+          when key == "MOLECULE"
+            molecule = value
+          when key == "CHAIN"
+            mol_codes[value] = mol_id
+            molecules[value] = molecule
+          end
+        end
+
+        structure.models.first.chains.each do |chain|
+          c = chain.chain_code
+          chain.mol_code = mol_codes[c] ? mol_codes[c] : nil
+          chain.molecule = molecules[c] ? molecules[c] : nil
+          puts "#{chain.mol_code}: #{chain.molecule}"
+          #chain.save!
+        end
+      end
+    end
+
   end
 end

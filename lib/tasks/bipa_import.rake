@@ -170,6 +170,20 @@ namespace :bipa do
             # Very dirty... it needs refactoring!
             mol_codes = {}
             molecules = {}
+#            mol_id    = nil
+#            molecule  = nil
+#
+#            pdb_bio.record("COMPND")[0].compound.each do |key, value|
+#              case
+#              when key == "MOL_ID"
+#                mol_id = value
+#              when key == "MOLECULE"
+#                molecule = value
+#              when key == "CHAIN"
+#                mol_codes[value] = mol_id
+#                molecules[value] = molecule
+#              end
+#            end
 
             pdb_bio.record('COMPND')[0].original_data.map do |s|
               s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'')
