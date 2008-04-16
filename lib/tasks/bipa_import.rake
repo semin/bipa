@@ -45,9 +45,9 @@ namespace :bipa do
               next
             end
 
-            bound_atom_asa      = Bipa::Naccess.new(IO.readlines(bound_asa_file).join).atom_asa
-            unbound_aa_atom_asa = Bipa::Naccess.new(IO.readlines(unbound_aa_asa_file).join).atom_asa
-            unbound_na_atom_asa = Bipa::Naccess.new(IO.readlines(unbound_na_asa_file).join).atom_asa
+            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
+            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
+            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
 
             # Load DSSP results for every amino acid residue in the structure
             dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
@@ -87,7 +87,13 @@ namespace :bipa do
                 tainted_zap = true
                 break
               end
-              zap = ZapAtom.new(elems)
+              zap = ZapAtom.new(elems[0].to_i,
+                                elems[1].to_i,
+                                elems[2],
+                                elems[3].to_f,
+                                elems[4].to_f,
+                                elems[5].to_f,
+                                elems[6].to_f)
               aa_zap_atoms[zap[:serial]] = zap
             end
 
@@ -97,13 +103,67 @@ namespace :bipa do
                 tainted_zap = true
                 break
               end
-              zap = ZapAtom.new(elems)
+              zap = ZapAtom.new(elems[0].to_i,
+                                elems[1].to_i,
+                                elems[2],
+                                elems[3].to_f,
+                                elems[4].to_f,
+                                elems[5].to_f,
+                                elems[6].to_f)
               na_zap_atoms[zap[:serial]] = zap
             end
 
             if tainted_zap
               $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
               next
+            end
+
+            # Params
+            def residue_params(chain_id, residue, sstruc = nil)
+              {
+                :chain_id             => chain_id,
+                :residue_code         => residue.residue_id,
+                :icode                => (residue.iCode.blank? ? nil : residue.iCode),
+                :residue_name         => residue.resName.strip,
+                :hydrophobicity       => residue.hydrophobicity,
+                :secondary_structure  => sstruc
+              }
+            end
+
+            def atom_params(residue_id,
+                            atom,
+                            bound_atom_asa,
+                            unbound_aa_atom_asa,
+                            unbound_na_atom_asa,
+                            aa_zap_atoms,
+                            na_zap_atoms)
+
+              bound_asa   = bound_atom_asa[atom.serial]
+              unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial]
+              delta_asa   = unbound_asa - bound_asa if bound_asa && unbound_asa
+              zap_atom    = aa_zap_atoms[atom.serial] || na_zap_atoms[atom.serial]
+
+              {
+                :residue_id     => residue_id,
+                :position_type  => atom.position_type,
+                :atom_code      => atom.serial,
+                :atom_name      => atom.name.strip,
+                :altloc         => atom.altLoc.blank? ? nil : atom.altLoc,
+                :x              => atom.x,
+                :y              => atom.y,
+                :z              => atom.z,
+                :occupancy      => atom.occupancy,
+                :tempfactor     => atom.tempFactor,
+                :element        => atom.element,
+                :charge         => atom.charge.blank? ? nil : atom.charge,
+                :bound_asa      => bound_asa,
+                :unbound_asa    => unbound_asa,
+                :delta_asa      => delta_asa,
+                :radius         => zap_atom ? zap_atom[:radius]         : nil,
+                :formal_charge  => zap_atom ? zap_atom[:formal_charge]  : nil,
+                :partial_charge => zap_atom ? zap_atom[:partial_charge] : nil,
+                :potential      => zap_atom ? zap_atom[:potential]      : nil
+              }
             end
 
             # Parse molecule and chain information
@@ -163,60 +223,26 @@ namespace :bipa do
                 :molecule   => molecules[chain_code] ? molecules[chain_code] : nil
               )
 
-              def residue_params(chain_id, residue, sstruc = nil)
-                {
-                  :chain_id             => chain_id,
-                  :residue_code         => residue.residue_id,
-                  :icode                => (residue.iCode.blank? ? nil : residue.iCode),
-                  :residue_name         => residue.resName.strip,
-                  :hydrophobicity       => residue.hydrophobicity,
-                  :secondary_structure  => sstruc
-                }
-              end
-
-              def atom_params(residue_id, atom)
-
-                bound_asa   = bound_atom_asa[atom.serial]
-                unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial]
-                delta_asa   = unbound_asa - bound_asa if bound_asa && unbound_asa
-                zap_atom    = aa_zap_atoms[atom.serial] || na_zap_atoms[atom.serial]
-
-                {
-                  :residue_id     => residue_id,
-                  :position_type  => atom.position_type,
-                  :atom_code      => atom.serial,
-                  :atom_name      => atom.name.strip,
-                  :altloc         => atom.altLoc.blank? ? nil : atom.altLoc,
-                  :x              => atom.x,
-                  :y              => atom.y,
-                  :z              => atom.z,
-                  :occupancy      => atom.occupancy,
-                  :tempfactor     => atom.tempFactor,
-                  :element        => atom.element,
-                  :charge         => atom.charge.blank? ? nil : atom.charge,
-                  :bound_asa      => bound_asa,
-                  :unbound_asa    => unbound_asa,
-                  :delta_asa      => delta_asa,
-                  :radius         => zap_atom ? zap_atom[:radius]         : nil,
-                  :partial_charge => zap_atom ? zap_atom[:partial_charge] : nil,
-                  :potential      => zap_atom ? zap_atom[:potential]      : nil
-                }
-              end
 
               chain_bio.each_residue do |residue_bio|
-
                 if residue_bio.dna?
                   residue = DnaResidue.create!(residue_params(chain.id, residue_bio))
                 elsif residue_bio.rna?
                   residue = RnaResidue.create!(residue_params(chain.id, residue_bio))
                 else
                   dssp_hash_key = chain_bio.chain_id + residue_bio.residue_id
-                  sstruc        = dssp_sstruc[dssp_hash_key] ? dssp_sstruc[dssp_hash_key] : nil
+                  sstruc        = dssp_sstruc[dssp_hash_key] ? dssp_sstruc[dssp_hash_key] : "L"
                   residue       = AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
                 end
 
                 residue_bio.each do |atom_bio|
-                  atoms << Atom.new(atom_params(residue.id, atom_bio))
+                  atoms << Atom.new(atom_params(residue.id,
+                                                atom_bio,
+                                                bound_atom_asa,
+                                                unbound_aa_atom_asa,
+                                                unbound_na_atom_asa,
+                                                aa_zap_atoms,
+                                                na_zap_atoms))
                 end
               end
 
@@ -224,7 +250,13 @@ namespace :bipa do
                 het_residue = HetResidue.create!(residue_params(chain.id, het_residue_bio))
 
                 het_residue_bio.each do |het_atom_bio|
-                  atoms << Atom.new(atom_params(het_residue.id, het_atom_bio))
+                  atoms << Atom.new(atom_params(het_residue.id,
+                                                het_atom_bio,
+                                                bound_atom_asa,
+                                                unbound_aa_atom_asa,
+                                                unbound_na_atom_asa,
+                                                aa_zap_atoms,
+                                                na_zap_atoms))
                 end
               end
             end
