@@ -587,8 +587,7 @@ namespace :bipa do
                   iface.residues << domain.send("#{na}_binding_interface_residues")
                   iface.save!
                   iface_found = true
-
-                  puts "#{domain.sid} has a #{na} interface"
+                  $logger.info("#{domain.sid} has a #{na} interface")
                 end
               end
 
@@ -600,10 +599,9 @@ namespace :bipa do
                   a.save!
                 end
               else
-                puts "#{domain.sid} has no newly found interface"
+                $logger.info("#{domain.sid} has no newly found interface")
               end
             end # domains.each
-
             $logger.info("Extracting domain interfaces from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
             ActiveRecord::Base.remove_connection
           end # fmanager.fork
