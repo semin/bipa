@@ -302,16 +302,31 @@ namespace :bipa do
 
             structure = Structure.find_by_pdb_code(pdb_code)
             kdtree    = Bipa::Kdtree.new
-            contacts  = Array.new
+            contacts  = []
 
             structure.atoms.each { |a| kdtree.insert(a) }
 
-            structure.na_atoms.each do |na_atom|
-              neighbor_atoms = kdtree.neighbors(na_atom, MAX_DISTANCE).map(&:point)
-              neighbor_atoms.each do |neighbor_atom|
-                if neighbor_atom.aa?
-                  dist = na_atom - neighbor_atom
-                  contacts << [neighbor_atom.id, na_atom.id, dist]
+            aa_atoms = structure.aa_atoms
+            na_atoms = structure.na_atoms
+
+            if aa_atoms.size > na_atoms.size
+              na_atoms.each do |na_atom|
+                neighbor_atoms = kdtree.neighbors(na_atom, MAX_DISTANCE).map(&:point)
+                neighbor_atoms.each do |neighbor_atom|
+                  if neighbor_atom.aa?
+                    dist = na_atom - neighbor_atom
+                    contacts << [neighbor_atom.id, na_atom.id, dist]
+                  end
+                end
+              end
+            else
+              aa_atoms.each do |aa_atom|
+                neighbor_atoms = kdtree.neighbors(aa_atom, MAX_DISTANCE).map(&:point)
+                neighbor_atoms.each do |neighbor_atom|
+                  if neighbor_atom.na?
+                    dist = aa_atom - neighbor_atom
+                    contacts << [aa_atom.id, neighbor_atom.id, dist]
+                  end
                 end
               end
             end
