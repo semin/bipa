@@ -559,7 +559,7 @@ namespace :bipa do
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.find(:all).map(&:pdb_code).reverse
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
