@@ -177,7 +177,6 @@ class DomainInterface < Interface
   %w(hbond whbond contact).each do |intact|
 
     AminoAcids::Residues::STANDARD.each do |aa|
-
       class_eval <<-END
         before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
 
@@ -189,7 +188,6 @@ class DomainInterface < Interface
     end
 
     %w(sugar phosphate).each do |moiety|
-
       class_eval <<-END
         before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
 
@@ -202,7 +200,6 @@ class DomainInterface < Interface
       END
 
       AminoAcids::Residues::STANDARD.each do |aa|
-
         class_eval <<-END
           before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
 
@@ -220,8 +217,8 @@ end # class DomainInterface
 class DomainDnaInterface < DomainInterface
 
   %w(hbond whbond contact).each do |intact|
-    NucleicAcids::Dna::Residues::STANDARD.each do |dna|
 
+    NucleicAcids::Dna::Residues::STANDARD.each do |dna|
       class_eval <<-END
         before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{dna.downcase}
 
@@ -232,7 +229,6 @@ class DomainDnaInterface < DomainInterface
       END
 
       AminoAcids::Residues::STANDARD.each do |aa|
-
         class_eval <<-END
           before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{dna.downcase}
 
@@ -262,7 +258,6 @@ class DomainRnaInterface < DomainInterface
 
   %w(hbond whbond contact).each do |intact|
     NucleicAcids::Rna::Residues::STANDARD.each do |rna|
-
       class_eval <<-END
         before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{rna.downcase}
 
@@ -273,7 +268,6 @@ class DomainRnaInterface < DomainInterface
       END
 
       AminoAcids::Residues::STANDARD.each do |aa|
-
         class_eval <<-END
           before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{rna.downcase}
 
