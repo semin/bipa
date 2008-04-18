@@ -602,6 +602,7 @@ namespace :bipa do
                 $logger.info("#{domain.sid} has no newly found interface")
               end
             end # domains.each
+
             $logger.info("Extracting domain interfaces from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
             ActiveRecord::Base.remove_connection
           end # fmanager.fork
