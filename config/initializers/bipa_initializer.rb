@@ -1,4 +1,7 @@
 require "rubygems"
+#require "memoize"
+#include Memoize
+require "simple_memoize"
 
 require "matrix"
 require "inline"

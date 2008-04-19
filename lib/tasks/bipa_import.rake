@@ -577,8 +577,11 @@ namespace :bipa do
 
               %w(dna rna).each do |na|
                 if domain.send("#{na}_interfaces").size > 0
-                  $logger.info("#{domain.sid} has #{na} interfaces detected")
+                  $logger.info("#{domain.sid} has a #{na} interface already detected")
+                  iface_found = true
                   next
+                else
+                  $logger.info("#{domain.sid} has no #{na} interface")
                 end
 
                 if domain.send("#{na}_binding_interface_residues").size > 0
@@ -598,8 +601,6 @@ namespace :bipa do
                   a.registered = true
                   a.save!
                 end
-              else
-                $logger.info("#{domain.sid} has no newly found interface")
               end
             end # domains.each
 

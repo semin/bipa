@@ -391,18 +391,18 @@ class ScopDomain < Scop
 
   # Callbacks
   def update_pdb_code
-    pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
+    self.pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
   end
 
   def update_unbound_asa
-    unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
+    self.unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
   end
 
   def update_bound_asa
-    bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
+    self.bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
   end
 
   def update_delta_asa
-    delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
+    self.delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
   end
 end # class ScopDomain

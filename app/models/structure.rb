@@ -29,6 +29,7 @@ class Structure < ActiveRecord::Base
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }
   end
+  memoize :residues
 
   # has_many  :residues,
   #           :through    => :chains

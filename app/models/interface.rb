@@ -23,12 +23,14 @@ class DomainInterface < Interface
               (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
+  memoize :singlet_propensity_of
 
   def sse_propensity_of(sse)
     result = ((delta_asa_of_sse(sse) / delta_asa) /
               (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
+  memoize :sse_propensity_of
 
   def frequency_of_hbond_between(aa, na)
     sum = 0
@@ -46,6 +48,7 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_hbond_between
 
   def frequency_of_whbond_between(aa, na)
     sum = 0
@@ -57,6 +60,7 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_whbond_between
 
   def frequency_of_contact_between(aa, na)
     sum = 0
@@ -68,6 +72,7 @@ class DomainInterface < Interface
     end
     sum - frequency_of_hbond_between(aa, na)
   end
+  memoize :frequency_of_contact_between
 
   def frequency_of_hbond_between_sugar_and_(aa)
     sum = 0
@@ -81,6 +86,7 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_hbond_between_sugar_and_
 
   def frequency_of_whbond_between_sugar_and_(aa)
     sum = 0
@@ -90,6 +96,7 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_whbond_between_sugar_and_
 
   def frequency_of_contact_between_sugar_and_(aa)
     sum = 0
@@ -99,6 +106,7 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_contact_between_sugar_and_
 
   def frequency_of_hbond_between_phosphate_and_(aa)
     sum = 0
@@ -112,6 +120,7 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_hbond_between_phosphate_and_
 
   def frequency_of_whbond_between_phosphate_and_(aa)
     sum = 0
@@ -121,6 +130,7 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_whbond_between_phosphate_and_
 
   def frequency_of_contact_between_phosphate_and_(aa)
     sum = 0
@@ -130,18 +140,22 @@ class DomainInterface < Interface
     end
     sum
   end
+  memoize :frequency_of_contact_between_phosphate_and_
 
   def frequency_of_hbond_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_hbond_between(r, na) }
   end
+  memoize :frequency_of_hbond_between_amino_acids_and_
 
   def frequency_of_whbond_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_whbond_between(r, na) }
   end
+  memoize :frequency_of_whbond_between_amino_acids_and_
 
   def frequency_of_contact_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_contact_between(r, na) }
   end
+  memoize :frequency_of_contact_between_amino_acids_and_
 
 
   protected
