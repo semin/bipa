@@ -559,7 +559,7 @@ namespace :bipa do
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.find(:all).map(&:pdb_code).reverse
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -580,8 +580,6 @@ namespace :bipa do
                   $logger.info("#{domain.sid} has a #{na} interface already detected")
                   iface_found = true
                   next
-                else
-                  $logger.info("#{domain.sid} has no #{na} interface")
                 end
 
                 if domain.send("#{na}_binding_interface_residues").size > 0
@@ -603,9 +601,8 @@ namespace :bipa do
                 end
               end
             end # domains.each
-
-            $logger.info("Extracting domain interfaces from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
             ActiveRecord::Base.remove_connection
+            $logger.info("Extracting domain interfaces from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
