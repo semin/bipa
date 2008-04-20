@@ -251,7 +251,7 @@ namespace :bipa do
 
               next unless pdb_list.size > 0
 
-              clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, "#{sunid}.nr90.fa")
+              clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, "#{sunid}.cluster90")
               clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
               list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
 
@@ -271,7 +271,7 @@ namespace :bipa do
       desc "Run Baton for representative PDB files for each SCOP Family"
       task :rep_scop_pdb_files => [:environment] do
 
-        sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
+        sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid).sort
         fmanager  = ForkManager.new(MAX_FORK)
 
         fmanager.manage do
@@ -281,10 +281,22 @@ namespace :bipa do
             fmanager.fork do
 
               (10..100).step(10) do |si|
-                cwd     = pwd
-                rep_dir = File.join(FAMILY_DIR, "rep#{si}", "#{sunid}")
+                cwd       = pwd
+                pre_si    = si > 10 ? si - 10 : si
+                rep_dir   = File.join(FAMILY_DIR, "rep#{si}", "#{sunid}")
+                pdb_list  = Dir[rep_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
+
+                next unless pdb_list.size > 0
+
+                clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, "#{sunid}.cluster#{pre_si}")
+                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
+                list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
+
                 chdir(rep_dir)
-                system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+                ENV["PDB_EXT"] = ".pdb"
+                File.open("LIST", "w") { |f| f.puts list.join("\n") }
+                system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1")
+                #system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
                 chdir(cwd)
               end
 
@@ -298,7 +310,7 @@ namespace :bipa do
       desc "Run Baton for each subfamilies of SCOP families"
       task :sub_scop_pdb_files => [:environment] do
 
-        sunids    = ScopFamily.registered.find(:all).map(&:sunid).sort
+        sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid).sort
         sub_dir   = File.join(FAMILY_DIR, "sub")
         fmanager  = ForkManager.new(MAX_FORK)
 
