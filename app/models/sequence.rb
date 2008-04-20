@@ -4,11 +4,11 @@ class Sequence < ActiveRecord::Base
 
   belongs_to  :domain,
               :class_name => "ScopDomain",
-              :foreign_key  => "scop_domain_id"
+              :foreign_key  => "scop_id"
 
   belongs_to  :chain
 
-  has_many  :columns,
-            :order  => "position"
+  has_many  :positions,
+            :order  => "number"
 
 end

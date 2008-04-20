@@ -41,46 +41,61 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'subfamilies' table
   create_table "subfamilies", :force => true do |t|
-    t.belongs_to  "scop_family"
+    t.belongs_to  "scop"
     t.string      "type"
   end
 
-  add_index "subfamilies", ["scop_family_id", "type"], :name => "index_sub_families_on_scop_family_id_and_type"
+  add_index "subfamilies", ["scop_id", "type"], :name => "index_sub_families_on_scop_id_and_type"
 
 
   # 'alignments' table
   create_table "alignments", :force => true do |t|
-    t.belongs_to  "scop_family"
+    t.belongs_to  "scop"
     t.belongs_to  "subfamily"
     t.string      "type"
   end
 
-  add_index "alignments", ["scop_family_id", "type"],  :name => "index_alignments_on_scop_family_id_and_type"
-  add_index "alignments", ["subfamily_id", "type"],    :name => "index_alignments_on_subfamily_id_and_type"
+  add_index "alignments", ["scop_id", "type"],      :name => "index_alignments_on_scop_id_and_type"
+  add_index "alignments", ["subfamily_id", "type"], :name => "index_alignments_on_subfamily_id_and_type"
 
 
-  # 'sequnece' table
+  # 'sequneces' table
   create_table "sequences", :force => true do |t|
     t.belongs_to  "alignment"
-    t.belongs_to  "scop_domain"
+    t.belongs_to  "scop"
     t.belongs_to  "chain"
   end
 
-  add_index "sequences", ["alignment_id"],    :name => "index_sequences_on_alignment_id"
-  add_index "sequences", ["scop_domain_id"],  :name => "index_sequences_on_scop_domain_id"
-  add_index "sequences", ["chain_id"],        :name => "index_sequences_on_chain_id"
+  add_index "sequences", ["alignment_id"],  :name => "index_sequences_on_alignment_id"
+  add_index "sequences", ["scop_id"],       :name => "index_sequences_on_scop_id"
+  add_index "sequences", ["chain_id"],      :name => "index_sequences_on_chain_id"
 
 
   # 'columns' table
   create_table "columns", :force => true do |t|
+    t.belongs_to  "alignment"
+    t.integer     "number"
+    t.float       "entropy"
+    t.float       "relative_entropy"
+  end
+
+  add_index "columns", ["alignment_id"],            :name => "index_columns_on_alignment_id"
+  add_index "columns", ["alignment_id", "number"],  :name => "index_columns_on_alignment_id_and_number"
+
+
+  # 'positions' table
+  create_table "positions", :force => true do |t|
     t.belongs_to  "sequence"
+    t.belongs_to  "column"
     t.belongs_to  "residue"
-    t.integer     "position"
+    t.integer     "number"
     t.string      "residue_name"
   end
 
-  add_index "columns", ["sequence_id"], :name => "index_columns_on_sequence_id"
-  add_index "columns", ["residue_id"],  :name => "index_columns_on_residue_id"
+  add_index "positions", ["sequence_id"],           :name => "index_positions_on_sequence_id"
+  add_index "positions", ["sequence_id", "number"], :name => "index_positions_on_sequence_id_and_number"
+  add_index "positions", ["column_id"],             :name => "index_positions_on_column_id"
+  add_index "positions", ["residue_id"],            :name => "index_positions_on_residue_id"
 
 
   # 'structures' table

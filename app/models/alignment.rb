@@ -5,9 +5,8 @@ class Alignment < ActiveRecord::Base
   has_many  :sequences,
             :order    => "id"
 
-#  has_many  :columns,
-#            :through  => :sequences,
-#            :order    => "position"
+  has_many  :columns,
+            :order    => "number"
 
   def to_fasta
     sequences.each do |seq|
@@ -54,7 +53,7 @@ class FullAlignment < Alignment
 
   belongs_to  :family,
               :class_name   => "ScopFamily",
-              :foreign_key  => "scop_family_id"
+              :foreign_key  => "scop_id"
 end
 
 
@@ -72,7 +71,7 @@ end
 
       belongs_to  :family,
                   :class_name   => "ScopFamily",
-                  :foreign_key  => "scop_family_id"
+                  :foreign_key  => "scop_id"
     end
   EVAL
 end

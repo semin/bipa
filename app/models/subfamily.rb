@@ -2,7 +2,7 @@ class Subfamily < ActiveRecord::Base
 
   belongs_to  :family,
               :class_name   => "ScopFamily",
-              :foreign_key  => "scop_family_id"
+              :foreign_key  => "scop_id"
 
   def representative
     rep = nil

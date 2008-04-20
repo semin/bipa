@@ -703,7 +703,7 @@ namespace :bipa do
     desc "Import Full & Representative Alignments for each SCOP Family"
     task :full_alignments => [:environment] do
 
-      sunids    = ScopFamily.registered.find(:all).map(&:sunid)
+      sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -738,18 +738,21 @@ namespace :bipa do
               pos = 0
 
               ff_residues.each_with_index do |res, fi|
-                column = sequence.columns.build
+                column    = alignment.columns.find_or_create_by_number(fi + 1)
+                position  = sequence.positions.build
 
                 if (res == "-")
-                  column.residue_name = res
-                  column.position     = fi + 1
-                  column.save!
+                  position.residue_name = res
+                  position.number       = fi + 1
+                  position.column       = column
+                  position.save!
                 else
                   if (db_residues[pos].one_letter_code == res)
-                    column.residue      = db_residues[pos]
-                    column.residue_name = res
-                    column.position     = fi + 1
-                    column.save!
+                    position.residue      = db_residues[pos]
+                    position.residue_name = res
+                    position.number       = fi + 1
+                    position.column       = column
+                    position.save!
                     pos += 1
                   else
                     raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"

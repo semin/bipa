@@ -1,6 +1,6 @@
 class Column < ActiveRecord::Base
 
-  belongs_to :sequence
+  belongs_to :alignment
 
-  belongs_to :residue
+  has_many  :positions
 end
