@@ -5,18 +5,18 @@ class Alignment < ActiveRecord::Base
   has_many  :sequences,
             :order    => "id"
 
-  has_many  :columns,
-            :through  => :sequences,
-            :order    => "position"
+#  has_many  :columns,
+#            :through  => :sequences,
+#            :order    => "position"
 
   def to_fasta
     sequences.each do |seq|
-      header = seq.domain ? seq.domain.fasta_header : seq.chain.fasta_header
+      header = seq.domain ? seq.domain.sid : seq.chain.fasta_header
       puts ">#{header}"
       puts seq.columns.map(&:residue_name).join
     end
   end
-  
+
   def to_pir
     raise "Not implemented yet!"
   end
@@ -40,7 +40,7 @@ class Alignment < ActiveRecord::Base
   end
 
   def length
-    @length ||= sequences.first.columns.length
+    sequences.first.columns.length
   end
 
   # To use Bio::Alignment of BioRuby
