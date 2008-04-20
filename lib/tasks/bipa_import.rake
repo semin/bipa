@@ -659,30 +659,43 @@ namespace :bipa do
     desc "Import Subfamilies for each SCOP family"
     task :subfamilies => [:environment] do
 
-      families = ScopFamily.registered.find(:all)
+      sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
+      fmanager  = ForkManager.new(MAX_FORK)
 
-      families.each_with_index do |family, i|
-        family_dir = File.join(BLASTCLUST_DIR, "#{family.sunid}")
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
 
-        (10..100).step(10) do |si|
-          subfamily_file = File.join(family_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')
+        sunids.each_with_index do |sunid, i|
 
-          IO.readlines(subfamily_file).each do |line|
-            subfamily = "Rep#{si}Subfamily".constantize.new
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
 
-            members = line.split(/\s+/)
-            members.each do |member|
-              domain = ScopDomain.find_by_sunid(member)
-              subfamily.domains << domain
+            family      = ScopFamily.find_by_sunid(sunid)
+            family_dir  = File.join(BLASTCLUST_DIR, "#{sunid}")
+
+            (10..100).step(10) do |si|
+              subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
+
+              IO.readlines(subfamily_file).each do |line|
+                subfamily = "Rep#{si}Subfamily".constantize.new
+
+                members = line.split(/\s+/)
+                members.each do |member|
+                  domain = ScopDomain.find_by_sunid(member)
+                  subfamily.domains << domain
+                end
+
+                subfamily.family = family
+                subfamily.save!
+
+                $logger.info("Rep#{si}Subfamily} (#{subfamily.id}): created")
+              end
             end
-
-            subfamily.family = family
-            subfamily.save!
-
-            $logger.info("Rep#{si}Subfamily} (#{subfamily.id}): created")
+            ActiveRecord::Base.remove_connection
+            $logger.info("Importing subfamilies for #{sunid} : done (#{i + 1}/#{sunids.size})")
           end
         end
-        $logger.info("Importing subfamilies for #{family.sunid} : done (#{i + 1}/#{families.size})")
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -699,7 +712,6 @@ namespace :bipa do
         sunids.each_with_index do |sunid, i|
 
           fmanager.fork do
-
             ActiveRecord::Base.establish_connection(config)
 
             family    = ScopFamily.find_by_sunid(sunid)
