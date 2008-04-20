@@ -244,7 +244,7 @@ namespace :bipa do
                   residue = RnaResidue.create!(residue_params(chain.id, residue_bio))
                 else
                   dssp_hash_key = chain_bio.chain_id + residue_bio.residue_id
-                  sstruc        = dssp_sstruc[dssp_hash_key] ? dssp_sstruc[dssp_hash_key] : "L"
+                  sstruc        = dssp_sstruc[dssp_hash_key].blank? ? "L" : dssp_sstruc[dssp_hash_key]
                   residue       = AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
                 end
 
@@ -277,8 +277,8 @@ namespace :bipa do
             Atom.import(atoms, :validate => false)
             structure.save!
 
-            $logger.info("Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})")
             ActiveRecord::Base.remove_connection
+            $logger.info("Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})")
           end
         end
         ActiveRecord::Base.establish_connection(config)

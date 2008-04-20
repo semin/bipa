@@ -380,14 +380,12 @@ class ScopDomain < Scop
   def to_pdb
     atoms.sort_by(&:atom_code).inject("") { |p, a| p + (a.to_pdb + "\n") }
   end
+  memoize :to_pdb
 
-  def to_fasta
+  def to_sequence
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
   end
-
-  def fasta_header
-    "#{sunid}|#{sid}|#{desciption}"
-  end
+  memoize :to_sequence
 
   # Callbacks
   def update_pdb_code

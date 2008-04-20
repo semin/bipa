@@ -179,43 +179,54 @@ namespace :bipa do
 
       refresh_dir(BLASTCLUST_DIR)
 
-      families = ScopFamily.registered.find(:all)
+      sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
+      fmanager  = ForkManager.new(MAX_FORK)
 
-      families.each_with_index do |family, i|
-        fam_dir   = File.join(BLASTCLUST_DIR, "#{family.sunid}")
-        fam_fasta = File.join(fam_dir, "#{family.sunid}.fa")
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
 
-        mkdir(fam_dir)
+        sunids.each_with_index do |sunid, i|
 
-        File.open(fam_fasta, "w") do |file|
-          domains = family.all_registered_leaf_children
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
 
-          domains.each do |domain|
-            sunid = domain.sunid
-            fasta = domain.to_fasta
+            family    = ScopFamily.find_by_sunid(sunid)
+            fam_dir   = File.join(BLASTCLUST_DIR, "#{family.sunid}")
+            fam_fasta = File.join(fam_dir, "#{family.sunid}.fa")
 
-            if fasta.include?("X")
-              puts "Skip: SCOP domain, #{sunid} has some unknown residues!"
-              next
+            mkdir(fam_dir)
+
+            File.open(fam_fasta, "w") do |file|
+              domains = family.all_registered_leaf_children
+
+              domains.each do |domain|
+                if domain.to_sequence.include?("X")
+                  puts "Skip: SCOP domain, #{domain.sunid} has some unknown residues!"
+                  next
+                end
+
+                file.puts ">#{domain.sunid}"
+                file.puts domain.to_sequence
+              end
             end
 
-            file.puts ">#{domain.fasta_header}"
-            file.puts fasta
+            (10..100).step(10) do |si|
+              blastclust_cmd =
+                "blastclust " +
+                "-i #{fam_fasta} "+
+                "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
+                "-L .9 " +
+                "-S #{si} " +
+                "-a 2 " +
+                "-p T"
+                system blastclust_cmd
+            end
+
+            ActiveRecord::Base.remove_connection
+            $logger.info("Creating cluster files for SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})")
           end
         end
-
-        (10..100).step(10) do |si|
-          blastclust_cmd =
-            "blastclust " +
-            "-i #{fam_fasta} "+
-            "-o #{File.join(fam_dir, family.sunid.to_s + '.nr' + si.to_s + '.fa')} " +
-            "-L .9 " +
-            "-S #{si} " +
-            "-a 2 " +
-            "-p T"
-            system blastclust_cmd
-        end
-        $logger.info("Creating non-redundant fasta files for SCOP family, #{family.sunid}: done (#{i+1}/#{families.size})")
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 

@@ -90,6 +90,10 @@ end
 
 
 class HetResidue < Residue
+
+  def one_letter_code
+    "X"
+  end
 end
 
 
