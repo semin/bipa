@@ -8,7 +8,7 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
       full_dir  = File.join(FAMILY_DIR, "full")
 
-      refresh_dir(full_dir)
+      refresh_dir(full_dir) unless RESUME
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -21,13 +21,23 @@ namespace :bipa do
             family      = ScopFamily.find_by_sunid(sunid)
             family_dir  = File.join(full_dir, "#{sunid}")
 
-            mkdir_p(family_dir)
+            mkdir_p(family_dir) unless File.exists? family_dir
 
             domains = family.all_registered_leaf_children
             domains.each do |domain|
-              next if domain.has_unks? || domain.calpha_only?
+              domain_pdb_file = File.join(family_dir, "#{domain.sunid}.pdb")
 
-              File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |file|
+              if File.size?(domain_pdb_file)
+                $logger.warn("SKIP: #{domain_pdb_file} already exists!")
+                next
+              end
+
+              if domain.has_unks? || domain.calpha_only?
+                $logger.warn("SKIP: #{domain.sid} is C-alpha only or having some unknown residues")
+                next
+              end
+
+              File.open(domain_pdb_file, "w") do |file|
                 file.puts domain.to_pdb + "END\n"
               end
             end
