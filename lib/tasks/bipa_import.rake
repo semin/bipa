@@ -577,7 +577,7 @@ namespace :bipa do
 
               %w(dna rna).each do |na|
                 if domain.send("#{na}_interfaces").size > 0
-                  $logger.info("#{domain.sid} has a #{na} interface already detected")
+                  $logger.info("#{domain.sid} has a #{na} already detected interface")
                   iface_found = true
                   next
                 end
