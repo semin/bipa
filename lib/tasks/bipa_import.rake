@@ -688,7 +688,7 @@ namespace :bipa do
                 subfamily.family = family
                 subfamily.save!
 
-                $logger.info("Rep#{si}Subfamily} (#{subfamily.id}): created")
+                $logger.info("Rep#{si}Subfamily (#{subfamily.id}): created")
               end
             end
             ActiveRecord::Base.remove_connection
@@ -796,7 +796,7 @@ namespace :bipa do
                 next
               end
 
-              alignment = family.send("build_rep#{si}_alignment")
+              alignment = family.send("create_rep#{si}_alignment")
               flat_file = Bio::FlatFile.auto(ali_file)
 
               flat_file.each_entry do |entry|
@@ -811,17 +811,23 @@ namespace :bipa do
                 pos = 0
 
                 ff_residues.each_with_index do |res, fi|
-                  column = sequence.columns.build
+                  column    = alignment.columns.find_or_create_by_number(fi + 1)
+                  #column    = alignment.columns.build(:number => fi + 1) unless column
+                  position  = sequence.positions.build
 
                   if (res == "-")
-                    column.residue_name = res
-                    column.position     = fi + 1
+                    position.residue_name = res
+                    position.number       = fi + 1
+                    position.column       = column
+                    position.save!
                     column.save!
                   else
                     if (db_residues[pos].one_letter_code == res)
-                      column.residue      = db_residues[pos]
-                      column.residue_name = res
-                      column.position     = fi + 1
+                      position.residue      = db_residues[pos]
+                      position.residue_name = res
+                      position.number       = fi + 1
+                      position.column       = column
+                      position.save!
                       column.save!
                       pos += 1
                     else

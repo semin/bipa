@@ -80,7 +80,7 @@ namespace :bipa do
                 next if domain.nil?
 
                 domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
-                raise "Cannot find #{domain_pdb_file}" unless File.exists?(domain_pdb_file)
+                raise "Cannot find #{domain_pdb_file}" if !File.exists?(domain_pdb_file)
 
                 system("cp #{domain_pdb_file} #{family_dir}")
               end

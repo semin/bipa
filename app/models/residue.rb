@@ -92,7 +92,7 @@ end
 class HetResidue < Residue
 
   def one_letter_code
-    "X"
+    AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or "X"
   end
 end
 

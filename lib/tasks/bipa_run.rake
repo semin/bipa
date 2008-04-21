@@ -177,7 +177,7 @@ namespace :bipa do
     desc "Run blastclust for each SCOP family"
     task :blastclust => [:environment] do
 
-      refresh_dir(BLASTCLUST_DIR)
+      refresh_dir(BLASTCLUST_DIR) unless RESUME
 
       sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
@@ -191,35 +191,36 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             family    = ScopFamily.find_by_sunid(sunid)
-            fam_dir   = File.join(BLASTCLUST_DIR, "#{family.sunid}")
-            fam_fasta = File.join(fam_dir, "#{family.sunid}.fa")
+            fam_dir   = File.join(BLASTCLUST_DIR, "#{sunid}")
+            fam_fasta = File.join(fam_dir, "#{sunid}.fa")
 
             mkdir(fam_dir)
 
-            File.open(fam_fasta, "w") do |file|
-              domains = family.all_registered_leaf_children
+            domains = family.all_registered_leaf_children
 
-              domains.each do |domain|
-                if domain.to_sequence.include?("X")
-                  puts "Skip: SCOP domain, #{domain.sunid} has some unknown residues!"
-                  next
-                end
-
+            domains.each do |domain|
+              if domain.to_sequence.include?("X")
+                puts "Skip: SCOP domain, #{domain.sunid} has some unknown residues!"
+                next
+              end
+              File.open(fam_fasta, "a") do |file|
                 file.puts ">#{domain.sunid}"
                 file.puts domain.to_sequence
               end
             end
 
-            (10..100).step(10) do |si|
-              blastclust_cmd =
-                "blastclust " +
-                "-i #{fam_fasta} "+
-                "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
-                "-L .9 " +
-                "-S #{si} " +
-                "-a 2 " +
-                "-p T"
-                system blastclust_cmd
+            if File.size?(fam_fasta)
+              (10..100).step(10) do |si|
+                blastclust_cmd =
+                  "blastclust " +
+                  "-i #{fam_fasta} "+
+                  "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
+                  "-L .9 " +
+                  "-S #{si} " +
+                  "-a 2 " +
+                  "-p T"
+                  system blastclust_cmd
+              end
             end
 
             ActiveRecord::Base.remove_connection

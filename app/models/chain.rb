@@ -9,6 +9,8 @@ class Chain < ActiveRecord::Base
             :foreign_key  => "chain_id",
             :dependent    => :destroy
 
+  has_many  :aa_residues
+
   has_many  :atoms,
             :through      => :residues
 
@@ -59,7 +61,7 @@ class AaChain < Chain
             :foreign_key  => "chain_id"
 
   has_many  :domains,
-            :through      => :residues,
+            :through      => :aa_residues,
             :uniq         => true
 end
 
