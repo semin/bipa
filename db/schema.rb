@@ -176,6 +176,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'atoms' table
   create_table "atoms", :force => true do |t|
     t.belongs_to  "residue"
+    t.string      "type"
     t.string      "position_type"
     t.integer     "atom_code"
     t.string      "atom_name"

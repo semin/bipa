@@ -2,17 +2,10 @@ namespace :bipa do
   namespace :fetch do
 
     require "logger"
-    require "fileutils"
 
     include FileUtils
 
     $logger = Logger.new(STDOUT)
-
-    task :default => [:all]
-
-    desc "Fetch datasets for BIPA construction"
-    task :all => [:pdb_remote, :scop]
-
 
     desc "Download protein-nucleic acid complexes from PDB ftp"
     task :pdb_remote => [:environment] do
@@ -61,14 +54,15 @@ namespace :bipa do
       fmanager = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
+
         pna_complexes.each_with_index do |pdb_code, i|
+
           fmanager.fork do
             pdb_file = File.join(PDB_MIRROR_DIR, "./data/structures/all/pdb/pdb#{pdb_code}.ent.gz")
-            if File.exist?(pdb_file)
-              File.open(File.join(PDB_DIR, "#{pdb_code}.pdb"),'w') do |f|
-                f.puts Zlib::GzipReader.open(pdb_file).readlines.join
-              end
-              $logger.info("Copying #{pdb_file} (#{i + 1}/#{pna_complexes.size}): done")
+
+            if File.size?(pdb_file)
+              system("gzip -cd #{pdb_file} > #{File.join(PDB_DIR, pdb_code + '.pdb')}")
+              $logger.info("Unzipping #{pdb_file} (#{i + 1}/#{pna_complexes.size}): done")
             else
               missings << pdb_code
             end

@@ -75,7 +75,7 @@ namespace :bipa do
             chdir(cwd)
             rm_rf(work_dir)
 
-            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+            $logger.info("HBPlus: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
           end
         end
       end

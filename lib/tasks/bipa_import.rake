@@ -15,12 +15,15 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         pdb_files.each_with_index do |pdb_file, i|
+          tainted       = false
+          calpha_only   = false
+          unk_residues  = false
 
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
             pdb_code  = File.basename(pdb_file, ".pdb")
-            pdb_bio   = Bio::PDB.new(IO.read(pdb_file))
+            bio_pdb   = Bio::PDB.new(IO.read(pdb_file))
 
             # Filter C-alpha only structures using HBPLUS results
             hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
@@ -169,9 +172,8 @@ namespace :bipa do
             mol_codes = {}
             molecules = {}
 
-            pdb_bio.record('COMPND')[0].original_data.map do |s|
-              s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'')
-            end.join.scan(/MOL_ID:\s+(\d+);MOLECULE:\s+(.*?);CHAIN:\s+(.*?);/) do |mol_id, molecule, chain_codes|
+            compnd = bio_pdb.record('COMPND')[0].original_data.map { |s| s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'') }.join + ";"
+            compnd.scan(/MOL_ID:\s+(\d+);MOLECULE:\s+(.*?);CHAIN:\s+(.*?);/) do |mol_id, molecule, chain_codes|
               chain_codes.split(/,/).each do |chain_code|
                 chain_code.strip!
                 mol_codes[chain_code] = mol_id
@@ -180,34 +182,34 @@ namespace :bipa do
             end
 
             structure = Structure.create!(
-              :pdb_code       => pdb_bio.accession,
-              :classification => pdb_bio.classification,
-              :title          => pdb_bio.definition,
-              :exp_method     => pdb_bio.exp_method,
-              :resolution     => pdb_bio.resolution.to_f < EPSILON ? nil : pdb_bio.resolution,
-              :deposited_at   => pdb_bio.deposition_date
+              :pdb_code       => bio_pdb.accession,
+              :classification => bio_pdb.classification,
+              :title          => bio_pdb.definition,
+              :exp_method     => bio_pdb.exp_method,
+              :resolution     => bio_pdb.resolution.to_f < EPSILON ? nil : bio_pdb.resolution,
+              :deposited_at   => bio_pdb.deposition_date
             )
 
-            model_bio = pdb_bio.models.first
+            bio_model = bio_pdb.models.first
 
             model = Model.create!(
               :structure_id => structure.id,
-              :model_code   => model_bio.serial ? model_bio.serial : 1
+              :model_code   => bio_model.serial ? bio_model.serial : 1
             )
 
             # Create empty atoms array for massive importing Atom AREs
             atoms = Array.new
 
-            model_bio.each do |chain_bio|
-              chain_code = chain_bio.chain_id.blank? ? nil : chain_bio.chain_id
+            bio_model.each do |bio_chain|
+              chain_code = bio_chain.chain_id.blank? ? nil : bio_chain.chain_id
 
-              chain_type = if chain_bio.aa?
+              chain_type = if bio_chain.aa?
                              AaChain
-                           elsif chain_bio.dna?
+                           elsif bio_chain.dna?
                              DnaChain
-                           elsif chain_bio.rna?
+                           elsif bio_chain.rna?
                              RnaChain
-                           elsif chain_bio.hna?
+                           elsif bio_chain.hna?
                              HnaChain
                            else
                              HetChain
@@ -220,39 +222,39 @@ namespace :bipa do
                 :molecule   => molecules[chain_code] ? molecules[chain_code] : nil
               )
 
-              chain_bio.each_residue do |residue_bio|
-                if residue_bio.dna?
-                  residue = DnaResidue.create!(residue_params(chain.id, residue_bio))
-                elsif residue_bio.rna?
-                  residue = RnaResidue.create!(residue_params(chain.id, residue_bio))
+              bio_chain.each_residue do |bio_residue|
+                if bio_residue.dna?
+                  residue = DnaResidue.create!(residue_params(chain.id, bio_residue))
+                elsif bio_residue.rna?
+                  residue = RnaResidue.create!(residue_params(chain.id, bio_residue))
                 else
-                  dssp_hash_key = chain_bio.chain_id + residue_bio.residue_id
+                  dssp_hash_key = bio_chain.chain_id + bio_residue.residue_id
                   sstruc        = dssp_sstruc[dssp_hash_key].blank? ? "L" : dssp_sstruc[dssp_hash_key]
-                  residue       = AaResidue.create!(residue_params(chain.id, residue_bio, sstruc))
+                  residue       = AaResidue.create!(residue_params(chain.id, bio_residue, sstruc))
                 end
 
-                residue_bio.each do |atom_bio|
-                  atoms << Atom.new(atom_params(residue.id,
-                                                atom_bio,
-                                                bound_atom_asa,
-                                                unbound_aa_atom_asa,
-                                                unbound_na_atom_asa,
-                                                aa_zap_atoms,
-                                                na_zap_atoms))
+                bio_residue.each do |bio_atom|
+                  atoms << StdAtom.new(atom_params( residue.id,
+                                                    bio_atom,
+                                                    bound_atom_asa,
+                                                    unbound_aa_atom_asa,
+                                                    unbound_na_atom_asa,
+                                                    aa_zap_atoms,
+                                                    na_zap_atoms))
                 end
               end
 
-              chain_bio.each_heterogen do |het_residue_bio|
-                het_residue = HetResidue.create!(residue_params(chain.id, het_residue_bio))
+              bio_chain.each_heterogen do |het_bio_residue|
+                het_residue = HetResidue.create!(residue_params(chain.id, het_bio_residue))
 
-                het_residue_bio.each do |het_atom_bio|
-                  atoms << Atom.new(atom_params(het_residue.id,
-                                                het_atom_bio,
-                                                bound_atom_asa,
-                                                unbound_aa_atom_asa,
-                                                unbound_na_atom_asa,
-                                                aa_zap_atoms,
-                                                na_zap_atoms))
+                het_bio_residue.each do |het_bio_atom|
+                  atoms << HetAtom.new(atom_params( het_residue.id,
+                                                    het_bio_atom,
+                                                    bound_atom_asa,
+                                                    unbound_aa_atom_asa,
+                                                    unbound_na_atom_asa,
+                                                    aa_zap_atoms,
+                                                    na_zap_atoms))
                 end
               end
             end

@@ -48,15 +48,20 @@ module Bio
     class Chain
 
       def aa?
-        (residues.any? { |r| r.aa? } || heterogens.any? { |r| r.aa? }) && !id.blank?
+        (residues.any? { |r| r.aa? } || heterogens.any? { |r| r.aa? }) &&
+        !id.blank?
       end
 
       def dna?
-        (residues.any? { |r| r.dna? } || heterogens.any? { |r| r.dna? }) && residues.all? { |r| !r.rna? } && heterogens.all? { |r| !r.rna? } && !id.blank?
+        (residues.any? { |r| r.dna? } || heterogens.any? { |r| r.dna? }) &&
+        (residues.all? { |r| !r.rna? } && heterogens.all? { |r| !r.rna? }) &&
+        !id.blank?
       end
 
       def rna?
-        (residues.any? { |r| r.rna? } || heterogens.any? { |r| r.rna? }) && residues.all? { |r| !r.dna? } && heterogens.all? { |r| !r.dna? } && !id.blank?
+        (residues.any? { |r| r.rna? } || heterogens.any? { |r| r.rna? }) &&
+        (residues.all? { |r| !r.dna? } && heterogens.all? { |r| !r.dna? }) &&
+        !id.blank?
       end
 
       def hna?

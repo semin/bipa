@@ -1,13 +1,11 @@
 require "rubygems"
-#require "memoize"
-#include Memoize
 require "simple_memoize"
 
 require "matrix"
 require "inline"
 require "has_finder"
-require "will_paginate"
 require "fork_manager"
+require "will_paginate"
 require "ar-extensions"
 require "composite_primary_keys"
 

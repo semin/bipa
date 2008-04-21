@@ -177,3 +177,11 @@ class Atom < ActiveRecord::Base
     C_CODE
   end
 end # class Atom
+
+
+class StdAtom < Atom
+end
+
+
+class HetAtom < Atom
+end
