@@ -65,12 +65,12 @@ namespace :bipa do
             aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
             na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
 
-            if (!File.size?(aa_zap_file) || !File.size?(na_zap_file))
+            if !File.size?(aa_zap_file) || !File.size?(na_zap_file)
               $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
               next
             end
 
-            if (File.size?(aa_zap_err) || File.size?(na_zap_err))
+            if File.size?(aa_zap_err) || File.size?(na_zap_err)
               $logger.warn("SKIP: #{pdb_code} due to errors in ZAP calculation")
               next
             end
@@ -169,21 +169,6 @@ namespace :bipa do
             mol_codes = {}
             molecules = {}
 
-#            mol_id    = nil
-#            molecule  = nil
-#
-#            pdb_bio.record("COMPND")[0].compound.each do |key, value|
-#              case
-#              when key == "MOL_ID"
-#                mol_id = value
-#              when key == "MOLECULE"
-#                molecule = value
-#              when key == "CHAIN"
-#                mol_codes[value] = mol_id
-#                molecules[value] = molecule
-#              end
-#            end
-
             pdb_bio.record('COMPND')[0].original_data.map do |s|
               s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'')
             end.join.scan(/MOL_ID:\s+(\d+);MOLECULE:\s+(.*?);CHAIN:\s+(.*?);/) do |mol_id, molecule, chain_codes|
@@ -214,7 +199,6 @@ namespace :bipa do
             atoms = Array.new
 
             model_bio.each do |chain_bio|
-
               chain_code = chain_bio.chain_id.blank? ? nil : chain_bio.chain_id
 
               chain_type = if chain_bio.aa?
@@ -235,7 +219,6 @@ namespace :bipa do
                 :mol_code   => mol_codes[chain_code] ? mol_codes[chain_code] : nil,
                 :molecule   => molecules[chain_code] ? molecules[chain_code] : nil
               )
-
 
               chain_bio.each_residue do |residue_bio|
                 if residue_bio.dna?
