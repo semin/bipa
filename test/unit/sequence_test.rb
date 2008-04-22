@@ -8,5 +8,5 @@ class SequenceTest < Test::Unit::TestCase
 
   should_belong_to  :chain
 
-  should_have_many :columns
+  should_have_many  :positions
 end

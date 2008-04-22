@@ -5,44 +5,48 @@ class Chain < ActiveRecord::Base
   belongs_to  :model
 
   has_many  :residues,
-            :class_name   => "Residue",
-            :foreign_key  => "chain_id",
             :dependent    => :destroy
 
   has_many  :aa_residues
+  
+  has_many  :na_residues
+  
+  has_many  :dna_residues
+  
+  has_many  :rna_residues
+  
+  has_many  :het_residues
 
   has_many  :atoms,
             :through      => :residues
+            
+  has_many  :aa_atoms,
+            :through      => :aa_residues,
+            :source       => :atoms
+  
+  has_many  :na_atoms,
+            :through      => :na_residues,
+            :source       => :atoms
+
+  has_many  :dna_atoms,
+            :through      => :dna_residues,
+            :source       => :atoms
+
+  has_many  :rna_atoms,
+            :through      => :rna_residues,
+            :source       => :atoms
+            
+  has_many  :het_atoms,
+            :through      => :het_residues,
+            :source       => :atoms
 
   has_many  :sequences
 
-#  validates_uniqueness_of :chain_code,
-#                          :scope          => :model_id,
-#                          :allow_nil      => true,
-#                          :case_sensitive => true
-  # has_many  :contacts,
-  #           :through      => :atoms
-  #
-  # has_many  :contacting_atoms,
-  #                 :through      => :contacts
-  #
-  # has_many  :whbonds,
-  #             :through      => :atoms
-  #
-  # has_many  :whbonding_atoms,
-  #           :through      => :whbonds
-  #
-  # has_many  :hbonds_as_donor,
-  #           :through      => :atoms
-  #
-  # has_many  :hbonds_as_acceptor,
-  #           :through      => :atoms
-  #
-  # has_many  :hbonding_donors,
-  #           :through      => :hbonds_as_acceptor
-  #
-  # has_many  :hbonding_acceptors,
-  #           :through      => :hbonds_as_donor
+  validates_uniqueness_of :chain_code,
+                          :scope          => :model_id,
+                          :allow_nil      => true,
+                          :case_sensitive => true
+
 
   def fasta_header
     "#{model.structure.pdb_code}:#{chain_code}"
@@ -79,22 +83,6 @@ end
 
 
 class HnaChain < NaChain
-
-  has_many  :dna_residues,
-            :class_name   => "DnaResidue",
-            :foreign_key  => "chain_id"
-
-  has_many  :rna_residues,
-            :class_name   => "RnaResidue",
-            :foreign_key  => "chain_id"
-
-  has_many  :dna_atoms,
-            :through      => :dna_residues,
-            :source       => :atoms
-
-  has_many  :rna_atoms,
-            :through      => :rna_residues,
-            :source       => :atoms
 end
 
 

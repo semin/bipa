@@ -3,9 +3,7 @@ class Atom < ActiveRecord::Base
   include Bipa::Constants
   include Bipa::NucleicAcidBinding
 
-  belongs_to  :residue,
-              :class_name   => "Residue",
-              :foreign_key  => "residue_id"
+  belongs_to  :residue
 
   has_many  :contacts,
             :dependent    => :destroy
@@ -35,9 +33,11 @@ class Atom < ActiveRecord::Base
   has_many  :hbonding_acceptors,
             :through      => :hbonds_as_donor
 
+  
+
   # ASA related
   def on_surface?
-    unbound_asa ? unbound_asa > MIN_SRFATM_SASA : false
+    unbound_asa ? unbound_asa > MIN_SURFACE_ATOM_ASA : false
   end
 
   def buried?
@@ -45,7 +45,7 @@ class Atom < ActiveRecord::Base
   end
 
   def on_interface?
-    delta_asa ? delta_asa > MIN_INTATM_DASA : false
+    delta_asa ? delta_asa > MIN_INTERFACE_ATOM_DELTA_ASA : false
   end
 
   # Atom specific properties

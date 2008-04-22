@@ -4,8 +4,7 @@ class AlignmentTest < Test::Unit::TestCase
 
   should_have_many  :sequences
   
-  should_have_many  :columns,
-                    :through => :sequences
+  should_have_many  :columns
 end
 
 
@@ -25,7 +24,7 @@ end
   eval <<-EVAL
     class Rep#{si}AlignmentTest < AlignmentTest
 
-      should_belong_to  :family
+      should_belong_to :family
     end
   EVAL
 end

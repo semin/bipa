@@ -28,7 +28,7 @@ class AtomTest < Test::Unit::TestCase
 
   context "An Atom instance" do
     
-    context "with a unbound ASA bigger than MIN_SRFATM_SASA threshold" do
+    context "with a unbound ASA bigger than MIN_SURFACE_ATOM_ASA threshold" do
       # MIN_SRFATM_SASA = 0.1
       should "be on surface" do
         atom = Atom.new
@@ -37,7 +37,7 @@ class AtomTest < Test::Unit::TestCase
       end
     end
     
-    context "with a unbound ASA smaller than MIN_SRFATM_SASA threshold" do
+    context "with a unbound ASA smaller than MIN_SURFACE_ATOM_ASA threshold" do
       
       should "not be on surface" do
         atom = Atom.new
@@ -46,7 +46,7 @@ class AtomTest < Test::Unit::TestCase
       end
     end
     
-    context "with a delta ASA bigger than MIN_INTATM_DASA threshold" do
+    context "with a delta ASA bigger than MIN_INTERFACE_ATOM_DELTA_ASA threshold" do
       # MIN_INTATM_DASA = 0.1
       
       should "be on interface" do

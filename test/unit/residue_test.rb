@@ -59,7 +59,7 @@ class ResidueTest < Test::Unit::TestCase
     end
     
     
-    context "with one or more interface atoms" do
+    context "losing bigger than 1 square angstrom when forming complex" do
       
       should "be true when sending #on_interface?" do
         residue         = Residue.new

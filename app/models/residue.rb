@@ -17,14 +17,8 @@ class Residue < ActiveRecord::Base
   has_many  :contacts,
             :through      => :atoms
 
-  # has_many  :contacting_atoms,
-  #          :through      => :atoms
-
   has_many  :whbonds,
             :through      => :atoms
-
-  # has_many  :whbonding_atoms,
-  #           :through      => :whbonds
 
   has_many  :hbonds_as_donor,
             :through      => :atoms
@@ -32,13 +26,8 @@ class Residue < ActiveRecord::Base
   has_many  :hbonds_as_acceptor,
             :through      => :atoms
 
-  # has_many  :hbonding_donors,
-  #           :through      => :hbonds_as_acceptor
+  has_many  :positions
 
-  # has_many  :hbonding_acceptors,
-  #           :through      => :hbonds_as_donor
-
-  has_many  :columns
 
   # ASA related
   def on_surface?
@@ -46,8 +35,7 @@ class Residue < ActiveRecord::Base
   end
 
   def on_interface?
-    delta_asa > MIN_INTRES_DASA
-    #interface_atoms.size > 0
+    interface_atoms.size > 0
   end
 
   def buried?
@@ -117,6 +105,10 @@ class AaResidue < StdResidue
 
   def on_surface?
     relative_unbound_asa > MIN_SRFRES_RASA
+  end
+  
+  def on_interface?
+    delta_asa > MIN_INTRES_SASA
   end
 
   def one_letter_code
