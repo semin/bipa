@@ -385,7 +385,7 @@ namespace :bipa do
     desc "Run ZAP for each SCOP Domain PDB file"
     task :zap => [:environment] do
 
-      refresh_dir(ZAP_DIR)
+      refresh_dir(ZAP_DIR) unless RESUME
 
       pdb_codes = Dir[NACCESS_DIR + "/*_aa.asa"].map { |f| f.match(/(\S{4})_aa/)[1] }.sort
       fmanager  = ForkManager.new(MAX_FORK)
