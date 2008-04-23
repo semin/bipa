@@ -20,7 +20,7 @@ END
   context "A Dssp instance" do
     
     should "return correct number of residues" do
-      assert_equal(6, @dssp.size)
+      assert_equal(6, @dssp.residues.size)
     end
     
     # should "contain residues in the same order of DSSP result file" do

@@ -1,5 +1,8 @@
 module Bipa
   class Dssp
+    
+    attr :residues
+
     Dssp = Struct.new(:dssp_number,
                       :residue_number,
                       :icode,
@@ -32,7 +35,7 @@ module Bipa
                       :psi)
 
     def initialize(dssp_str)
-      residues = Hash.new
+      @residues = Hash.new
 
       dssp_str.each_line do |line|
         next if line =~ /^\s*#/
@@ -68,10 +71,9 @@ module Bipa
                           line[103..108].strip,
                           line[109..114].strip)
 
-          residues[line[5..11].gsub(/\s+/, '')] = dssp
+          @residues[line[5..11].gsub(/\s+/, '')] = dssp
         end
       end
-      residues
     end
   end
   
