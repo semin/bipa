@@ -8,22 +8,22 @@ class Chain < ActiveRecord::Base
             :dependent    => :destroy
 
   has_many  :aa_residues
-  
+
   has_many  :na_residues
-  
+
   has_many  :dna_residues
-  
+
   has_many  :rna_residues
-  
+
   has_many  :het_residues
 
   has_many  :atoms,
             :through      => :residues
-            
+
   has_many  :aa_atoms,
             :through      => :aa_residues,
             :source       => :atoms
-  
+
   has_many  :na_atoms,
             :through      => :na_residues,
             :source       => :atoms
@@ -35,7 +35,7 @@ class Chain < ActiveRecord::Base
   has_many  :rna_atoms,
             :through      => :rna_residues,
             :source       => :atoms
-            
+
   has_many  :het_atoms,
             :through      => :het_residues,
             :source       => :atoms
@@ -86,5 +86,5 @@ class HnaChain < NaChain
 end
 
 
-class HetChain < Chain
+class PseudoChain < Chain
 end

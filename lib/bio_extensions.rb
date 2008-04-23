@@ -132,7 +132,7 @@ module Bio
 
         include Bipa::Constants
 
-        def position_type
+        def moiety
           if residue.na?
             if NucleicAcids::Atoms::PHOSPHATE.include?(name.strip)
               'phosphate'

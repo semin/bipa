@@ -39,65 +39,6 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "scops", ["id", "registered"],        :name => "index_scops_on_id_and_registered"
 
 
-  # 'subfamilies' table
-  create_table "subfamilies", :force => true do |t|
-    t.belongs_to  "scop"
-    t.string      "type"
-  end
-
-  add_index "subfamilies", ["scop_id", "type"], :name => "index_sub_families_on_scop_id_and_type"
-
-
-  # 'alignments' table
-  create_table "alignments", :force => true do |t|
-    t.belongs_to  "scop"
-    t.belongs_to  "subfamily"
-    t.string      "type"
-  end
-
-  add_index "alignments", ["scop_id", "type"],      :name => "index_alignments_on_scop_id_and_type"
-  add_index "alignments", ["subfamily_id", "type"], :name => "index_alignments_on_subfamily_id_and_type"
-
-
-  # 'sequneces' table
-  create_table "sequences", :force => true do |t|
-    t.belongs_to  "alignment"
-    t.belongs_to  "scop"
-    t.belongs_to  "chain"
-  end
-
-  add_index "sequences", ["alignment_id"],  :name => "index_sequences_on_alignment_id"
-  add_index "sequences", ["scop_id"],       :name => "index_sequences_on_scop_id"
-  add_index "sequences", ["chain_id"],      :name => "index_sequences_on_chain_id"
-
-
-  # 'columns' table
-  create_table "columns", :force => true do |t|
-    t.belongs_to  "alignment"
-    t.integer     "number"
-    t.float       "entropy"
-    t.float       "relative_entropy"
-  end
-
-  add_index "columns", ["alignment_id"],            :name => "index_columns_on_alignment_id"
-  add_index "columns", ["alignment_id", "number"],  :name => "index_columns_on_alignment_id_and_number"
-
-
-  # 'positions' table
-  create_table "positions", :force => true do |t|
-    t.belongs_to  "sequence"
-    t.belongs_to  "column"
-    t.belongs_to  "residue"
-    t.integer     "number"
-    t.string      "residue_name"
-  end
-
-  add_index "positions", ["sequence_id"],           :name => "index_positions_on_sequence_id"
-  add_index "positions", ["sequence_id", "number"], :name => "index_positions_on_sequence_id_and_number"
-  add_index "positions", ["column_id"],             :name => "index_positions_on_column_id"
-  add_index "positions", ["residue_id"],            :name => "index_positions_on_residue_id"
-
-
   # 'structures' table
   create_table  "structures", :force => true do |t|
     t.string    "pdb_code"
@@ -107,7 +48,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float     "resolution"
     t.date      "deposited_at"
     t.boolean   "obsolete",   :default => false
-    t.boolean   "registered", :default => false
+    t.boolean   "tainted",    :default => false
     t.timestamps
   end
 
@@ -131,11 +72,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "chain_code"
     t.integer     "mol_code"
     t.string      "molecule"
-    t.boolean     "registered"
+    t.boolean     "tainted"
   end
 
   add_index "chains", ["chain_code"],             :name => "index_chains_on_chain_code"
-  add_index "chains", ["registered"],             :name => "index_chains_on_registered"
+  add_index "chains", ["tainted"],                :name => "index_chains_on_tainted"
   add_index "chains", ["model_id"],               :name => "index_chains_on_model_id"
   add_index "chains", ["model_id", "chain_code"], :name => "index_chains_on_model_id_and_chain_code"
 
@@ -152,8 +93,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "icode"
     t.integer     "residue_code"
     t.string      "residue_name"
-    t.string      "secondary_structure"
-    t.string      "hydrophobicity"
   end
 
   add_index "residues", ["chain_id"],                           :name => "index_residues_on_chain_id"
@@ -177,7 +116,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table "atoms", :force => true do |t|
     t.belongs_to  "residue"
     t.string      "type"
-    t.string      "position_type"
+    t.string      "moiety"
     t.integer     "atom_code"
     t.string      "atom_name"
     t.string      "altloc"
@@ -188,13 +127,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       "tempfactor"
     t.string      "element"
     t.string      "charge"
-    t.float       "bound_asa"
-    t.float       "unbound_asa"
-    t.float       "delta_asa"
-    t.float       "radius"
-    t.float       "formal_charge"
-    t.float       "partial_charge"
-    t.float       "potential"
   end
 
   add_index "atoms", ["residue_id"],              :name => "index_atoms_on_residue_id"
@@ -202,6 +134,64 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "atoms", ["residue_id", "atom_name"], :name => "index_atoms_on_residue_id_and_atom_name"
   add_index "atoms", ["atom_code"],               :name => "index_atoms_on_atom_code"
   add_index "atoms", ["atom_name"],               :name => "index_atoms_on_atom_name"
+
+
+  # 'dssp' table
+  create_table "dssp", :force => true do |t|
+    t.belongs_to  "residue"
+    t.integer     "dssp_number"
+    t.string      "sse"
+    t.string      "three_turns"
+    t.string      "four_turns"
+    t.string      "five_turns"
+    t.string      "geometrical_bend"
+    t.string      "chirality"
+    t.string      "beta_bridge_label_1"
+    t.string      "beta_bridge_label_2"
+    t.integer     "beta_brdige_partner_residue_number_1"
+    t.integer     "beta_brdige_partner_residue_number_2"
+    t.string      "beta_sheet_label"
+    t.integer     "sasa"
+    t.integer     "nh_o_hbond_1_acceptor"
+    t.float       "nh_o_hbond_1_energy"
+    t.integer     "o_hn_hbond_1_donor"
+    t.float       "o_hn_hbond_1_energy"
+    t.integer     "nh_o_hbond_2_acceptor"
+    t.float       "nh_o_hbond_2_energy"
+    t.integer     "o_hn_hbond_2_donor"
+    t.float       "o_hn_hbond_2_energy"
+    t.float       "tco"
+    t.float       "kappa"
+    t.float       "alpha"
+    t.float       "phi"
+    t.float       "psi"
+  end
+
+  add_index "dssp", ["residue_id"],   :name => "index_dssp_on_residue_id"
+  add_index "dssp", ["dssp_number"],  :name => "index_dssp_on_dssp_number"
+
+
+  # 'naccess' table
+  create_table "naccess", :force => true do |t|
+    t.belongs_to  "residue"
+    t.float       "unbound_asa"
+    t.float       "bound_asa"
+    t.float       "delta_asa"
+  end
+
+  add_index "naccess", ["residue_id"], :name => "index_naccess_on_residue_id"
+
+
+  # 'zap' table
+  create_table "zap", :force => true do |t|
+    t.belongs_to  "atom"
+    t.float       "radius"
+    t.float       "formal_charge"
+    t.float       "partial_charge"
+    t.float       "potential"
+  end
+
+  add_index "zap", ["atom_id"], :name => "index_zap_on_atom_id"
 
 
   # 'contacts' table
@@ -302,4 +292,63 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index "interfaces", ["id", "chain_id"],   :name => "index_interfaces_on_id_and_chain_id"
   add_index "interfaces", ["scop_id", "type"],  :name => "index_interfaces_on_scop_id_and_type"
   add_index "interfaces", ["chain_id", "type"], :name => "index_interfaces_on_chain_id_and_type"
+
+
+  # 'subfamilies' table
+  create_table "subfamilies", :force => true do |t|
+    t.belongs_to  "scop"
+    t.string      "type"
+  end
+
+  add_index "subfamilies", ["scop_id", "type"], :name => "index_sub_families_on_scop_id_and_type"
+
+
+  # 'alignments' table
+  create_table "alignments", :force => true do |t|
+    t.belongs_to  "scop"
+    t.belongs_to  "subfamily"
+    t.string      "type"
+  end
+
+  add_index "alignments", ["scop_id", "type"],      :name => "index_alignments_on_scop_id_and_type"
+  add_index "alignments", ["subfamily_id", "type"], :name => "index_alignments_on_subfamily_id_and_type"
+
+
+  # 'sequneces' table
+  create_table "sequences", :force => true do |t|
+    t.belongs_to  "alignment"
+    t.belongs_to  "scop"
+    t.belongs_to  "chain"
+  end
+
+  add_index "sequences", ["alignment_id"],  :name => "index_sequences_on_alignment_id"
+  add_index "sequences", ["scop_id"],       :name => "index_sequences_on_scop_id"
+  add_index "sequences", ["chain_id"],      :name => "index_sequences_on_chain_id"
+
+
+  # 'columns' table
+  create_table "columns", :force => true do |t|
+    t.belongs_to  "alignment"
+    t.integer     "number"
+    t.float       "entropy"
+    t.float       "relative_entropy"
+  end
+
+  add_index "columns", ["alignment_id"],            :name => "index_columns_on_alignment_id"
+  add_index "columns", ["alignment_id", "number"],  :name => "index_columns_on_alignment_id_and_number"
+
+
+  # 'positions' table
+  create_table "positions", :force => true do |t|
+    t.belongs_to  "sequence"
+    t.belongs_to  "column"
+    t.belongs_to  "residue"
+    t.integer     "number"
+    t.string      "residue_name"
+  end
+
+  add_index "positions", ["sequence_id"],           :name => "index_positions_on_sequence_id"
+  add_index "positions", ["sequence_id", "number"], :name => "index_positions_on_sequence_id_and_number"
+  add_index "positions", ["column_id"],             :name => "index_positions_on_column_id"
+  add_index "positions", ["residue_id"],            :name => "index_positions_on_residue_id"
 end

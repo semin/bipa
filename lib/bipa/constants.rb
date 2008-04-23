@@ -72,7 +72,9 @@ module Bipa
           # Special Encoded Amino Acids
           "SEC" => "U", # selenocysteine (the UniProt Knowledgebase uses "C" and a feature rather than "U"
           "PYL" => "O", # pyrrolysine ("pyrrOlysine", the UniProt Knowledgebase uses "K" and a feature rather than "O"
-          "MSE" => "M"
+          "MSE" => "M", # selenomethionin
+          "MLY" => "K", # methyl-lysine
+          "HYP" => "P"  # hydroxy-proline
         }
       end
 

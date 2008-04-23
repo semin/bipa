@@ -5,19 +5,172 @@ namespace :bipa do
 
     $logger = Logger.new(STDOUT)
 
+#    desc "Import HBPlus results to BIPA"
+#    task :hbplus => [:environment] do
+#
+#            # Filter C-alpha only structures using HBPLUS results
+#            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
+#            hbonds_bipa = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
+#
+#            if hbonds_bipa.empty?
+#              $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results found!")
+#              next
+#            end
+#
+#    end
+
+
+#    desc "Import NACCESS results to BIPA"
+#    task :naccess => [:environment] do
+#            # Load NACCESS results for every atom in the structure
+#            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
+#            unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
+#            unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
+#
+#            if (!File.exists?(bound_asa_file)       ||
+#                !File.exists?(unbound_aa_asa_file)  ||
+#                !File.exists?(unbound_na_asa_file))
+#              $logger.warn("SKIP: #{pdb_code} might be an improper PDB file. No NACCESS result found!")
+#              next
+#            end
+#
+#            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
+#            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
+#            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
+#
+#              bound_asa   = bound_atom_asa[atom.serial]
+#              unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial]
+#              delta_asa   = unbound_asa - bound_asa if bound_asa && unbound_asa
+#                :bound_asa      => bound_asa,
+#                :unbound_asa    => unbound_asa,
+#                :delta_asa      => delta_asa,
+#    end
+
+
+#    desc "Import DSSP results to BIPA"
+#    task :dssp => [:environment] do
+#            # Load DSSP results for every amino acid residue in the structure
+#            dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
+#
+#            if (!File.exists?(dssp_file))
+#              $logger.warn("SKIP: #{pdb_code} due to missing DSSP result file")
+#              next
+#            end
+#
+#            dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
+#
+#    end
+
+
+#    desc "Import OpenEYE ZAP results to BIPA"
+#    task :zap => [:environment] do
+#            # Load ZAP results for every atoms
+#            ZapAtom     = Struct.new(:index, :serial, :symbol, :radius,
+#                                     :formal_charge, :partial_charge, :potential)
+#            aa_zap_file = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
+#            na_zap_file = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
+#            aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
+#            na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
+#
+#            if !File.size?(aa_zap_file) || !File.size?(na_zap_file)
+#              $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
+#              next
+#            end
+#
+#            if File.size?(aa_zap_err) || File.size?(na_zap_err)
+#              $logger.warn("SKIP: #{pdb_code} due to errors in ZAP calculation")
+#              next
+#            end
+#
+#            aa_zap_atoms  = Hash.new
+#            na_zap_atoms  = Hash.new
+#            tainted_zap   = false
+#
+#            IO.foreach(aa_zap_file) do |line|
+#              elems = line.chomp.split(/\s+/)
+#              unless elems.size == 7
+#                tainted_zap = true
+#                break
+#              end
+#              zap = ZapAtom.new(elems[0].to_i,
+#                                elems[1].to_i,
+#                                elems[2],
+#                                elems[3].to_f,
+#                                elems[4].to_f,
+#                                elems[5].to_f,
+#                                elems[6].to_f)
+#              aa_zap_atoms[zap[:serial]] = zap
+#            end
+#
+#            IO.foreach(na_zap_file) do |line|
+#              elems = line.chomp.split(/\s+/)
+#              unless elems.size == 7
+#                tainted_zap = true
+#                break
+#              end
+#              zap = ZapAtom.new(elems[0].to_i,
+#                                elems[1].to_i,
+#                                elems[2],
+#                                elems[3].to_f,
+#                                elems[4].to_f,
+#                                elems[5].to_f,
+#                                elems[6].to_f)
+#              na_zap_atoms[zap[:serial]] = zap
+#            end
+#
+#            if tainted_zap
+#              $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
+#              next
+#            end
+#
+#              zap_atom    = aa_zap_atoms[atom.serial] || na_zap_atoms[atom.serial]
+#
+#    end
+
+
+#    desc "Import various hydrophobicity scales to BIPA"
+#    task :hydrophobicity => [:environment] do
+#    end
+
+
     desc "Import protein-nucleic acid complex PDB files to BIPA tables"
     task :pdb => [:environment] do
 
-      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")].sort
+      # helper methods for params
+      def residue_params(bio_residue)
+        {
+          :chain_id             => bio_residue.chain.id,
+          :residue_code         => bio_residue.residue_id,
+          :icode                => bio_residue.iCode.blank? ? nil : bio_residue.iCode,
+          :residue_name         => bio_residue.resName.strip,
+        }
+      end
+
+      def atom_params(bio_atom)
+        {
+          :residue_id => bio_atom.residue.id,
+          :moiety     => bio_atom.moiety,
+          :atom_code  => bio_atom.serial,
+          :atom_name  => bio_atom.name.strip,
+          :altloc     => bio_atom.altLoc.blank? ? nil : bio_atom.altLoc,
+          :x          => bio_atom.x,
+          :y          => bio_atom.y,
+          :z          => bio_atom.z,
+          :occupancy  => bio_atom.occupancy,
+          :tempfactor => bio_atom.tempFactor,
+          :element    => bio_atom.element,
+          :charge     => bio_atom.charge.blank? ? nil : bio_atom.charge,
+        }
+      end
+
+      pdb_files = Dir[PDB_DIR+"/*.pdb"].sort
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
 
         pdb_files.each_with_index do |pdb_file, i|
-          tainted       = false
-          calpha_only   = false
-          unk_residues  = false
+          tainted = false
 
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
@@ -25,154 +178,15 @@ namespace :bipa do
             pdb_code  = File.basename(pdb_file, ".pdb")
             bio_pdb   = Bio::PDB.new(IO.read(pdb_file))
 
-            # Filter C-alpha only structures using HBPLUS results
-            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
-            hbonds_bipa = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
-
-            if hbonds_bipa.empty?
-              $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results found!")
-              next
-            end
-
-            # Load NACCESS results for every atom in the structure
-            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
-            unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
-            unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
-
-            if (!File.exists?(bound_asa_file)       ||
-                !File.exists?(unbound_aa_asa_file)  ||
-                !File.exists?(unbound_na_asa_file))
-              $logger.warn("SKIP: #{pdb_code} might be an improper PDB file. No NACCESS result found!")
-              next
-            end
-
-            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
-            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
-            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
-
-            # Load DSSP results for every amino acid residue in the structure
-            dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
-
-            if (!File.exists?(dssp_file))
-              $logger.warn("SKIP: #{pdb_code} due to missing DSSP result file")
-              next
-            end
-
-            dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
-
-            # Load ZAP results for every atoms
-            ZapAtom     = Struct.new(:index, :serial, :symbol, :radius,
-                                     :formal_charge, :partial_charge, :potential)
-            aa_zap_file = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
-            na_zap_file = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
-            aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
-            na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
-
-            if !File.size?(aa_zap_file) || !File.size?(na_zap_file)
-              $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
-              next
-            end
-
-            if File.size?(aa_zap_err) || File.size?(na_zap_err)
-              $logger.warn("SKIP: #{pdb_code} due to errors in ZAP calculation")
-              next
-            end
-
-            aa_zap_atoms  = Hash.new
-            na_zap_atoms  = Hash.new
-            tainted_zap   = false
-
-            IO.foreach(aa_zap_file) do |line|
-              elems = line.chomp.split(/\s+/)
-              unless elems.size == 7
-                tainted_zap = true
-                break
-              end
-              zap = ZapAtom.new(elems[0].to_i,
-                                elems[1].to_i,
-                                elems[2],
-                                elems[3].to_f,
-                                elems[4].to_f,
-                                elems[5].to_f,
-                                elems[6].to_f)
-              aa_zap_atoms[zap[:serial]] = zap
-            end
-
-            IO.foreach(na_zap_file) do |line|
-              elems = line.chomp.split(/\s+/)
-              unless elems.size == 7
-                tainted_zap = true
-                break
-              end
-              zap = ZapAtom.new(elems[0].to_i,
-                                elems[1].to_i,
-                                elems[2],
-                                elems[3].to_f,
-                                elems[4].to_f,
-                                elems[5].to_f,
-                                elems[6].to_f)
-              na_zap_atoms[zap[:serial]] = zap
-            end
-
-            if tainted_zap
-              $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
-              next
-            end
-
-            # helper methods for params
-            def residue_params(chain_id, residue, sstruc = nil)
-              {
-                :chain_id             => chain_id,
-                :residue_code         => residue.residue_id,
-                :icode                => (residue.iCode.blank? ? nil : residue.iCode),
-                :residue_name         => residue.resName.strip,
-                :hydrophobicity       => residue.hydrophobicity,
-                :secondary_structure  => sstruc
-              }
-            end
-
-            def atom_params(residue_id,
-                            atom,
-                            bound_atom_asa,
-                            unbound_aa_atom_asa,
-                            unbound_na_atom_asa,
-                            aa_zap_atoms,
-                            na_zap_atoms)
-
-              bound_asa   = bound_atom_asa[atom.serial]
-              unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial]
-              delta_asa   = unbound_asa - bound_asa if bound_asa && unbound_asa
-              zap_atom    = aa_zap_atoms[atom.serial] || na_zap_atoms[atom.serial]
-
-              {
-                :residue_id     => residue_id,
-                :position_type  => atom.position_type,
-                :atom_code      => atom.serial,
-                :atom_name      => atom.name.strip,
-                :altloc         => atom.altLoc.blank? ? nil : atom.altLoc,
-                :x              => atom.x,
-                :y              => atom.y,
-                :z              => atom.z,
-                :occupancy      => atom.occupancy,
-                :tempfactor     => atom.tempFactor,
-                :element        => atom.element,
-                :charge         => atom.charge.blank? ? nil : atom.charge,
-                :bound_asa      => bound_asa,
-                :unbound_asa    => unbound_asa,
-                :delta_asa      => delta_asa,
-                :radius         => zap_atom ? zap_atom[:radius]         : nil,
-                :formal_charge  => zap_atom ? zap_atom[:formal_charge]  : nil,
-                :partial_charge => zap_atom ? zap_atom[:partial_charge] : nil,
-                :potential      => zap_atom ? zap_atom[:potential]      : nil
-              }
-            end
-
             # Parse molecule and chain information
             # Very dirty... it needs refactoring!
             mol_codes = {}
             molecules = {}
 
-            compnd = bio_pdb.record('COMPND')[0].original_data.map { |s| s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'') }.join + ";"
+            compnd = bio_pdb.record('COMPND')[0].original_data.map { |s|
+              s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'')
+            }.join + ";"
+
             compnd.scan(/MOL_ID:\s+(\d+);MOLECULE:\s+(.*?);CHAIN:\s+(.*?);/) do |mol_id, molecule, chain_codes|
               chain_codes.split(/,/).each do |chain_code|
                 chain_code.strip!
@@ -192,75 +206,56 @@ namespace :bipa do
 
             bio_model = bio_pdb.models.first
 
-            model = Model.create!(
-              :structure_id => structure.id,
+            model = structure.models.create(
               :model_code   => bio_model.serial ? bio_model.serial : 1
             )
 
-            # Create empty atoms array for massive importing Atom AREs
-            atoms = Array.new
+#            # Create empty atoms array for massive importing Atom AREs
+#            atoms = Array.new
 
             bio_model.each do |bio_chain|
               chain_code = bio_chain.chain_id.blank? ? nil : bio_chain.chain_id
-
               chain_type = if bio_chain.aa?
-                             AaChain
+                             "aa_chains"
                            elsif bio_chain.dna?
-                             DnaChain
+                             "dna_chains"
                            elsif bio_chain.rna?
-                             RnaChain
+                             "rna_chains"
                            elsif bio_chain.hna?
-                             HnaChain
+                             "hna_chains"
                            else
-                             HetChain
+                             "pseudo_chains"
                            end
 
-              chain = chain_type.create!(
-                :model_id   => model.id,
+              chain = model.send(chain_type).create(
                 :chain_code => chain_code,
                 :mol_code   => mol_codes[chain_code] ? mol_codes[chain_code] : nil,
                 :molecule   => molecules[chain_code] ? molecules[chain_code] : nil
               )
 
               bio_chain.each_residue do |bio_residue|
-                if bio_residue.dna?
-                  residue = DnaResidue.create!(residue_params(chain.id, bio_residue))
+                if bio_residue.aa?
+                  residue = chain.send("aa_residues").create(residue_params(bio_residue))
+                elsif bio_residue.dna?
+                  residue = chain.send("dna_residues").create(residue_params(bio_residue))
                 elsif bio_residue.rna?
-                  residue = RnaResidue.create!(residue_params(chain.id, bio_residue))
+                  residue = chain.send("rna_residues").create(residue_params(bio_residue))
                 else
-                  dssp_hash_key = bio_chain.chain_id + bio_residue.residue_id
-                  sstruc        = dssp_sstruc[dssp_hash_key].blank? ? "L" : dssp_sstruc[dssp_hash_key]
-                  residue       = AaResidue.create!(residue_params(chain.id, bio_residue, sstruc))
+                  raise "Error: #{bio_residue} is unknown type of standard residue!"
                 end
 
-                bio_residue.each do |bio_atom|
-                  atoms << StdAtom.new(atom_params( residue.id,
-                                                    bio_atom,
-                                                    bound_atom_asa,
-                                                    unbound_aa_atom_asa,
-                                                    unbound_na_atom_asa,
-                                                    aa_zap_atoms,
-                                                    na_zap_atoms))
-                end
+                bio_residue.each { |a| residue.atoms.create(atom_params(a)) }
               end
 
-              bio_chain.each_heterogen do |het_bio_residue|
-                het_residue = HetResidue.create!(residue_params(chain.id, het_bio_residue))
+              bio_chain.each_heterogen do |bio_het_residue|
+                residue = chain.send("het_residues").create(residue_params(bio_het_residue))
 
-                het_bio_residue.each do |het_bio_atom|
-                  atoms << HetAtom.new(atom_params( het_residue.id,
-                                                    het_bio_atom,
-                                                    bound_atom_asa,
-                                                    unbound_aa_atom_asa,
-                                                    unbound_na_atom_asa,
-                                                    aa_zap_atoms,
-                                                    na_zap_atoms))
-                end
+                bio_het_residue.each { |a| residue.atoms.create(atom_params(a)) }
               end
             end
 
-            Atom.import(atoms, :validate => false)
-            structure.save!
+#            Atom.import(atoms, :validate => false)
+#            structure.save!
 
             ActiveRecord::Base.remove_connection
             $logger.info("Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})")

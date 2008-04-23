@@ -17,7 +17,7 @@ class Model < ActiveRecord::Base
 
   has_many  :hna_chains
 
-  has_many  :het_chains
+  has_many  :pseudo_chains
 
   has_many  :residues,
             :through  => :chains

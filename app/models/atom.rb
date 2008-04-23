@@ -33,7 +33,6 @@ class Atom < ActiveRecord::Base
   has_many  :hbonding_acceptors,
             :through      => :hbonds_as_donor
 
-  
 
   # ASA related
   def on_surface?

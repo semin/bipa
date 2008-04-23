@@ -10,8 +10,6 @@ class Residue < ActiveRecord::Base
   belongs_to  :chain_interface
 
   has_many  :atoms,
-            :class_name   => "Atom",
-            :foreign_key  => "residue_id",
             :dependent    => :destroy
 
   has_many  :contacts,
@@ -74,10 +72,18 @@ end # class Residue
 
 
 class StdResidue < Residue
+
+  has_many  :atoms,
+            :class_name   => "StdAtom",
+            :foreign_key  => "residue_id"
 end
 
 
 class HetResidue < Residue
+
+  has_many  :atoms,
+            :class_name   => "HetAtom",
+            :foreign_key  => "residue_id"
 
   def one_letter_code
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or "X"
@@ -106,7 +112,7 @@ class AaResidue < StdResidue
   def on_surface?
     relative_unbound_asa > MIN_SRFRES_RASA
   end
-  
+
   def on_interface?
     delta_asa > MIN_INTRES_SASA
   end
