@@ -5,127 +5,167 @@ namespace :bipa do
 
     $logger = Logger.new(STDOUT)
 
-#    desc "Import HBPlus results to BIPA"
-#    task :hbplus => [:environment] do
-#
-#            # Filter C-alpha only structures using HBPLUS results
-#            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
-#            hbonds_bipa = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
-#
-#            if hbonds_bipa.empty?
-#              $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results found!")
-#              next
-#            end
-#
-#    end
+    desc "Import NACCESS results to BIPA"
+    task :naccess => [:environment] do
+
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_codes.each_with_index do |pdb_code, i|
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            structure           = Structure.find_by_pdb_code(pdb_code)
+            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
+            unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
+            unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
+
+            if (!File.exists?(bound_asa_file)       ||
+                !File.exists?(unbound_aa_asa_file)  ||
+                !File.exists?(unbound_na_asa_file))
+              $logger.warn("SKIP: #{pdb_code} might be an improper PDB file. No NACCESS result found!")
+              structure.tainted = true
+              structure.save!
+              next
+            end
+
+            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file))
+            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file))
+            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file))
+
+            structure.atoms.find_all_in_chunks |atom|
+              naccess             = atom.build_naccess
+              naccess.bound_asa   = bound_atom_asa[atom.serial] || nil
+              naccess.unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial] || nil
+              naccess.delta_asa   = bound_asa && unbound_asa ? unbound_asa - bound_asa : nil
+              naccess.save!
+            end
+            ActiveRecord::Base.remove_connection
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end
 
 
-#    desc "Import NACCESS results to BIPA"
-#    task :naccess => [:environment] do
-#            # Load NACCESS results for every atom in the structure
-#            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
-#            unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
-#            unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
-#
-#            if (!File.exists?(bound_asa_file)       ||
-#                !File.exists?(unbound_aa_asa_file)  ||
-#                !File.exists?(unbound_na_asa_file))
-#              $logger.warn("SKIP: #{pdb_code} might be an improper PDB file. No NACCESS result found!")
-#              next
-#            end
-#
-#            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
-#            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
-#            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
-#
-#              bound_asa   = bound_atom_asa[atom.serial]
-#              unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial]
-#              delta_asa   = unbound_asa - bound_asa if bound_asa && unbound_asa
-#                :bound_asa      => bound_asa,
-#                :unbound_asa    => unbound_asa,
-#                :delta_asa      => delta_asa,
-#    end
+    desc "Import DSSP results to BIPA"
+    task :dssp => [:environment] do
+
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_codes.each_with_index do |pdb_code, i|
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            structure = Structure.find_by_pdb_code(pdb_code)
+            dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
+
+            if (!File.exists?(dssp_file))
+              $logger.warn("SKIP: #{pdb_code} due to missing DSSP result file")
+              structure.tainted = true
+              structure.save!
+              next
+            end
+
+            bipa_dssp = Bipa::Dssp.new(IO.readlines(dssp_file).join)
+
+            structure.aa_residues.find_all_in_chunks do |residue|
+              key = residue.code +
+                    residue.icode ? residue.icode : '' +
+                    residue.chain.chain_code
+
+              if bipa_dssp.has_key? key
+                dssp = residue.build_dssp(bipa_dssp)
+                dssp.save!
+              end
+            end
+            ActiveRecord::Base.remove_connection
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end
 
 
-#    desc "Import DSSP results to BIPA"
-#    task :dssp => [:environment] do
-#            # Load DSSP results for every amino acid residue in the structure
-#            dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
-#
-#            if (!File.exists?(dssp_file))
-#              $logger.warn("SKIP: #{pdb_code} due to missing DSSP result file")
-#              next
-#            end
-#
-#            dssp_sstruc = Bipa::Dssp.new(IO.readlines(dssp_file).join).sstruc
-#
-#    end
+    desc "Import OpenEYE ZAP results to BIPA"
+    task :zap => [:environment] do
 
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
 
-#    desc "Import OpenEYE ZAP results to BIPA"
-#    task :zap => [:environment] do
-#            # Load ZAP results for every atoms
-#            ZapAtom     = Struct.new(:index, :serial, :symbol, :radius,
-#                                     :formal_charge, :partial_charge, :potential)
-#            aa_zap_file = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
-#            na_zap_file = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
-#            aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
-#            na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
-#
-#            if !File.size?(aa_zap_file) || !File.size?(na_zap_file)
-#              $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
-#              next
-#            end
-#
-#            if File.size?(aa_zap_err) || File.size?(na_zap_err)
-#              $logger.warn("SKIP: #{pdb_code} due to errors in ZAP calculation")
-#              next
-#            end
-#
-#            aa_zap_atoms  = Hash.new
-#            na_zap_atoms  = Hash.new
-#            tainted_zap   = false
-#
-#            IO.foreach(aa_zap_file) do |line|
-#              elems = line.chomp.split(/\s+/)
-#              unless elems.size == 7
-#                tainted_zap = true
-#                break
-#              end
-#              zap = ZapAtom.new(elems[0].to_i,
-#                                elems[1].to_i,
-#                                elems[2],
-#                                elems[3].to_f,
-#                                elems[4].to_f,
-#                                elems[5].to_f,
-#                                elems[6].to_f)
-#              aa_zap_atoms[zap[:serial]] = zap
-#            end
-#
-#            IO.foreach(na_zap_file) do |line|
-#              elems = line.chomp.split(/\s+/)
-#              unless elems.size == 7
-#                tainted_zap = true
-#                break
-#              end
-#              zap = ZapAtom.new(elems[0].to_i,
-#                                elems[1].to_i,
-#                                elems[2],
-#                                elems[3].to_f,
-#                                elems[4].to_f,
-#                                elems[5].to_f,
-#                                elems[6].to_f)
-#              na_zap_atoms[zap[:serial]] = zap
-#            end
-#
-#            if tainted_zap
-#              $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
-#              next
-#            end
-#
-#              zap_atom    = aa_zap_atoms[atom.serial] || na_zap_atoms[atom.serial]
-#
-#    end
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_codes.each_with_index do |pdb_code, i|
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            structure   = Structure.find_by_pdb_code(pdb_code)
+            ZapAtom     = Struct.new(:radius, :formal_charge, :partial_charge, :potential)
+            aa_zap_file = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
+            na_zap_file = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
+            aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
+            na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
+            zap_atoms   = Hash.new
+            tainted_zap = false
+
+            if (!File.size?(aa_zap_file)  ||
+                !File.size?(na_zap_file)  ||
+                File.size?(aa_zap_err)    ||
+                File.size?(na_zap_err))
+              $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
+              structure.tainted = true
+              structure.save!
+              next
+            end
+
+            IO.foreach(aa_zap_file) do |line|
+              z = line.chomp.split(/\s+/)
+              unless z.size == 7
+                tainted_zap = true
+                break
+              end
+              zap_atoms[z[1].to_i] = ZapAtom.new(z[3].to_f, z[4].to_f, z[5].to_f, z[6].to_f)
+            end
+
+            IO.foreach(na_zap_file) do |line|
+              z = line.chomp.split(/\s+/)
+              unless elems.size == 7
+                tainted_zap = true
+                break
+              end
+              zap_atoms[z[1].to_i] = ZapAtom.new(z[3].to_f, z[4].to_f, z[5].to_f, z[6].to_f)
+            end
+
+            if tainted_zap
+              $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
+              structure.tainted = true
+              structure.save!
+              next
+            end
+
+            structure.atoms.each do |atom|
+              if zap_atom[atom.serial]
+                zap = atom.build_zap(zap_atom[atom.serial])
+                zap.save!
+              end
+            end
+            ActiveRecord::Base.remove_connection
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end
 
 
 #    desc "Import various hydrophobicity scales to BIPA"
@@ -240,6 +280,8 @@ namespace :bipa do
                   residue = chain.send("dna_residues").create(residue_params(bio_residue))
                 elsif bio_residue.rna?
                   residue = chain.send("rna_residues").create(residue_params(bio_residue))
+                elsif bio_residue.na?
+                  residue = chain.send("na_residues").create(residue_params(bio_residue))
                 else
                   raise "Error: #{bio_residue} is unknown type of standard residue!"
                 end
@@ -269,7 +311,7 @@ namespace :bipa do
     desc "Import van der Waals Contacts"
     task :contacts => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -327,7 +369,7 @@ namespace :bipa do
     desc "Import Hydrogen Bonds"
     task :hbonds => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -336,20 +378,25 @@ namespace :bipa do
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
-
-            raise "Cannot find #{hbplus_file}, this cannot be happend!" if !File.exist? hbplus_file
-
             ActiveRecord::Base.establish_connection(config)
 
             structure   = Structure.find_by_pdb_code(pdb_code)
-            hbonds_bipa = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
+            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
+            bipa_hbonds = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
             hbonds      = Array.new
 
-            hbonds_bipa.each do |hbond|
-              if ((hbond.donor.aa? && hbond.acceptor.na?) || (hbond.donor.na? && hbond.acceptor.aa?))
+            if !File.size?(hbplus_file) || bipa_hbonds.empty?
+              $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results are found!")
+              structure.tainted = true
+              structure.save!
+              next
+            end
+
+            bipa_hbonds.each do |hbond|
+              if ((hbond.donor.aa? && hbond.acceptor.na?) ||
+                  (hbond.donor.na? && hbond.acceptor.aa?))
                 begin
-                  donor_atom    =
+                  donor_atom =
                     structure.
                     models.first.
                     chains.find_by_chain_code(hbond.donor.chain_code).

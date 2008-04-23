@@ -10,6 +10,7 @@ module Bipa
           atom_asa[line[6..10].to_i] = line[54..61].to_f
         end
       end
+      @atom_asa
     end
   end
 end

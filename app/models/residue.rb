@@ -109,6 +109,8 @@ class AaResidue < StdResidue
               :class_name   => "ResidueMap",
               :foreign_key  => "residue_map_id"
 
+  has_one     :dssp
+
   def on_surface?
     relative_unbound_asa > MIN_SRFRES_RASA
   end

@@ -100,7 +100,8 @@ module Bio
       end
 
       def aa?
-        AminoAcids::Residues::STANDARD.include?(resName.strip)
+        AminoAcids::Residues::STANDARD.include?(resName.strip) ||
+        AminoAcids::Residues::NON_STANDARD.include?(resName.strip)
       end
 
       def hydrophobicity

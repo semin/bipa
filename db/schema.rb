@@ -173,13 +173,13 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'naccess' table
   create_table "naccess", :force => true do |t|
-    t.belongs_to  "residue"
+    t.belongs_to  "atom"
     t.float       "unbound_asa"
     t.float       "bound_asa"
     t.float       "delta_asa"
   end
 
-  add_index "naccess", ["residue_id"], :name => "index_naccess_on_residue_id"
+  add_index "naccess", ["atom_id"], :name => "index_naccess_on_atom_id"
 
 
   # 'zap' table
