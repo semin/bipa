@@ -6,7 +6,7 @@ namespace :bipa do
   namespace :import do
 
     desc "Import protein-nucleic acid complex PDB files to BIPA tables"
-    task :pdb => [:environment] do
+    task :structures => [:environment] do
 
       # helper methods for Residue and Atom params
       def residue_params(bio_residue)
@@ -526,7 +526,7 @@ namespace :bipa do
 
 
     desc "Import SCOP datasets"
-    task :scop => [:environment] do
+    task :scops => [:environment] do
 
       hie_file = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
       des_file = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
