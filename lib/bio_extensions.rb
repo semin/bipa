@@ -16,6 +16,38 @@ module Bio
 
   class PDB
 
+    def r_value
+      if remark(3) && !remark(3).empty?
+        rv_line = remark(3).select { |r| r.gsub(/^\s+/, "").match(/^R VALUE/) }[0]
+        if !rv_line.blank?
+          rv = rv_line.match(/:\s*(\S+)/)[1]
+          return rv.blank? || rv.match(/NULL/) ? nil : rv.to_f
+        end
+      end
+      nil
+    end
+
+    def r_free
+      if remark(3) && !remark(3).empty?
+        rf_line = remark(3).select { |r| r.gsub(/^\s+/, "").match(/^FREE R VALUE\s+:/) }[0]
+        if !rf_line.blank?
+          rf = rf_line.match(/:\s*(\S+)/)[1]
+          return rf.blank? || rf.match(/NULL/) ? nil : rf.to_f
+        end
+      end
+      nil
+    end
+
+    def space_group
+      if remark(290) && !remark(290).empty?
+        sg_line = remark(290).select { |r| r.gsub(/^\s+/, "").match(/SPACE GROUP/) }[0]
+        if !sg_line.blank?
+          return sg_line.match(/:\s*(\S+.*)$/)[1]
+        end
+      end
+      nil
+    end
+
     def deposition_date
       if record('HEADER')[0].depDate =~ /(\d{2})-(\w{3})-(\d{2})/
         $3.to_i < 50 ? "#{$1}-#{$2}-#{'20'+$3}" : "#{$1}-#{$2}-#{'19'+$3}"

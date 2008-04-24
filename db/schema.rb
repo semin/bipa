@@ -46,6 +46,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string    "title"
     t.string    "exp_method"
     t.float     "resolution"
+    t.float     "r_value"
+    t.float     "r_free"
+    t.string    "space_group"
     t.date      "deposited_at"
     t.boolean   "obsolete",   :default => false
     t.boolean   "tainted",    :default => false
@@ -74,6 +77,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      "molecule"
     t.boolean     "tainted"
   end
+
+  execute "ALTER TABLE chains MODIFY chain_code VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
 
   add_index "chains", ["chain_code"],             :name => "index_chains_on_chain_code"
   add_index "chains", ["tainted"],                :name => "index_chains_on_tainted"

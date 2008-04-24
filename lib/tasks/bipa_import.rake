@@ -45,8 +45,6 @@ namespace :bipa do
           tainted = false
 
           fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
             pdb_code  = File.basename(pdb_file, ".pdb")
             bio_pdb   = Bio::PDB.new(IO.read(pdb_file))
 
@@ -67,12 +65,17 @@ namespace :bipa do
               end
             end
 
+            ActiveRecord::Base.establish_connection(config)
+
             structure = Structure.create!(
               :pdb_code       => bio_pdb.accession,
               :classification => bio_pdb.classification,
               :title          => bio_pdb.definition,
               :exp_method     => bio_pdb.exp_method,
               :resolution     => bio_pdb.resolution.to_f < EPSILON ? nil : bio_pdb.resolution,
+              :r_value        => bio_pdb.r_value,
+              :r_free         => bio_pdb.r_free,
+              :space_group    => bio_pdb.space_group,
               :deposited_at   => bio_pdb.deposition_date
             )
 
@@ -117,13 +120,11 @@ namespace :bipa do
                 else
                   raise "Error: #{bio_residue} is unknown type of standard residue!"
                 end
-
                 bio_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
               end
 
               bio_chain.each_heterogen do |bio_het_residue|
                 residue = chain.send("het_residues").create(residue_params(bio_het_residue))
-
                 bio_het_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
               end
             end

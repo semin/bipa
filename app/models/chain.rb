@@ -47,7 +47,6 @@ class Chain < ActiveRecord::Base
                           :allow_nil      => true,
                           :case_sensitive => true
 
-
   def fasta_header
     "#{model.structure.pdb_code}:#{chain_code}"
   end
