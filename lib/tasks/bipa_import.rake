@@ -129,6 +129,7 @@ namespace :bipa do
             end
 
             Atom.import(atoms, :validate => false)
+            structure.save!
             ActiveRecord::Base.remove_connection
             $logger.info("Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})")
           end
@@ -138,7 +139,7 @@ namespace :bipa do
     end # task :pdb
 
 
-    desc "Import NACCESS results to BIPA"
+    desc "Import NACCESS results into BIPA"
     task :naccess => [:environment] do
 
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
