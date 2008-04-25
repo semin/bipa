@@ -337,7 +337,7 @@ namespace :bipa do
                 neighbor_atoms.each do |neighbor_atom|
                   if neighbor_atom.aa?
                     dist = na_atom - neighbor_atom
-                    contacts << [neighbor_atom.id, na_atom.id, dist]
+                    contacts << Contact.new(neighbor_atom, na_atom, dist)
                   end
                 end
               end
@@ -347,17 +347,17 @@ namespace :bipa do
                 neighbor_atoms.each do |neighbor_atom|
                   if neighbor_atom.na?
                     dist = aa_atom - neighbor_atom
-                    contacts << [aa_atom.id, neighbor_atom.id, dist]
+                    contacts << Contact.new(aa_atom, neighbor_atom, dist)
                   end
                 end
               end
             end
 
-            columns = [:atom_id, :contacting_atom_id, :distance]
-            Contact.import(columns, contacts)
+            #columns = [:atom_id, :contacting_atom_id, :distance]
+            #Contact.import(columns, contacts)
+            Contact.import(contacts, :validate => false)
             structure.save!
             ActiveRecord::Base.remove_connection
-
             $logger.info("Importing 'contacts' in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end
         end
