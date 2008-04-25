@@ -143,7 +143,7 @@ namespace :bipa do
     desc "Import NACCESS results into BIPA"
     task :naccess => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -168,19 +168,34 @@ namespace :bipa do
               next
             end
 
-            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file))
-            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file))
-            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file))
+            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
+            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
+            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
 
-            structure.atoms.each do |atom|
+            structure.aa_atoms.each do |atom|
+              next if (!bound_atom_asa.has_key?(atom.atom_code) &&
+                       !unbound_aa_atom_asa.has_key?(atom.atom_code))
               naccess             = atom.build_naccess
-              naccess.bound_asa   = bound_atom_asa[atom.serial] || nil
-              naccess.unbound_asa = unbound_aa_atom_asa[atom.serial] || unbound_na_atom_asa[atom.serial] || nil
-              naccess.delta_asa   = bound_asa && unbound_asa ? unbound_asa - bound_asa : nil
+              naccess.bound_asa   = bound_atom_asa[atom.atom_code]
+              naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
+              naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] -
+                                    bound_atom_asa[atom.atom_code]
+              naccess.save!
+            end
+
+            structure.na_atoms.each do |atom|
+              next if (!bound_atom_asa.has_key?(atom.atom_code) &&
+                       !unbound_na_atom_asa.has_key?(atom.atom_code))
+              naccess             = atom.build_naccess
+              naccess.bound_asa   = bound_atom_asa[atom.atom_code]
+              naccess.unbound_asa = unbound_na_atom_asa[atom.atom_code]
+              naccess.delta_asa   = unbound_na_atom_asa[atom.atom_code] -
+                                    bound_atom_asa[atom.atom_code]
               naccess.save!
             end
 
             ActiveRecord::Base.remove_connection
+            $logger.info("Importing 'naccess' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end
         end
         ActiveRecord::Base.establish_connection(config)
