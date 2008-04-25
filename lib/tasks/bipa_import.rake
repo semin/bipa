@@ -159,9 +159,9 @@ namespace :bipa do
             unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
             unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
 
-            if (!File.exists?(bound_asa_file)       ||
-                !File.exists?(unbound_aa_asa_file)  ||
-                !File.exists?(unbound_na_asa_file))
+            if (!File.size?(bound_asa_file)       ||
+                !File.size?(unbound_aa_asa_file)  ||
+                !File.size?(unbound_na_asa_file))
               $logger.warn("SKIP: #{pdb_code} might be an improper PDB file. No NACCESS result found!")
               structure.tainted = true
               structure.save!
