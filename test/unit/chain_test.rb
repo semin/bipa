@@ -38,8 +38,8 @@ class ChainTest < Test::Unit::TestCase
 end
 
 
-class AaChainTest < Test::Unit::TestCase
-
+class AaChainTest < ChainTest
+  
   should_have_many  :dna_interfaces
 
   should_have_many  :rna_interfaces
@@ -56,10 +56,10 @@ class AaChainTest < Test::Unit::TestCase
         @aa_chain     = AaChain.create(valid_chain_params)
         @aa_residue1  = AaResidue.create(valid_residue_params(:residue_name => "ARG"))
         @aa_residue2  = AaResidue.create(valid_residue_params(:residue_name => "PHE"))
-        @aa_atom1     = Atom.create(valid_atom_params)
-        @aa_atom2     = Atom.create(valid_atom_params)
-        @aa_atom3     = Atom.create(valid_atom_params)
-        @aa_atom4     = Atom.create(valid_atom_params)
+        @aa_atom1     = StdAtom.create(valid_atom_params)
+        @aa_atom2     = StdAtom.create(valid_atom_params)
+        @aa_atom3     = StdAtom.create(valid_atom_params)
+        @aa_atom4     = StdAtom.create(valid_atom_params)
         
         @aa_residue1.atoms << @aa_atom1
         @aa_residue1.atoms << @aa_atom2
@@ -120,7 +120,7 @@ class AaChainTest < Test::Unit::TestCase
 end
 
 
-class HnaChainTest < Test::Unit::TestCase
+class PseudoChainTest < ChainTest
                     
   should_have_many  :dna_residues
 

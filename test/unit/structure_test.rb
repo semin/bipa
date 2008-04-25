@@ -24,73 +24,7 @@ class StructureTest < Test::Unit::TestCase
                     
   should_have_many  :het_chains,
                     :through => :models
-                    
-  # should_have_many  :residues,
-  #                   :through => :chains
-  #                   
-  # should_have_many  :aa_residues,
-  #                   :through    => :aa_chains
-  # 
-  # should_have_many  :na_residues,
-  #                   :through    => :na_chains
-  # 
-  # should_have_many  :dna_residues,
-  #                   :through    => :dna_chains
-  # 
-  # should_have_many  :rna_residues,
-  #                   :through    => :rna_chains
-  #                   
-  # should_have_many  :hna_residues,
-  #                   :through    => :hna_chains
-  # 
-  # should_have_many  :het_residues,
-  #                   :through    => :het_chains
-  #                   
-  # should_have_many  :atoms,
-  #                   :through    => :residues
-  # 
-  # should_have_many  :aa_atoms,
-  #                   :through    => :aa_residues
-  # 
-  # should_have_many  :na_atoms,
-  #                   :through    => :na_residues
-  #                   
-  # should_have_many  :dna_atoms,
-  #                   :through    => :dna_residues
-  # 
-  # should_have_many  :rna_atoms,
-  #                   :through    => :rna_residues
-  # 
-  # should_have_many  :hna_atoms,
-  #                   :through    => :hna_residues
-  # 
-  # should_have_many  :het_atoms,
-  #                   :through    => :het_residues
-  # 
-  # should_have_many  :contacts,
-  #                   :through    => :atoms
-  # 
-  # should_have_many  :contacting_atoms,
-  #                   :through    => :contacts
-  # 
-  # should_have_many  :hbonds_as_donor,
-  #                   :through    => :atoms
-  # 
-  # should_have_many  :hbonds_as_acceptor,
-  #                   :through    => :atoms
-  # 
-  # should_have_many  :hbonding_donors,
-  #                   :through    => :hbonds_as_acceptor
-  # 
-  # should_have_many  :hbonding_acceptors,
-  #                   :through    => :hbonds_as_donor
-  # 
-  # should_have_many  :whbonds,
-  #                   :through    => :atoms
-  # 
-  # should_have_many  :whbonding_atoms,
-  #                   :through    => :whbonds
-                    
+                                      
 
   context "A Stucture instance" do
 
@@ -158,8 +92,8 @@ class StructureTest < Test::Unit::TestCase
       model     = Model.create(valid_model_params)
       chain     = AaChain.create(valid_chain_params)
       residue   = AaResidue.create(valid_residue_params)
-      atom1     = Atom.create(valid_atom_params)
-      atom2     = Atom.create(valid_atom_params)
+      atom1     = StdAtom.create(valid_atom_params)
+      atom2     = StdAtom.create(valid_atom_params)
     
       structure.models << model
       structure.models.first.aa_chains << chain
