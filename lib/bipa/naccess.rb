@@ -1,16 +1,17 @@
 module Bipa
   class Naccess
     
-    attr_reader :atom_asa
+    attr_reader :atom_asa, :atom_radius
 
     def initialize(file_str)
       @atom_asa = {}
+      @atom_radius   = {}
       file_str.each do |line|
         if line =~ /^ATOM/
-          atom_asa[line[6..10].to_i] = line[54..61].to_f
+          atom_asa[line[6..10].to_i]    = line[54..61].to_f
+          atom_radius[line[6..10].to_i] = line[62..67].to_f
         end
       end
-      @atom_asa
     end
   end
 end
@@ -43,10 +44,12 @@ END
 
     def test_first_residue
       assert_equal(@naccess.atom_asa[1], 38.898)
+      assert_equal(@naccess.atom_radius[1], 1.65)
     end
 
     def test_last_residue
       assert_equal(@naccess.atom_asa[10], 0.000)
+      assert_equal(@naccess.atom_radius[10], 1.76)
     end
   end
 end

@@ -183,6 +183,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :unbound_asa
     t.float       :bound_asa
     t.float       :delta_asa
+    t.float       :radius
   end
 
   add_index :naccess, :atom_id

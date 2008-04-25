@@ -168,6 +168,7 @@ namespace :bipa do
               next
             end
 
+            bound_atom_radius   = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_radius
             bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
             unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
             unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
@@ -180,6 +181,7 @@ namespace :bipa do
               naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
               naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] -
                                     bound_atom_asa[atom.atom_code]
+              naccess.radius      = bound_atom_radius[atom.atom_code]
               naccess.save!
             end
 
@@ -191,6 +193,7 @@ namespace :bipa do
               naccess.unbound_asa = unbound_na_atom_asa[atom.atom_code]
               naccess.delta_asa   = unbound_na_atom_asa[atom.atom_code] -
                                     bound_atom_asa[atom.atom_code]
+              naccess.radius      = bound_atom_radius[atom.atom_code]
               naccess.save!
             end
 
