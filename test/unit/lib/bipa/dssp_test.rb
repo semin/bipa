@@ -35,76 +35,219 @@ END
     end
     
     should "return correct #three_turns" do
+      assert_equal("", @residues["4A"].three_turns)
+      assert_equal("", @residues["5A"].three_turns)
+      assert_equal("", @residues["6A"].three_turns)
+      assert_equal("", @residues["140F"].three_turns)
+      assert_equal("", @residues["141F"].three_turns)
+      assert_equal("", @residues["142F"].three_turns)
     end
     
     should "return correct #four_turns" do
+      assert_equal("", @residues["4A"].four_turns)
+      assert_equal("", @residues["5A"].four_turns)
+      assert_equal("", @residues["6A"].four_turns)
+      assert_equal(">", @residues["140F"].four_turns)
+      assert_equal(">", @residues["141F"].four_turns)
+      assert_equal(">", @residues["142F"].four_turns)
     end
     
     should "return correct #five_turns" do
+      assert_equal("", @residues["4A"].five_turns)
+      assert_equal("", @residues["5A"].five_turns)
+      assert_equal("", @residues["6A"].five_turns)
+      assert_equal("", @residues["140F"].five_turns)
+      assert_equal("", @residues["141F"].five_turns)
+      assert_equal("", @residues["142F"].five_turns)
     end
     
     should "return correct #geometrical_bend" do
+      assert_equal("",  @residues["4A"].geometrical_bend)
+      assert_equal("S", @residues["5A"].geometrical_bend)
+      assert_equal("S", @residues["6A"].geometrical_bend)
+      assert_equal("",  @residues["140F"].geometrical_bend)
+      assert_equal("",  @residues["141F"].geometrical_bend)
+      assert_equal("S", @residues["142F"].geometrical_bend)
     end
     
     should "return correct #chirality" do
+      assert_equal("+", @residues["4A"].chirality)
+      assert_equal("+", @residues["5A"].chirality)
+      assert_equal("-", @residues["6A"].chirality)
+      assert_equal("",  @residues["140F"].chirality)
+      assert_equal("+", @residues["141F"].chirality)
+      assert_equal("+", @residues["142F"].chirality)
     end
     
     should "return correct #beta_bridge_label_1" do
+      assert_equal("", @residues["4A"].beta_bridge_label_1)
+      assert_equal("", @residues["5A"].beta_bridge_label_1)
+      assert_equal("", @residues["6A"].beta_bridge_label_1)
+      assert_equal("", @residues["140F"].beta_bridge_label_1)
+      assert_equal("", @residues["141F"].beta_bridge_label_1)
+      assert_equal("", @residues["142F"].beta_bridge_label_1)
     end
     
     should "return correct #beta_bridge_label_2" do
+      assert_equal("", @residues["4A"].beta_bridge_label_2)
+      assert_equal("", @residues["5A"].beta_bridge_label_2)
+      assert_equal("", @residues["6A"].beta_bridge_label_2)
+      assert_equal("", @residues["140F"].beta_bridge_label_2)
+      assert_equal("", @residues["141F"].beta_bridge_label_2)
+      assert_equal("", @residues["142F"].beta_bridge_label_2)
     end
     
     should "return correct #beta_brdige_partner_residue_number_1" do
+      assert_equal(0, @residues["4A"].beta_brdige_partner_residue_number_1)
+      assert_equal(0, @residues["5A"].beta_brdige_partner_residue_number_1)
+      assert_equal(0, @residues["6A"].beta_brdige_partner_residue_number_1)
+      assert_equal(0, @residues["140F"].beta_brdige_partner_residue_number_1)
+      assert_equal(0, @residues["141F"].beta_brdige_partner_residue_number_1)
+      assert_equal(0, @residues["142F"].beta_brdige_partner_residue_number_1)
     end
     
     should "return correct #beta_brdige_partner_residue_number_2" do
+      assert_equal(0, @residues["4A"].beta_brdige_partner_residue_number_2)
+      assert_equal(0, @residues["5A"].beta_brdige_partner_residue_number_2)
+      assert_equal(0, @residues["6A"].beta_brdige_partner_residue_number_2)
+      assert_equal(0, @residues["140F"].beta_brdige_partner_residue_number_2)
+      assert_equal(0, @residues["141F"].beta_brdige_partner_residue_number_2)
+      assert_equal(0, @residues["142F"].beta_brdige_partner_residue_number_2)
     end
     
     should "return correct #beta_sheet_label" do
+      assert_equal("", @residues["4A"].beta_sheet_label)
+      assert_equal("", @residues["5A"].beta_sheet_label)
+      assert_equal("", @residues["6A"].beta_sheet_label)
+      assert_equal("", @residues["140F"].beta_sheet_label)
+      assert_equal("", @residues["141F"].beta_sheet_label)
+      assert_equal("", @residues["142F"].beta_sheet_label)
     end
     
     should "return correct #sasa" do
+      assert_equal(28,  @residues["4A"].sasa)
+      assert_equal(213, @residues["5A"].sasa)
+      assert_equal(93,  @residues["6A"].sasa)
+      assert_equal(193, @residues["140F"].sasa)
+      assert_equal(188, @residues["141F"].sasa)
+      assert_equal(72,  @residues["142F"].sasa)
     end
-    
+
     should "return correct #nh_o_hbond_1_acceptor" do
+      assert_equal(-2,  @residues["4A"].nh_o_hbond_1_acceptor)
+      assert_equal(-2,  @residues["5A"].nh_o_hbond_1_acceptor)
+      assert_equal(1,   @residues["6A"].nh_o_hbond_1_acceptor)
+      assert_equal(0,   @residues["140F"].nh_o_hbond_1_acceptor)
+      assert_equal(1,   @residues["141F"].nh_o_hbond_1_acceptor)
+      assert_equal(2,   @residues["142F"].nh_o_hbond_1_acceptor)
     end
     
     should "return correct #nh_o_hbond_1_energy" do
+      assert_equal(-0.4,  @residues["4A"].nh_o_hbond_1_energy)
+      assert_equal(-0.5,  @residues["5A"].nh_o_hbond_1_energy)
+      assert_equal(-0.1,  @residues["6A"].nh_o_hbond_1_energy)
+      assert_equal( 0.0,  @residues["140F"].nh_o_hbond_1_energy)
+      assert_equal(-0.2,  @residues["141F"].nh_o_hbond_1_energy)
+      assert_equal(-0.2,  @residues["142F"].nh_o_hbond_1_energy)
     end
     
     should "return correct #o_hn_hbond_1_donor" do
-    end
+      assert_equal(3, @residues["4A"].o_hn_hbond_1_donor)
+      assert_equal(2, @residues["5A"].o_hn_hbond_1_donor)
+      assert_equal(2, @residues["6A"].o_hn_hbond_1_donor)
+      assert_equal(4, @residues["140F"].o_hn_hbond_1_donor)
+      assert_equal(4, @residues["141F"].o_hn_hbond_1_donor)
+      assert_equal(4, @residues["142F"].o_hn_hbond_1_donor)
+    end            
     
     should "return correct #o_hn_hbond_1_energy" do
+      assert_equal(-0.1,  @residues["4A"].o_hn_hbond_1_energy)
+      assert_equal(-1.3,  @residues["5A"].o_hn_hbond_1_energy)
+      assert_equal(-2.6,  @residues["6A"].o_hn_hbond_1_energy)
+      assert_equal(-1.5,  @residues["140F"].o_hn_hbond_1_energy)
+      assert_equal(-1.4,  @residues["141F"].o_hn_hbond_1_energy)
+      assert_equal(-1.9,  @residues["142F"].o_hn_hbond_1_energy)
     end
     
     should "return correct #nh_o_hbond_2_acceptor" do
-    end
+      assert_equal(26, @residues["4A"].nh_o_hbond_2_acceptor)
+      assert_equal( 1, @residues["5A"].nh_o_hbond_2_acceptor)
+      assert_equal( 2, @residues["6A"].nh_o_hbond_2_acceptor)
+      assert_equal( 0, @residues["140F"].nh_o_hbond_2_acceptor)
+      assert_equal( 2, @residues["141F"].nh_o_hbond_2_acceptor)
+      assert_equal( 1, @residues["142F"].nh_o_hbond_2_acceptor)
+    end             
     
     should "return correct #nh_o_hbond_2_energy" do
+      assert_equal(-0.3,  @residues["4A"].nh_o_hbond_2_energy)
+      assert_equal(-0.2,  @residues["5A"].nh_o_hbond_2_energy)
+      assert_equal(-0.0,  @residues["6A"].nh_o_hbond_2_energy)
+      assert_equal( 0.0,  @residues["140F"].nh_o_hbond_2_energy)
+      assert_equal(-0.2,  @residues["141F"].nh_o_hbond_2_energy)
+      assert_equal(-0.2,  @residues["142F"].nh_o_hbond_2_energy)
     end
     
     should "return correct #o_hn_hbond_2_donor" do
+      assert_equal(308, @residues["4A"].o_hn_hbond_2_donor)
+      assert_equal(-1,  @residues["5A"].o_hn_hbond_2_donor)
+      assert_equal(-1,  @residues["6A"].o_hn_hbond_2_donor)
+      assert_equal(5,   @residues["140F"].o_hn_hbond_2_donor)
+      assert_equal(5,   @residues["141F"].o_hn_hbond_2_donor)
+      assert_equal(3,   @residues["142F"].o_hn_hbond_2_donor)
     end
     
     should "return correct #o_hn_hbond_2_energy" do
+      assert_equal(-0.0,  @residues["4A"].o_hn_hbond_2_energy)
+      assert_equal(-0.2,  @residues["5A"].o_hn_hbond_2_energy)
+      assert_equal(-0.2,  @residues["6A"].o_hn_hbond_2_energy)
+      assert_equal(-0.2,  @residues["140F"].o_hn_hbond_2_energy)
+      assert_equal(-0.1,  @residues["141F"].o_hn_hbond_2_energy)
+      assert_equal(-0.3,  @residues["142F"].o_hn_hbond_2_energy)
     end
     
     should "return correct #tco" do
+      assert_equal(-0.876,  @residues["4A"].tco)
+      assert_equal( 0.859,  @residues["5A"].tco)
+      assert_equal(-0.693,  @residues["6A"].tco)
+      assert_equal( 0.000,  @residues["140F"].tco)
+      assert_equal( 0.796,  @residues["141F"].tco)
+      assert_equal( 0.947,  @residues["142F"].tco)
     end
     
     should "return correct #kappa" do
+      assert_equal( 18.3,  @residues["4A"].kappa)
+      assert_equal( 74.0,  @residues["5A"].kappa)
+      assert_equal( 74.1,  @residues["6A"].kappa)
+      assert_equal(360.0,  @residues["140F"].kappa)
+      assert_equal(360.0,  @residues["141F"].kappa)
+      assert_equal(104.3,  @residues["142F"].kappa)
     end
     
     should "return correct #alpha" do
-    end
+      assert_equal(178.8,   @residues["4A"].alpha)
+      assert_equal(61.4,    @residues["5A"].alpha)
+      assert_equal(-159.1,  @residues["6A"].alpha)
+      assert_equal(360.0,   @residues["140F"].alpha)
+      assert_equal(46.8,    @residues["141F"].alpha)
+      assert_equal(55.2,    @residues["142F"].alpha)
+    end             
     
     should "return correct #phi" do
+      assert_equal(-103.4,  @residues["4A"].phi)
+      assert_equal(-88.1,   @residues["5A"].phi)
+      assert_equal(-86.8,   @residues["6A"].phi)
+      assert_equal( 360.0,  @residues["140F"].phi)
+      assert_equal(-50.6,   @residues["141F"].phi)
+      assert_equal(-79.4,   @residues["142F"].phi)
     end
     
     should "return correct #psi" do
+      assert_equal(125.7, @residues["4A"].psi)
+      assert_equal(-42.3, @residues["5A"].psi)
+      assert_equal(88.6,  @residues["6A"].psi)
+      assert_equal(136.6, @residues["140F"].psi)
+      assert_equal(-32.4, @residues["141F"].psi)
+      assert_equal(-47.7, @residues["142F"].psi)
     end
-  
   end
 end
