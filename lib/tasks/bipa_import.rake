@@ -331,31 +331,18 @@ namespace :bipa do
             aa_atoms = structure.aa_atoms
             na_atoms = structure.na_atoms
 
-            if aa_atoms.size > na_atoms.size
-              na_atoms.each do |na_atom|
-                neighbor_atoms = kdtree.neighbors(na_atom, MAX_VDW_DISTANCE).map(&:point)
-                neighbor_atoms.each do |neighbor_atom|
-                  if neighbor_atom.aa?
-                    dist = na_atom - neighbor_atom
-                    contacts << Contact.new(neighbor_atom, na_atom, dist)
-                  end
-                end
-              end
-            else
-              aa_atoms.each do |aa_atom|
-                neighbor_atoms = kdtree.neighbors(aa_atom, MAX_VDW_DISTANCE).map(&:point)
-                neighbor_atoms.each do |neighbor_atom|
-                  if neighbor_atom.na?
-                    dist = aa_atom - neighbor_atom
-                    contacts << Contact.new(aa_atom, neighbor_atom, dist)
-                  end
+            na_atoms.each do |na_atom|
+              neighbor_atoms = kdtree.neighbors(na_atom, MAX_VDW_DISTANCE).map(&:point)
+              neighbor_atoms.each do |neighbor_atom|
+                if neighbor_atom.aa?
+                  dist = na_atom - neighbor_atom
+                  contacts << [neighbor_atom.id, na_atom.id, dist]
                 end
               end
             end
 
-            #columns = [:atom_id, :contacting_atom_id, :distance]
-            #Contact.import(columns, contacts)
-            Contact.import(contacts, :validate => false)
+            columns = [:atom_id, :contacting_atom_id, :distance]
+            Contact.import(columns, contacts)
             structure.save!
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'contacts' in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
