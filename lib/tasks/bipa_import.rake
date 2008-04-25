@@ -333,7 +333,7 @@ namespace :bipa do
 
             if aa_atoms.size > na_atoms.size
               na_atoms.each do |na_atom|
-                neighbor_atoms = kdtree.neighbors(na_atom, MAX_DISTANCE).map(&:point)
+                neighbor_atoms = kdtree.neighbors(na_atom, MAX_VDW_DISTANCE).map(&:point)
                 neighbor_atoms.each do |neighbor_atom|
                   if neighbor_atom.aa?
                     dist = na_atom - neighbor_atom
@@ -343,7 +343,7 @@ namespace :bipa do
               end
             else
               aa_atoms.each do |aa_atom|
-                neighbor_atoms = kdtree.neighbors(aa_atom, MAX_DISTANCE).map(&:point)
+                neighbor_atoms = kdtree.neighbors(aa_atom, MAX_VDW_DISTANCE).map(&:point)
                 neighbor_atoms.each do |neighbor_atom|
                   if neighbor_atom.na?
                     dist = aa_atom - neighbor_atom

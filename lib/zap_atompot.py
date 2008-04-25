@@ -53,13 +53,13 @@ def CalcAtomPotentials(itf):
     zap.SetBoundarySpacing(itf.GetFloat("-boundary"))
     zap.SetGridSpacing(itf.GetFloat("-grid_spacing"))
 
-    grid_file = itf.GetString("-grid_file")
-    if grid_file:
-        grid = OEScalarGrid()
-        if zap.CalcPotentialGrid(grid):
-            if itf.GetBool("-mask"):
-                OEMaskGridByMolecule(grid, mol)
-            OEWriteGrid(grid_file, grid)
+#    grid_file = itf.GetString("-grid_file")
+#    if grid_file:
+#        grid = OEScalarGrid()
+#        if zap.CalcPotentialGrid(grid):
+#            if itf.GetBool("-mask"):
+#                OEMaskGridByMolecule(grid, mol)
+#            OEWriteGrid(grid_file, grid)
 
     showAtomTable = itf.GetBool("-atomtable")
     calcType = itf.GetString("-calc_type")
@@ -124,12 +124,6 @@ InterfaceData="""
 !KEYLESS 1
 !END
 
-!PARAMETER -grid_file
-!TYPE string
-!BRIEF Grid file to be saved
-!DEFAULT ''
-!END
-
 !PARAMETER -file_charges
 !TYPE bool
 !DEFAULT false
@@ -184,3 +178,9 @@ InterfaceData="""
 
 if __name__ == "__main__":
     sys.exit(main(InterfaceData))
+#!PARAMETER -grid_file
+#!TYPE string
+#!BRIEF Grid file to be saved
+#!DEFAULT ''
+#!END
+#
