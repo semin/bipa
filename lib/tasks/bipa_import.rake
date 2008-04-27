@@ -268,6 +268,7 @@ namespace :bipa do
             aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
             na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
             zap_atoms   = Hash.new
+            zaps        = Array.new
             tainted_zap = false
 
             if (!File.size?(aa_zap_file)  ||
@@ -307,10 +308,11 @@ namespace :bipa do
 
             structure.atoms.each do |atom|
               if zap_atoms.has_key?(atom.atom_code)
-                zap = atom.build_zap(zap_atoms[atom.atom_code].to_hash)
-                zap.save!
+                zaps << atom.build_zap(zap_atoms[atom.atom_code].to_hash)
               end
             end
+
+            Zap.import(zaps, :validate => false)
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'zap' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end
@@ -359,7 +361,6 @@ namespace :bipa do
 
             columns = [:atom_id, :contacting_atom_id, :distance]
             Contact.import(columns, contacts)
-            structure.save!
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'contacts' in #{pdb_code} : done (#{i + 1}/#{pdb_codes.size})")
           end
@@ -372,7 +373,7 @@ namespace :bipa do
     desc "Import Hydrogen Bonds"
     task :hbonds => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -390,14 +391,14 @@ namespace :bipa do
 
             if !File.size?(hbplus_file) || bipa_hbonds.empty?
               $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results are found!")
-#              structure.tainted = true
-#              structure.save!
+              structure.tainted = true
+              structure.save!
               next
             end
 
             bipa_hbonds.each do |hbond|
-              if ((hbond.donor.aa? && hbond.acceptor.na?) ||
-                  (hbond.donor.na? && hbond.acceptor.aa?))
+#              if ((hbond.donor.aa? && hbond.acceptor.na?) ||
+#                  (hbond.donor.na? && hbond.acceptor.aa?))
                 begin
                   donor_atom =
                     structure.
@@ -416,50 +417,21 @@ namespace :bipa do
                   $logger.warn("Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}")
                   next
                 else
-                  if donor_atom && acceptor_atom
-                    hbonds << [
-                      donor_atom.id,
-                      acceptor_atom.id,
-                      hbond.da_distance,
-                      hbond.category,
-                      hbond.gap,
-                      hbond.ca_distance,
-                      hbond.dha_angle,
-                      hbond.ha_distance,
-                      hbond.haaa_angle,
-                      hbond.daaa_angle
-                    ]
-                  end
+                  hbonds << Hbond.new(:donor_id     => donor_atom.id,
+                                      :acceptor_id  => acceptor_atom.id,
+                                      :da_distance  => hbond.da_distance,
+                                      :category     => hbond.category,
+                                      :gap          => hbond.gap,
+                                      :ca_distance  => hbond.ca_distance,
+                                      :dha_angle    => hbond.dha_angle,
+                                      :ha_distance  => hbond.ha_distance,
+                                      :haaa_angle   => hbond.haaa_angle,
+                                      :daaa_angle   => hbond.daaa_angle)
                 end
-              end
+#              end
             end
 
-            columns = [
-              :donor_id,
-              :acceptor_id,
-              :da_distance,
-              :category,
-              :gap,
-              :ca_distance,
-              :dha_angle,
-              :ha_distance,
-              :haaa_angle,
-              :daaa_angle
-            ]
-
-            Hbond.import(columns, hbonds,
-                         :on_duplicate_update => [
-                           :donor_id,
-                           :acceptor_id,
-                           :da_distance,
-                           :category,
-                           :gap,
-                           :ca_distance,
-                           :dha_angle,
-                           :ha_distance,
-                           :haaa_angle,
-                           :daaa_angle])
-
+            Hbond.import(hbonds, :validate => false)
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'hbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end # fmanager.fork
