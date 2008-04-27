@@ -250,7 +250,7 @@ namespace :bipa do
     desc "Import OpenEYE ZAP results to BIPA"
     task :zap => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -275,8 +275,8 @@ namespace :bipa do
                 File.size?(aa_zap_err)    ||
                 File.size?(na_zap_err))
               $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
-              structure.tainted = true
-              structure.save!
+#              structure.tainted = true
+#              structure.save!
               next
             end
 
@@ -291,7 +291,7 @@ namespace :bipa do
 
             IO.foreach(na_zap_file) do |line|
               z = line.chomp.split(/\s+/)
-              unless elems.size == 7
+              unless z.size == 7
                 tainted_zap = true
                 break
               end
@@ -300,18 +300,19 @@ namespace :bipa do
 
             if tainted_zap
               $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
-              structure.tainted = true
-              structure.save!
+#              structure.tainted = true
+#              structure.save!
               next
             end
 
             structure.atoms.each do |atom|
-              if zap_atom[atom.serial]
-                zap = atom.build_zap(zap_atom[atom.serial])
+              if zap_atoms.has_key?(atom.atom_code)
+                zap = atom.build_zap(zap_atoms[atom.atom_code].to_hash)
                 zap.save!
               end
             end
             ActiveRecord::Base.remove_connection
+            $logger.info("Importing 'zap' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end
         end
         ActiveRecord::Base.establish_connection(config)
