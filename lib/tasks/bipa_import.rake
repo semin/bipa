@@ -275,8 +275,8 @@ namespace :bipa do
                 File.size?(aa_zap_err)    ||
                 File.size?(na_zap_err))
               $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
-#              structure.tainted = true
-#              structure.save!
+              structure.tainted = true
+              structure.save!
               next
             end
 
@@ -300,8 +300,8 @@ namespace :bipa do
 
             if tainted_zap
               $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
-#              structure.tainted = true
-#              structure.save!
+              structure.tainted = true
+              structure.save!
               next
             end
 
