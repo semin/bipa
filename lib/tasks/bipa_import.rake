@@ -234,8 +234,8 @@ namespace :bipa do
                     (residue.icode.blank? ? '' : residue.icode) +
                     residue.chain.chain_code
 
-              if dssp_residues.has_key? key
-                dssp = residue.create_dssp(bipa_dssp)
+              if dssp_residues.has_key?(key)
+                dssp = residue.create_dssp(dssp_residues[key].to_hash)
               end
             end
             ActiveRecord::Base.remove_connection

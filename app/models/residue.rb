@@ -26,6 +26,10 @@ class Residue < ActiveRecord::Base
 
   has_many  :positions
 
+  has_one     :dssp,
+              :class_name   => "Dssp",
+              :foreign_key  => "residue_id"
+
 
   # ASA related
   def on_surface?
@@ -108,8 +112,6 @@ class AaResidue < StdResidue
   belongs_to  :residue_map,
               :class_name   => "ResidueMap",
               :foreign_key  => "residue_map_id"
-
-  has_one     :dssp
 
   def on_surface?
     relative_unbound_asa > MIN_SRFRES_RASA

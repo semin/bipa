@@ -1,3 +1,14 @@
+class Struct
+  def to_hash
+    hash = Hash.new
+    self.each_pair do |sym, obj|
+      hash[sym] = obj
+    end
+    hash
+  end
+end
+
+
 module Bipa
   class Dssp
 
@@ -67,6 +78,6 @@ module Bipa
         end
       end
     end
-  end
 
+  end
 end
