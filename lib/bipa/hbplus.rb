@@ -47,7 +47,7 @@ module Bipa
       end
 
       def aa?
-        AminoAcids::Residues::STANDARD.include?(@residue_name)
+        AminoAcids::Residues::ALL.include?(@residue_name)
       end
 
       def ==(other)

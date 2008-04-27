@@ -390,8 +390,8 @@ namespace :bipa do
 
             if !File.size?(hbplus_file) || bipa_hbonds.empty?
               $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results are found!")
-              structure.tainted = true
-              structure.save!
+#              structure.tainted = true
+#              structure.save!
               next
             end
 
