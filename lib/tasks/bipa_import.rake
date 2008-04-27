@@ -360,7 +360,7 @@ namespace :bipa do
             Contact.import(columns, contacts)
             structure.save!
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'contacts' in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+            $logger.info("Importing 'contacts' in #{pdb_code} : done (#{i + 1}/#{pdb_codes.size})")
           end
         end
         ActiveRecord::Base.establish_connection(config)

@@ -401,7 +401,11 @@ namespace :bipa do
               grd_file = File.join(ZAP_DIR, pdb_stem + '.grd')
               err_file = File.join(ZAP_DIR, pdb_stem + '.err')
               pdb_file = File.join(NACCESS_DIR, pdb_stem + '.pdb')
-              next if File.exists? zap_file
+
+              if File.size? zap_file
+                $logger.info("Skip #{pdb_code}, ZAP results files are already there!")
+                next
+              end
 
               #system "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
               system "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
