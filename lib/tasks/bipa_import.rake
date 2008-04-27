@@ -158,6 +158,7 @@ namespace :bipa do
             bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
             unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
             unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
+            naccesses           = Array.new
 
             if (!File.size?(bound_asa_file)       ||
                 !File.size?(unbound_aa_asa_file)  ||
@@ -180,7 +181,7 @@ namespace :bipa do
               naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
               naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] -
                                     bound_atom_asa[atom.atom_code]
-              naccess.save!
+              naccesses << naccess
             end
 
             structure.na_atoms.each do |atom|
@@ -191,9 +192,10 @@ namespace :bipa do
               naccess.unbound_asa = unbound_na_atom_asa[atom.atom_code]
               naccess.delta_asa   = unbound_na_atom_asa[atom.atom_code] -
                                     bound_atom_asa[atom.atom_code]
-              naccess.save!
+              naccesses << naccess
             end
 
+            Naccess.import(naccesses)
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'naccess' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end
@@ -397,38 +399,35 @@ namespace :bipa do
             end
 
             bipa_hbonds.each do |hbond|
-#              if ((hbond.donor.aa? && hbond.acceptor.na?) ||
-#                  (hbond.donor.na? && hbond.acceptor.aa?))
-                begin
-                  donor_atom =
-                    structure.
-                    models.first.
-                    chains.find_by_chain_code(hbond.donor.chain_code).
-                    residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).
-                    atoms.find_by_atom_name(hbond.donor.atom_name)
+              begin
+                donor_atom =
+                  structure.
+                  models.first.
+                  chains.find_by_chain_code(hbond.donor.chain_code).
+                  residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).
+                  atoms.find_by_atom_name(hbond.donor.atom_name)
 
-                  acceptor_atom =
-                    structure.
-                    models.first.
-                    chains.find_by_chain_code(hbond.acceptor.chain_code).
-                    residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).
-                    atoms.find_by_atom_name(hbond.acceptor.atom_name)
-                rescue
-                  $logger.warn("Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}")
-                  next
-                else
-                  hbonds << Hbond.new(:donor_id     => donor_atom.id,
-                                      :acceptor_id  => acceptor_atom.id,
-                                      :da_distance  => hbond.da_distance,
-                                      :category     => hbond.category,
-                                      :gap          => hbond.gap,
-                                      :ca_distance  => hbond.ca_distance,
-                                      :dha_angle    => hbond.dha_angle,
-                                      :ha_distance  => hbond.ha_distance,
-                                      :haaa_angle   => hbond.haaa_angle,
-                                      :daaa_angle   => hbond.daaa_angle)
-                end
-#              end
+                acceptor_atom =
+                  structure.
+                  models.first.
+                  chains.find_by_chain_code(hbond.acceptor.chain_code).
+                  residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).
+                  atoms.find_by_atom_name(hbond.acceptor.atom_name)
+              rescue
+                $logger.warn("Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}")
+                next
+              else
+                hbonds << Hbond.new(:donor_id     => donor_atom.id,
+                                    :acceptor_id  => acceptor_atom.id,
+                                    :da_distance  => hbond.da_distance,
+                                    :category     => hbond.category,
+                                    :gap          => hbond.gap,
+                                    :ca_distance  => hbond.ca_distance,
+                                    :dha_angle    => hbond.dha_angle,
+                                    :ha_distance  => hbond.ha_distance,
+                                    :haaa_angle   => hbond.haaa_angle,
+                                    :daaa_angle   => hbond.daaa_angle) if donor_atom && acceptor_atom
+              end
             end
 
             Hbond.import(hbonds, :validate => false)
