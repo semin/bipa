@@ -1,6 +1,6 @@
 module Bipa
   module NucleicAcidBinding
-    
+
     # Interaction related
     def contacting_dna?
       contacting_atoms.each { |a| return true if a.dna? }
@@ -69,6 +69,6 @@ module Bipa
     def binding_na?
       binding_dna? or binding_rna?
     end
-    
+
   end
 end
