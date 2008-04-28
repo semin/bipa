@@ -174,28 +174,24 @@ namespace :bipa do
             unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
 
             structure.aa_atoms.each do |atom|
-              next if (!bound_atom_asa.has_key?(atom.atom_code) &&
-                       !unbound_aa_atom_asa.has_key?(atom.atom_code))
+              next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_aa_atom_asa.has_key?(atom.atom_code)
               naccess             = atom.build_naccess
               naccess.bound_asa   = bound_atom_asa[atom.atom_code]
               naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
-              naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] -
-                                    bound_atom_asa[atom.atom_code]
+              naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
               naccesses << naccess
             end
 
             structure.na_atoms.each do |atom|
-              next if (!bound_atom_asa.has_key?(atom.atom_code) &&
-                       !unbound_na_atom_asa.has_key?(atom.atom_code))
+              next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_na_atom_asa.has_key?(atom.atom_code)
               naccess             = atom.build_naccess
               naccess.bound_asa   = bound_atom_asa[atom.atom_code]
               naccess.unbound_asa = unbound_na_atom_asa[atom.atom_code]
-              naccess.delta_asa   = unbound_na_atom_asa[atom.atom_code] -
-                                    bound_atom_asa[atom.atom_code]
+              naccess.delta_asa   = unbound_na_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
               naccesses << naccess
             end
 
-            Naccess.import(naccesses)
+            Naccess.import(naccesses, :validate => false)
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'naccess' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end
@@ -221,9 +217,10 @@ namespace :bipa do
 
             structure = Structure.find_by_pdb_code(pdb_code)
             dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
+            dssps     = Array.new
 
             if (!File.size?(dssp_file))
-              $logger.warn("SKIP: #{pdb_code} due to missing DSSP result file")
+              $logger.warn("Skip #{pdb_code} due to missing DSSP result file")
               structure.tainted = true
               structure.save!
               next
@@ -236,10 +233,10 @@ namespace :bipa do
                     (residue.icode.blank? ? '' : residue.icode) +
                     residue.chain.chain_code
 
-              if dssp_residues.has_key?(key)
-                dssp = residue.create_dssp(dssp_residues[key].to_hash)
-              end
+              dssps << residue.build_dssp(dssp_residues[key].to_hash) if dssp_residues.has_key?(key)
             end
+
+            Dssp.import(dssps, :validate => false)
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'dssp' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end
@@ -309,9 +306,7 @@ namespace :bipa do
             end
 
             structure.atoms.each do |atom|
-              if zap_atoms.has_key?(atom.atom_code)
-                zaps << atom.build_zap(zap_atoms[atom.atom_code].to_hash)
-              end
+              zaps << atom.build_zap(zap_atoms[atom.atom_code].to_hash) if zap_atoms.has_key?(atom.atom_code)
             end
 
             Zap.import(zaps, :validate => false)
@@ -344,7 +339,7 @@ namespace :bipa do
 
             structure = Structure.find_by_pdb_code(pdb_code)
             kdtree    = Bipa::Kdtree.new
-            contacts  = []
+            contacts  = Array.new
 
             structure.atoms.each { |a| kdtree.insert(a) }
 
@@ -356,13 +351,14 @@ namespace :bipa do
               neighbor_atoms.each do |neighbor_atom|
                 if neighbor_atom.aa?
                   dist = na_atom - neighbor_atom
-                  contacts << [neighbor_atom.id, na_atom.id, dist]
+                  contacts << Contact.new(:atom_id            => neighbor_atom.id,
+                                          :contacting_atom_id => na_atom.id,
+                                          :distance           => dist)
                 end
               end
             end
 
-            columns = [:atom_id, :contacting_atom_id, :distance]
-            Contact.import(columns, contacts)
+            Contact.import(contacts, :validate => false)
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'contacts' in #{pdb_code} : done (#{i + 1}/#{pdb_codes.size})")
           end
@@ -432,7 +428,7 @@ namespace :bipa do
 
             Hbond.import(hbonds, :validate => false)
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'hbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+            $logger.info("Importing 'hbonds' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
@@ -440,63 +436,63 @@ namespace :bipa do
     end
 
 
-    desc "Import Water-mediated hydrogen bonds"
-    task :whbonds => [:environment] do
-
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
-
-            raise "Cannot find #{hbplus_file}, this cannot be happend!" if !File.exist? hbplus_file
-
-            ActiveRecord::Base.establish_connection(config)
-
-            structure   = Structure.find_by_pdb_code(pdb_code)
-            whbonds_bio = Bipa::Hbplus.new(IO.read(hbplus_file)).whbonds
-            whbonds     = Array.new
-
-            whbonds_bio.each do |whbond|
-              aa_atom = structure.
-                models.first.
-                chains.find_by_chain_code(whbond.aa_atom.chain_code).
-                residues.find_by_residue_code_and_icode(whbond.aa_atom.residue_code, whbond.aa_atom.insertion_code).
-                atoms.find_by_atom_name(whbond.aa_atom.atom_name)
-
-              na_atom = structure.
-                models.first.
-                chains.find_by_chain_code(whbond.na_atom.chain_code).
-                residues.find_by_residue_code_and_icode(whbond.na_atom.residue_code, whbond.na_atom.insertion_code).
-                atoms.find_by_atom_name(whbond.na_atom.atom_name)
-
-              water_atom =  structure.
-                models.first.
-                chains.find_by_chain_code(whbond.water_atom.chain_code).
-                residues.find_by_residue_code_and_icode(whbond.water_atom.residue_code, whbond.water_atom.insertion_code).
-                atoms.find_by_atom_name(whbond.water_atom.atom_name)
-
-              if aa_atom && na_atom && water_atom
-                whbonds << [aa_atom.id, na_atom.id, water_atom.id]
-              end
-            end
-
-            columns = [:atom_id, :whbonding_atom_id, :water_atom_id]
-            Whbond.import(columns, whbonds)
-
-            ActiveRecord::Base.remove_connection
-
-            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
-          end # fmanager.fork
-        end # pdb_codes.each_with_index
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end
+#    desc "Import Water-mediated hydrogen bonds"
+#    task :whbonds => [:environment] do
+#
+#      pdb_codes = Structure.find(:all).map(&:pdb_code)
+#      fmanager  = ForkManager.new(MAX_FORK)
+#
+#      fmanager.manage do
+#        config = ActiveRecord::Base.remove_connection
+#
+#        pdb_codes.each_with_index do |pdb_code, i|
+#
+#          fmanager.fork do
+#            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
+#
+#            raise "Cannot find #{hbplus_file}, this cannot be happend!" if !File.exist? hbplus_file
+#
+#            ActiveRecord::Base.establish_connection(config)
+#
+#            structure   = Structure.find_by_pdb_code(pdb_code)
+#            whbonds_bio = Bipa::Hbplus.new(IO.read(hbplus_file)).whbonds
+#            whbonds     = Array.new
+#
+#            whbonds_bio.each do |whbond|
+#              aa_atom = structure.
+#                models.first.
+#                chains.find_by_chain_code(whbond.aa_atom.chain_code).
+#                residues.find_by_residue_code_and_icode(whbond.aa_atom.residue_code, whbond.aa_atom.insertion_code).
+#                atoms.find_by_atom_name(whbond.aa_atom.atom_name)
+#
+#              na_atom = structure.
+#                models.first.
+#                chains.find_by_chain_code(whbond.na_atom.chain_code).
+#                residues.find_by_residue_code_and_icode(whbond.na_atom.residue_code, whbond.na_atom.insertion_code).
+#                atoms.find_by_atom_name(whbond.na_atom.atom_name)
+#
+#              water_atom = structure.
+#                models.first.
+#                chains.find_by_chain_code(whbond.water_atom.chain_code).
+#                residues.find_by_residue_code_and_icode(whbond.water_atom.residue_code, whbond.water_atom.insertion_code).
+#                atoms.find_by_atom_name(whbond.water_atom.atom_name)
+#
+#              if aa_atom && na_atom && water_atom
+#                whbonds << [aa_atom.id, na_atom.id, water_atom.id]
+#              end
+#            end
+#
+#            columns = [:atom_id, :whbonding_atom_id, :water_atom_id]
+#            Whbond.import(columns, whbonds)
+#
+#            ActiveRecord::Base.remove_connection
+#
+#            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+#          end # fmanager.fork
+#        end # pdb_codes.each_with_index
+#        ActiveRecord::Base.establish_connection(config)
+#      end # fmanager.manage
+#    end
 
 
     desc "Import SCOP datasets"

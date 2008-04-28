@@ -2,6 +2,8 @@ class Structure < ActiveRecord::Base
 
   include Bipa::ComposedOfResidues
 
+  has_finder :untainted, :conditions => { :tainted => false }
+
   has_many  :models,
             :dependent  => :destroy
 

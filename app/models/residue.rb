@@ -26,9 +26,9 @@ class Residue < ActiveRecord::Base
 
   has_many  :positions
 
-  has_one     :dssp,
-              :class_name   => "Dssp",
-              :foreign_key  => "residue_id"
+  has_one :dssp,
+          :class_name   => "Dssp",
+          :foreign_key  => "residue_id"
 
 
   # ASA related
