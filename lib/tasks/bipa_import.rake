@@ -388,7 +388,7 @@ namespace :bipa do
             hbonds      = Array.new
 
             if !File.size?(hbplus_file) || bipa_hbonds.empty?
-              $logger.warn("SKIP: #{pdb_code} might be a C-alpha only structure. No HBPLUS results are found!")
+              $logger.warn("Skip #{pdb_code} might be a C-alpha only structure. No HBPLUS results are found!")
               structure.tainted = true
               structure.save!
               next
@@ -410,23 +410,30 @@ namespace :bipa do
                   residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).
                   atoms.find_by_atom_name(hbond.acceptor.atom_name)
               rescue
-                $logger.warn("Cannot find #{pdb_code}: #{hbond.donor} <=> #{hbond.acceptor}")
+                $logger.warn("Cannot find hbonds: #{hbond.donor} <=> #{hbond.acceptor} in #{pdb_code}")
                 next
               else
-                hbonds << Hbond.new(:donor_id     => donor_atom.id,
-                                    :acceptor_id  => acceptor_atom.id,
-                                    :da_distance  => hbond.da_distance,
-                                    :category     => hbond.category,
-                                    :gap          => hbond.gap,
-                                    :ca_distance  => hbond.ca_distance,
-                                    :dha_angle    => hbond.dha_angle,
-                                    :ha_distance  => hbond.ha_distance,
-                                    :haaa_angle   => hbond.haaa_angle,
-                                    :daaa_angle   => hbond.daaa_angle) if donor_atom && acceptor_atom
+                if donor_atom && acceptor_atom
+                  if Hbond.exists?(:donor_id => donor_atom.id, :acceptor_id => acceptor_atom.id)
+                    #$logger.warn("Skip hbond: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}")
+                    next
+                  else
+                    hbonds << Hbond.new(:donor_id     => donor_atom.id,
+                                        :acceptor_id  => acceptor_atom.id,
+                                        :da_distance  => hbond.da_distance,
+                                        :category     => hbond.category,
+                                        :gap          => hbond.gap,
+                                        :ca_distance  => hbond.ca_distance,
+                                        :dha_angle    => hbond.dha_angle,
+                                        :ha_distance  => hbond.ha_distance,
+                                        :haaa_angle   => hbond.haaa_angle,
+                                        :daaa_angle   => hbond.daaa_angle)
+                  end
+                end
               end
             end
 
-            Hbond.import(hbonds, :validate => false)
+            Hbond.import(hbonds, :validate => false) unless hbonds.empty?
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'hbonds' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end # fmanager.fork
