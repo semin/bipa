@@ -66,6 +66,10 @@ class Residue < ActiveRecord::Base
     is_a?(HetResidue)
   end
 
+  def water?
+    residue_name == "HOH"
+  end
+
   def justified_residue_name
     residue_name.rjust(3)
   end

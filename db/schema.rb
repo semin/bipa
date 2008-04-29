@@ -234,17 +234,16 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :hbplus, [:acceptor_id, :donor_id]
 
 
-#  # 'whbonds' table
-#  create_table :whbonds, :force => true do |t|
-#    t.belongs_to :atom
-#    t.belongs_to :whbonding_atom
-#    t.belongs_to :water_atom
-#  end
-#
-#  add_index :whbonds, :atom_id
-#  add_index :whbonds, :whbonding_atom_id
-#  add_index :whbonds, [:atom_id, :whbonding_atom_id]
-#  add_index :whbonds, [:whbonding_atom_id, :atom_id]
+  # 'whbonds' table
+  create_table :whbonds, :force => true do |t|
+    t.belongs_to :aa_water_hbond
+    t.belongs_to :na_water_hbond
+  end
+
+  add_index :whbonds, :aa_water_hbond_id
+  add_index :whbonds, :na_water_hbond_id
+  add_index :whbonds, [:aa_water_hbond_id, :na_water_hbond_id]
+  add_index :whbonds, [:na_water_hbond_id, :aa_water_hbond_id]
 
 
   # 'interface' table

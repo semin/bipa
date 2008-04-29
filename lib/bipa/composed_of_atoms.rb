@@ -19,6 +19,22 @@ module Bipa
     end
     memoize :na_atoms
 
+    def dna_atoms
+      atoms.select { |a| a.dna? }
+    end
+
+    def rna_atoms
+      atoms.select { |a| a.rna? }
+    end
+
+    def het_atoms
+      atoms.select { |a| a.het? }
+    end
+
+    def water_atoms
+      atoms.select { |a| a.water? }
+    end
+
     def contacts
       atoms.inject([]) { |s, a| s.concat(a.contacts) }
     end
@@ -94,24 +110,22 @@ module Bipa
     end
     memoize :calpha_only?
 
-
-    # ASA related
-    %w(unbound bound delta).each do |stat|
+    %w(unbound bound delta).each do |state|
       module_eval <<-END
-        def #{stat}_asa
-          atoms.inject(0) { |s, a| a.#{stat}_asa ? s + a.#{stat}_asa : s }
+        def #{state}_asa
+          atoms.inject(0) { |s, a| a.#{state}_asa ? s + a.#{state}_asa : s }
         end
-        memoize :#{stat}_asa
+        memoize :#{state}_asa
 
-        def #{stat}_asa_polar
-          atoms.inject(0) { |s, a| (a.#{stat}_asa && a.polar?) ? s + a.#{stat}_asa : s }
+        def #{state}_asa_polar
+          atoms.inject(0) { |s, a| (a.#{state}_asa && a.polar?) ? s + a.#{state}_asa : s }
         end
-        memoize :#{stat}_asa_polar
+        memoize :#{state}_asa_polar
 
-        def #{stat}_of_atom(atm)
-          atoms.inject(0) { |s, a| a.atom_name == atm.upcase ? s + a.#{stat}_asa : s }
+        def #{state}_of_atom(atm)
+          atoms.inject(0) { |s, a| a.atom_name == atm.upcase ? s + a.#{state}_asa : s }
         end
-        memoize :#{stat}_of_atom
+        memoize :#{state}_of_atom
       END
     end
 

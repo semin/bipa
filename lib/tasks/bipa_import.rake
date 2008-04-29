@@ -443,63 +443,68 @@ namespace :bipa do
     end
 
 
-#    desc "Import Water-mediated hydrogen bonds"
-#    task :whbonds => [:environment] do
-#
-#      pdb_codes = Structure.find(:all).map(&:pdb_code)
-#      fmanager  = ForkManager.new(MAX_FORK)
-#
-#      fmanager.manage do
-#        config = ActiveRecord::Base.remove_connection
-#
-#        pdb_codes.each_with_index do |pdb_code, i|
-#
-#          fmanager.fork do
-#            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
-#
-#            raise "Cannot find #{hbplus_file}, this cannot be happend!" if !File.exist? hbplus_file
-#
-#            ActiveRecord::Base.establish_connection(config)
-#
-#            structure   = Structure.find_by_pdb_code(pdb_code)
-#            whbonds_bio = Bipa::Hbplus.new(IO.read(hbplus_file)).whbonds
-#            whbonds     = Array.new
-#
-#            whbonds_bio.each do |whbond|
-#              aa_atom = structure.
-#                models.first.
-#                chains.find_by_chain_code(whbond.aa_atom.chain_code).
-#                residues.find_by_residue_code_and_icode(whbond.aa_atom.residue_code, whbond.aa_atom.insertion_code).
-#                atoms.find_by_atom_name(whbond.aa_atom.atom_name)
-#
-#              na_atom = structure.
-#                models.first.
-#                chains.find_by_chain_code(whbond.na_atom.chain_code).
-#                residues.find_by_residue_code_and_icode(whbond.na_atom.residue_code, whbond.na_atom.insertion_code).
-#                atoms.find_by_atom_name(whbond.na_atom.atom_name)
-#
-#              water_atom = structure.
-#                models.first.
-#                chains.find_by_chain_code(whbond.water_atom.chain_code).
-#                residues.find_by_residue_code_and_icode(whbond.water_atom.residue_code, whbond.water_atom.insertion_code).
-#                atoms.find_by_atom_name(whbond.water_atom.atom_name)
-#
-#              if aa_atom && na_atom && water_atom
-#                whbonds << [aa_atom.id, na_atom.id, water_atom.id]
-#              end
-#            end
-#
-#            columns = [:atom_id, :whbonding_atom_id, :water_atom_id]
-#            Whbond.import(columns, whbonds)
-#
-#            ActiveRecord::Base.remove_connection
-#
-#            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
-#          end # fmanager.fork
-#        end # pdb_codes.each_with_index
-#        ActiveRecord::Base.establish_connection(config)
-#      end # fmanager.manage
-#    end
+    desc "Import Water-mediated hydrogen bonds"
+    task :whbonds => [:environment] do
+
+      require "facets/array"
+
+      pdb_codes = Structure.untainted.find(:all).map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_codes.each_with_index do |pdb_code, i|
+
+          fmanager.fork do
+
+            ActiveRecord::Base.establish_connection(config)
+
+            structure   = Structure.find_by_pdb_code(pdb_code)
+            whbonds     = Array.new
+
+            structure.water_atoms.each do |water|
+              water.hbonding_donors.combination(2).each do |atom1, atom2|
+                if atom1.aa? && atom2.na?
+                  whbonds << Whbond.new(:aa_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water),
+                                        :na_water_hbond_id => atom2.hbonds_as_donor.find_by_acceptor_id(water))
+                elsif atom1.na? && atom2.aa?
+                  whbonds << Whbond.new(:aa_water_hbond_id => atom2.hbonds_as_donor.find_by_acceptor_id(water),
+                                        :na_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water))
+                end
+              end
+
+              water.hbonding_acceptors.combination(2).each do |atom1, atom2|
+                if atom1.aa? && atom2.na?
+                  whbonds << Whbond.new(:aa_water_hbond_id => atom1.hbonds_as_acceptor.find_by_donor_id(water),
+                                        :na_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water))
+                elsif atom1.na? && atom2.aa?
+                  whbonds << Whbond.new(:aa_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water),
+                                        :na_water_hbond_id => atom1.hbonds_as_acceptor.find_by_donor_id(water))
+                end
+              end
+
+              water.hbonding_donors.each do |atom1|
+                water.hbonding_acceptors.each do |atom2|
+                  if atom1.aa? && atom2.na?
+                    whbonds << Whbond.new(:aa_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water),
+                                          :na_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water))
+                  elsif atom1.na? && atom2.aa?
+                    whbonds << Whbond.new(:aa_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water),
+                                          :na_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water))
+                  end
+                end
+              end
+            end
+
+            Whbond.import(whbonds) unless whbonds.empty?
+            ActiveRecord::Base.remove_connection
+            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+          end # fmanager.fork
+        end # pdb_codes.each_with_index
+        ActiveRecord::Base.establish_connection(config)
+      end # fmanager.manage
+    end
 
 
     desc "Import SCOP datasets"

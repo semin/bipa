@@ -28,10 +28,12 @@ class Atom < ActiveRecord::Base
             :dependent    => :destroy
 
   has_many  :hbonding_donors,
-            :through      => :hbonds_as_acceptor
+            :through      => :hbonds_as_acceptor,
+            :source       => :donor
 
   has_many  :hbonding_acceptors,
-            :through      => :hbonds_as_donor
+            :through      => :hbonds_as_donor,
+            :source       => :acceptor
 
   has_one   :naccess
 
@@ -69,6 +71,10 @@ class Atom < ActiveRecord::Base
 
   def het?
     residue.het?
+  end
+
+  def water?
+    residue.water?
   end
 
   def polar?
