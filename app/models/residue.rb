@@ -30,12 +30,14 @@ class Residue < ActiveRecord::Base
           :class_name   => "Dssp",
           :foreign_key  => "residue_id"
 
-
-  # ASA related
+  # this is for regular 'residue' types except 'AaResidue',
+  # which has its own definition of surface residue
   def on_surface?
     surface_atoms.size > 0
   end
 
+  # this is for regular 'residue' types except 'AaResidue',
+  # which has its own definition of 'interface residue'
   def on_interface?
     interface_atoms.size > 0
   end
@@ -44,7 +46,6 @@ class Residue < ActiveRecord::Base
     !on_surface?
   end
 
-  # Residue specific properties
   def aa?
     is_a?(AaResidue)
   end
@@ -129,13 +130,14 @@ class AaResidue < StdResidue
   %w(unbound bound delta).each do |stat|
     class_eval <<-END
       def relative_#{stat}_asa
-        @relative_#{stat}_asa ||= if AminoAcids::Residues::STANDARD.include?(residue_name)
+        if AminoAcids::Residues::STANDARD.include?(residue_name)
           atoms.inject(0) { |s, a| a.#{stat}_asa ? s + a.#{stat}_asa : s } /
             AminoAcids::Residues::STANDARD_ASA[residue_name]
         else
           raise "Unknown residue type: \#{id}, \#{residue_name}"
         end
       end
+      memoize :relative_#{stat}_asa
     END
   end
 end
