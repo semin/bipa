@@ -1,4 +1,4 @@
-class Hbond < ActiveRecord::Base
+class Hbplus < ActiveRecord::Base
 
   belongs_to  :donor,
               :class_name   => "Atom",

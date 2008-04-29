@@ -214,8 +214,8 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :contacts, [:contacting_atom_id, :atom_id]
 
 
-  # 'hbonds' table
-  create_table :hbonds, :force => true do |t|
+  # 'hbplus' table
+  create_table :hbplus, :force => true do |t|
     t.belongs_to  :donor
     t.belongs_to  :acceptor
     t.float       :da_distance
@@ -228,23 +228,23 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :daaa_angle
   end
 
-  add_index :hbonds, [:donor_id]
-  add_index :hbonds, [:acceptor_id]
-  add_index :hbonds, [:donor_id, :acceptor_id]
-  add_index :hbonds, [:acceptor_id, :donor_id]
+  add_index :hbplus, [:donor_id]
+  add_index :hbplus, [:acceptor_id]
+  add_index :hbplus, [:donor_id, :acceptor_id]
+  add_index :hbplus, [:acceptor_id, :donor_id]
 
 
-  # 'whbonds' table
-  create_table :whbonds, :force => true do |t|
-    t.belongs_to :atom
-    t.belongs_to :whbonding_atom
-    t.belongs_to :water_atom
-  end
-
-  add_index :whbonds, :atom_id
-  add_index :whbonds, :whbonding_atom_id
-  add_index :whbonds, [:atom_id, :whbonding_atom_id]
-  add_index :whbonds, [:whbonding_atom_id, :atom_id]
+#  # 'whbonds' table
+#  create_table :whbonds, :force => true do |t|
+#    t.belongs_to :atom
+#    t.belongs_to :whbonding_atom
+#    t.belongs_to :water_atom
+#  end
+#
+#  add_index :whbonds, :atom_id
+#  add_index :whbonds, :whbonding_atom_id
+#  add_index :whbonds, [:atom_id, :whbonding_atom_id]
+#  add_index :whbonds, [:whbonding_atom_id, :atom_id]
 
 
   # 'interface' table

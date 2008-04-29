@@ -368,8 +368,8 @@ namespace :bipa do
     end
 
 
-    desc "Import Hydrogen Bonds"
-    task :hbonds => [:environment] do
+    desc "Import HBPlus results into BIPA"
+    task :hbplus => [:environment] do
 
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
@@ -414,28 +414,28 @@ namespace :bipa do
                 next
               else
                 if donor_atom && acceptor_atom
-                  if Hbond.exists?(:donor_id => donor_atom.id, :acceptor_id => acceptor_atom.id)
+                  if Hbplus.exists?(:donor_id => donor_atom.id, :acceptor_id => acceptor_atom.id)
                     #$logger.warn("Skip hbond: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}")
                     next
                   else
-                    hbonds << Hbond.new(:donor_id     => donor_atom.id,
-                                        :acceptor_id  => acceptor_atom.id,
-                                        :da_distance  => hbond.da_distance,
-                                        :category     => hbond.category,
-                                        :gap          => hbond.gap,
-                                        :ca_distance  => hbond.ca_distance,
-                                        :dha_angle    => hbond.dha_angle,
-                                        :ha_distance  => hbond.ha_distance,
-                                        :haaa_angle   => hbond.haaa_angle,
-                                        :daaa_angle   => hbond.daaa_angle)
+                    hbplus << Hbplus.new(:donor_id     => donor_atom.id,
+                                         :acceptor_id  => acceptor_atom.id,
+                                         :da_distance  => hbond.da_distance,
+                                         :category     => hbond.category,
+                                         :gap          => hbond.gap,
+                                         :ca_distance  => hbond.ca_distance,
+                                         :dha_angle    => hbond.dha_angle,
+                                         :ha_distance  => hbond.ha_distance,
+                                         :haaa_angle   => hbond.haaa_angle,
+                                         :daaa_angle   => hbond.daaa_angle)
                   end
                 end
               end
             end
 
-            Hbond.import(hbonds, :validate => false) unless hbonds.empty?
+            Hbplus.import(hbplus, :validate => false) unless hbonds.empty?
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'hbonds' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
+            $logger.info("Importing 'hbplus' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
