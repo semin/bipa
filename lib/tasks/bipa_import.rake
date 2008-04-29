@@ -466,32 +466,48 @@ namespace :bipa do
             structure.water_atoms.each do |water|
               water.hbonding_donors.combination(2).each do |atom1, atom2|
                 if atom1.aa? && atom2.na?
-                  whbonds << Whbond.new(:aa_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water),
-                                        :na_water_hbond_id => atom2.hbonds_as_donor.find_by_acceptor_id(water))
+                  whbonds << Whbond.new(:atom_id            => atom1,
+                                        :whbonding_atom_id  => atom2,
+                                        :aa_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water),
+                                        :na_water_hbond_id  => atom2.hbonds_as_donor.find_by_acceptor_id(water))
                 elsif atom1.na? && atom2.aa?
-                  whbonds << Whbond.new(:aa_water_hbond_id => atom2.hbonds_as_donor.find_by_acceptor_id(water),
-                                        :na_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water))
+                  whbonds << Whbond.new(:atom_id            => atom2,
+                                        :whbonding_atom_id  => atom1,
+                                        :aa_water_hbond_id  => atom2.hbonds_as_donor.find_by_acceptor_id(water),
+                                        :na_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water))
                 end
               end
 
               water.hbonding_acceptors.combination(2).each do |atom1, atom2|
                 if atom1.aa? && atom2.na?
-                  whbonds << Whbond.new(:aa_water_hbond_id => atom1.hbonds_as_acceptor.find_by_donor_id(water),
-                                        :na_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water))
+                  whbonds << Whbond.new(:atom_id            => atom1,
+                                        :whbonding_atom_id  => atom2,
+                                        :water_atom_id      => water,
+                                        :aa_water_hbond_id  => atom1.hbonds_as_acceptor.find_by_donor_id(water),
+                                        :na_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water))
                 elsif atom1.na? && atom2.aa?
-                  whbonds << Whbond.new(:aa_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water),
-                                        :na_water_hbond_id => atom1.hbonds_as_acceptor.find_by_donor_id(water))
+                  whbonds << Whbond.new(:atom_id            => atom2,
+                                        :whbonding_atom_id  => atom1,
+                                        :water_atom_id      => water,
+                                        :aa_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water),
+                                        :na_water_hbond_id  => atom1.hbonds_as_acceptor.find_by_donor_id(water))
                 end
               end
 
               water.hbonding_donors.each do |atom1|
                 water.hbonding_acceptors.each do |atom2|
                   if atom1.aa? && atom2.na?
-                    whbonds << Whbond.new(:aa_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water),
-                                          :na_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water))
+                    whbonds << Whbond.new(:atom_id            => atom1,
+                                          :whbonding_atom_id  => atom2,
+                                          :water_atom_id      => water,
+                                          :aa_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water),
+                                          :na_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water))
                   elsif atom1.na? && atom2.aa?
-                    whbonds << Whbond.new(:aa_water_hbond_id => atom2.hbonds_as_acceptor.find_by_donor_id(water),
-                                          :na_water_hbond_id => atom1.hbonds_as_donor.find_by_acceptor_id(water))
+                    whbonds << Whbond.new(:atom_id            => atom2,
+                                          :whbonding_atom_id  => atom1,
+                                          :water_atom_id      => water,
+                                          :aa_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water),
+                                          :na_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water))
                   end
                 end
               end

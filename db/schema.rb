@@ -236,16 +236,16 @@ ActiveRecord::Schema.define(:version => 1) do
 
   # 'whbonds' table
   create_table :whbonds, :force => true do |t|
-    t.belongs_to :aa_atom
-    t.belongs_to :na_atom
+    t.belongs_to :atom
+    t.belongs_to :whbonding_atom
     t.belongs_to :water_atom
     t.belongs_to :aa_water_hbond
     t.belongs_to :na_water_hbond
   end
 
-  add_index :aa_atom
-  add_index :na_atom
-  add_index :water_atom
+  add_index :whbonds, :atom_id
+  add_index :whbonds, :whbonding_atom_id
+  add_index :whbonds, :water_atom_id
   add_index :whbonds, :aa_water_hbond_id
   add_index :whbonds, :na_water_hbond_id
 
