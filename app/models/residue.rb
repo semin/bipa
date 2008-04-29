@@ -127,17 +127,17 @@ class AaResidue < StdResidue
     raise "No one letter code for residue: #{residue_name}"
   end
 
-  %w(unbound bound delta).each do |stat|
+  %w(unbound bound delta).each do |state|
     class_eval <<-END
-      def relative_#{stat}_asa
+      def relative_#{state}_asa
         if AminoAcids::Residues::STANDARD.include?(residue_name)
-          atoms.inject(0) { |s, a| a.#{stat}_asa ? s + a.#{stat}_asa : s } /
+          atoms.inject(0) { |s, a| a.#{state}_asa ? s + a.#{state}_asa : s } /
             AminoAcids::Residues::STANDARD_ASA[residue_name]
         else
           raise "Unknown residue type: \#{id}, \#{residue_name}"
         end
       end
-      memoize :relative_#{stat}_asa
+      memoize :relative_#{state}_asa
     END
   end
 end

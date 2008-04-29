@@ -1,7 +1,7 @@
 class Atom < ActiveRecord::Base
 
   include Bipa::Constants
-  include Bipa::NucleicAcidBinding
+  include Bipa::BindingNucleicAcids
 
   belongs_to  :residue
 
