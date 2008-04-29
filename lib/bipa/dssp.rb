@@ -1,23 +1,3 @@
-require "active_support"
-
-class String
-  def nil_if_blank
-    self.blank? ? nil : self
-  end
-end
-
-
-class Struct
-  def to_hash
-    hash = Hash.new
-    self.each_pair do |sym, obj|
-      hash[sym] = obj
-    end
-    hash
-  end
-end
-
-
 module Bipa
   class Dssp
 
