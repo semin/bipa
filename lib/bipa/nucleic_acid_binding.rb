@@ -1,5 +1,5 @@
 module Bipa
-  module NucleicAcidBinding
+  module BindingNucleicAcids
 
     # Interaction related
     def contacting_dna?

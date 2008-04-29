@@ -2,7 +2,7 @@ module Bipa
   module ComposedOfAtoms
 
     include Bipa::Usr
-    include Bipa::NucleicAcidBinding
+    include Bipa::BindingNucleicAcids
 
     def atoms
       raise "'atoms' method has to be implemented in your class"
