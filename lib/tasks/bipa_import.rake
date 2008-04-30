@@ -118,7 +118,7 @@ namespace :bipa do
                 elsif bio_residue.na?
                   residue = chain.send("na_residues").create(residue_params(bio_residue))
                 else
-                  raise "Error: #{bio_residue} is unknown type of standard residue!"
+                  raise "Error: #{bio_residue} is a unknown type of standard residue!"
                 end
                 bio_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
               end
@@ -468,11 +468,13 @@ namespace :bipa do
                 if atom1.aa? && atom2.na?
                   whbonds << Whbond.new(:atom_id            => atom1,
                                         :whbonding_atom_id  => atom2,
+                                        :water_atom_id      => water,
                                         :aa_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water),
                                         :na_water_hbond_id  => atom2.hbonds_as_donor.find_by_acceptor_id(water))
                 elsif atom1.na? && atom2.aa?
                   whbonds << Whbond.new(:atom_id            => atom2,
                                         :whbonding_atom_id  => atom1,
+                                        :water_atom_id      => water,
                                         :aa_water_hbond_id  => atom2.hbonds_as_donor.find_by_acceptor_id(water),
                                         :na_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water))
                 end
@@ -513,7 +515,7 @@ namespace :bipa do
               end
             end
 
-            Whbond.import(whbonds) unless whbonds.empty?
+            Whbond.import(whbonds, :validate => false) unless whbonds.empty?
             ActiveRecord::Base.remove_connection
             $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end # fmanager.fork
