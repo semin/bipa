@@ -140,6 +140,64 @@ namespace :bipa do
     end # task :pdb
 
 
+    desc "Import SCOP datasets"
+    task :scops => [:environment] do
+
+      hie_file = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
+      des_file = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
+
+      # Create a hash for description of scop entries,
+      # and set a description for 'root' scop entry with sunid, '0'
+      scop_des      = Hash.new
+      scop_des['0'] = {
+        :sunid        => '0',
+        :stype        => 'root',
+        :sccs         => 'root',
+        :sid          => 'root',
+        :description  => 'root',
+      }
+
+      # # dir.des.scop.txt
+      # 46456   cl      a       -       All alpha proteins [46456]
+      # 46457   cf      a.1     -       Globin-like
+      # 46458   sf      a.1.1   -       Globin-like
+      # 46459   fa      a.1.1.1 -       Truncated hemoglobin
+      # 46460   dm      a.1.1.1 -       Protozoan/bacterial hemoglobin
+      # 46461   sp      a.1.1.1 -       Ciliate (Paramecium caudatum) [TaxId: 5885]
+      # 14982   px      a.1.1.1 d1dlwa_ 1dlw A:
+      # 100068  px      a.1.1.1 d1uvya_ 1uvy A:
+      IO.foreach(des_file) do |line|
+        next if line =~ /^#/ || line.blank?
+        sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
+        sccs  = nil if sccs =~ /unassigned/
+        sid   = nil if sid  =~ /unassigned/
+        scop_des[sunid] = {
+          :sunid        => sunid,
+          :stype        => stype,
+          :sccs         => sccs,
+          :sid          => sid,
+          :description  => description
+        }
+      end
+
+      # # dir.hie.scop.txt
+      # 46460   46459   46461,46462,81667,63437,88965,116748
+      # 14982   46461   -
+      IO.readlines(hie_file).each_with_index do |line, i|
+        next if line =~ /^#/ || line.blank?
+
+        self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
+        current_scop = Scop.factory_create!(scop_des[self_sunid])
+
+        unless self_sunid.to_i == 0
+          parent_scop = Scop.find_by_sunid(parent_sunid)
+          current_scop.move_to_child_of(parent_scop)
+        end
+        #$logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
+      end
+    end # task :scops
+
+
     desc "Import NACCESS results into BIPA"
     task :naccess => [:environment] do
 
@@ -323,6 +381,7 @@ namespace :bipa do
 #    task :hydrophobicity => [:environment] do
 #    end
 
+
     desc "Import van der Waals Contacts"
     task :contacts => [:environment] do
 
@@ -458,10 +517,20 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code)
+            hbonds    = Array.new
+
+            structure.hbplus_as_donor.each do |hbplus|
+              if ((hbplus.donor.aa? && hbplus.acceptor.na?) ||
+                  (hbplus.donor.na? && hbplus.acceptor.aa?))
+                hbonds << Hbond.new(:donor_id    => hbplus.donor,
+                                    :acceptor_id => hbplus.acceptor,
+                                    :hbplus_id   => hbplus)
+              end
+            end
 
             Hbond.import(hbonds, :validate => false) unless hbonds.empty?
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+            $logger.info("Importing 'hbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -550,62 +619,6 @@ namespace :bipa do
     end
 
 
-    desc "Import SCOP datasets"
-    task :scops => [:environment] do
-
-      hie_file = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
-      des_file = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
-
-      # Create a hash for description of scop entries,
-      # and set a description for 'root' scop entry with sunid, '0'
-      scop_des      = Hash.new
-      scop_des['0'] = {
-        :sunid        => '0',
-        :stype        => 'root',
-        :sccs         => 'root',
-        :sid          => 'root',
-        :description  => 'root',
-      }
-
-      # # dir.des.scop.txt
-      # 46456   cl      a       -       All alpha proteins [46456]
-      # 46457   cf      a.1     -       Globin-like
-      # 46458   sf      a.1.1   -       Globin-like
-      # 46459   fa      a.1.1.1 -       Truncated hemoglobin
-      # 46460   dm      a.1.1.1 -       Protozoan/bacterial hemoglobin
-      # 46461   sp      a.1.1.1 -       Ciliate (Paramecium caudatum) [TaxId: 5885]
-      # 14982   px      a.1.1.1 d1dlwa_ 1dlw A:
-      # 100068  px      a.1.1.1 d1uvya_ 1uvy A:
-      IO.foreach(des_file) do |line|
-        next if line =~ /^#/ || line.blank?
-        sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
-        sccs  = nil if sccs =~ /unassigned/
-        sid   = nil if sid  =~ /unassigned/
-        scop_des[sunid] = {
-          :sunid        => sunid,
-          :stype        => stype,
-          :sccs         => sccs,
-          :sid          => sid,
-          :description  => description
-        }
-      end
-
-      # # dir.hie.scop.txt
-      # 46460   46459   46461,46462,81667,63437,88965,116748
-      # 14982   46461   -
-      IO.readlines(hie_file).each_with_index do |line, i|
-        next if line =~ /^#/ || line.blank?
-
-        self_sunid, parent_sunid, children_sunids = line.chomp.split(/\t/)
-        current_scop = Scop.factory_create!(scop_des[self_sunid])
-
-        unless self_sunid.to_i == 0
-          parent_scop = Scop.find_by_sunid(parent_sunid)
-          current_scop.move_to_child_of(parent_scop)
-        end
-        #$logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
-      end
-    end # task :scops
 
 
     desc "Import Domain Interfaces"

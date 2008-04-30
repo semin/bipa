@@ -241,8 +241,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  :hbplus
   end
 
-  add_index :hbonds, [:donor_id]
-  add_index :hbonds, [:acceptor_id]
+  add_index :hbonds, :donor_id
+  add_index :hbonds, :acceptor_id
+  add_index :hbonds, :hbplus_id, :unique => true
   add_index :hbonds, [:donor_id, :acceptor_id]
   add_index :hbonds, [:acceptor_id, :donor_id]
 

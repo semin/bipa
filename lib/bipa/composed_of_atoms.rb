@@ -45,6 +45,16 @@ module Bipa
     end
     memoize :whbonds
 
+    def hbplus_as_donor
+      atoms.inject([]) { |s, a| s.concat(a.hbplus_as_donor) }
+    end
+    memoize :hbplus_as_donor
+
+    def hbplus_as_acceptor
+      atoms.inject([]) { |s, a| s.concat(a.hbplus_as_acceptor) }
+    end
+    memoize :hbplus_as_acceptor
+
     def hbonds_as_donor
       atoms.inject([]) { |s, a| s.concat(a.hbonds_as_donor) }
     end
@@ -64,6 +74,16 @@ module Bipa
       atoms.inject([]) { |s, a| s.concat(a.whbonding_atoms) }
     end
     memoize :whbonding_atoms
+
+    def hbplus_donors
+      atoms.inject([]) { |s, a| s.concat(a.hbplus_donors) }
+    end
+    memoize :hbplus_donors
+
+    def hbplus_acceptors
+      atoms.inject([]) { |s, a| s.concat(a.hbplus_acceptors) }
+    end
+    memoize :hbplus_acceptors
 
     def hbonding_donors
       atoms.inject([]) { |s, a| s.concat(a.hbonding_donors) }
