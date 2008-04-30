@@ -59,55 +59,51 @@ class Scop < ActiveRecord::Base
     all_registered_leaf_children.map(&:rna_interfaces).flatten.compact
   end
 
-  # Statistical properties
   %w(dna rna).each do |na|
-
     %w(mean stddev).each do |property|
+      class_eval <<-END
+        def #{property}_#{na}_interface_asa
+          #{na}_interfaces.map { |i| i.asa }.to_stats_array.#{property}
+        end
+        memoize :#{property}_#{na}_interface_asa
 
-      define_method "#{property}_#{na}_interface_asa" do
-        "%.2f" % send("#{na}_interfaces").map { |i|
-          i.asa
-        }.to_stats_array.send(property)
-      end
+        def #{property}_#{na}_interface_hbonds
+          #{na}_interfaces.map { |i| (i.hbonds_as_donor.size + i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
+        end
+        memoize :#{property}_#{na}_interface_hbonds
 
-      define_method "#{property}_#{na}_interface_hbonds" do
-        "%.2f" % send("#{na}_interfaces").map { |i|
-          (i.hbonds_as_donor.size + i.hbonds_as_acceptor.size) / i.asa * 100
-        }.to_stats_array.send(property)
-      end
+        def #{property}_#{na}_interface_whbonds
+          #{na}_interfaces.map { |i| i.whbonds.size / i.asa * 100 }.to_stats_array.#{property}
+        end
+        memoize :#{property}_#{na}_interface_whbonds
 
-      define_method "#{property}_#{na}_interface_whbonds" do
-        "%.2f" % send("#{na}_interfaces").map { |i|
-          i.whbonds.size / i.asa * 100
-        }.to_stats_array.send(property)
-      end
+        def #{property}_#{na}_interface_contacts
+          #{na}_interfaces.map { |i| (i.contacts.size - i.hbonds_as_donor.size - i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
+        end
+        memoize :#{property}_#{na}_interface_contacts
 
-      define_method "#{property}_#{na}_interface_contacts" do
-        "%.2f" % send("#{na}_interfaces").map { |i|
-          (i.contacts.size - i.hbonds_as_donor.size - i.hbonds_as_acceptor.size) / i.asa * 100
-        }.to_stats_array.send(property)
-      end
-
-      define_method "#{property}_#{na}_interface_polarity" do
-        "%.2f" % send("#{na}_interfaces").map { |i|
-          i.polarity
-        }.to_stats_array.send(property)
-      end
+        def #{property}_#{na}_interface_polarity
+          #{na}_interfaces.map { |i| i.polarity }.to_stats_array.#{property}
+        end
+        memoize :#{property}_#{na}_interface_polarity
+      END
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-        define_method "#{property}_#{na}_interface_singlet_propensity_of_#{aa}" do
-          "%.2f" % send("#{na}_interfaces").map { |i|
-            i.send("singlet_propensity_of_#{aa}")
-          }.to_stats_array.send(property)
-        end
+        class_eval <<-END
+          def #{property}_#{na}_interface_singlet_propensity_of_#{aa}
+            #{na}_interfaces.map { |i| i.singlet_propensity_of_#{aa} }.to_stats_array.#{property}
+          end
+          memoize :#{property}_#{na}_interface_singlet_propensity_of_#{aa}
+        END
       end
 
       Dssp::SSES.map(&:downcase).each do |sse|
-        define_method "#{property}_#{na}_interface_sse_propensity_of_#{sse}" do
-          "%.2f" % send("#{na}_interfaces").map { |i|
-            i.send("sse_propensity_of_#{sse}")
-          }.to_stats_array.send(property)
-        end
+        class_eval <<-END
+          def #{property}_#{na}_interface_sse_propensity_of_#{sse}
+            #{na}_interfaces.map { |i| i.sse_propensity_of_#{sse} }.to_stats_array.#{property}
+          end
+          memoize :#{property}_#{na}_interface_sse_propensity_of_#{sse}
+        END
       end
     end
   end
@@ -117,115 +113,87 @@ class Scop < ActiveRecord::Base
     %w(dna rna).each do |na|
       na_residues = "Bipa::Constants::NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize.map(&:downcase)
 
-      define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}" do
-        if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}")
-          return instance_variable_get("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}")
-        else
-          result = AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
-            send("total_observed_frequency_of_#{int}_between_#{a}_and_#{na}")
+      class_eval <<-END
+        def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}
+          AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
+            send("total_observed_frequency_of_#{int}_between_\#{a}_and_#{na}")
           }
-          instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}", result)
         end
-      end
+        memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}
+      END
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-        define_method :"total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}" do
-          if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}")
-            return instance_variable_get("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}")
-          else
-            result = na_residues.sum { |r|
-              send("observed_frequency_of_#{int}_between_#{aa}_and_#{r}")
+        class_eval <<-END
+          def total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}
+            na_residues.sum { |r|
+              send("observed_frequency_of_#{int}_between_#{aa}_and_\#{r}")
             } + %w(sugar phosphate).sum { |m|
-              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{m}")
+              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_\#{m}")
             }
-            instance_variable_set("@total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}", result)
           end
-        end
+          memoize :total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}
+        END
       end
 
       na_residues.each do |res|
-        define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}" do
-          if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}")
-            return instance_variable_get("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}")
-          else
-            result = AminoAcids::Residues::STANDARD.map(&:downcase).sum { |r|
-              send("observed_frequency_of_#{int}_between_#{r}_and_#{res}")
+        class_eval <<-END
+          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}
+            AminoAcids::Residues::STANDARD.map(&:downcase).sum { |r|
+              send("observed_frequency_of_#{int}_between_\#{r}_and_#{res}")
             }
-            instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}", result)
           end
-        end
+          memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}
+        END
 
         AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-          define_method :"observed_frequency_of_#{int}_between_#{aa}_and_#{res}" do
-            if instance_variable_defined?("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}")
-              return instance_variable_get("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}")
-            else
-              result = send("#{na}_interfaces").sum { |i|
-                i.send("frequency_of_#{int}_between_#{aa}_and_#{res}")
-              }
-              instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{res}", result)
+          class_eval <<-END
+            def observed_frequency_of_#{int}_between_#{aa}_and_#{res}
+              #{na}_interfaces.sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{res} }
             end
-          end
+            memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{res}
 
-          define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{res}" do
-            if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
-              return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}")
-            else
-              result = (
-                send("total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}").to_f *
-                send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}").to_f /
-                send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}").to_f
-              )
-              result.nan? ? 0 : "%.2f" % result
-              instance_variable_set("@expected_frequency_of_#{int}_between_#{aa}_and_#{res}", result)
+            def expected_frequency_of_#{int}_between_#{aa}_and_#{res}
+              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}.to_f *
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}.to_f /
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}.to_f
+              result.nan? ? 0 : result
             end
-          end
+            memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{res}
+          END
         end
       end
 
 
       %w(sugar phosphate).each do |moiety|
-        define_method :"total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}" do
-          if instance_variable_defined?("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}")
-            return instance_variable_get("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}")
-          else
-            result = AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
-              send("observed_frequency_of_#{int}_between_#{a}_and_#{na}_#{moiety}")
+        class_eval <<-END
+          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}
+            AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
+              send("observed_frequency_of_#{int}_between_\#{a}_and_#{na}_#{moiety}")
             }
-            instance_variable_set("@total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}", result)
           end
-        end
+          memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}
+        END
 
         AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-          define_method :"observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}" do
-            if instance_variable_defined?("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
-              return instance_variable_get("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
-            else
-              result = send("#{na}_interfaces").sum { |i|
-                i.send("frequency_of_#{int}_between_#{aa}_and_#{moiety}")
-              }
-              instance_variable_set("@observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}", result)
+          class_eval <<-END
+            def observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
+              #{na}_interfaces.sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{moiety} }
             end
-          end
+            memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
 
-          define_method :"expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}" do
-            if instance_variable_defined?("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
-              return instance_variable_get("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}")
-            else
-              result = (
-                send("total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}").to_f *
-                send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}").to_f /
-                send("total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}").to_f
-              )
-              result.nan? ? 0 : "%.2f" % result
-              instance_variable_set("@expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}", result)
+            def expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
+              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}.to_f *
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}.to_f /
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}.to_f
+              result.nan? ? 0 : result
             end
-          end
+            memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
+          END
         end
       end
 
-    end #
-  end #
+    end
+  end
 end # class Scop
 
 
@@ -302,35 +270,6 @@ class ScopDomain < Scop
 
   has_many  :sequences
 
-  # has_many  :atoms,
-  #           :through      => :residues
-  #
-  # has_many  :contacts,
-  #           :through      => :atoms
-  #
-  # has_many  :contacting_atoms,
-  #           :through      => :contacts
-  #
-  # has_many  :whbonds,
-  #           :through      => :atoms
-  #
-  # has_many  :whbonding_atoms,
-  #           :through      => :whbonds
-  #
-  # has_many  :hbonds_as_donor,
-  #           :through      => :atoms
-  #
-  # has_many  :hbonds_as_acceptor,
-  #           :through      => :atoms
-  #
-  # has_many  :hbonding_donors,
-  #           :through      => :hbonds_as_acceptor
-  #
-  # has_many  :hbonding_acceptors,
-  #           :through      => :hbonds_as_donor
-
-  # Methods
-
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
   end
@@ -386,21 +325,4 @@ class ScopDomain < Scop
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
   end
   memoize :to_sequence
-
-  # Callbacks
-  def update_pdb_code
-    self.pdb_code = (stype == 'px' ? description[0..3].upcase : '-')
-  end
-
-  def update_unbound_asa
-    self.unbound_asa = atoms.inject(0) { |s, a| a.unbound_asa ? s + a.unbound_asa : s }
-  end
-
-  def update_bound_asa
-    self.bound_asa = atoms.inject(0) { |s, a| a.bound_asa ? s + a.bound_asa : s }
-  end
-
-  def update_delta_asa
-    self.delta_asa = atoms.inject(0) { |s, a| a.delta_asa ? s + a.delta_asa : s }
-  end
 end # class ScopDomain

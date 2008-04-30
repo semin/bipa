@@ -30,6 +30,8 @@ class Residue < ActiveRecord::Base
           :class_name   => "Dssp",
           :foreign_key  => "residue_id"
 
+  delegate :sse, :to => :dssp
+
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?
@@ -119,11 +121,11 @@ class AaResidue < StdResidue
               :foreign_key  => "residue_map_id"
 
   def on_surface?
-    relative_unbound_asa > MIN_SRFRES_RASA
+    relative_unbound_asa >= MIN_SURFACE_RESIDUE_RELATIVE_ASA
   end
 
   def on_interface?
-    delta_asa > MIN_INTRES_SASA
+    delta_asa >= MIN_INTERFACE_RESIDUE_DELTA_ASA
   end
 
   def one_letter_code

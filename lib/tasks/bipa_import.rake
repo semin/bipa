@@ -443,6 +443,32 @@ namespace :bipa do
     end
 
 
+    desc "Import hydrogen bonds between protein and nucleic acids"
+    task :hbonds => [:environment] do
+
+      pdb_codes = Structure.untainted.find(:all).map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_codes.each_with_index do |pdb_code, i|
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            structure = Structure.find_by_pdb_code(pdb_code)
+
+            Hbond.import(hbonds, :validate => false) unless hbonds.empty?
+            ActiveRecord::Base.remove_connection
+            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end
+
+
     desc "Import Water-mediated hydrogen bonds"
     task :whbonds => [:environment] do
 
@@ -457,7 +483,6 @@ namespace :bipa do
         pdb_codes.each_with_index do |pdb_code, i|
 
           fmanager.fork do
-
             ActiveRecord::Base.establish_connection(config)
 
             structure   = Structure.find_by_pdb_code(pdb_code)
@@ -586,7 +611,7 @@ namespace :bipa do
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.untainted.find(:all).map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do

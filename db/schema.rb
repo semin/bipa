@@ -234,6 +234,19 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :hbplus, [:acceptor_id, :donor_id]
 
 
+  # 'hbonds' table
+  create_table :hbonds, :force => true do |t|
+    t.belongs_to  :donor
+    t.belongs_to  :acceptor
+    t.belongs_to  :hbplus
+  end
+
+  add_index :hbonds, [:donor_id]
+  add_index :hbonds, [:acceptor_id]
+  add_index :hbonds, [:donor_id, :acceptor_id]
+  add_index :hbonds, [:acceptor_id, :donor_id]
+
+
   # 'whbonds' table
   create_table :whbonds, :force => true do |t|
     t.belongs_to :atom

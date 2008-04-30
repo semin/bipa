@@ -17,27 +17,45 @@ class Atom < ActiveRecord::Base
   has_many  :whbonding_atoms,
             :through      => :whbonds
 
-  has_many  :hbonds_as_donor,
+  has_many  :hbplus_as_donor,
             :class_name   => "Hbplus",
             :foreign_key  => "donor_id",
             :dependent    => :destroy
 
-  has_many  :hbonds_as_acceptor,
+  has_many  :hbplus_as_acceptor,
             :class_name   => "Hbplus",
             :foreign_key  => "acceptor_id",
             :dependent    => :destroy
 
-  has_many  :hbonding_donors,
-            :through      => :hbonds_as_acceptor,
+  has_many  :hbplus_donors,
+            :through      => :hbplus_as_acceptor,
             :source       => :donor
 
-  has_many  :hbonding_acceptors,
-            :through      => :hbonds_as_donor,
+  has_many  :hbplus_acceptors,
+            :through      => :hbplus_as_donor,
             :source       => :acceptor
+
+  has_many  :hbonds_as_donor,
+            :class_name   => "Hbond",
+            :foreign_key  => "donor_id",
+            :dependent    => :destroy
+
+  has_many  :hbonds_as_acceptor,
+            :class_name   => "Hbond",
+            :foreign_key  => "acceptor_id",
+            :dependent    => :destroy
+
+  has_many  :hbonding_donors,
+            :through      => :hbonds_as_acceptor
+
+  has_many  :hbonding_acceptors,
+            :through      => :hbonds_as_donor
 
   has_one   :naccess
 
   has_one   :zap
+
+  %w(unbound bound delta).each { |s| delegate :"#{s}_asa", :to => :naccess }
 
   # ASA related
   def on_surface?

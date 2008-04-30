@@ -33,4 +33,8 @@ class Structure < ActiveRecord::Base
   end
   memoize :residues
 
+  def domains
+    aa_chains.inject([]) { |s, a| s.concat(a.domains) }
+  end
+  memoize :domains
 end

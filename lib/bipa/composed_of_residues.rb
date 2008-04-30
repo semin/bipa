@@ -67,7 +67,7 @@ module Bipa
         memoize :#{stat}_asa_of_residue
 
         def #{stat}_asa_of_sse(sse)
-          residues.inject(0) { |s, r| r.secondary_structure == sse.upcase ? s + r.#{stat}_asa : s }
+          residues.inject(0) { |s, r| !r.dssp.nil? && r.sse == sse.upcase ? s + r.#{stat}_asa : s }
         end
         memoize :#{stat}_asa_of_sse
       END
