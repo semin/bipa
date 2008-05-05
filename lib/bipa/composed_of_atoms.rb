@@ -126,7 +126,7 @@ module Bipa
     memoize :interface_atoms_binding_rna
 
     def calpha_only?
-      atoms.map(&:atom_name).uniq == ["CA"]
+      atoms.find(:all, :select => "atom_name").map(&:atom_name).uniq == ["CA"]
     end
     memoize :calpha_only?
 

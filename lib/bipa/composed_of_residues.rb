@@ -54,7 +54,7 @@ module Bipa
     memoize :rna_binding_interface_residues
 
     def has_unks?
-      residues.each { |r| return true if r.residue_name == "UNK" }
+      residues.find(:all, :select => "residue_name").each { |r| return true if r.residue_name == "UNK" }
       false
     end
     memoize :has_unks?

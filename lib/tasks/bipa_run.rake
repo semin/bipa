@@ -301,7 +301,7 @@ namespace :bipa do
                 chdir(cwd)
               end
 
-              $logger.info("BATON with representative PDB files for SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+              $logger.info("BATON with representative PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
             end
           end
         end
@@ -328,12 +328,13 @@ namespace :bipa do
 
                 Dir[rep_dir + "/*"].each do |subfam_dir|
                   chdir(subfam_dir)
-                  system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+                  system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1")
+                  #system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
                   chdir(cwd)
                 end
               end
 
-              $logger.info("BATON with subfamily PDB files for SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+              $logger.info("BATON with subfamily PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
             end
           end
         end

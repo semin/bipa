@@ -619,8 +619,6 @@ namespace :bipa do
     end
 
 
-
-
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
