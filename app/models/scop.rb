@@ -268,7 +268,9 @@ class ScopDomain < Scop
             :through      => :residues,
             :uniq         => true
 
-  has_many  :sequences
+  has_many  :sequences,
+            :class_name   => "Sequence",
+            :foreign_key  => "scop_id"
 
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
