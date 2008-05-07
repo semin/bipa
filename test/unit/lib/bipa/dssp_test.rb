@@ -26,47 +26,47 @@ END
     end
 
     should "return correct secondary structure element when sending #sse" do
-      assert_equal("",  @residues["4A"].sse)
+      assert_equal("C", @residues["4A"].sse)
       assert_equal("S", @residues["5A"].sse)
       assert_equal("S", @residues["6A"].sse)
-      assert_equal("",  @residues["140F"].sse)
+      assert_equal("C", @residues["140F"].sse)
       assert_equal("H", @residues["141F"].sse)
       assert_equal("H", @residues["142F"].sse)
     end
     
     should "return correct #three_turns" do
-      assert_equal("", @residues["4A"].three_turns)
-      assert_equal("", @residues["5A"].three_turns)
-      assert_equal("", @residues["6A"].three_turns)
-      assert_equal("", @residues["140F"].three_turns)
-      assert_equal("", @residues["141F"].three_turns)
-      assert_equal("", @residues["142F"].three_turns)
+      assert_equal(nil, @residues["4A"].three_turns)
+      assert_equal(nil, @residues["5A"].three_turns)
+      assert_equal(nil, @residues["6A"].three_turns)
+      assert_equal(nil, @residues["140F"].three_turns)
+      assert_equal(nil, @residues["141F"].three_turns)
+      assert_equal(nil, @residues["142F"].three_turns)
     end
     
     should "return correct #four_turns" do
-      assert_equal("", @residues["4A"].four_turns)
-      assert_equal("", @residues["5A"].four_turns)
-      assert_equal("", @residues["6A"].four_turns)
+      assert_equal(nil,  @residues["4A"].four_turns)
+      assert_equal(nil,  @residues["5A"].four_turns)
+      assert_equal(nil,  @residues["6A"].four_turns)
       assert_equal(">", @residues["140F"].four_turns)
       assert_equal(">", @residues["141F"].four_turns)
       assert_equal(">", @residues["142F"].four_turns)
     end
     
     should "return correct #five_turns" do
-      assert_equal("", @residues["4A"].five_turns)
-      assert_equal("", @residues["5A"].five_turns)
-      assert_equal("", @residues["6A"].five_turns)
-      assert_equal("", @residues["140F"].five_turns)
-      assert_equal("", @residues["141F"].five_turns)
-      assert_equal("", @residues["142F"].five_turns)
+      assert_equal(nil, @residues["4A"].five_turns)
+      assert_equal(nil, @residues["5A"].five_turns)
+      assert_equal(nil, @residues["6A"].five_turns)
+      assert_equal(nil, @residues["140F"].five_turns)
+      assert_equal(nil, @residues["141F"].five_turns)
+      assert_equal(nil, @residues["142F"].five_turns)
     end
     
     should "return correct #geometrical_bend" do
-      assert_equal("",  @residues["4A"].geometrical_bend)
+      assert_equal(nil,  @residues["4A"].geometrical_bend)
       assert_equal("S", @residues["5A"].geometrical_bend)
       assert_equal("S", @residues["6A"].geometrical_bend)
-      assert_equal("",  @residues["140F"].geometrical_bend)
-      assert_equal("",  @residues["141F"].geometrical_bend)
+      assert_equal(nil,  @residues["140F"].geometrical_bend)
+      assert_equal(nil,  @residues["141F"].geometrical_bend)
       assert_equal("S", @residues["142F"].geometrical_bend)
     end
     
@@ -74,27 +74,27 @@ END
       assert_equal("+", @residues["4A"].chirality)
       assert_equal("+", @residues["5A"].chirality)
       assert_equal("-", @residues["6A"].chirality)
-      assert_equal("",  @residues["140F"].chirality)
+      assert_equal(nil,  @residues["140F"].chirality)
       assert_equal("+", @residues["141F"].chirality)
       assert_equal("+", @residues["142F"].chirality)
     end
     
     should "return correct #beta_bridge_label_1" do
-      assert_equal("", @residues["4A"].beta_bridge_label_1)
-      assert_equal("", @residues["5A"].beta_bridge_label_1)
-      assert_equal("", @residues["6A"].beta_bridge_label_1)
-      assert_equal("", @residues["140F"].beta_bridge_label_1)
-      assert_equal("", @residues["141F"].beta_bridge_label_1)
-      assert_equal("", @residues["142F"].beta_bridge_label_1)
+      assert_equal(nil, @residues["4A"].beta_bridge_label_1)
+      assert_equal(nil, @residues["5A"].beta_bridge_label_1)
+      assert_equal(nil, @residues["6A"].beta_bridge_label_1)
+      assert_equal(nil, @residues["140F"].beta_bridge_label_1)
+      assert_equal(nil, @residues["141F"].beta_bridge_label_1)
+      assert_equal(nil, @residues["142F"].beta_bridge_label_1)
     end
     
     should "return correct #beta_bridge_label_2" do
-      assert_equal("", @residues["4A"].beta_bridge_label_2)
-      assert_equal("", @residues["5A"].beta_bridge_label_2)
-      assert_equal("", @residues["6A"].beta_bridge_label_2)
-      assert_equal("", @residues["140F"].beta_bridge_label_2)
-      assert_equal("", @residues["141F"].beta_bridge_label_2)
-      assert_equal("", @residues["142F"].beta_bridge_label_2)
+      assert_equal(nil, @residues["4A"].beta_bridge_label_2)
+      assert_equal(nil, @residues["5A"].beta_bridge_label_2)
+      assert_equal(nil, @residues["6A"].beta_bridge_label_2)
+      assert_equal(nil, @residues["140F"].beta_bridge_label_2)
+      assert_equal(nil, @residues["141F"].beta_bridge_label_2)
+      assert_equal(nil, @residues["142F"].beta_bridge_label_2)
     end
     
     should "return correct #beta_brdige_partner_residue_number_1" do
@@ -116,12 +116,12 @@ END
     end
     
     should "return correct #beta_sheet_label" do
-      assert_equal("", @residues["4A"].beta_sheet_label)
-      assert_equal("", @residues["5A"].beta_sheet_label)
-      assert_equal("", @residues["6A"].beta_sheet_label)
-      assert_equal("", @residues["140F"].beta_sheet_label)
-      assert_equal("", @residues["141F"].beta_sheet_label)
-      assert_equal("", @residues["142F"].beta_sheet_label)
+      assert_equal(nil, @residues["4A"].beta_sheet_label)
+      assert_equal(nil, @residues["5A"].beta_sheet_label)
+      assert_equal(nil, @residues["6A"].beta_sheet_label)
+      assert_equal(nil, @residues["140F"].beta_sheet_label)
+      assert_equal(nil, @residues["141F"].beta_sheet_label)
+      assert_equal(nil, @residues["142F"].beta_sheet_label)
     end
     
     should "return correct #sasa" do

@@ -122,10 +122,9 @@ class ResidueTest < Test::Unit::TestCase
       context "hbonding each other" do
         
         setup do
-          @hbond              = Hbond.new
-          @hbond.donor        = @atom1
-          @hbond.acceptor     = @atom2
-          @hbond.da_distance  = @atom1 - @atom2
+          @hbond          = Hbond.new
+          @hbond.donor    = @atom1
+          @hbond.acceptor = @atom2
           @hbond.save
         end
         
