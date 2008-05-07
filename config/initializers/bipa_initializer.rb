@@ -19,9 +19,9 @@ require "bipa"
 
 # STI dependency
 require_dependency "scop"
+require_dependency "atom"
 require_dependency "chain"
 require_dependency "residue"
-require_dependency "atom"
 require_dependency "interface"
 require_dependency "subfamily"
 require_dependency "alignment"

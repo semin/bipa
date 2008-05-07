@@ -1,7 +1,9 @@
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 
+# STI dependency
 require_dependency "scop"
+require_dependency "atom"
 require_dependency "chain"
 require_dependency "residue"
 require_dependency "interface"
@@ -19,4 +21,10 @@ class ApplicationController < ActionController::Base
 
   # Semin: disable forgery protection
   self.allow_forgery_protection = false
+
+  private
+
+  def local_request?
+    false
+  end
 end
