@@ -3,16 +3,20 @@ class Alignment < ActiveRecord::Base
   include Bio::Alignment::EnumerableExtension
 
   has_many  :sequences,
-            :order    => "id"
+            :order      => "id",
+            :dependent  => :delete_all
+
 
   has_many  :columns,
-            :order    => "number"
+            :order      => "number",
+            :dependent  => :delete_all
+
 
   def to_fasta
     sequences.each do |seq|
       header = seq.domain ? seq.domain.sid : seq.chain.fasta_header
       puts ">#{header}"
-      puts seq.columns.map(&:residue_name).join
+      puts seq.positions.map(&:residue_name).join
     end
   end
 
@@ -25,11 +29,11 @@ class Alignment < ActiveRecord::Base
 
     0.upto(length - 1) do |pos|
       0.upto(sequences.length - 2) do |seq1|
-        col1 = sequences[seq1].columns[pos]
+        col1 = sequences[seq1].positions[pos]
         next if col1.residue.nil?
 
         (seq1 + 1).upto(sequences.length - 1) do |seq2|
-          col2 = sequences[seq2].columns[pos]
+          col2 = sequences[seq2].positions[pos]
           next if col2.residue.nil?
           pairs << Set.new([col1.residue, col2.residue])
         end
@@ -39,12 +43,12 @@ class Alignment < ActiveRecord::Base
   end
 
   def length
-    sequences.first.columns.length
+    sequences.first.positions.length
   end
 
   # To use Bio::Alignment of BioRuby
   def each_seq
-    sequences.each { |s| yield s.columns.map(&:residue_name).join }
+    sequences.each { |s| yield s.positions.map(&:residue_name).join }
   end
 end
 

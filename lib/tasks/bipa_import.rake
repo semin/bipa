@@ -786,7 +786,7 @@ namespace :bipa do
               next
             end
 
-            alignment = family.send("build_full_alignment")
+            alignment = family.send("create_full_alignment")
             flat_file = Bio::FlatFile.auto(ali_file)
 
             flat_file.each_entry do |entry|
@@ -936,7 +936,7 @@ namespace :bipa do
                   next
                 end
 
-                alignment = Subfamily.find(subfam_id).build_alignment
+                alignment = Subfamily.find(subfam_id).create_alignment
                 flat_file = Bio::FlatFile.auto(ali_file)
 
                 flat_file.each_entry do |entry|
