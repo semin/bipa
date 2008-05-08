@@ -245,7 +245,7 @@ class ScopDomain < Scop
 
   (10..100).step(10) do |si|
     belongs_to  :"rep#{si}_subfamily",
-                :class_name   => "Rep#{si}Subfamiy",
+                :class_name   => "Rep#{si}Subfamily",
                 :foreign_key  => "rep#{si}_subfamily#{si}_id"
   end
 
