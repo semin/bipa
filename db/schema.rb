@@ -376,4 +376,45 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :positions, [:sequence_id, :number]
   add_index :positions, :column_id
   add_index :positions, :residue_id
+
+
+  create_table :go_terms, :force => true do |t|
+    t.string  :go_id
+    t.boolean :is_anonymous
+    t.string  :name
+    t.string  :namespace
+    t.string  :definition
+    t.string  :synonym
+    t.string  :alt_id
+    t.string  :comment
+    t.string  :subset
+    t.string  :synonym
+    t.string  :xref
+    t.boolean :is_obsolete
+    t.string  :replaced_by
+    t.string  :consider
+  end
+
+  add_index :go_terms, :go_id, :unique => true
+
+
+  create_table :go_associations, :force => true do |t|
+    t.belongs_to :subclass
+    t.belongs_to :superclass
+  end
+
+  add_index :go_associations, :subclass
+  add_index :go_associations, :superclass
+
+
+  create_table :go_relationships, :force => true do |t|
+    t.belongs_to  :object
+    t.belongs_to  :subject
+    t.string      :type
+  end
+
+  add_index :go_relationships, :object_id
+  add_index :go_relationships, :subject_id
+  add_index :go_relationships, :type
+
 end
