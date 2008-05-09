@@ -3,9 +3,8 @@ require File.dirname(__FILE__) + '/../../../test_helper'
 class Bipa::OboTest < Test::Unit::TestCase
 
   context "An Bipa::Obo instance" do
-
     setup do
-      obo_str =<<END
+      obo_str = <<END
 [Term]
 id: GO:0000001
 name: mitochondrion inheritance
@@ -48,6 +47,9 @@ END
       assert_equal "GO:0000001", @obo_obj.terms[0].go_id
       assert_equal "GO:0000002", @obo_obj.terms[1].go_id
       assert_equal "GO:0000003", @obo_obj.terms[2].go_id
+    end
+
+    should "have a correct name for each term" do
     end
   end
 end
