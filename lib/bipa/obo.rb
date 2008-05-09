@@ -21,15 +21,14 @@ module Bipa
                       :replaced_by,
                       :consider)
 
-    Association = Struct.new(:subclass_id.
-                              :superclass_id)
+    Association = Struct.new(:subclass_id,
+                             :superclass_id)
 
-    Relationship = Struct.new(:object_id.
+    Relationship = Struct.new(:object_id,
                               :subject_id,
                               :type)
 
     def initialize(obo_str)
-
       @terms          = Array.new
       @associations   = Hash.new([])
       @relationships  = Hash.new([])
@@ -38,12 +37,11 @@ module Bipa
     end
 
     def parse_obo_flat_file(obo_str)
-
-      obo_str.scan(/^\[Term\].*?^\n$/m).each do |term, i|
+      obo_str.scan(/^\[Term\].*?^$/m).each_with_index do |t, i|
 
         term = Term.new
 
-        term.split(/\n/).each do |line|
+        t.split(/\n/).each do |line|
           case line
           when /^\[Term\]/ # title line
             next
@@ -91,6 +89,7 @@ module Bipa
             #next
           end
         end
+        @terms << term
       end
     end
 

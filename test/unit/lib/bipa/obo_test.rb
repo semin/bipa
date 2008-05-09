@@ -1,11 +1,11 @@
 require File.dirname(__FILE__) + '/../../../test_helper'
 
-class OboFlatFileTest < Test::Unit::TestCase
+class Bipa::OboTest < Test::Unit::TestCase
 
-  context "A OboFlatFile instance" do
+  context "An Bipa::Obo instance" do
 
     setup do
-      obo_str   = <<END
+      obo_str =<<END
 [Term]
 id: GO:0000001
 name: mitochondrion inheritance
@@ -35,12 +35,19 @@ subset: goslim_plant
 subset: gosubset_prok
 synonym: "reproductive physiological process" EXACT []
 is_a: GO:0008150 ! biological_process
+
 END
-      obo_obj   = Bipa::OboFlatFile.new(obo_str)
+      @obo_obj = Bipa::Obo.new(obo_str)
     end
 
     should "have three GO terms" do
-      assert_equal 3, obo_obj.terms.size
+      assert_equal 3, @obo_obj.terms.size
+    end
+
+    should "have a correct ID for each term" do
+      assert_equal "GO:0000001", @obo_obj.terms[0].go_id
+      assert_equal "GO:0000002", @obo_obj.terms[1].go_id
+      assert_equal "GO:0000003", @obo_obj.terms[2].go_id
     end
   end
 end
