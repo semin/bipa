@@ -2,7 +2,7 @@ require "autotest/redgreen"
 require "autotest/growl"
 
 Autotest.add_hook :initialize do |at|
-  %w{.svn .hg .git public}.each { |e| at.add_exception(e) }
+  %w{.svn .hg .git doc log public tmp}.each { |e| at.add_exception(e) }
 end
 
 # module Autotest::Growl
