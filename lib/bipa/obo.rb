@@ -11,7 +11,6 @@ module Bipa
                       :name,
                       :namespace,
                       :definition,
-                      :synonym,
                       :alt_id,
                       :comment,
                       :subset,
@@ -24,14 +23,14 @@ module Bipa
     Association = Struct.new(:subclass_id,
                              :superclass_id)
 
-    Relationship = Struct.new(:object_id,
-                              :subject_id,
+    Relationship = Struct.new(:subject_id,
+                              :object_id,
                               :type)
 
     def initialize(obo_str)
       @terms          = Array.new
-      @associations   = Hash.new([])
-      @relationships  = Hash.new([])
+      @associations   = Hash.new
+      @relationships  = Hash.new
 
       parse_obo_flat_file(obo_str)
     end
@@ -58,9 +57,9 @@ module Bipa
           when /^def:\s+(.*)$/
             term[:definition] = $1
           when /^synonym:\s+(.*)$/
-            next # can be many, at the moment
+            next # can be many
           when /^alt_id:\s+(\S+)/
-            term[:alt_id] = $1
+            next # can be many
           when /^comment:\s+(.*)$/
             term[:comment] = $1
           when /^subset:\s+(.*)$/
@@ -74,16 +73,21 @@ module Bipa
           when /^consider:\s+(\S+)/
             next # can be many
           when /^is_a:\s+(\S+)/
-            association = Association.new
-            association[:subclass_id]    = term[:go_id]
-            association[:superclass_id]  = $1
-            @associations[term[:go_id]] << association
+            association = Association.new(term.go_id, $1)
+            if @associations[term.go_id].nil?
+              @associations[term.go_id] = []
+              @associations[term.go_id] << association
+            else
+              @associations[term.go_id] << association
+            end
           when /^relationship:\s+(\S+)\s+(\S+)/
-            relationship = Relationship.new
-            relationship[:subject_id] = term[:go_id]
-            relationship[:type]       = $1
-            relationship[:object_id]  = $2
-            @relationships[term[:go_id]] << relationship
+            relationship = Relationship.new(term.go_id, $2, $1)
+            if @relationships[term.go_id].nil?
+              @relationships[term.go_id] = []
+              @relationships[term.go_id] << relationship
+            else
+              @relationships[term.go_id] << relationship
+            end
           else
             raise "Unknown type: #{line}"
             #next

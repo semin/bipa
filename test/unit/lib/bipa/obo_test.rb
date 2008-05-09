@@ -15,41 +15,65 @@ is_a: GO:0048308 ! organelle inheritance
 is_a: GO:0048311 ! mitochondrion distribution
 
 [Term]
-id: GO:0000002
-name: mitochondrial genome maintenance
+id: GO:0000018
+name: regulation of DNA recombination
 namespace: biological_process
-def: "The maintenance of the structure and integrity of the mitochondrial genome; includes replication and segregation of the mitochondrial chromosome." [GOC:ai, GOC:vw]
-is_a: GO:0007005 ! mitochondrion organization and biogenesis
+def: "Any process that modulates the frequency, rate or extent of DNA recombination, a process by which a new genotype is formed by reassortment of genes resulting in gene combinations different from those that were present in the parents." [GOC:go_curators, ISBN:0198506732 "Oxford Dictionary of Biochemistry and Molecular Biology"]
+subset: gosubset_prok
+is_a: GO:0051052 ! regulation of DNA metabolic process
+relationship: regulates GO:0006310 ! DNA recombination
 
 [Term]
-id: GO:0000003
-name: reproduction
+id: GO:0000022
+name: mitotic spindle elongation
 namespace: biological_process
-alt_id: GO:0019952
-alt_id: GO:0050876
-def: "The production by an organism of new individuals that contain some portion of their genetic material inherited from that organism." [GOC:go_curators, GOC:isa_complete, ISBN:0198506732 "Oxford Dictionary of Biochemistry and Molecular Biology"]
-subset: goslim_generic
-subset: goslim_pir
-subset: goslim_plant
-subset: gosubset_prok
-synonym: "reproductive physiological process" EXACT []
-is_a: GO:0008150 ! biological_process
+def: "Lengthening of the distance between poles of the mitotic spindle." [GOC:mah]
+synonym: "spindle elongation during mitosis" EXACT []
+is_a: GO:0051231 ! spindle elongation
+relationship: part_of GO:0007052 ! mitotic spindle organization and biogenesis
 
 END
-      @obo_obj = Bipa::Obo.new(obo_str)
+      obo_obj         = Bipa::Obo.new(obo_str)
+      @terms          = obo_obj.terms
+      @associations   = obo_obj.associations
+      @relationships  = obo_obj.relationships
     end
 
     should "have three GO terms" do
-      assert_equal 3, @obo_obj.terms.size
+      assert_equal 3, @terms.size
     end
 
     should "have a correct ID for each term" do
-      assert_equal "GO:0000001", @obo_obj.terms[0].go_id
-      assert_equal "GO:0000002", @obo_obj.terms[1].go_id
-      assert_equal "GO:0000003", @obo_obj.terms[2].go_id
+      assert_equal "GO:0000001", @terms[0].go_id
+      assert_equal "GO:0000018", @terms[1].go_id
+      assert_equal "GO:0000022", @terms[2].go_id
     end
 
     should "have a correct name for each term" do
+      assert_equal "mitochondrion inheritance",       @terms[0].name
+      assert_equal "regulation of DNA recombination", @terms[1].name
+      assert_equal "mitotic spindle elongation",      @terms[2].name
+    end
+
+    should "have a correct namespace for each term" do
+      assert_equal "biological_process", @terms[0].namespace
+      assert_equal "biological_process", @terms[1].namespace
+      assert_equal "biological_process", @terms[2].namespace
+    end
+
+    should "have correct superclasses for each term" do
+      assert_equal "GO:0048308", @associations[@terms[0].go_id][0].superclass_id
+      assert_equal "GO:0048311", @associations[@terms[0].go_id][1].superclass_id
+      assert_equal "GO:0051052", @associations[@terms[1].go_id][0].superclass_id
+      assert_equal "GO:0051231", @associations[@terms[2].go_id][0].superclass_id
+    end
+
+    should "have correct relationships for each term" do
+      assert_nil @relationships[@terms[0].go_id]
+      assert_equal "GO:0006310",  @relationships[@terms[1].go_id][0].object_id
+      assert_equal "regulates",   @relationships[@terms[1].go_id][0].type
+      assert_equal "GO:0007052",  @relationships[@terms[2].go_id][0].object_id
+      assert_equal "part_of",     @relationships[@terms[2].go_id][0].type
     end
   end
 end
