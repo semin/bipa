@@ -403,8 +403,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to :superclass
   end
 
-  add_index :go_associations, :subclass
-  add_index :go_associations, :superclass
+  add_index :go_associations, :subclass_id
+  add_index :go_associations, :superclass_id
 
 
   create_table :go_relationships, :force => true do |t|
