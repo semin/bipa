@@ -987,5 +987,106 @@ namespace :bipa do
       end # fmanager.manage
     end # task :sub_alignments
 
+
+    desc "Import GO data into GO related tables"
+    task :go => [:environment] do
+
+      obo_file  = File.join(GO_DIR, "gene_ontology_edit.obo")
+      obo_obj   = Bipa::Obo.new(IO.read(obo_file))
+
+      obo_obj.terms.each do |go_id, term|
+        term_ar = GoTerm.find_by_go_id(go_id)
+        if term_ar.nil?
+          GoTerm.create!(term.to_hash)
+          $logger.info("Importing #{go_id} into 'go_terms': done")
+        end
+      end
+
+      obo_obj.associations.each do |go_id, associations|
+        subclass = GoTerm.find_by_go_id(go_id)
+        associations.each do |association|
+          superclass = GoTerm.find_by_go_id(association.superclass_id)
+          GoAssociation.create!(:subclass_id    => subclass.id,
+                                :superclass_id  => superclass.id)
+          $logger.info("Importing #{go_id} is_a #{association.superclass_id} into 'go_associations': done")
+        end
+      end
+
+      obo_obj.relationships.each do |go_id, relationships|
+        subject = GoTerm.find_by_go_id(go_id)
+
+        relationships.each do |relationship|
+          object = GoTerm.find_by_go_id(relationship.object_id)
+
+          if relationship.type == "part_of"
+            GoPartOf.create!(:subject_id  => subject.id,
+                             :object_id   => object.id)
+            $logger.info("Importing #{go_id} 'part_of' #{relationship.object_id} into 'go_relationships': done")
+          elsif relationship.type == "regulates"
+            GoRegulate.create!(:subject_id  => subject.id,
+                               :object_id   => object.id)
+            $logger.info("Importing #{go_id} 'regulates' #{relationship.object_id} into 'go_relationships': done")
+          elsif relationship.type == "positively_regulates"
+            GoPositivelyRegulate.create!(:subject_id  => subject.id,
+                                         :object_id   => object.id)
+            $logger.info("Importing #{go_id} 'positively regulates' #{relationship.object_id} into 'go_relationships': done")
+          elsif relationship.type == "negatively_regulates"
+            GoNegativelyRegulate.create!(:subject_id  => subject.id,
+                                         :object_id   => object.id)
+            $logger.info("Importing #{go_id} 'negatively regulates' #{relationship.object_id} into 'go_relationships': done")
+          else
+            raise "Unknown type of relationship: #{relationship.type}"
+          end
+        end
+      end
+    end
+
+
+    desc "Import GOA-PDB data into 'goa_pdbs' table"
+    task :goa => [:environment] do
+
+      goa_pdb_file = File.join(GO_DIR, "gene_association.goa_pdb")
+
+      IO.foreach(goa_pdb_file) do |line|
+        line_arr = line.chomp.split(/\t/)
+
+        line_hsh = {
+          :db                => line_arr[0],
+          :db_object_id      => line_arr[1],
+          :db_object_symbol  => line_arr[2],
+          :qualifier         => line_arr[3].nil_if_blank,
+          :go_id             => line_arr[4],
+          :db_reference      => line_arr[5],
+          :evidence          => line_arr[6],
+          :with              => line_arr[7],
+          :aspect            => line_arr[8],
+          :db_object_name    => line_arr[9].nil_if_blank,
+          :synonym           => line_arr[10].nil_if_blank,
+          :db_object_type    => line_arr[11],
+          :taxon_id          => line_arr[12].gsub(/taxon:/, ''),
+          :date              => line_arr[13],
+          :assigned_by       => line_arr[14]
+        }
+
+        pdb_code    = line_hsh[:db_object_id].match(/\S{4}/)[0]
+        chain_code  = line_hsh[:db_object_id].match(/\S{4}_(\S{1})/)[1]
+        structure   = Structure.find_by_pdb_code(pdb_code)
+
+        next if structure.nil?
+
+        chain   = structure.chains.find_by_chain_code(chain_code)
+        go_term = GoTerm.find_by_go_id(line_hsh[:go_id])
+
+        GoaPdb.create!(
+          {
+            :chain_id   => chain.id,
+            :go_term_id => go_term.id
+          }.merge!(line_hsh)
+        )
+
+        $logger.info("Importing #{pdb_code}, #{chain_code}, #{line_hsh[:go_id]} into 'goa_pdbs' table: done")
+      end
+    end
+
   end
 end

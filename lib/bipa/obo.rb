@@ -11,14 +11,8 @@ module Bipa
                       :name,
                       :namespace,
                       :definition,
-                      :alt_id,
                       :comment,
-                      :subset,
-                      :synonym,
-                      :xref,
-                      :is_obsolete,
-                      :replaced_by,
-                      :consider)
+                      :is_obsolete)
 
     Association = Struct.new(:subclass_id,
                              :superclass_id)
@@ -28,7 +22,7 @@ module Bipa
                               :type)
 
     def initialize(obo_str)
-      @terms          = Array.new
+      @terms          = Hash.new
       @associations   = Hash.new
       @relationships  = Hash.new
 
@@ -72,6 +66,8 @@ module Bipa
             next # can be many
           when /^consider:\s+(\S+)/
             next # can be many
+          when /^disjoint_from:\s+(\S+)/
+            next # can be many
           when /^is_a:\s+(\S+)/
             association = Association.new(term.go_id, $1)
             if @associations[term.go_id].nil?
@@ -93,7 +89,7 @@ module Bipa
             #next
           end
         end
-        @terms << term
+        @terms[term.go_id] = term
       end
     end
 

@@ -44,36 +44,36 @@ END
     end
 
     should "have a correct ID for each term" do
-      assert_equal "GO:0000001", @terms[0].go_id
-      assert_equal "GO:0000018", @terms[1].go_id
-      assert_equal "GO:0000022", @terms[2].go_id
+      assert_equal "GO:0000001", @terms["GO:0000001"].go_id
+      assert_equal "GO:0000018", @terms["GO:0000018"].go_id
+      assert_equal "GO:0000022", @terms["GO:0000022"].go_id
     end
 
     should "have a correct name for each term" do
-      assert_equal "mitochondrion inheritance",       @terms[0].name
-      assert_equal "regulation of DNA recombination", @terms[1].name
-      assert_equal "mitotic spindle elongation",      @terms[2].name
+      assert_equal "mitochondrion inheritance",       @terms["GO:0000001"].name
+      assert_equal "regulation of DNA recombination", @terms["GO:0000018"].name
+      assert_equal "mitotic spindle elongation",      @terms["GO:0000022"].name
     end
 
     should "have a correct namespace for each term" do
-      assert_equal "biological_process", @terms[0].namespace
-      assert_equal "biological_process", @terms[1].namespace
-      assert_equal "biological_process", @terms[2].namespace
+      assert_equal "biological_process", @terms["GO:0000001"].namespace
+      assert_equal "biological_process", @terms["GO:0000018"].namespace
+      assert_equal "biological_process", @terms["GO:0000022"].namespace
     end
 
     should "have correct superclasses for each term" do
-      assert_equal "GO:0048308", @associations[@terms[0].go_id][0].superclass_id
-      assert_equal "GO:0048311", @associations[@terms[0].go_id][1].superclass_id
-      assert_equal "GO:0051052", @associations[@terms[1].go_id][0].superclass_id
-      assert_equal "GO:0051231", @associations[@terms[2].go_id][0].superclass_id
+      assert_equal "GO:0048308", @associations[@terms["GO:0000001"].go_id][0].superclass_id
+      assert_equal "GO:0048311", @associations[@terms["GO:0000001"].go_id][1].superclass_id
+      assert_equal "GO:0051052", @associations[@terms["GO:0000018"].go_id][0].superclass_id
+      assert_equal "GO:0051231", @associations[@terms["GO:0000022"].go_id][0].superclass_id
     end
 
     should "have correct relationships for each term" do
-      assert_nil @relationships[@terms[0].go_id]
-      assert_equal "GO:0006310",  @relationships[@terms[1].go_id][0].object_id
-      assert_equal "regulates",   @relationships[@terms[1].go_id][0].type
-      assert_equal "GO:0007052",  @relationships[@terms[2].go_id][0].object_id
-      assert_equal "part_of",     @relationships[@terms[2].go_id][0].type
+      assert_nil @relationships[@terms["GO:0000001"].go_id]
+      assert_equal "GO:0006310",  @relationships[@terms["GO:0000018"].go_id][0].object_id
+      assert_equal "regulates",   @relationships[@terms["GO:0000018"].go_id][0].type
+      assert_equal "GO:0007052",  @relationships[@terms["GO:0000022"].go_id][0].object_id
+      assert_equal "part_of",     @relationships[@terms["GO:0000022"].go_id][0].type
     end
   end
 end

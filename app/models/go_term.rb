@@ -9,8 +9,8 @@ class GoTerm < ActiveRecord::Base
             :foreign_key  => "superclass_id"
 
   has_many  :subclasses,
-            :through      => :associations_as_subclass,
+            :through      => :associations_as_subclass
 
   has_many  :superclasses,
-            :through      => :associations_as_superclass,
+            :through      => :associations_as_superclass
 end

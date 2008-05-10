@@ -9,6 +9,7 @@ require_dependency "residue"
 require_dependency "interface"
 require_dependency "subfamily"
 require_dependency "alignment"
+require_dependency "go_relationship"
 require_dependency "gloria"
 require_dependency "mmcif"
 
