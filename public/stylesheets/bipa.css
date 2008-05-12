@@ -27,7 +27,7 @@ body {
   background-color: #043278;
   font-family: Lucida Grande, Lucida, Verdana, Arial, san-serif;
 
-  overflow: hidden;
+  overflow: auto;
   z-index: 0;
 }
 
@@ -94,43 +94,68 @@ body {
 }
 
 #header_separator {
-  position: fixed;
-  top: 100px;
-  left: 5px;
-  right: 5px;
-  height: 8px;
-  margin: 0px;
-  padding: 0px;
+  position:   fixed;
+  top:        100px;
+  left:       5px;
+  right:      5px;
+  height:     8px;
+  margin:     0px;
+  padding:    0px;
   border-top: 2px #000000 dotted;
 }
 
 #left_border {
-  position: fixed;
-  top: 110px;
-  left: 0px;
-  width: 10px;
-  bottom: 40px;
+  position:   fixed;
+  top:        110px;
+  left:       0px;
+  width:      10px;
+  bottom:     40px;
   background: #043278;
 }
 
 #right_border {
-  position: fixed;
-  top: 110px;
-  right: 0px;
-  width: 10px;
-  bottom: 40px;
+  position:   fixed;
+  top:        110px;
+  right:      0px;
+  width:      10px;
+  bottom:     40px;
   background: #043278;
 }
 
 #sidebar {
   position: fixed;
-  top: 110px;
-  bottom: 40px;
-  left: 10px;
-  width: 300px;
-  margin: 0px;
-  padding: 0px;
+  top:      110px;
+  bottom:   40px;
+  left:     10px;
+  width:    300px;
+  margin:   0px;
+  padding:  0px;
+  background: #FFFFFF;
 }
+
+#drawers {
+  position: fixed;
+  top:      115px;
+  bottom:   45px;
+  left:     20px;
+  width:    300px;
+  margin:   0px;
+  padding:  0px;
+  /* overflow: auto; */
+}
+
+ul.ui-accordion { margin: 0; padding: 0; list-style-type: none; }
+ul.ui-accordion li { margin: 0; margin-bottom: 2px; padding: 0; background-image: url(/images/jquery/accordion-left.png); background-repeat: no-repeat; }
+ul.ui-accordion li a.ui-accordion-header { display: block; padding-left: 5px; margin-right: 3px; height: 28px; background-image: url(/images/jquery/accordion-middle.png); color: #000; text-decoration: none; line-height: 28px; }
+ul.ui-accordion li .ui-accordion-right { display: block; background-image: url(/images/jquery/accordion-right.png); position: absolute; top: 0px; right: 0px; height: 28px; width: 3px;  }
+
+ul.ui-accordion li:hover { background-image: url(/images/jquery/accordion-left-over.png); }
+ul.ui-accordion li:hover a.ui-accordion-header { background-image: url(/images/jquery/accordion-middle-over.png); }
+ul.ui-accordion li:hover .ui-accordion-right { background-image: url(/images/jquery/accordion-right-over.png); }
+
+ul.ui-accordion li.active { background-image: url(/images/jquery/accordion-left-act.png); }
+ul.ui-accordion li.active a.ui-accordion-header { background-image: url(/images/jquery/accordion-middle-act.png); }
+ul.ui-accordion li.active .ui-accordion-right { background-image: url(/images/jquery/accordion-right-act.png); }
 
 #sidebar_search {
   position: fixed;

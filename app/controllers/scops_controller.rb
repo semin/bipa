@@ -1,7 +1,7 @@
 class ScopsController < ApplicationController
 
   def index
-#    @scops = Scop.root.registered_children
+    #    @scops = Scop.root.registered_children
 
     respond_to do |format|
       format.html

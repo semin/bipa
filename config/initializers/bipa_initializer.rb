@@ -30,8 +30,8 @@ require_dependency "gloria"
 require_dependency "mmcif"
 
 # Constants for BIPA
-RESUME          = ENV["RESUME"].to_i > 0 ? ENV["RESUME"].to_i : false
-MAX_FORK        = ENV["MAX_FORK"].to_i > 0 ? ENV["MAX_FORK"].to_i : 2
+RESUME          = ENV["RESUME"].to_i > 0    ? ENV["RESUME"].to_i    : false
+MAX_FORK        = ENV["MAX_FORK"].to_i > 0  ? ENV["MAX_FORK"].to_i  : 2
 
 EPSILON                           = 1.0E-6
 MAX_VDW_DISTANCE                  = 5.0
