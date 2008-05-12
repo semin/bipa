@@ -42,6 +42,11 @@ class Chain < ActiveRecord::Base
 
   has_many  :sequences
 
+  has_many  :goa_pdbs
+
+  has_many  :go_terms,
+            :through      => :goa_pdbs
+
   validates_uniqueness_of :chain_code,
                           :scope          => :model_id,
                           :allow_nil      => true,

@@ -13,4 +13,9 @@ class GoTerm < ActiveRecord::Base
 
   has_many  :superclasses,
             :through      => :associations_as_superclass
+
+  has_many  :goa_pdbs
+
+  has_many  :chains,
+            :through      => :goa_pdbs
 end
