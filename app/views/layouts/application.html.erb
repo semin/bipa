@@ -7,8 +7,9 @@
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
     <%= stylesheet_link_tag "bipa" %>
     <script>
+      jQuery.noConflict()
       jQuery(document).ready(function(){
-        jQuery('#drawers').accordion();
+        jQuery('#browsers').accordion();
       });
     </script>
   </head>
@@ -41,7 +42,7 @@
     </div>
 
     <div id="sidebar">
-      <ul id="drawers" class="ui-accordion" style="width: 200px;">
+      <ul id="browsers" class="ui-accordion" style="width: 200px;">
         <li class="drawer">
         <a href='#'>SCOP</a>
         <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
