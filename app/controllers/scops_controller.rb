@@ -1,7 +1,7 @@
 class ScopsController < ApplicationController
 
   def index
-    @scops = Scop.root.registered_children
+#    @scops = Scop.root.registered_children
 
     respond_to do |format|
       format.html
@@ -22,48 +22,48 @@ class ScopsController < ApplicationController
   # end
 
 
-  def auto_complete_description
-    @sphinx = Ultrasphinx::Search.new(:query => params[:scop][:description],
-                                      :class_names => "Scop",
-                                      :filters => { "registered" => 1 })
-    @sphinx.run
-    @scops = @sphinx.results
-
-    render :layout => false
-  end
-
-
-  def expand_subcategories
-    @scop = Scop.find(params[:id])
-    @scops = @scop.registered_children
-
-    render :update do |page|
-      page.insert_html  :bottom,
-                        subcategories(dom_id(@scop)),
-                        :partial => "category",
-                        :collection => @scops
-    end
-  end
+#  def auto_complete_description
+#    @sphinx = Ultrasphinx::Search.new(:query => params[:scop][:description],
+#                                      :class_names => "Scop",
+#                                      :filters => { "registered" => 1 })
+#    @sphinx.run
+#    @scops = @sphinx.results
+#
+#    render :layout => false
+#  end
 
 
-  def collapse_subcategories
-    @scop = Scop.find(params[:id])
+#  def expand_subcategories
+#    @scop = Scop.find(params[:id])
+#    @scops = @scop.registered_children
+#
+#    render :update do |page|
+#      page.insert_html  :bottom,
+#                        subcategories(dom_id(@scop)),
+#                        :partial => "category",
+#                        :collection => @scops
+#    end
+#  end
+#
+#
+#  def collapse_subcategories
+#    @scop = Scop.find(params[:id])
+#
+#    render :update do |page|
+#      page.replace_html(subcategories(dom_id(@scop)))
+#      page.hide "collapse_subcategories_#{dom_id(@scop)}"
+#      page.show "expand_subcategories_#{dom_id(@scop)}"
+#    end
+#  end
 
-    render :update do |page|
-      page.replace_html(subcategories(dom_id(@scop)))
-      page.hide "collapse_subcategories_#{dom_id(@scop)}"
-      page.show "expand_subcategories_#{dom_id(@scop)}"
-    end
-  end
 
-
-  def show
-    @scop = Scop.find(params[:id])
-    @top_children = Scop.root.registered_children
-
-    respond_to do |format|
-      format.html
-      format.js
-    end
-  end
+#  def show
+#    @scop = Scop.find(params[:id])
+#    @top_children = Scop.root.registered_children
+#
+#    respond_to do |format|
+#      format.html
+#      format.js
+#    end
+#  end
 end

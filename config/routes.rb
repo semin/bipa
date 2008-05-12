@@ -1,11 +1,12 @@
 ActionController::Routing::Routes.draw do |map|
   # The priority is based upon order of creation: first created -> highest priority.
-  map.connect '', :controller => "scops", :action => "index"
-  map.connect 'home', :controller => "scops", :action => "index"
+  map.connect '',         :controller => "main", :action => "home"
+  map.connect 'home',     :controller => "main", :action => "home"
+  map.connect 'contact',  :controller => "main", :action => "contact"
 
-  map.resources :scops, :member => {:expand_subcategories => :post}
-  map.resources :scops, :member => {:collapse_subcategories => :post}
-
+#  map.resources :scops, :member => {:expand_subcategories => :post}
+#  map.resources :scops, :member => {:collapse_subcategories => :post}
+#
 #  map.resources :structures do |structures|
 #    structures.resources :models do |models|
 #      models.resources :chains do |chains|
@@ -19,8 +20,6 @@ ActionController::Routing::Routes.draw do |map|
 #      end
 #    end
 #  end
-
-  map.resources :contacts
 
   # Sample of regular route:
   #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
