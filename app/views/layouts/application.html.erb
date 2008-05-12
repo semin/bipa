@@ -2,8 +2,15 @@
 <html>
   <head>
     <title><%= @page_title || "Welcome to BIPA!" %></title>
-    <%= javascript_include_tag :defaults %>
+    <%= javascript_include_tag "jquery.ui/jquery-1.2.4b.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.core.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
     <%= stylesheet_link_tag "bipa" %>
+    <script>
+      jQuery(document).ready(function(){
+        jQuery('#drawers').accordion();
+      });
+    </script>
   </head>
 
   <body>
@@ -18,7 +25,8 @@
       <%= image_tag "cambridge_logo.gif",
         :id => "header_banner_logo",
         :size => "60x80",
-        :alt => "University of Cambridge"%>
+        :alt => "University of Cambridge"
+      %>
       <div id="header_menu">
         <%= link_to "Home", '/home' %> |
         <%= link_to "Help", '/help' %> |
@@ -33,63 +41,24 @@
     </div>
 
     <div id="sidebar">
-      <div id="sidebar_search">
-        <% form_remote_tag(
-          :url => { :action => "search" },
-          :loading =>  "$('main_content').hide();" +
-                      "$('main_spinner').show()",
-          :complete => "$('main_spinner').hide();" +
-                      "$('main_content').show()") do %>
-
-          <div id="sidebar_search_text">
-            <%= text_field("scop", "description",
-                           :onfocus => "background_color_white();",
-                           :onblur => "background_color_orange();") %>
-          </div>
-          <%= image_tag("spinner_arrow.gif",
-                        :id => "sidebar_search_spinner",
-                        :alt => "Searching...", :style => "display: none;") %>
-          <div id="sidebar_search_image">
-            <%= image_submit_tag("search.gif", :alt => "Search") %>
-          </div>
-        <% end %>
-      </div>
-
-      <div id="sidebar_separator">
-      </div>
-
-      <div id="sidebar_navigation">
-        <% tabnav :sidebar do %>
-          <%= yield :sidebar %>
-        <% end %>
-      </div>
-      <div  id="scop_description_auto_complete"
-            class="auto_complete">
-      </div>
-      <%= auto_complete_field(
-          :scop_description,
-          :indicator => 'sidebar_search_spinner',
-          :url => {:action => 'auto_complete_description'},
-          :on_show => "function(element, update) {
-            update.show();
-          }",
-          :on_hide => "function(element, update) {
-            update.hide();
-            update.innerHTML = '';
-            $('footer_notice').innerHTML = '';
-          }",
-          :select => 'description',
-          :frequency => 0.5,
-          :min_char => 3) -%>
+      <ul id="drawers" class="ui-accordion-container" style="width: 200px;">
+        <li>
+        <a href='#'>SCOP</a>
+        <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+        </li>
+        <li>
+        <a href='#'>GO</a>
+        <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam <br>
+        </div>
+        </li>
+        <li>
+        <a href='#'>ESST</a>
+        <div>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+        </li>
+      </ul>
     </div>
-
-		<div id="separator">
-    	<div id="separator_left">
-	    </div>
-
-	    <div id="separator_right">
-	    </div>
-		</div>
 
     <div id="main">
       <div id="main_content">
@@ -111,11 +80,6 @@
     </div>
 
     <div id="footer">
-      <div id="footer_loading" style="display: none;">
-        Loading...
-      </div>
-      <div id="footer_notice">
-      </div>
     </div>
   </body>
 </html>
