@@ -2,14 +2,14 @@
 <html>
   <head>
     <title><%= @page_title || "Welcome to BIPA!" %></title>
-    <%= javascript_include_tag "jquery.ui/jquery-1.2.4b.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.core.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
+    <%= javascript_include_tag :default %>
     <%= stylesheet_link_tag "bipa" %>
     <script>
       jQuery.noConflict()
       jQuery(document).ready(function(){
-        jQuery('#browsers').accordion();
+        jQuery('#browsers').accordion({
+          autoheight: false
+        });
       });
     </script>
   </head>
