@@ -5,12 +5,26 @@
     <%= javascript_include_tag "jquery.ui/jquery-1.2.4b.js" %>
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.datepicker.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.dialog.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.draggable.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.droppable.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.resizable.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.selectable.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.slider.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.sortable.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.tabs.js" %>
     <%= stylesheet_link_tag "bipa" %>
     <script>
       jQuery.noConflict()
       jQuery(document).ready(function(){
+
         jQuery('#browsers').accordion({
+          header: 'div.title',
+          active: false,
+          alwaysOpen: false
         });
+
       });
     </script>
   </head>
@@ -42,35 +56,31 @@
     <div id="left_border">
     </div>
 
-    <div id="sidebar">
-      <ul id="menu" class="menu">
-        <li>
-        Hi
-        </li>
-        <li>
-        <ul id="browsers" class="browsers">
-          <li>
-          <a href='#' class="browser-header">SCOP</a>
-          <div class="browser-content">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          </div>
-          </li>
-          <li>
-          <a href='#' class="browser-header">GO</a>
-          <div class="browser-content">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          </div>
-          </li>
-          <li>
-          <a href='#' class="browser-header">ESST</a>
-          <div class="browser-content">
-            Hello.
-          </div>
-          </li>
-        </ul>
-        </li>
-        <li>
-        Hello
-        </li>
-      </ul>
+    <div "sidebar">
+      <div id="browsers">
+        <div class="title">
+          SCOP
+        </div>
+        <div class="content">
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+        <div class="title">
+          GO
+        </div>
+        <div class="content">
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+        <div class="title">
+          ESST
+        </div>
+        <div class="content">
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </div>
+      </div>
     </div>
 
     <div id="main">
@@ -78,21 +88,21 @@
         <%= yield :layout %>
       </div>
       <%= image_tag(
-        "spinner_spike.gif",
-        :alt => "Loading ...",
-        :border => 0,
-        :id => "main_spinner",
-        :size => "32x32",
-        :style => "display: none;") %>
-    </div>
+            "spinner_spike.gif",
+            :alt => "Loading ...",
+            :border => 0,
+            :id => "main_spinner",
+            :size => "32x32",
+            :style => "display: none;") %>
 
-    <div id="right_border">
-    </div>
+      <div id="right_border">
+      </div>
 
-    <div id="footer_separator">
-    </div>
+      <div id="footer_separator">
+      </div>
 
-    <div id="footer">
+      <div id="footer">
+      </div>
     </div>
   </body>
 </html>

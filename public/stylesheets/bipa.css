@@ -104,6 +104,21 @@ body {
   border-top: 2px #000000 dotted;
 }
 
+.ui-resizable-e {
+  width: 10px;
+  height: 475px;
+  background:#e1e7f2 url(/images/splitpane_handle-ew.gif) no-repeat scroll 75% 50% !important;
+  cursor:col-resize !important;
+  border-left: #bbb 1px solid;
+  padding: 3px;
+}
+.ui-resizable-n {
+  height: 10px;
+  background:#e1e7f2 url(/images/splitpane_handle-sn.gif) no-repeat scroll 50% 55% !important;
+  border-top: #bbb 1px solid;
+  padding: 3px;
+}
+
 #left_border {
   position:   fixed;
   top:        110px;
@@ -135,80 +150,30 @@ body {
   background: #FFFFFF;
 }
 
-ul.menu {
+#browsers {
   position: fixed;
   top:      110px;
   bottom:   40px;
   left:     10px;
-  width:    300px;
   margin:   0px;
   padding:  0px;
-  
-  list-style-type: none;
+  color:      #000000;
+  background: #FFFFFF;
 }
+*/
 
-ul.menu li {
-  margin:         0;
-  margin-bottom:  0px;
-  padding:        0;
-  overflow:       auto;
-}
-
-ul.browsers {
-  position: fixed;
-  left:     10px;
-  width:    300px;
-  margin:   0px;
-  padding:  0px;
-  
-  list-style-type: none;
-}
-
-ul.browsers li {
-  margin:         0;
-  margin-bottom:  0px;
-  padding:        0;
-  overflow:       auto;
-}
-
-ul.browsers li a.browser-header {
-  display:          block;
+div.title {
   padding-left:     5px; 
   margin-right:     3px; 
 }
 
-ul.browsers li div.browser-content {
+div.content {
+  padding-left:     2px; 
   overflow: auto;
 }
 
-ul.browsers li .browser-right {
-  display: block;
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  height: 28px;
-  width: 3px; 
-}
-
-ul.browsers li:hover { }
-ul.browsers li:hover a.browser-header { }
-ul.browsers li:hover .browser-right { }
-
-ul.browsers li.active { }
-ul.browsers li.active a.browser-header { }
-ul.browsers li.active .browser-right { }
-
-#separator_left {
-  position:     fixed;
-  top:          110px;
-  bottom:       40px;
-  left:         310px;
-  width:        5px;
-  margin:       0;
-  padding:      0;
-  background:   #043278;
-  border-right: 2px #000000 dotted;
-}
+div.title:hover { }
+div.title:active { }
 
 #main {
   position:     fixed;
@@ -255,17 +220,6 @@ ul.browsers li.active .browser-right { }
   top:        50%;
   left:       48%;
   margin-top: -25px;
-}
-
-#separator_right {
-  position:   fixed;
-  top:        110px;
-  bottom:     40px;
-  left:       317px;
-  width:      10px;
-  margin:     0;
-  padding:    0;
-  background: #043278;
 }
 
 #footer_separator {
