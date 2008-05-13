@@ -1,261 +1,170 @@
-html { 
+html {
   overflow: hidden;
 }
 
 * html #main {
-  height: 100%; 
-  width: 100%; 
+  height: 100%;
+  width: 100%;
 }
 
 * html #sidebar {
-  height: 100%; 
-  width: 100%; 
+  height: 100%;
+  width: 100%;
 }
 
-html, body { 
-  height: 100%; 
-  width: 100% 
+html, body {
+  height: 100%;
+  width: 100%
 }
 
 body {
   margin: 0px;
-  border: 0px;
   padding: 0px;
-  max-height: 100%;
-
-  color: #FFFFFF;
+  border: 0px;
+  color: white;
   background-color: #043278;
   font-family: Lucida Grande, Lucida, Verdana, Arial, san-serif;
-
   overflow: auto;
   z-index: 0;
 }
 
-#header {
-  position: absolute;
-  top:      0px;
-  left:     0px;
-  width:    100%;
-  height:   100px;
-  margin:   0px;
-  padding:  0px;
-
-  overflow: auto;
+#top {
+  width: 100%;
+  height: 100px;
+  overflow: hidden;
+  border-bottom: 2px black dotted;
 }
 
-#header_banner {
-  position: fixed;
-  top:      10px;
-  left:     10px;
-
-  font-family:  Georgia, Times New Roman, Serif;
-  font-size:    150%;
-  font-weight:  bold;
-  text-align:   left;
-
+#banner {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: Georgia, Times New Roman, Serif;
+  font-size: 150%;
+  font-weight: bold;
+  text-align: left;
   display: inline;
 }
 
-#header_subbanner {
-  position: fixed;
-  top:      40px;
-  left:     10px;
-
-  font-family:  Georgia, Times New Roman, Serif;
-  font-size:    105%;
-  text-align:   left;
+#subbanner {
+  position: absolute;
+  top: 40px;
+  left: 10px;
+  font-family: Georgia, Times New Roman, Serif;
+  font-size: 105%;
+  text-align: left;
 }
 
-#header_banner_logo {
-  position: fixed;
-  top:      10px;
-  right:    10px;
+#banner_logo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  margin: 0px;
+  padding: 0px;
 }
 
-#header_menu {
-  position:   fixed;
-  top:        80px;
-  left:       10px;
-  font-size:  80%;
+#menu {
+  position: absolute;
+  top: 80px;
+  left: 10px;
+  margin: 0px;
+  padding: 0px;
+  font-size: 80%;
 }
 
-#header_menu a {
+#menu a {
   color: white;
 }
 
-#header_menu a:link, a:visited {
+#menu a:link, a:visited {
   color: white;
   text-decoration: none;
 }
 
-#header_menu a:hover, a:active {
+#menu a:hover, a:active {
   color: white;
   text-decoration: underline;
 }
 
-#header_separator {
-  position:   fixed;
-  top:        100px;
-  left:       5px;
-  right:      5px;
-  height:     8px;
-  margin:     0px;
-  padding:    0px;
-  border-top: 2px #000000 dotted;
-}
-
-.ui-resizable-e {
-  width: 10px;
-  height: 475px;
-  background:#e1e7f2 url(/images/splitpane_handle-ew.gif) no-repeat scroll 75% 50% !important;
-  cursor:col-resize !important;
-  border-left: #bbb 1px solid;
-  padding: 3px;
-}
-.ui-resizable-n {
-  height: 10px;
-  background:#e1e7f2 url(/images/splitpane_handle-sn.gif) no-repeat scroll 50% 55% !important;
-  border-top: #bbb 1px solid;
-  padding: 3px;
-}
-
-#left_border {
-  position:   fixed;
-  top:        110px;
-  left:       0px;
-  width:      10px;
-  bottom:     40px;
-  background: #043278;
-}
-
-#right_border {
-  position:   fixed;
-  top:        110px;
-  right:      0px;
-  width:      10px;
-  bottom:     40px;
-  background: #043278;
-}
-
 #sidebar {
-  position: fixed;
-  top:      110px;
-  bottom:   40px;
-  left:     10px;
-  width:    300px;
-  margin:   0px;
-  padding:  0px;
-
-  color:      #000000;
-  background: #FFFFFF;
+  float: left;
+  width: 29%;
+  bottom: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  border-right: 10px #043278 solid;
+  color: black;
+  background: white;
 }
 
 #browsers {
-  position: fixed;
-  top:      110px;
-  bottom:   40px;
-  left:     10px;
-  margin:   0px;
-  padding:  0px;
-  color:      #000000;
-  background: #FFFFFF;
-}
-*/
-
-div.title {
-  padding-left:     5px; 
-  margin-right:     3px; 
+  margin: 0;
+  padding: 0;
 }
 
-div.content {
-  padding-left:     2px; 
-  overflow: auto;
+#browsers div.title {
+  padding-left: 5px; 
+  margin-right: 3px; 
 }
 
-div.title:hover { }
-div.title:active { }
+#browsers div.content {
+  padding-left: 2px; 
+}
+
+#browsers div.title:hover { }
+#browsers div.title:active { }
 
 #main {
-  position:     fixed;
-  top:          110px;
-  bottom:       40px;
-  left:         322px;
-  right:        10px;
-  padding-left: 5px;
-  overflow:     auto;
-  color:        #000000;
-  background:   #FFFFFF;
-
-  min-height:   50px !important;
+  float: left;
+  width: 68%;
+  bottom: 30px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-right: 10px;
+  overflow: auto;
+  color: black;
+  background: white;
 }
 
 #main a {
-  color: #000000;
-}
-
-#main a:link, a:visited {
-  color:            #000000;
-  text-decoration:  none;
-}
-
-#main a:hover, a:active {
-  color:            #000000;
-  text-decoration:  underline;
-}
-
-#main_content {
-  position:     fixed;
-  top:          110px;
-  bottom:       40px;
-  left:         322px;
-  right:        10px;
-  padding-left: 5px;
-  color:        #000000;
-  background:   #FFFFFF;
-  overflow:     auto;
-}
-
-#main_spinner {
-  position:   absolute;
-  top:        50%;
-  left:       48%;
-  margin-top: -25px;
-}
-
-#footer_separator {
-  position:       fixed;
-  bottom:         30px;
-  left:           10px;
-  right:          10px;
-  height:         8px;
-  margin:         0;
-  padding:        0;
-  border-bottom:  2px #000000 dotted;
-}
-
-#footer {
-  position:     absolute;
-  bottom:       0px;
-  left:         0px;
-  width:        100%;
-  height:       30px;
-  background:   #043278;
-  overflow:     auto;
-
-  font-size:    85%;
-  color:        white;
-}
-
-#footer a {
   color: white;
 }
 
-#footer a:link, a:visited {
+#main a:link, a:visited {
+  color: white;
+  text-decoration: none;
+}
+
+#main a:hover, a:active {
+  color: white;
+  text-decoration: underline;
+}
+
+#main_content {
+  overflow: auto;
+}
+
+#bottom {
+  clear: both;
+  width: 100%;
+  height: 30px;
+  font-size: 85%;
+  color: white;
+  background: #043278;
+  border-top: 2px #000000 dotted;
+}
+
+#bottom a {
+  color: white;
+}
+
+#bottom a:link, a:visited {
   color:            white;
   text-decoration:  none;
 }
 
-#footer a:hover, a:active {
+#bottom a:hover, a:active {
   color:            white;
   text-decoration:  underline;
 }

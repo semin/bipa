@@ -18,67 +18,55 @@
     <script>
       jQuery.noConflict()
       jQuery(document).ready(function(){
-
         jQuery('#browsers').accordion({
           header: 'div.title',
           active: false,
           alwaysOpen: false
         });
-
       });
     </script>
   </head>
 
   <body>
-    <div id="header"> 
-      <div id="header_banner">
+    <div id="top"> 
+      <div id="banner">
         BIPA
       </div>
-      <div id="header_subbanner">
+      <div id="subbanner">
         : <u>B</u>iological database for <u>I</u>nteraction between 
         <u>P</u>rotein and nucleic <u>A</u>cid
       </div>
       <%= image_tag "cambridge_logo.gif",
-        :id => "header_banner_logo",
+        :id => "banner_logo",
         :size => "60x80",
         :alt => "University of Cambridge"
       %>
-      <div id="header_menu">
+      <div id="menu">
         <%= link_to "Home",     '/home' %> |
         <%= link_to "Help",     '/help' %> |
         <%= link_to "Contact",  '/contact' %>
       </div>
     </div>
 
-    <div id="header_separator">
-    </div>
-
-    <div id="left_border">
-    </div>
-
-    <div "sidebar">
+    <div id="sidebar">
       <div id="browsers">
         <div class="title">
           SCOP
         </div>
         <div class="content">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </div>
         <div class="title">
           GO
         </div>
         <div class="content">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </div>
         <div class="title">
           ESST
         </div>
         <div class="content">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </div>
       </div>
     </div>
@@ -97,12 +85,9 @@
 
       <div id="right_border">
       </div>
+    </div>
 
-      <div id="footer_separator">
-      </div>
-
-      <div id="footer">
-      </div>
+    <div id="bottom">
     </div>
   </body>
 </html>
