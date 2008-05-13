@@ -135,10 +135,27 @@ body {
   background: #FFFFFF;
 }
 
-ul.browsers {
+ul.menu {
   position: fixed;
   top:      110px;
   bottom:   40px;
+  left:     10px;
+  width:    300px;
+  margin:   0px;
+  padding:  0px;
+  
+  list-style-type: none;
+}
+
+ul.menu li {
+  margin:         0;
+  margin-bottom:  0px;
+  padding:        0;
+  overflow:       auto;
+}
+
+ul.browsers {
+  position: fixed;
   left:     10px;
   width:    300px;
   margin:   0px;
