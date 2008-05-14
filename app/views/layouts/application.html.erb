@@ -2,24 +2,38 @@
 <html>
   <head>
     <title><%= @page_title || "Welcome to BIPA!" %></title>
-    <%= javascript_include_tag "jquery.ui/jquery-1.2.4b.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.core.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.tabs.js" %>
-    <%= javascript_include_tag "jquery-treeview/jquery.treeview.js" %>
-    <%= stylesheet_link_tag "bipa" %>
+    <%= javascript_include_tag :defaults %>
+    <%= javascript_include_tag "accordion" %>
+    <%= stylesheet_link_tag "bipa.css" %>
     <script>
-      jQuery.noConflict()
-      jQuery(document).ready(function(){
-        jQuery('#browsers').accordion({
-          header: 'div.title',
-          clearStyle: false,
-          fillSpace: true
+      Event.observe(window, 'load', loadAccordions, true);
+
+      function loadAccordions() {
+        var leftAccordion = new accordion('container', {
+          // The speed of the accordion
+          resizeSpeed : 8,
+          // The classnames to look for
+          classNames : {
+            // The standard class for the title bar
+              toggle : 'accordion_toggle',
+              // The class used for the active state of the title bar
+              toggleActive : 'accordion_toggle_active',
+              // The class used to find the content
+              content : 'accordion_content'
+          },
+          // If you don't want the accordion to stretch to fit 
+          // its content, set a value here, handy for horixontal examples.
+          defaultSize : {
+              height : null,
+              width : null
+          },
+          // The direction of the accordion
+          direction : 'vertical',
+          // Should the accordion activate on click or say on mouseover? (apple.com)
+          onEvent : 'click'
         });
-        jQuery('#scop_tree').treeview({
-          collapsed: true
-        });
-      });
+        leftAccordion.activate($$('#container .accordion_toggle')[0]);
+      }
     </script>
   </head>
 
@@ -45,24 +59,44 @@
     </div>
 
     <div id="sidebar">
-      <div id="browsers">
-        <div class="title">
+      <div id="container">
+        <div class="accordion_toggle">
           SCOP
         </div>
-        <div class="content">
+        <div class="accordion_content">
+          Accordion 2.0 is really well done. A couple of questions: 
+          What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
+          Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
           <ul id="scop_tree">
-            <%= @scop_tree %>
           </ul>
         </div>
-        <div class="title">
+        <div class="accordion_toggle">
           GO
         </div>
-        <div class="content">
+        <div class="accordion_content">
+          Accordion 2.0 is really well done. A couple of questions: 
+          What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
+          Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
+          Accordion 2.0 is really well done. A couple of questions: 
+          What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
+          Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
+          Accordion 2.0 is really well done. A couple of questions: 
+          What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
+          Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
         </div>
-        <div class="title">
+        <div class="accordion_toggle">
           ESST
         </div>
-        <div class="content">
+        <div class="accordion_content">
+          Accordion 2.0 is really well done. A couple of questions: 
+          What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
+          Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
+          Accordion 2.0 is really well done. A couple of questions: 
+          What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
+          Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
+          Accordion 2.0 is really well done. A couple of questions: 
+          What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
+          Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
         </div>
       </div>
     </div>
@@ -77,10 +111,8 @@
             :border => 0,
             :id => "main_spinner",
             :size => "32x32",
-            :style => "display: none;") %>
-
-      <div id="right_border">
-      </div>
+            :style => "display: none;")
+      %>
     </div>
 
     <div id="bottom">

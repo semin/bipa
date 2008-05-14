@@ -8,7 +8,6 @@ class ScopsController < ApplicationController
     end
   end
 
-
   # def search
   #   @search = Ultrasphinx::Search.new(:query => @keyword, :class_names => "Scop", :filters => { "registered" => 1 })
   #   @search.run
