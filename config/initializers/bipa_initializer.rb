@@ -30,8 +30,8 @@ require_dependency "gloria"
 require_dependency "mmcif"
 
 # Constants for BIPA
-RESUME          = ENV["RESUME"].to_i > 0    ? ENV["RESUME"].to_i    : false
-MAX_FORK        = ENV["MAX_FORK"].to_i > 0  ? ENV["MAX_FORK"].to_i  : 2
+RESUME    = ENV["RESUME"].to_i > 0    ? ENV["RESUME"].to_i    : false
+MAX_FORK  = ENV["MAX_FORK"].to_i > 0  ? ENV["MAX_FORK"].to_i  : 2
 
 EPSILON                           = 1.0E-6
 MAX_VDW_DISTANCE                  = 5.0
@@ -57,30 +57,29 @@ NCBI_FTP        = "ftp.ncbi.nih.gov"
 TAXONOMY_FTP    = "pub/taxonomy"
 TAXONOMY_DIR    = File.join(RAILS_ROOT, "/public/taxonomy")
 
-CLEAN_BIN       = `which clean`.chomp
-HBADD_BIN       = `which hbadd`.chomp
-HBPLUS_BIN      = `which hbplus`.chomp
+HBPLUS_BIN      = "/BiO/Install/hbplus/hbplus"
+CLEAN_BIN       = "/BiO/Install/hbplus/clean"
+HBADD_BIN       = "/BiO/Install/hbadd/hdadd"
 HBPLUS_DIR      = File.join(RAILS_ROOT, "/public/hbplus")
-HET_DICT_FILE   = "/BiO/Mirror/PDB/data/monomers/het_dictionary.txt"
+HET_DICT_FILE   = File.join(PDB_MIRROR_DIR, "/data/monomers/het_dictionary.txt")
 
-NACCESS_BIN     = `which naccess`.chomp
+NACCESS_BIN     = "/BiO/Install/naccess/naccess"
 NACCESS_VDW     = "/BiO/Install/naccess/vdw.radii"
 NACCESS_STD     = "/BiO/Install/naccess/standard.data"
 NACCESS_DIR     = File.join(RAILS_ROOT, "/public/naccess")
 
-DSSP_BIN        = `which dssp`.chomp
+DSSP_BIN        = "/BiO/Install/dssp/dsspcmbi"
 DSSP_DIR        = File.join(RAILS_ROOT, "/public/dssp")
 
-JOY_BIN         = `which joy`.chomp
+JOY_BIN         = "/BiO/Install/joy/joy"
 JOY_DIR         = File.join(RAILS_ROOT, "/public/joy")
 
-BATON_BIN       = `which Baton`.chomp
+BATON_BIN       = "/BiO/Install/Baton/bin/Baton"
 BATON_DIR       = File.join(RAILS_ROOT, "/public/baton")
 
-BLASTCLUST_BIN  = `which blastclust`.chomp
+BLASTCLUST_BIN  = "/usr/bin/blastclust"
 BLASTCLUST_DIR  = File.join(RAILS_ROOT, "/public/blastclust/")
 
 FAMILY_DIR      = File.join(RAILS_ROOT, "/public/families")
 ZAP_DIR         = File.join(RAILS_ROOT, "/public/zap")
-
 GO_DIR          = File.join(RAILS_ROOT, "/public/go")
