@@ -5,23 +5,19 @@
     <%= javascript_include_tag "jquery.ui/jquery-1.2.4b.js" %>
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.datepicker.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.dialog.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.draggable.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.droppable.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.resizable.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.selectable.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.slider.js" %>
-    <%= javascript_include_tag "jquery.ui/ui.sortable.js" %>
     <%= javascript_include_tag "jquery.ui/ui.tabs.js" %>
+    <%= javascript_include_tag "jquery-treeview/jquery.treeview.js" %>
     <%= stylesheet_link_tag "bipa" %>
     <script>
       jQuery.noConflict()
       jQuery(document).ready(function(){
         jQuery('#browsers').accordion({
           header: 'div.title',
-          active: false,
-          alwaysOpen: false
+          clearStyle: false,
+          fillSpace: true
+        });
+        jQuery('#scop_tree').treeview({
+          collapsed: true
         });
       });
     </script>
@@ -54,19 +50,19 @@
           SCOP
         </div>
         <div class="content">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          <ul id="scop_tree">
+            <%= @scop_tree %>
+          </ul>
         </div>
         <div class="title">
           GO
         </div>
         <div class="content">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </div>
         <div class="title">
           ESST
         </div>
         <div class="content">
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
         </div>
       </div>
     </div>

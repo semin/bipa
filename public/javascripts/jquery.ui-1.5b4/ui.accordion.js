@@ -256,7 +256,8 @@
 				var hideHeight = options.toHide.height(),
 					showHeight = options.toShow.height(),
 					difference = showHeight / hideHeight;
-				options.toShow.css({ height: 0, overflow: 'hidden' }).show();
+				//options.toShow.css({ height: 0, overflow: 'hidden' }).show();
+				options.toShow.css({ height: 0, overflow: 'auto' }).show();
 				options.toHide.filter(":hidden").each(options.complete).end().filter(":visible").animate({height:"hide"},{
 					step: function(now) {
 						var current = (hideHeight - now) * difference;

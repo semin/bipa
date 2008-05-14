@@ -19,6 +19,21 @@ class Scop < ActiveRecord::Base
     else; raise "Unknown SCOP hierarchy: #{opt[:stype]}"; end
   end
 
+  def ul_tree
+    tree = ""
+    registered_children.each do |child|
+      tree += %Q{<li>}
+      tree += %Q{<span class="#{child.type}">#{child.description}</span>}
+      if child.children_count != 0
+        tree += %Q{<ul>}
+        tree += child.ul_tree
+        tree += %Q{</ul>}
+      end
+      tree += %Q{</li>}
+    end
+    tree
+  end
+
   def hierarchy_and_description
     "#{hierarchy}: #{description}"
   end
@@ -327,4 +342,5 @@ class ScopDomain < Scop
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
   end
   memoize :to_sequence
+
 end # class ScopDomain
