@@ -23,7 +23,7 @@ class Scop < ActiveRecord::Base
     tree = ""
     registered_children.each do |child|
       tree += %Q{<li>}
-      tree += %Q{<span class="#{child.type}">[#{child.stype.upcase}] #{child.description}</span>}
+      tree += %Q{<a href="#" class="#{child.type}">[#{child.stype.upcase}] #{child.description}</a>}
       if child.children_count != 0
         tree += %Q{<ul>}
         tree += child.ul_tree
