@@ -12,7 +12,7 @@
     <%= javascript_include_tag "jquery-treeview/jquery.treeview.async.bipa.js" %>
 
     <%= stylesheet_link_tag "bipa.css" %>
-    <%= stylesheet_link_tag "jquery.treeview.css" %>
+    <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
     <script>
       jQuery.noConflict();
       jQuery(document).ready(function(){
@@ -23,6 +23,7 @@
           autoHeight: false
         });
         jQuery("#scop_tree").treeview({
+          alwaysOpen: true,
           url: "main/scop_subtree"
         })
       });
