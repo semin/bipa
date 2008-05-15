@@ -19,6 +19,22 @@ class Scop < ActiveRecord::Base
     else; raise "Unknown SCOP hierarchy: #{opt[:stype]}"; end
   end
 
+  def ul_tree
+    tree = ""
+    registered_children.each do |child|
+      tree += %Q{<li>}
+      tree += %Q{<span class="#{child.type}">[#{child.stype.upcase}] #{child.description}</span>}
+      if child.children_count != 0
+        tree += %Q{<ul>}
+        tree += child.ul_tree
+        tree += %Q{</ul>}
+      end
+      tree += %Q{</li>}
+    end
+    tree
+  end
+  memoize :ul_tree
+
   def hierarchy_and_description
     "#{hierarchy}: #{description}"
   end
@@ -59,141 +75,141 @@ class Scop < ActiveRecord::Base
     all_registered_leaf_children.map(&:rna_interfaces).flatten.compact
   end
 
-  %w(dna rna).each do |na|
-    %w(mean stddev).each do |property|
-      class_eval <<-END
-        def #{property}_#{na}_interface_asa
-          #{na}_interfaces.map { |i| i.asa }.to_stats_array.#{property}
-        end
-        memoize :#{property}_#{na}_interface_asa
-
-        def #{property}_#{na}_interface_hbonds
-          #{na}_interfaces.map { |i| (i.hbonds_as_donor.size + i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
-        end
-        memoize :#{property}_#{na}_interface_hbonds
-
-        def #{property}_#{na}_interface_whbonds
-          #{na}_interfaces.map { |i| i.whbonds.size / i.asa * 100 }.to_stats_array.#{property}
-        end
-        memoize :#{property}_#{na}_interface_whbonds
-
-        def #{property}_#{na}_interface_contacts
-          #{na}_interfaces.map { |i| (i.contacts.size - i.hbonds_as_donor.size - i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
-        end
-        memoize :#{property}_#{na}_interface_contacts
-
-        def #{property}_#{na}_interface_polarity
-          #{na}_interfaces.map { |i| i.polarity }.to_stats_array.#{property}
-        end
-        memoize :#{property}_#{na}_interface_polarity
-      END
-
-      AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-        class_eval <<-END
-          def #{property}_#{na}_interface_singlet_propensity_of_#{aa}
-            #{na}_interfaces.map { |i| i.singlet_propensity_of_#{aa} }.to_stats_array.#{property}
-          end
-          memoize :#{property}_#{na}_interface_singlet_propensity_of_#{aa}
-        END
-      end
-
-      Dssp::SSES.map(&:downcase).each do |sse|
-        class_eval <<-END
-          def #{property}_#{na}_interface_sse_propensity_of_#{sse}
-            #{na}_interfaces.map { |i| i.sse_propensity_of_#{sse} }.to_stats_array.#{property}
-          end
-          memoize :#{property}_#{na}_interface_sse_propensity_of_#{sse}
-        END
-      end
-    end
-  end
-
-
-  %w(hbond whbond contact).each do |int|
-    %w(dna rna).each do |na|
-      na_residues = "Bipa::Constants::NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize.map(&:downcase)
-
-      class_eval <<-END
-        def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}
-          AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
-            send("total_observed_frequency_of_#{int}_between_\#{a}_and_#{na}")
-          }
-        end
-        memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}
-      END
-
-      AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-        class_eval <<-END
-          def total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}
-            na_residues.sum { |r|
-              send("observed_frequency_of_#{int}_between_#{aa}_and_\#{r}")
-            } + %w(sugar phosphate).sum { |m|
-              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_\#{m}")
-            }
-          end
-          memoize :total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}
-        END
-      end
-
-      na_residues.each do |res|
-        class_eval <<-END
-          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}
-            AminoAcids::Residues::STANDARD.map(&:downcase).sum { |r|
-              send("observed_frequency_of_#{int}_between_\#{r}_and_#{res}")
-            }
-          end
-          memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}
-        END
-
-        AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-          class_eval <<-END
-            def observed_frequency_of_#{int}_between_#{aa}_and_#{res}
-              #{na}_interfaces.sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{res} }
-            end
-            memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{res}
-
-            def expected_frequency_of_#{int}_between_#{aa}_and_#{res}
-              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}.to_f *
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}.to_f /
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}.to_f
-              result.nan? ? 0 : result
-            end
-            memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{res}
-          END
-        end
-      end
-
-
-      %w(sugar phosphate).each do |moiety|
-        class_eval <<-END
-          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}
-            AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
-              send("observed_frequency_of_#{int}_between_\#{a}_and_#{na}_#{moiety}")
-            }
-          end
-          memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}
-        END
-
-        AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
-          class_eval <<-END
-            def observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
-              #{na}_interfaces.sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{moiety} }
-            end
-            memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
-
-            def expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
-              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}.to_f *
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}.to_f /
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}.to_f
-              result.nan? ? 0 : result
-            end
-            memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
-          END
-        end
-      end
-
-    end
-  end
+#  %w(dna rna).each do |na|
+#    %w(mean stddev).each do |property|
+#      class_eval <<-END
+#        def #{property}_#{na}_interface_asa
+#          #{na}_interfaces.map { |i| i.asa }.to_stats_array.#{property}
+#        end
+#        memoize :#{property}_#{na}_interface_asa
+#
+#        def #{property}_#{na}_interface_hbonds
+#          #{na}_interfaces.map { |i| (i.hbonds_as_donor.size + i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
+#        end
+#        memoize :#{property}_#{na}_interface_hbonds
+#
+#        def #{property}_#{na}_interface_whbonds
+#          #{na}_interfaces.map { |i| i.whbonds.size / i.asa * 100 }.to_stats_array.#{property}
+#        end
+#        memoize :#{property}_#{na}_interface_whbonds
+#
+#        def #{property}_#{na}_interface_contacts
+#          #{na}_interfaces.map { |i| (i.contacts.size - i.hbonds_as_donor.size - i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
+#        end
+#        memoize :#{property}_#{na}_interface_contacts
+#
+#        def #{property}_#{na}_interface_polarity
+#          #{na}_interfaces.map { |i| i.polarity }.to_stats_array.#{property}
+#        end
+#        memoize :#{property}_#{na}_interface_polarity
+#      END
+#
+#      AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
+#        class_eval <<-END
+#          def #{property}_#{na}_interface_singlet_propensity_of_#{aa}
+#            #{na}_interfaces.map { |i| i.singlet_propensity_of_#{aa} }.to_stats_array.#{property}
+#          end
+#          memoize :#{property}_#{na}_interface_singlet_propensity_of_#{aa}
+#        END
+#      end
+#
+#      Dssp::SSES.map(&:downcase).each do |sse|
+#        class_eval <<-END
+#          def #{property}_#{na}_interface_sse_propensity_of_#{sse}
+#            #{na}_interfaces.map { |i| i.sse_propensity_of_#{sse} }.to_stats_array.#{property}
+#          end
+#          memoize :#{property}_#{na}_interface_sse_propensity_of_#{sse}
+#        END
+#      end
+#    end
+#  end
+#
+#
+#  %w(hbond whbond contact).each do |int|
+#    %w(dna rna).each do |na|
+#      na_residues = "Bipa::Constants::NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize.map(&:downcase)
+#
+#      class_eval <<-END
+#        def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}
+#          AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
+#            send("total_observed_frequency_of_#{int}_between_\#{a}_and_#{na}")
+#          }
+#        end
+#        memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}
+#      END
+#
+#      AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
+#        class_eval <<-END
+#          def total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}
+#            na_residues.sum { |r|
+#              send("observed_frequency_of_#{int}_between_#{aa}_and_\#{r}")
+#            } + %w(sugar phosphate).sum { |m|
+#              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_\#{m}")
+#            }
+#          end
+#          memoize :total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}
+#        END
+#      end
+#
+#      na_residues.each do |res|
+#        class_eval <<-END
+#          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}
+#            AminoAcids::Residues::STANDARD.map(&:downcase).sum { |r|
+#              send("observed_frequency_of_#{int}_between_\#{r}_and_#{res}")
+#            }
+#          end
+#          memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}
+#        END
+#
+#        AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
+#          class_eval <<-END
+#            def observed_frequency_of_#{int}_between_#{aa}_and_#{res}
+#              #{na}_interfaces.sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{res} }
+#            end
+#            memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{res}
+#
+#            def expected_frequency_of_#{int}_between_#{aa}_and_#{res}
+#              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}.to_f *
+#                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}.to_f /
+#                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}.to_f
+#              result.nan? ? 0 : result
+#            end
+#            memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{res}
+#          END
+#        end
+#      end
+#
+#
+#      %w(sugar phosphate).each do |moiety|
+#        class_eval <<-END
+#          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}
+#            AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
+#              send("observed_frequency_of_#{int}_between_\#{a}_and_#{na}_#{moiety}")
+#            }
+#          end
+#          memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}
+#        END
+#
+#        AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
+#          class_eval <<-END
+#            def observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
+#              #{na}_interfaces.sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{moiety} }
+#            end
+#            memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
+#
+#            def expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
+#              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}.to_f *
+#                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}.to_f /
+#                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}.to_f
+#              result.nan? ? 0 : result
+#            end
+#            memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
+#          END
+#        end
+#      end
+#
+#    end
+#  end
 end # class Scop
 
 
@@ -327,5 +343,4 @@ class ScopDomain < Scop
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
   end
   memoize :to_sequence
-
 end # class ScopDomain

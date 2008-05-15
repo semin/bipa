@@ -7,7 +7,7 @@
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
     <%= javascript_include_tag "jquery-treeview/lib/jquery.cookie.js" %>
-    <%= javascript_include_tag "jquery-treeview/jquery.treeview.async.bipa.js" %>
+    <%= javascript_include_tag "jquery-treeview/jquery.treeview.js" %>
 
     <%= stylesheet_link_tag "bipa.css" %>
     <%= stylesheet_link_tag "jquery.treeview.css" %>
@@ -21,7 +21,9 @@
           autoHeight: false
         });
         jQuery("#scop_tree").treeview({
-          url: "/main/scop_subtree"
+          collapsed: true,
+          animated: "medium",
+          persist: "location"
         })
       });
     </script>
@@ -56,6 +58,7 @@
           </div>
           <div class="accordion_content">
             <ul id="scop_tree">
+              <%= SCOP_TREE %>
             </ul>
           </div>
           <div class="accordion_title">
