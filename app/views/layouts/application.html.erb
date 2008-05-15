@@ -6,16 +6,23 @@
     <%= javascript_include_tag "jquery.ui/jquery-1.2.4b.js" %>
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
+    <%= javascript_include_tag "jquery-treeview/lib/jquery.cookie.js" %>
+    <%= javascript_include_tag "jquery-treeview/jquery.treeview.async.bipa.js" %>
 
     <%= stylesheet_link_tag "bipa.css" %>
+    <%= stylesheet_link_tag "jquery.treeview.css" %>
     <script>
       jQuery.noConflict();
       jQuery(document).ready(function(){
         jQuery('#accordion_container').accordion({
           header: 'div.accordion_title',
-          autoHeight: false,
-          alwaysOpen: false
+          active: false,
+          alwaysOpen: false,
+          autoHeight: false
         });
+        jQuery("#scop_tree").treeview({
+          url: "/main/scop_subtree"
+        })
       });
     </script>
   </head>
@@ -48,16 +55,6 @@
             SCOP
           </div>
           <div class="accordion_content">
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
             <ul id="scop_tree">
             </ul>
           </div>
@@ -65,29 +62,11 @@
             GO
           </div>
           <div class="accordion_content">
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
           </div>
           <div class="accordion_title">
             ESST
           </div>
           <div class="accordion_content">
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
           </div>
         </div>
       </div>
@@ -95,60 +74,6 @@
       <div id="main_container">
         <div id="main_content">
           <%= yield :layout %>
-            Accordion 2.0 is really well done. A couple of questions: 
-            Accordion 2.0 is really well done. A couple of questions: 
-            Accordion 2.0 is really well done. A couple of questions: 
-            Accordion 2.0 is really well done. A couple of questions: 
-            Accordion 2.0 is really well done. A couple of questions: 
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
-            Accordion 2.0 is really well done. A couple of questions: 
-            What kind of application does “Accordions will dynamically resize on content added REAL TIME!” refer to?
-            Can the accordion areas in your example (the little green bars with the star) be represented by a variety of different images? I’m guessing that’s in the CSS part.
         </div>
         <%= image_tag(
                 "spinner_spike.gif",
@@ -162,7 +87,7 @@
     </div>
 
     <!--    <div id="footer"> -->
-    <!--      Footer! -->
-    <!--    </div> -->
+    <!--      Footer!         -->
+    <!--    </div>            -->
   </body>
 </html>

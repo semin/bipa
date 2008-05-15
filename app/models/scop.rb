@@ -19,22 +19,6 @@ class Scop < ActiveRecord::Base
     else; raise "Unknown SCOP hierarchy: #{opt[:stype]}"; end
   end
 
-  def ul_tree
-    tree = ""
-    registered_children.each do |child|
-      tree += %Q{<li>}
-      tree += %Q{<span class="#{child.type}">[#{child.stype.upcase}] #{child.description}</span>}
-      if child.children_count != 0
-        tree += %Q{<ul>}
-        tree += child.ul_tree
-        tree += %Q{</ul>}
-      end
-      tree += %Q{</li>}
-    end
-    tree
-  end
-  memoize :ul_tree
-
   def hierarchy_and_description
     "#{hierarchy}: #{description}"
   end
