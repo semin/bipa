@@ -14,6 +14,7 @@ class MainController < ApplicationController
 
   def scop_subtree
     children = Scop.find(params[:root]).registered_children
+
     children.each do |child|
       if child.registered_children.size > 0
         child[:hasChildren] = true
