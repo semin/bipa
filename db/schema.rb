@@ -378,25 +378,20 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :positions, :residue_id
 
 
-  create_table :go_terms, :force => true do |t|
-    t.string  :go_id
+  create_table :gos, :force => true do |t|
+    t.string  :goid
     t.boolean :is_anonymous,  :default => false
     t.string  :name
     t.string  :namespace
     t.string  :definition
-#    t.string  :synonym
-#    t.string  :alt_id
     t.string  :comment
-#    t.string  :subset
-#    t.string  :synonym
-#    t.string  :xref
     t.boolean :is_obsolete,   :default => false
-#    t.string  :replaced_by
-#    t.string  :consider
+    t.boolean :registered,    :default => false
   end
 
-  add_index :go_terms, :go_id, :unique => true
-  add_index :go_terms, :is_obsolete
+  add_index :gos, :goid, :unique => true
+  add_index :gos, :is_obsolete
+  add_index :gos, :registered
 
 
   create_table :go_associations, :force => true do |t|
@@ -421,12 +416,12 @@ ActiveRecord::Schema.define(:version => 1) do
 
   create_table :goa_pdbs, :force => true do |t|
     t.belongs_to  :chain
-    t.belongs_to  :go_term
+    t.belongs_to  :go
     t.string      :db
     t.string      :db_object_id
     t.string      :db_object_symbol
     t.string      :qualifier
-    t.string      :go_id
+    t.string      :goid
     t.string      :db_reference
     t.string      :evidence
     t.string      :with
@@ -440,6 +435,6 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index :goa_pdbs, :chain_id
-  add_index :goa_pdbs, :go_term_id
   add_index :goa_pdbs, :go_id
+  add_index :goa_pdbs, :goid
 end

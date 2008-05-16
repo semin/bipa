@@ -7,7 +7,7 @@ html, body {
 body {
   color: #000000;
   background: #C5C2B8;
-  font-family: Lucida Grande, Lucida, Verdana, Arial, san-serif;
+  font-family: Lucida Grande, Verdana, Arial, san-serif;
 }
 
 #header {
@@ -94,6 +94,7 @@ body {
   background: #888888;
   border: 0;
   border-bottom: 1px #000000 solid;
+  font-weight: bold;
 }
 
 #accordion_container div.accordion_title:hover {
@@ -102,8 +103,8 @@ body {
 }
 
 #accordion_container div.accordion_content {
-  font-size: 80%;
   padding-left: 2px; 
+  font-size: 80%;
   overflow: auto;
 }
 

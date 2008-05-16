@@ -6,7 +6,7 @@ module Bipa
     require "rubygems"
     require "active_support"
 
-    Term = Struct.new(:go_id,
+    Term = Struct.new(:goid,
                       :is_anonymous,
                       :name,
                       :namespace,
@@ -41,7 +41,7 @@ module Bipa
           when /^\s*$/ # empty line
             next
           when /^id:\s+(\S+)/
-            term[:go_id] = $1
+            term[:goid] = $1
           when /^is_anonymous:\s+(.*)$/
             term[:is_anonymous] = $1
           when /^name:\s+(.*)$/
@@ -69,27 +69,27 @@ module Bipa
           when /^disjoint_from:\s+(\S+)/
             next # can be many
           when /^is_a:\s+(\S+)/
-            association = Association.new(term.go_id, $1)
-            if @associations[term.go_id].nil?
-              @associations[term.go_id] = []
-              @associations[term.go_id] << association
+            association = Association.new(term.goid, $1)
+            if @associations[term.goid].nil?
+              @associations[term.goid] = []
+              @associations[term.goid] << association
             else
-              @associations[term.go_id] << association
+              @associations[term.goid] << association
             end
           when /^relationship:\s+(\S+)\s+(\S+)/
-            relationship = Relationship.new(term.go_id, $2, $1)
-            if @relationships[term.go_id].nil?
-              @relationships[term.go_id] = []
-              @relationships[term.go_id] << relationship
+            relationship = Relationship.new(term.goid, $2, $1)
+            if @relationships[term.goid].nil?
+              @relationships[term.goid] = []
+              @relationships[term.goid] << relationship
             else
-              @relationships[term.go_id] << relationship
+              @relationships[term.goid] << relationship
             end
           else
             raise "Unknown type: #{line}"
             #next
           end
         end
-        @terms[term.go_id] = term
+        @terms[term.goid] = term
       end
     end
 
