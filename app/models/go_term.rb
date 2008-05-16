@@ -1,4 +1,4 @@
-class Go < ActiveRecord::Base
+class GoTerm < ActiveRecord::Base
 
   has_many  :associations_as_subclass,
             :class_name   => "GoAssociation",

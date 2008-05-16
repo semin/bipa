@@ -989,45 +989,45 @@ namespace :bipa do
 
 
     desc "Import GO data into GO related tables"
-    task :gos => [:environment] do
+    task :go_terms => [:environment] do
 
       obo_file  = File.join(GO_DIR, "gene_ontology_edit.obo")
       obo_obj   = Bipa::Obo.new(IO.read(obo_file))
 
-      obo_obj.terms.each do |goid, term|
-        term_ar = Go.find_by_goid(goid)
+      obo_obj.terms.each do |go_id, term|
+        term_ar = GoTerm.find_by_go_id(go_id)
         if term_ar.nil?
-          Go.create!(term.to_hash)
-          $logger.info("Importing #{goid} into 'gos': done")
+          GoTerm.create!(term.to_hash)
+          $logger.info("Importing #{go_id} into 'go_terms': done")
         end
       end
 
-      obo_obj.relationships.each do |goid, relationships|
-        source = Go.find_by_goid(goid)
+      obo_obj.relationships.each do |go_id, relationships|
+        source = Go.find_by_go_id(go_id)
 
         relationships.each do |relationship|
-          target = Go.find_by_goid(relationship.target_id)
+          target = Go.find_by_go_id(relationship.target_id)
 
           if relationship.type == "is_a"
             GoIsA.create!(:source_id => source.id,
                           :target_id => target.id)
-            $logger.info("Importing #{goid} 'is_a' #{relationship.target_id} into 'go_relationships': done")
+            $logger.info("Importing #{go_id} 'is_a' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "part_of"
             GoPartOf.create!(:source_id => source.id,
                              :target_id => target.id)
-            $logger.info("Importing #{goid} 'part_of' #{relationship.target_id} into 'go_relationships': done")
+            $logger.info("Importing #{go_id} 'part_of' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "regulates"
             GoRegulate.create!(:source_id => source.id,
                                :target_id => target.id)
-            $logger.info("Importing #{goid} 'regulates' #{relationship.target_id} into 'go_relationships': done")
+            $logger.info("Importing #{go_id} 'regulates' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "positively_regulates"
             GoPositivelyRegulate.create!(:source_id => source.id,
                                          :target_id => target.id)
-            $logger.info("Importing #{goid} 'positively regulates' #{relationship.target_id} into 'go_relationships': done")
+            $logger.info("Importing #{go_id} 'positively regulates' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "negatively_regulates"
             GoNegativelyRegulate.create!(:source_id => source.id,
                                          :target_id => target.id)
-            $logger.info("Importing #{goid} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done")
+            $logger.info("Importing #{go_id} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done")
           else
             raise "Unknown type of relationship: #{relationship.type}"
           end
@@ -1049,7 +1049,7 @@ namespace :bipa do
           :db_object_id     => line_arr[1],
           :db_object_symbol => line_arr[2],
           :qualifier        => line_arr[3].nil_if_blank,
-          :goid             => line_arr[4],
+          :go_id             => line_arr[4],
           :db_reference     => line_arr[5],
           :evidence         => line_arr[6],
           :with             => line_arr[7],
@@ -1069,7 +1069,7 @@ namespace :bipa do
         next if structure.nil?
 
         chain = structure.chains.find_by_chain_code(chain_code)
-        go    = Go.find_by_goid(line_hsh[:goid])
+        go    = Go.find_by_go_id(line_hsh[:go_id])
 
         GoaPdb.create!(
           {
@@ -1078,7 +1078,7 @@ namespace :bipa do
           }.merge!(line_hsh)
         )
 
-        $logger.info("Importing #{pdb_code}, #{chain_code}, #{line_hsh[:goid]} into 'goa_pdbs' table: done")
+        $logger.info("Importing #{pdb_code}, #{chain_code}, #{line_hsh[:go_id]} into 'goa_pdbs' table: done")
       end
     end
 

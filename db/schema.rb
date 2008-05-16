@@ -378,8 +378,8 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :positions, :residue_id
 
 
-  create_table :gos, :force => true do |t|
-    t.string  :goid
+  create_table :go_terms, :force => true do |t|
+    t.string  :go_id
     t.boolean :is_anonymous,  :default => false
     t.string  :name
     t.string  :namespace
@@ -389,18 +389,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean :registered,    :default => false
   end
 
-  add_index :gos, :goid, :unique => true
-  add_index :gos, :is_obsolete
-  add_index :gos, :registered
-
-
-#  create_table :go_associations, :force => true do |t|
-#    t.belongs_to :subclass
-#    t.belongs_to :superclass
-#  end
-#
-#  add_index :go_associations, :subclass_id
-#  add_index :go_associations, :superclass_id
+  add_index :go_terms, :go_id, :unique => true
+  add_index :go_terms, :is_obsolete
+  add_index :go_terms, :registered
 
 
   create_table :go_relationships, :force => true do |t|
@@ -416,12 +407,12 @@ ActiveRecord::Schema.define(:version => 1) do
 
   create_table :goa_pdbs, :force => true do |t|
     t.belongs_to  :chain
-    t.belongs_to  :go
+    t.belongs_to  :go_term
     t.string      :db
     t.string      :db_object_id
     t.string      :db_object_symbol
     t.string      :qualifier
-    t.string      :goid
+    t.string      :go_id
     t.string      :db_reference
     t.string      :evidence
     t.string      :with
@@ -435,6 +426,6 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index :goa_pdbs, :chain_id
+  add_index :goa_pdbs, :go_term_id
   add_index :goa_pdbs, :go_id
-  add_index :goa_pdbs, :goid
 end

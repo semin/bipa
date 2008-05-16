@@ -44,7 +44,7 @@ class Chain < ActiveRecord::Base
 
   has_many  :goa_pdbs
 
-  has_many  :gos,
+  has_many  :go_terms,
             :through      => :goa_pdbs
 
   validates_uniqueness_of :chain_code,
