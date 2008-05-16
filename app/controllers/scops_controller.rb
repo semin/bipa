@@ -8,6 +8,20 @@ class ScopsController < ApplicationController
     end
   end
 
+  def subtree
+    children = Scop.find(params[:root]).registered_children
+
+    children.each do |child|
+      if child.registered_children.size > 0
+        child[:hasChildren] = true
+      end
+    end
+
+    respond_to do |format|
+      format.json { render :json => children.to_json }
+    end
+  end
+
   # def search
   #   @search = Ultrasphinx::Search.new(:query => @keyword, :class_names => "Scop", :filters => { "registered" => 1 })
   #   @search.run
