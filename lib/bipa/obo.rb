@@ -18,13 +18,9 @@ module Bipa
                               :target_id,
                               :type)
 
-#    Association = Struct.new(:subclass_id,
-#                             :superclass_id)
-
     def initialize(obo_str)
       @terms          = Hash.new
       @relationships  = Hash.new
-#      @associations   = Hash.new
 
       parse_obo_flat_file(obo_str)
     end
@@ -78,13 +74,6 @@ module Bipa
             else
               @relationships[term.goid] << relationship
             end
-#            association = Association.new(term.goid, $1)
-#            if @associations[term.goid].nil?
-#              @associations[term.goid] = []
-#              @associations[term.goid] << association
-#            else
-#              @associations[term.goid] << association
-#            end
           when /^relationship:\s+(\S+)\s+(\S+)/
             relationship = Relationship.new(:source_id  => term.goid,
                                             :target_id  => $2,
@@ -98,7 +87,6 @@ module Bipa
             end
           else
             raise "Unknown type: #{line}"
-#            next
           end
         end
         @terms[term.goid] = term

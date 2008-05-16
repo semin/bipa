@@ -1002,16 +1002,6 @@ namespace :bipa do
         end
       end
 
-#      obo_obj.associations.each do |goid, associations|
-#        subclass = Go.find_by_goid(goid)
-#        associations.each do |association|
-#          superclass = Go.find_by_goid(association.superclass_id)
-#          GoAssociation.create!(:subclass_id    => subclass.id,
-#                                :superclass_id  => superclass.id)
-#          $logger.info("Importing #{goid} is_a #{association.superclass_id} into 'go_associations': done")
-#        end
-#      end
-
       obo_obj.relationships.each do |goid, relationships|
         source = Go.find_by_goid(goid)
 
