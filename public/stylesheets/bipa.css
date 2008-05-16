@@ -95,11 +95,13 @@ body {
   border: 0;
   border-bottom: 1px #000000 solid;
   font-weight: bold;
+  font-size: 90%;
 }
 
 #accordion_container div.accordion_title:hover {
   color: #C5C2B8;
   background: #3C3C3C;
+  font-size: 90%;
 }
 
 #accordion_container div.accordion_content {

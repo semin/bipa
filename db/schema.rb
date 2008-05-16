@@ -394,23 +394,23 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :gos, :registered
 
 
-  create_table :go_associations, :force => true do |t|
-    t.belongs_to :subclass
-    t.belongs_to :superclass
-  end
-
-  add_index :go_associations, :subclass_id
-  add_index :go_associations, :superclass_id
+#  create_table :go_associations, :force => true do |t|
+#    t.belongs_to :subclass
+#    t.belongs_to :superclass
+#  end
+#
+#  add_index :go_associations, :subclass_id
+#  add_index :go_associations, :superclass_id
 
 
   create_table :go_relationships, :force => true do |t|
-    t.belongs_to  :object
-    t.belongs_to  :subject
+    t.belongs_to  :source
+    t.belongs_to  :target
     t.string      :type
   end
 
-  add_index :go_relationships, :object_id
-  add_index :go_relationships, :subject_id
+  add_index :go_relationships, :source_id
+  add_index :go_relationships, :target_id
   add_index :go_relationships, :type
 
 

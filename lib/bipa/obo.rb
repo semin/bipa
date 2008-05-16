@@ -14,24 +14,23 @@ module Bipa
                       :comment,
                       :is_obsolete)
 
-    Association = Struct.new(:subclass_id,
-                             :superclass_id)
-
-    Relationship = Struct.new(:subject_id,
-                              :object_id,
+    Relationship = Struct.new(:source_id,
+                              :target_id,
                               :type)
+
+#    Association = Struct.new(:subclass_id,
+#                             :superclass_id)
 
     def initialize(obo_str)
       @terms          = Hash.new
-      @associations   = Hash.new
       @relationships  = Hash.new
+#      @associations   = Hash.new
 
       parse_obo_flat_file(obo_str)
     end
 
     def parse_obo_flat_file(obo_str)
       obo_str.scan(/^\[Term\].*?^$/m).each_with_index do |t, i|
-
         term = Term.new
 
         t.split(/\n/).each do |line|
@@ -69,15 +68,28 @@ module Bipa
           when /^disjoint_from:\s+(\S+)/
             next # can be many
           when /^is_a:\s+(\S+)/
-            association = Association.new(term.goid, $1)
-            if @associations[term.goid].nil?
-              @associations[term.goid] = []
-              @associations[term.goid] << association
+            relationship = Relationship.new(:source_id  => term.goid,
+                                            :target_id  => $1,
+                                            :type       => "is_a")
+
+            if @relationships[term.goid].nil?
+              @relationships[term.goid] = []
+              @relationships[term.goid] << relationship
             else
-              @associations[term.goid] << association
+              @relationships[term.goid] << relationship
             end
+#            association = Association.new(term.goid, $1)
+#            if @associations[term.goid].nil?
+#              @associations[term.goid] = []
+#              @associations[term.goid] << association
+#            else
+#              @associations[term.goid] << association
+#            end
           when /^relationship:\s+(\S+)\s+(\S+)/
-            relationship = Relationship.new(term.goid, $2, $1)
+            relationship = Relationship.new(:source_id  => term.goid,
+                                            :target_id  => $2,
+                                            :type       => $1)
+
             if @relationships[term.goid].nil?
               @relationships[term.goid] = []
               @relationships[term.goid] << relationship
@@ -86,7 +98,7 @@ module Bipa
             end
           else
             raise "Unknown type: #{line}"
-            #next
+#            next
           end
         end
         @terms[term.goid] = term

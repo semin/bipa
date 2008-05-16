@@ -1002,38 +1002,42 @@ namespace :bipa do
         end
       end
 
-      obo_obj.associations.each do |goid, associations|
-        subclass = Go.find_by_goid(goid)
-        associations.each do |association|
-          superclass = Go.find_by_goid(association.superclass_id)
-          GoAssociation.create!(:subclass_id    => subclass.id,
-                                :superclass_id  => superclass.id)
-          $logger.info("Importing #{goid} is_a #{association.superclass_id} into 'go_associations': done")
-        end
-      end
+#      obo_obj.associations.each do |goid, associations|
+#        subclass = Go.find_by_goid(goid)
+#        associations.each do |association|
+#          superclass = Go.find_by_goid(association.superclass_id)
+#          GoAssociation.create!(:subclass_id    => subclass.id,
+#                                :superclass_id  => superclass.id)
+#          $logger.info("Importing #{goid} is_a #{association.superclass_id} into 'go_associations': done")
+#        end
+#      end
 
       obo_obj.relationships.each do |goid, relationships|
-        subject = Go.find_by_goid(goid)
+        source = Go.find_by_goid(goid)
 
         relationships.each do |relationship|
-          object = Go.find_by_goid(relationship.object_id)
+          target = Go.find_by_goid(relationship.target_id)
 
-          if relationship.type == "part_of"
-            GoPartOf.create!(:subject_id  => subject.id,
-                             :object_id   => object.id)
-            $logger.info("Importing #{goid} 'part_of' #{relationship.object_id} into 'go_relationships': done")
+          if relationship.type == "is_a"
+            GoIsA.create!(:source_id => source.id,
+                          :target_id => target.id)
+            $logger.info("Importing #{goid} 'is_a' #{relationship.target_id} into 'go_relationships': done")
+          elsif relationship.type == "part_of"
+            GoPartOf.create!(:source_id => source.id,
+                             :target_id => target.id)
+            $logger.info("Importing #{goid} 'part_of' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "regulates"
-            GoRegulate.create!(:subject_id  => subject.id,
-                               :object_id   => object.id)
-            $logger.info("Importing #{goid} 'regulates' #{relationship.object_id} into 'go_relationships': done")
+            GoRegulate.create!(:source_id => source.id,
+                               :target_id => target.id)
+            $logger.info("Importing #{goid} 'regulates' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "positively_regulates"
-            GoPositivelyRegulate.create!(:subject_id  => subject.id,
-                                         :object_id   => object.id)
-            $logger.info("Importing #{goid} 'positively regulates' #{relationship.object_id} into 'go_relationships': done")
+            GoPositivelyRegulate.create!(:source_id => source.id,
+                                         :target_id => target.id)
+            $logger.info("Importing #{goid} 'positively regulates' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "negatively_regulates"
-            GoNegativelyRegulate.create!(:subject_id  => subject.id,
-                                         :object_id   => object.id)
-            $logger.info("Importing #{goid} 'negatively regulates' #{relationship.object_id} into 'go_relationships': done")
+            GoNegativelyRegulate.create!(:source_id => source.id,
+                                         :target_id => target.id)
+            $logger.info("Importing #{goid} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done")
           else
             raise "Unknown type of relationship: #{relationship.type}"
           end
