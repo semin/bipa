@@ -1003,10 +1003,10 @@ namespace :bipa do
       end
 
       obo_obj.relationships.each do |go_id, relationships|
-        source = Go.find_by_go_id(go_id)
+        source = GoTerm.find_by_go_id(go_id)
 
         relationships.each do |relationship|
-          target = Go.find_by_go_id(relationship.target_id)
+          target = GoTerm.find_by_go_id(relationship.target_id)
 
           if relationship.type == "is_a"
             GoIsA.create!(:source_id => source.id,
@@ -1043,13 +1043,12 @@ namespace :bipa do
 
       IO.foreach(goa_pdb_file) do |line|
         line_arr = line.chomp.split(/\t/)
-
         line_hsh = {
           :db               => line_arr[0],
           :db_object_id     => line_arr[1],
           :db_object_symbol => line_arr[2],
           :qualifier        => line_arr[3].nil_if_blank,
-          :go_id             => line_arr[4],
+          :go_id            => line_arr[4],
           :db_reference     => line_arr[5],
           :evidence         => line_arr[6],
           :with             => line_arr[7],
@@ -1068,13 +1067,13 @@ namespace :bipa do
 
         next if structure.nil?
 
-        chain = structure.chains.find_by_chain_code(chain_code)
-        go    = Go.find_by_go_id(line_hsh[:go_id])
+        chain   = structure.chains.find_by_chain_code(chain_code)
+        go_term = GoTerm.find_by_go_id(line_hsh[:go_id])
 
         GoaPdb.create!(
           {
-            :chain_id => chain.id,
-            :go_id    => go.id
+            :chain_id   => chain.id,
+            :go_term_id => go_term.id
           }.merge!(line_hsh)
         )
 
