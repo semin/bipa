@@ -3,6 +3,7 @@ ActionController::Routing::Routes.draw do |map|
   map.connect '',         :controller => "main", :action => "home"
   map.connect 'home',     :controller => "main", :action => "home"
   map.connect 'contact',  :controller => "main", :action => "contact"
+
 #  map.resources :structures do |structures|
 #    structures.resources :models do |models|
 #      models.resources :chains do |chains|
