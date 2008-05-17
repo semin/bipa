@@ -8,7 +8,7 @@ class ScopsController < ApplicationController
     end
   end
 
-  def subtree
+  def children
     children = Scop.find(params[:root]).registered_children
 
     children.each do |child|

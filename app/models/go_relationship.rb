@@ -26,7 +26,7 @@ class GoPartOf < GoRelationship
 end
 
 
-class GoRegulate < GoRelationship
+class GoRegulates < GoRelationship
 
   belongs_to  :regulator,
               :class_name   => "GoTerms",
@@ -38,9 +38,9 @@ class GoRegulate < GoRelationship
 end
 
 
-class GoPositivelyRegulate < GoRegulate
+class GoPositivelyRegulates < GoRegulates
 end
 
 
-class GoNegativelyRegulate < GoRegulate
+class GoNegativelyRegulates < GoRegulates
 end

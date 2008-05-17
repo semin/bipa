@@ -425,6 +425,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :assigned_by
   end
 
+  execute "ALTER TABLE goa_pdbs MODIFY db_object_id     VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
+  execute "ALTER TABLE goa_pdbs MODIFY db_object_symbol VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
+
   add_index :goa_pdbs, :chain_id
   add_index :goa_pdbs, :go_term_id
   add_index :goa_pdbs, :go_id
