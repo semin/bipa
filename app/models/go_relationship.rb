@@ -5,11 +5,11 @@ end
 class GoIsA < GoRelationship
 
   belongs_to  :subclass,
-              :class_name   => "GoTerms",
+              :class_name   => "GoTerm",
               :foreign_key  => :source_id
 
   belongs_to  :superclass,
-              :class_name   => "GoTerms",
+              :class_name   => "GoTerm",
               :foreign_key  => :target_id
 end
 
@@ -17,11 +17,11 @@ end
 class GoPartOf < GoRelationship
 
   belongs_to  :part,
-              :class_name   => "GoTerms",
+              :class_name   => "GoTerm",
               :foreign_key  => :source_id
 
   belongs_to  :whole,
-              :class_name   => "GoTerms",
+              :class_name   => "GoTerm",
               :foreign_key  => :target_id
 end
 
@@ -29,18 +29,34 @@ end
 class GoRegulates < GoRelationship
 
   belongs_to  :regulator,
-              :class_name   => "GoTerms",
+              :class_name   => "GoTerm",
               :foreign_key  => :source_id
 
   belongs_to  :regulatee,
-              :class_name   => "GoTerms",
+              :class_name   => "GoTerm",
               :foreign_key  => :target_id
 end
 
 
-class GoPositivelyRegulates < GoRegulates
+class GoPositivelyRegulates < GoRelationship
+
+  belongs_to  :positive_regulator,
+              :class_name   => "GoTerm",
+              :foreign_key  => :source_id
+
+  belongs_to  :positive_regulatee,
+              :class_name   => "GoTerm",
+              :foreign_key  => :target_id
 end
 
 
-class GoNegativelyRegulates < GoRegulates
+class GoNegativelyRegulates < GoRelationship
+
+  belongs_to  :negative_regulator,
+              :class_name   => "GoTerm",
+              :foreign_key  => :source_id
+
+  belongs_to  :negative_regulatee,
+              :class_name   => "GoTerm",
+              :foreign_key  => :target_id
 end

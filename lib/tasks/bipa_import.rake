@@ -988,7 +988,7 @@ namespace :bipa do
     end # task :sub_alignments
 
 
-    desc "Import GO data into GO related tables"
+    desc "Import GO data into 'go_terms' and 'go_relationships' tables"
     task :go_terms => [:environment] do
 
       obo_file  = File.join(GO_DIR, "gene_ontology_edit.obo")
@@ -1011,22 +1011,27 @@ namespace :bipa do
           if relationship.type == "is_a"
             GoIsA.create!(:source_id => source.id,
                           :target_id => target.id)
+
             $logger.info("Importing #{go_id} 'is_a' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "part_of"
             GoPartOf.create!(:source_id => source.id,
                              :target_id => target.id)
+
             $logger.info("Importing #{go_id} 'part_of' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "regulates"
-            GoRegulate.create!(:source_id => source.id,
-                               :target_id => target.id)
+            GoRegulates.create!(:source_id => source.id,
+                                :target_id => target.id)
+
             $logger.info("Importing #{go_id} 'regulates' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "positively_regulates"
-            GoPositivelyRegulate.create!(:source_id => source.id,
-                                         :target_id => target.id)
+            GoPositivelyRegulates.create!(:source_id => source.id,
+                                          :target_id => target.id)
+
             $logger.info("Importing #{go_id} 'positively regulates' #{relationship.target_id} into 'go_relationships': done")
           elsif relationship.type == "negatively_regulates"
-            GoNegativelyRegulate.create!(:source_id => source.id,
-                                         :target_id => target.id)
+            GoNegativelyRegulates.create!(:source_id => source.id,
+                                          :target_id => target.id)
+
             $logger.info("Importing #{go_id} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done")
           else
             raise "Unknown type of relationship: #{relationship.type}"
