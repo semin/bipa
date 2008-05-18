@@ -1,4 +1,12 @@
 class GoRelationship < ActiveRecord::Base
+
+  belongs_to  :source,
+              :class_name   => "GoTerm",
+              :foreign_key  => :source_id
+
+  belongs_to  :target,
+              :class_name   => "GoTerm",
+              :foreign_key  => :target_id
 end
 
 

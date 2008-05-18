@@ -1,11 +1,10 @@
 class GoTermsController < ApplicationController
 
   def chilren
-    children = GoTerm.registered.find(params[:root]).  registered_children
+    children = GoTerm.registered.find(params[:root]).registered_children
 
     children.each do |child|
       child[:tree_title] = child.tree_title
-
       if child.registered_children.size > 0
         child[:hasChildren] = true
       end

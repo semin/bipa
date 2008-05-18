@@ -9,11 +9,10 @@ class ScopsController < ApplicationController
   end
 
   def children
-    children = Scop.find(params[:root]).registered_children
+    children = Scop.registered.find(params[:root]).registered_children
 
     children.each do |child|
       child[:tree_title] = child.tree_title
-
       if child.registered_children.size > 0
         child[:hasChildren] = true
       end
