@@ -1,5 +1,20 @@
 class GoTerm < ActiveRecord::Base
 
+  # abstract source <-> target relationship
+  has_many  :relationships_as_source,
+            :class_name   => "GoRelationship",
+            :foreign_key  => "source_id"
+
+  has_many  :relationships_as_target,
+            :class_name   => "GoRelationship",
+            :foreign_key  => "target_id"
+
+  has_many  :sources,
+            :through      => :relationships_as_target
+
+  has_many  :targets,
+            :through      => :relationships_as_source
+
   # is_a
   has_many  :relationships_as_subclass,
             :class_name   => "GoIsA",
@@ -80,5 +95,9 @@ class GoTerm < ActiveRecord::Base
 
   has_many  :chains,
             :through      => :goa_pdbs
+
+  def tree_title
+    "#{go_id}: #{name}"
+  end
 end
 

@@ -403,6 +403,8 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :go_relationships, :source_id
   add_index :go_relationships, :target_id
   add_index :go_relationships, :type
+  add_index :go_relationships, [:source_id, :target_id]
+  add_index :go_relationships, [:target_id, :source_id]
 
 
   create_table :goa_pdbs, :force => true do |t|
