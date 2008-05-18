@@ -22,17 +22,17 @@
           alwaysOpen: false,
           autoHeight: false
         });
-        jQuery("#scops_tree").treeview({
+        jQuery("#scop_tree").treeview({
           alwaysOpen: true,
-          url: "scops/children"
+          url: "scop/children"
         })
-        jQuery("#gos_tree").treeview({
+        jQuery("#go_tree").treeview({
           alwaysOpen: true,
-          url: "gos/children"
+          url: "go/children"
         })
-        jQuery("#taxa_tree").treeview({
+        jQuery("#taxonomy_tree").treeview({
           alwaysOpen: true,
-          url: "taxa/children"
+          url: "taxonomy/children"
         })
       });
     </script>
@@ -66,21 +66,21 @@
             SCOP
           </div>
           <div class="accordion_content">
-            <ul id="scops_tree">
+            <ul id="scop_tree">
             </ul>
           </div>
           <div class="accordion_title">
             GO
           </div>
           <div class="accordion_content">
-            <ul id="gos_tree">
+            <ul id="go_tree">
             </ul>
           </div>
           <div class="accordion_title">
             TAXONOMY
           </div>
           <div class="accordion_content">
-            <ul id="taxa_tree">
+            <ul id="taxonomy_tree">
             </ul>
           </div>
         </div>
