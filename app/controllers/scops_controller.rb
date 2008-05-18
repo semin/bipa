@@ -1,4 +1,4 @@
-class ScopsController < ApplicationController
+class ScopController < ApplicationController
 
   def index
     #    @scops = Scop.root.registered_children
