@@ -1087,5 +1087,65 @@ namespace :bipa do
       end
     end
 
+
+    desc "Import NCBI Taxonomy 'nodes.dmp' file into 'taxonomic_nodes' table"
+    task :taxonomic_nodes => [:environment] do
+      nodes_file = File.join(TAXONOMY_DIR, "nodes.dmp")
+
+      Node = Struct.new(
+        :tax_id,
+        :parent_tax_id,
+        :rank,
+        :embl_code,
+        :division_id,
+        :inherited_div_flag,
+        :genetic_code_id,
+        :inherited_gc_flag,
+        :mitochondrial_genetic_code_id,
+        :inherited_mgc_flag,
+        :genbank_hidden_flag,
+        :hidden_subtree_root,
+        :comments
+      )
+
+#      nodes = []
+
+      IO.foreach(nodes_file) do |line|
+        next if line =~ /^#/ || line.blank?
+        node_struct = Node.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
+        TaxonomicNode.create!(node_struct.to_hash)
+#        nodes << TaxonomicNode.new(node_struct.to_hash)
+      end
+
+#      TaxonomicNode.import(nodes, :validate => false)
+
+      taxonomic_nodes = TaxonomicNode.find(:all, :select => "id, parent_id, tax_id, parent_tax_id")
+      taxonomic_nodes.each_with_index do |node, i|
+        parent = TaxonomicNode.find_by_tax_id(node.parent_tax_id)
+        node.move_to_child_of(parent)
+        $logger.info("Importing #{node.id} into 'taxonomic_nodes' table: done (#{i + 1}/#{nodes.size})")
+      end
+    end
+
+
+    desc "Import NCBI Taxonomy 'names.dmp' file into 'taxonomic_names' table"
+    task :taxonomic_names => [:environment] do
+      name_file = File.join(TAXONOMY_DIR, "names.dmp")
+
+      Name = Struct.new(
+        :tax_id,
+        :name_txt,
+        :unique_name,
+        :name_class
+      )
+
+      IO.foreach(names_file) do |line|
+        next if line =~ /^#/ || line.blank?
+        name = Name.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
+        node = TaxonomicNode.find_by_tax_id(name.tax_id)
+        node.names.create!(name.to_hash)
+      end
+    end
+
   end
 end

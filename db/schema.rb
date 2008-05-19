@@ -422,7 +422,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :db_object_name
     t.string      :synonym
     t.string      :db_object_type
-    t.integer     :taxon_id
+    t.integer     :tax_id
     t.date        :date
     t.string      :assigned_by
   end
@@ -433,4 +433,46 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :goa_pdbs, :chain_id
   add_index :goa_pdbs, :go_term_id
   add_index :goa_pdbs, :go_id
+
+
+  create_table :taxonomic_nodes, :force => true do |t|
+    # fields for better nested set
+    t.belongs_to  :parent
+    t.integer     :lft
+    t.integer     :rgt
+    t.string      :type
+    # fields for nodes.dmp
+    t.integer     :tax_id
+    t.integer     :parent_tax_id
+    t.string      :rank
+    t.string      :embl_code,     :default => false
+    t.integer     :division_id
+    t.boolean     :inherited_div_flag
+    t.integer     :genetic_code_id
+    t.boolean     :inherited_gc_flag
+    t.integer     :mitochondrial_genetic_code_id
+    t.boolean     :inherited_mgc_flag
+    t.boolean     :genbank_hidden_flag
+    t.boolean     :hidden_subtree_root
+    t.string      :comments
+    # flag for filtering discovered nodes
+    t.boolean     :registered,    :default => false
+  end
+
+  add_index :taxonomic_nodes, :parent_id
+  add_index :taxonomic_nodes, :lft
+  add_index :taxonomic_nodes, :rgt
+  add_index :taxonomic_nodes, :tax_id
+
+
+  create_table :taxonomic_names, :force => true do |t|
+    t.belongs_to  :taxonomic_node
+    t.string      :type
+    t.integer     :tax_id
+    t.string      :name_txt
+    t.string      :unique_name
+    t.string      :name_class
+  end
+
+  add_index :taxonomic_names, :taxonomic_node_id
 end
