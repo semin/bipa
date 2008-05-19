@@ -1,6 +1,6 @@
 class TaxonomicNode < ActiveRecord::Base
 
-  acts_as_nested_set
+  acts_as_tree
 
   has_many  :names,
             :class_name   => "TaxonomicName",
