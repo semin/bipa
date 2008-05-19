@@ -1068,7 +1068,6 @@ namespace :bipa do
 
         pdb_code    = line_hsh[:db_object_id].match(/\S{4}/)[0]
         chain_code  = line_hsh[:db_object_id].match(/\S{4}_(\S{1})/)[1]
-
         structure   = Structure.find_by_pdb_code(pdb_code)
 
         next if structure.nil?
