@@ -1093,8 +1093,8 @@ namespace :bipa do
       nodes_file = File.join(TAXONOMY_DIR, "nodes.dmp")
 
       Node = Struct.new(
-        :tax_id,
-        :parent_tax_id,
+        :id,
+        :parent_id,
         :rank,
         :embl_code,
         :division_id,
@@ -1108,23 +1108,19 @@ namespace :bipa do
         :comments
       )
 
-#      nodes = []
-
       IO.foreach(nodes_file) do |line|
         next if line =~ /^#/ || line.blank?
         node_struct = Node.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
         TaxonomicNode.create!(node_struct.to_hash)
-#        nodes << TaxonomicNode.new(node_struct.to_hash)
       end
 
-#      TaxonomicNode.import(nodes, :validate => false)
-
-      taxonomic_nodes = TaxonomicNode.find(:all, :select => "id, parent_id, tax_id, parent_tax_id")
-      taxonomic_nodes.each_with_index do |node, i|
-        parent = TaxonomicNode.find_by_tax_id(node.parent_tax_id)
-        node.move_to_child_of(parent)
-        $logger.info("Importing #{node.id} into 'taxonomic_nodes' table: done (#{i + 1}/#{nodes.size})")
-      end
+#      nodes = TaxonomicNode.find(:all, :select => "id, parent_id, lft, rgt, tax_id, parent_tax_id")
+#      nodes.each_with_index do |node, i|
+#        next if node.tax_id == 1;
+#        parent = TaxonomicNode.find_by_tax_id(node.parent_tax_id)
+#        node.move_to_child_of(parent)
+#        $logger.info("Importing #{node.id} into 'nodes' table: done (#{i + 1}/#{nodes.size})")
+#      end
     end
 
 

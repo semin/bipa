@@ -436,15 +436,9 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   create_table :taxonomic_nodes, :force => true do |t|
-    # fields for better nested set
-    t.belongs_to  :parent
-    t.integer     :lft
-    t.integer     :rgt
-    t.string      :type
-    # fields for nodes.dmp
-    t.integer     :tax_id
-    t.integer     :parent_tax_id
+    t.integer     :parent_id
     t.string      :rank
+    t.string      :type
     t.string      :embl_code,     :default => false
     t.integer     :division_id
     t.boolean     :inherited_div_flag
@@ -455,14 +449,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean     :genbank_hidden_flag
     t.boolean     :hidden_subtree_root
     t.string      :comments
-    # flag for filtering discovered nodes
     t.boolean     :registered,    :default => false
   end
 
   add_index :taxonomic_nodes, :parent_id
-  add_index :taxonomic_nodes, :lft
-  add_index :taxonomic_nodes, :rgt
-  add_index :taxonomic_nodes, :tax_id
 
 
   create_table :taxonomic_names, :force => true do |t|
