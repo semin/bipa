@@ -26,13 +26,8 @@ class ScopController < ApplicationController
   def tabs
     scop = Scop.registered.find(params[:id])
 
-    respond_to do |format|
-#      format.html { render :text => "hello" }
-      format.js {
-        render :update do |page|
-          page.insert_html "main_content", :text => scop.description
-        end
-      }
+    render :update do |page|
+      page.insert_html "main_content", :text => scop.description
     end
   end
 
