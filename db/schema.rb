@@ -438,7 +438,6 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :taxonomic_nodes, :force => true do |t|
     t.integer     :parent_id
     t.string      :rank
-    t.string      :type
     t.string      :embl_code,     :default => false
     t.integer     :division_id
     t.boolean     :inherited_div_flag
@@ -457,8 +456,6 @@ ActiveRecord::Schema.define(:version => 1) do
 
   create_table :taxonomic_names, :force => true do |t|
     t.belongs_to  :taxonomic_node
-    t.string      :type
-    t.integer     :tax_id
     t.string      :name_txt
     t.string      :unique_name
     t.string      :name_class
