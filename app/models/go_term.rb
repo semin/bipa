@@ -97,7 +97,7 @@ class GoTerm < ActiveRecord::Base
             :through      => :goa_pdbs
 
   def tree_title
-    "#{go_id}: #{name}"
+    "<a href='/go/tabs/#{go_id}'>#{go_id}: #{name}</a>"
   end
 end
 

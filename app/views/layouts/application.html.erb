@@ -25,15 +25,25 @@
         jQuery("#scop_tree").treeview({
           alwaysOpen: true,
           url: "scop/children"
-        })
+        });
         jQuery("#go_tree").treeview({
           alwaysOpen: true,
           url: "go/children"
-        })
+        });
         jQuery("#taxonomy_tree").treeview({
           alwaysOpen: true,
           url: "taxonomy/children"
-        })
+        });
+        jQuery("a.rjs").click(function() {
+          jQuery.ajax({
+              url: this.href,
+              dataType: "script",
+              beforeSend: function(xhr) {
+                xhr.setRequestHeader("Accept", "text/javascript");
+              }
+          });
+          return false;
+        });
       });
     </script>
   </head>

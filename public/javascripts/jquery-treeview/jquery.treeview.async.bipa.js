@@ -18,7 +18,7 @@
 function load(settings, root, child, container) {
 	$.getJSON(settings.url, {root: root}, function(response) {
 		function createNode(parent) {
-			var current = $("<li/>").attr("id", this.id || "").html("<a>" + this.tree_title + "</a>").appendTo(parent);
+			var current = $("<li/>").attr("id", this.id || "").html(this.tree_title).appendTo(parent);
 			if (this.classes) {
 				current.children("a").addClass(this.classes);
 			}
@@ -31,7 +31,7 @@ function load(settings, root, child, container) {
 					current.addClass("hasChildren");
 					createNode.call({
 						classes: "placeholder",
-						tree_title: "&nbsp;",
+						tree_title: "<a>&nbsp;</a>",
 						children:[]
 					}, branch);
 				}

@@ -1,7 +1,7 @@
 class ScopController < ApplicationController
 
   def index
-    #    @scops = Scop.root.registered_children
+    @scops = Scop.root.registered_children
 
     respond_to do |format|
       format.html
@@ -20,6 +20,19 @@ class ScopController < ApplicationController
 
     respond_to do |format|
       format.json { render :json => children.to_json }
+    end
+  end
+
+  def tabs
+    scop = Scop.registered.find(params[:id])
+
+    respond_to do |format|
+#      format.html { render :text => "hello" }
+      format.js {
+        render :update do |page|
+          page.insert_html "main_content", :text => scop.description
+        end
+      }
     end
   end
 
