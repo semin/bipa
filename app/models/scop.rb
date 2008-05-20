@@ -20,7 +20,7 @@ class Scop < ActiveRecord::Base
   end
 
   def tree_title
-    "<div href='/scop/tabs/#{id}' class='rjs'>[#{stype.upcase}] #{description}</div>"
+    "<a href='/scop/tabs/#{id}' class='rjs'>[#{stype.upcase}] #{description}</a>"
   end
 
   def hierarchy_and_description

@@ -20,7 +20,7 @@ function load(settings, root, child, container) {
 		function createNode(parent) {
 			var current = $("<li/>").attr("id", this.id || "").html(this.tree_title).appendTo(parent);
 			if (this.classes) {
-				current.children("div").addClass(this.classes);
+				current.children("a").addClass(this.classes);
 			}
 			if (this.expanded) {
 				current.addClass("open");
@@ -31,7 +31,7 @@ function load(settings, root, child, container) {
 					current.addClass("hasChildren");
 					createNode.call({
 						classes: "placeholder",
-						tree_title: "<div>&nbsp;</div>",
+						tree_title: "<a>&nbsp;</a>",
 						children:[]
 					}, branch);
 				}
