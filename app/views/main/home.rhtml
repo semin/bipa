@@ -1,4 +1,4 @@
-<div id="home_ver">
+<div id="home_ver" class="home_title">
   BIPA ver1.0 (<%= Date.today %>)
 </div>
 
@@ -7,8 +7,10 @@
 </p>
 
 <div id="home_stats">
-  Brief statistics of BIPA
-  <ul>
+  <div class="home_title">
+    Brief Statistics
+  </div>
+  <ul id="home_stats_list">
     <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
     <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.registered.count %></li>
     <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.registered.count %></li>
@@ -19,8 +21,10 @@
 </div>
 
 <div id="home_news">
-  News
+  <div class="home_title">
+    News
+  </div>
   <table id="home_news_table">
-    <%= render(:partial => "news") %>
+    <%= render(:partial => "news", :collection => @newses) %>
   </table>
 </div>

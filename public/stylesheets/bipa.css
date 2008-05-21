@@ -157,7 +157,7 @@ body {
   padding-bottom: 5px;
   color: #000000;
   background: #FFFFFF;
-  font-size: 100%;
+  font-size: 95%;
 }
 
 #main_spinner {
@@ -165,29 +165,33 @@ body {
   margin-left: 10px;
 }
 
-#footer {
-  width: 100%;
-  height: 20px;
-  border-top: 2px #000000 dotted;
-  padding-top: 10px;
-  margin: -50px auto 0 auto;
-  font-family: Courier New;
-  font-size: 85%;
-  text-align: center;
+#home_intro {
+  margin-top: 5px;
+  text-indent: 30pt;
 }
 
-#footer a {
-  color: white;
+.home_title {
+  font-size: 110%;
+  font-weight: bold;
 }
 
-#footer a:link, a:visited {
-  color: white;
-  text-decoration: none;
+ul#home_stats_list {
+  margin-top: 5px;
+  padding-top: 0px;
 }
 
-#footer a:hover, a:active {
-  color: white;
-  text-decoration: underline;
+#home_news_table {
+}
+
+#home_news_table .news_date {
+}
+
+#home_news_table .news_title {
+  font-weight: bold;
+}
+
+#home_news_table .news_content {
+  font-size: 90%;
 }
 
 ul.contact {
