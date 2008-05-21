@@ -4,7 +4,6 @@
     <title><%= @page_title || "Welcome to BIPA!" %></title>
     <%= javascript_include_tag :defaults %>
     <%= javascript_include_tag "jquery.js" %>
-    <%= javascript_include_tag "rounded.js" %>
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
     <%= javascript_include_tag "jquery-treeview/lib/jquery.cookie.js" %>
@@ -61,8 +60,8 @@
     </div>
 
     <div id="middler">
-      <div id="sidebar">
-        <div id="accordion_container" class="rounded">
+      <div id="sidebar" class="rounded">
+        <div id="accordion_container">
           <div class="accordion_title">
             SCOP
           </div>
@@ -100,9 +99,5 @@
         %>
       </div>
     </div>
-
-    <script type="text/javascript">
-      Rounded('rounded', 6, 6);
-    </script> 
   </body>
 </html>
