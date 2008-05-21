@@ -97,7 +97,7 @@ class GoTerm < ActiveRecord::Base
             :through      => :goa_pdbs
 
   def tree_title
-    "<a href='/go/tabs/#{go_id}'>#{go_id}: #{name}</a>"
+    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/go/tabs/#{id}', {asynchronous:true, evalScripts:true, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[#{go_id}]: #{name}</a>^
   end
 end
 

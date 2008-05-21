@@ -20,7 +20,7 @@ class Scop < ActiveRecord::Base
   end
 
   def tree_title
-    "<a href='/scop/tabs/#{id}' class='rjs'>[#{stype.upcase}] #{description}</a>"
+    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', {asynchronous:true, evalScripts:true, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[#{stype.upcase}] #{description}</a>^
   end
 
   def hierarchy_and_description

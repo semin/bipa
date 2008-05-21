@@ -44,10 +44,6 @@ function load(settings, root, child, container) {
 		child.empty();
 		$.each(response, createNode, [child]);
 
-                $("a.rjs").click(function () {
-                  $('#main_content').load(this.href);
-                });
-
         $(container).treeview({add: child});
     });
 }
@@ -59,7 +55,7 @@ $.fn.treeview = function(settings) {
 	}
 	var container = this;
 	if (!container.children().size())
-		load(settings, "1", this, container);
+		load(settings, "root", this, container);
 	var userToggle = settings.toggle;
 	return proxied.call(this, $.extend({}, settings, {
 		collapsed: true,

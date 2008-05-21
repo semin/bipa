@@ -1,2 +1,26 @@
+<div id="home_ver">
+  BIPA ver1.0 (<%= Date.today %>)
+</div>
 
-Hello, there!
+<p id="home_intro">
+  BIPA is the best and the most thorough database for protein-nucleic acid interaction. blah blah ...
+</p>
+
+<div id="home_stats">
+  Brief statistics of BIPA
+  <ul>
+    <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
+    <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.registered.count %></li>
+    <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.registered.count %></li>
+    <li>No. of Nucleic Acid Binding SCOP Domains: <%= ScopDomain.registered.count %></li>
+    <li>No. of Protein-DNA interfaces: <%= DomainDnaInterface.count %></li>
+    <li>No. of Protein-RNA interfaces: <%= DomainRnaInterface.count %></li>
+  </ul>
+</div>
+
+<div id="home_news">
+  News
+  <table id="home_news_table">
+    <%= render(:partial => "news") %>
+  </table>
+</div>

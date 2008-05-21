@@ -462,4 +462,13 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index :taxonomic_names, :taxonomic_node_id
+
+
+  create_table :news, :force => true do |t|
+    t.date    :date
+    t.string  :title
+    t.text    :content
+  end
+
+  add_index :news, :date
 end
