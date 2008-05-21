@@ -1,4 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"> 
+<!DOCTYPE HTML PUBLIC "-//W4C//DTD XHTML 1.0 Transitional//EN"> 
 <html>
   <head>
     <title><%= @page_title || "Welcome to BIPA!" %></title>
@@ -13,7 +13,7 @@
 
     <%= stylesheet_link_tag "bipa.css" %>
     <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
-    <script>
+    <script type="text/javascript">
       jQuery.noConflict();
       jQuery(document).ready(function(){
         jQuery('#accordion_container').accordion({
@@ -24,25 +24,15 @@
         });
         jQuery("#scop_tree").treeview({
           alwaysOpen: true,
-          url: "scop/children"
+          url: "/scop/children"
         });
         jQuery("#go_tree").treeview({
           alwaysOpen: true,
-          url: "go/children"
+          url: "/go/children"
         });
         jQuery("#taxonomy_tree").treeview({
           alwaysOpen: true,
-          url: "taxonomy/children"
-        });
-        jQuery(".rjs").click(function() {
-          jQuery.ajax({
-              url: this.href,
-              dataType: "script",
-              beforeSend: function(xhr) {
-                xhr.setRequestHeader("Accept", "text/javascript");
-              }
-          });
-          return false;
+          url: "/taxonomy/children"
         });
       });
     </script>
@@ -98,7 +88,6 @@
 
       <div id="main_container">
         <div id="main_content">
-          <%= yield :layout %>
         </div>
         <%= image_tag(
                 "spinner_spike.gif",

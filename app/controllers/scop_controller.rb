@@ -24,10 +24,10 @@ class ScopController < ApplicationController
   end
 
   def tabs
-    scop = Scop.registered.find(params[:id])
+    @scop = Scop.registered.find(params[:id])
 
-    render :update do |page|
-      page.insert_html "main_content", :text => scop.description
+    respond_to do |format|
+      format.html
     end
   end
 
