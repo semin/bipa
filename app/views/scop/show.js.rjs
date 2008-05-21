@@ -1,1 +1,0 @@
-page.replace_html "main_content", :partial => "scops/scop", :locals => { :scop => @scop } 
