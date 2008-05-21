@@ -7,7 +7,7 @@ html, body {
 body {
   color: #000000;
   background: #C5C2B8;
-  font-family: Lucida Grande, Verdana, Arial, san-serif;
+  font-family: Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
 }
 
 #header {
@@ -24,7 +24,7 @@ body {
   position: absolute;
   top: 10px;
   left: 10px;
-  font-family: Georgia, Times New Roman, Serif;
+  font-family: Georgia, serif;
   font-size: 150%;
   font-weight: bold;
   text-align: left;
@@ -35,7 +35,7 @@ body {
   position: absolute;
   top: 40px;
   left: 10px;
-  font-family: Georgia, Times New Roman, Serif;
+  font-family: Georgia, serif;
   font-size: 105%;
   text-align: left;
 }
@@ -96,9 +96,8 @@ body {
 
 #accordion_container {
   width: 300px;
-  border-top: 1px #000000 solid;
   color: black;
-  background: white;
+  background: #888888;
 }
 
 #accordion_container div.accordion_title {
@@ -107,7 +106,6 @@ body {
   margin-right: 3px; 
   background: #888888;
   border: 0;
-  border-bottom: 1px #000000 solid;
   font-weight: bold;
   font-size: 90%;
 }
@@ -120,6 +118,7 @@ body {
 
 #accordion_container div.accordion_content {
   padding-left: 2px; 
+  background: #FFFFFF;
   font-size: 80%;
   overflow: auto;
 }
@@ -154,8 +153,6 @@ body {
 #main_content {
   padding-left: 5px;
   padding-bottom: 5px;
-  color: #000000;
-  background: #FFFFFF;
   font-size: 95%;
 }
 
