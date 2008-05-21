@@ -4,4 +4,4 @@
 // for compatibility issuses in jQuery and Rails
 
 //jQuery.ajaxSetup({ ‘beforeSend’: function(xhr) {xhr.setRequestHeader(“Accept”, “text/javascript”)} })
-//
+

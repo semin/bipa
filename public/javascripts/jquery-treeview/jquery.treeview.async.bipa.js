@@ -20,10 +20,6 @@ function load(settings, root, child, container) {
 		function createNode(parent) {
 			var current = $("<li/>").attr("id", this.id || "").html(this.tree_title).appendTo(parent);
 
-                        current.children("a.rjs").click(function () {
-                          $('#main_content').load(this.href);
-                        });
-
 			if (this.classes) {
 				current.children("a").addClass(this.classes);
 			}
@@ -47,6 +43,11 @@ function load(settings, root, child, container) {
 		}
 		child.empty();
 		$.each(response, createNode, [child]);
+
+                $("a.rjs").click(function () {
+                  $('#main_content').load(this.href);
+                });
+
         $(container).treeview({add: child});
     });
 }
