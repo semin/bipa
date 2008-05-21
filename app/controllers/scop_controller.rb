@@ -26,4 +26,36 @@ class ScopController < ApplicationController
       format.html { render :layout => false }
     end
   end
+
+  def summary
+    @scop = Scop.registered.find(params[:id])
+
+    respond_to do |format|
+      format.html { render :layout => false }
+    end
+  end
+
+  def propensity
+    @scop = Scop.registered.find(params[:id])
+
+    respond_to do |format|
+      format.html { render :layout => false }
+    end
+  end
+
+  def msa
+    @scop = Scop.registered.find(params[:id])
+
+    respond_to do |format|
+      format.html { render :layout => false }
+    end
+  end
+
+  def esst
+    @scop = Scop.registered.find(params[:id])
+
+    respond_to do |format|
+      format.html { render :layout => false }
+    end
+  end
 end

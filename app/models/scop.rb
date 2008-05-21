@@ -20,11 +20,7 @@ class Scop < ActiveRecord::Base
   end
 
   def tree_title
-    if self.is_a? ScopFamily
-      %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', {asynchronous:true, evalScripts:true, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[#{stype.upcase}] #{description}</a>^
-    else
-      %Q^<a href="#">[#{stype.upcase}] #{description}</a>^
-    end
+    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', {asynchronous:true, evalScripts:true, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[#{stype.upcase}] #{description}</a>^
   end
 
   def hierarchy_and_description
