@@ -2,6 +2,7 @@ html, body {
   margin: 0px;
   border: 0px;
   padding: 0px;
+  height: 100%;
 }
 
 body {
@@ -11,7 +12,7 @@ body {
 }
 
 #header {
-  position: relative;
+  position: fixed;
   top: 0px;
   left: 0px;
   width: 100%;
@@ -68,15 +69,18 @@ body {
 }
 
 #middler {
-  position: relative;
+  position: fixed;
+  top: 100px;
+  bottom: 30px;
   width: 100%;
 }
 
 #sidebar {
-  position: absolute;
-  top: 10px;
-  left: 0px;
+  position: fixed;
+  top: 110px;
+  bottom: 40px;
   width: 300px;
+  margin: 0px;
   margin-left: 10px;
 }
 
@@ -95,23 +99,25 @@ body {
 }
 
 #accordion_container {
-  width: 300px;
-  color: black;
-  background: #888888;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+  overflow-x: hidden;
 }
 
 #accordion_container div.accordion_title {
-  width: 295px;
+  margin: 0px;
   padding-top: 3px; 
   padding-bottom: 3px; 
   padding-left: 5px; 
   background: #888888;
-  border: 0;
   font-weight: bold;
   font-size: 90%;
 }
 
 #accordion_container div.accordion_title:hover {
+  margin: 0px;
   padding-top: 3px; 
   padding-bottom: 3px; 
   padding-left: 5px; 
@@ -121,20 +127,18 @@ body {
 }
 
 #accordion_container div.accordion_content {
+  margin: 0px;
   padding-left: 2px; 
   background: #FFFFFF;
   font-size: 80%;
-  overflow: auto;
 }
 
 #main_container {
-  position: absolute;
-  top: 0px;
+  position: fixed;
+  top: 110px;
+  bottom: 40px;
   left: 312px;
   right: 10px;
-  min-height 50px !important;
-  margin-top: 10px;
-  margin-bottom: 10px;
   border-left: 10px #C5C2B8 solid;
   color: #000000;
   background: #FFFFFF;
@@ -154,14 +158,20 @@ body {
 }
 
 #main_content {
+  position: absolute;
+  width: 100%;
+  height: 100%;
   padding-left: 5px;
   padding-bottom: 5px;
   font-size: 95%;
+  overflow: auto;
 }
 
 #main_spinner {
-  margin-top: 5px;
-  margin-left: 10px;
+  position: absolute;
+  top: 50%;
+  left: 48%;
+  margin-top: -25px;
 }
 
 #main_title {
@@ -213,3 +223,12 @@ ul li div.contact_affiliation {}
 
 ul li div.contact_email {}
 
+#footer {
+  position: absolute;
+  bottom: 0px;
+  height: 30px;
+  width: 100%;
+  border-top: 2px black dotted;
+  font-size: 80%;
+  text-align: center;
+}

@@ -20,20 +20,17 @@
       jQuery(document).ready(function(){
         jQuery("#accordion_container").accordion({
           header: "div.accordion_title",
-          active: false,
+          active: ".accordion_init",
           alwaysOpen: false,
           autoHeight: false
         });
         jQuery("#scop_tree").treeview({
-          alwaysOpen: true,
           url: "/scop/children"
         });
         jQuery("#go_tree").treeview({
-          alwaysOpen: true,
           url: "/go/children"
         });
         jQuery("#taxonomy_tree").treeview({
-          alwaysOpen: true,
           url: "/taxonomy/children"
         });
       });
@@ -64,7 +61,7 @@
     <div id="middler">
       <div id="sidebar" class="rounded">
         <div id="accordion_container">
-          <div class="accordion_title">
+          <div class="accordion_title accordion_init">
             SCOP
           </div>
           <div class="accordion_content">
@@ -93,13 +90,17 @@
           <%= yield :layout %>
         </div>
         <%= image_tag(
-                "spinner_arrow.gif",
+                "spinner_spike.gif",
                 :alt => "Loading ...",
                 :border => 0,
                 :id => "main_spinner",
                 :style => "display: none;")
         %>
       </div>
+    </div>
+
+    <div id="footer">
+      &copy; 2008 Semin Lee, Tom L. Blundell Group, Department of Biochemistry, University of Cambridge, UK
     </div>
   </body>
 </html>
