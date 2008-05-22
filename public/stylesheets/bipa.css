@@ -181,6 +181,7 @@ body {
   top: 0px;
   height: 30px;
   width: 100%;
+  margin: 0px;
   padding-top: 3px;
   padding-left: 10px;
   color: #C5C2B8;
@@ -192,8 +193,9 @@ body {
 
 #main_content div.content {
   position: absolute;
-  top: 40px;
-  bottom: 40px;
+  top: 33px;
+  padding-top: 10px;
+  bottom: 0px;
   width: 100%;
   overflow: auto;
 }

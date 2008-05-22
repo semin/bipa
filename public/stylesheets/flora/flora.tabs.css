@@ -16,8 +16,8 @@
 
 /* Skin */
 .ui-tabs-nav, .ui-tabs-panel {
-    font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
-    font-size: 12px;
+    font-family: Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
+    font-size: 15px;
 }
 .ui-tabs-nav {
     list-style: none;
@@ -86,7 +86,7 @@
     color: #000;
 }
 .ui-tabs-panel {
-    border: 1px solid #519e2d;
+    border-top: 2px solid #519e2d;
     padding: 10px;
     background: #fff; /* declare background color for container to avoid distorted fonts in IE while fading */
 }
