@@ -200,13 +200,22 @@ body {
   overflow: auto;
 }
 
+#main_content div.home {
+  position: absolute;
+  top: 0px;
+  padding-top: 10px;
+  padding-left: 10px;
+  bottom: 0px;
+  width: 100%;
+  overflow: auto;
+}
+
 #main_spinner {
   position: absolute;
   top: 50%;
   left: 48%;
   margin-top: -25px;
 }
-
 
 #home_intro {
   margin-top: 5px;

@@ -1,30 +1,32 @@
-<div id="home_ver" class="home_title">
-  BIPA ver1.0 (<%= Date.today %>)
-</div>
-
-<p id="home_intro">
-  BIPA is the best and the most thorough database for protein-nucleic acid interaction. blah blah ...
-</p>
-
-<div id="home_stats">
-  <div class="home_title">
-    Brief Statistics
+<div class="home">
+  <div id="home_ver" class="home_title">
+    BIPA ver1.0 (<%= Date.today %>)
   </div>
-  <ul id="home_stats_list">
-    <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
-    <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.registered.count %></li>
-    <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.registered.count %></li>
-    <li>No. of Nucleic Acid Binding SCOP Domains: <%= ScopDomain.registered.count %></li>
-    <li>No. of Protein-DNA interfaces: <%= DomainDnaInterface.count %></li>
-    <li>No. of Protein-RNA interfaces: <%= DomainRnaInterface.count %></li>
-  </ul>
-</div>
 
-<div id="home_news">
-  <div class="home_title">
-    News
+  <p id="home_intro">
+    BIPA is the best and the most thorough database for protein-nucleic acid interaction. blah blah ...
+  </p>
+
+  <div id="home_stats">
+    <div class="home_title">
+      Brief Statistics
+    </div>
+    <ul id="home_stats_list">
+      <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
+      <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.registered.count %></li>
+      <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.registered.count %></li>
+      <li>No. of Nucleic Acid Binding SCOP Domains: <%= ScopDomain.registered.count %></li>
+      <li>No. of Protein-DNA interfaces: <%= DomainDnaInterface.count %></li>
+      <li>No. of Protein-RNA interfaces: <%= DomainRnaInterface.count %></li>
+    </ul>
   </div>
-  <table id="home_news_table">
-    <%= render(:partial => "news", :collection => @newses) %>
-  </table>
+
+  <div id="home_news">
+    <div class="home_title">
+      News
+    </div>
+    <table id="home_news_table">
+      <%= render(:partial => "news", :collection => @newses) %>
+    </table>
+  </div>
 </div>
