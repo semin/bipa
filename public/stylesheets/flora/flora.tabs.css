@@ -67,6 +67,7 @@
 .ui-tabs-nav .ui-tabs-selected a span {
     padding-top: 0;
     height: 27px;
+    color: #C5C2B8;
     background-position: 0 -23px;
     line-height: 27px;
 }
@@ -86,7 +87,6 @@
     color: #000;
 }
 .ui-tabs-panel {
-    color: #C5C2B8;
     border-top: 2px solid #3C3C3C;
     padding: 10px;
     background: #fff; /* declare background color for container to avoid distorted fonts in IE while fading */
