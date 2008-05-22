@@ -6,17 +6,17 @@ class Scop < ActiveRecord::Base
 
   has_finder :registered, :conditions => { :registered => true }
 
-  def self.factory_create!(opt={})
-    case opt[:stype]
-    when 'root' then ScopRoot.create!(opt)
-    when 'cl'   then ScopClass.create!(opt)
-    when 'cf'   then ScopFold.create!(opt)
-    when 'sf'   then ScopSuperFamily.create!(opt)
-    when 'fa'   then ScopFamily.create!(opt)
-    when 'dm'   then ScopProtein.create!(opt)
-    when 'sp'   then ScopSpecies.create!(opt)
-    when 'px'   then ScopDomain.create!(opt)
-    else; raise "Unknown SCOP hierarchy: #{opt[:stype]}"; end
+  def self.factory_create!(opts={})
+    case opts[:stype]
+    when "root" then ScopRoot.create!(opts)
+    when "cl"   then ScopClass.create!(opts)
+    when "cf"   then ScopFold.create!(opts)
+    when "sf"   then ScopSuperFamily.create!(opts)
+    when "fa"   then ScopFamily.create!(opts)
+    when "dm"   then ScopProtein.create!(opts)
+    when "sp"   then ScopSpecies.create!(opts)
+    when "px"   then ScopDomain.create!(opts)
+    else; raise "Unknown SCOP hierarchy: #{opts[:stype]}"; end
   end
 
   def tree_title
@@ -29,14 +29,14 @@ class Scop < ActiveRecord::Base
 
   def hierarchy
     case stype
-    when 'cl' then 'Class'
-    when 'cf' then 'Fold'
-    when 'sf' then 'Superfamily'
-    when 'fa' then 'Family'
-    when 'dm' then 'Protein'
-    when 'sp' then 'Species'
-    when 'px' then 'Domain'
-    else; 'Unknown'; end
+    when "cl" then "Class"
+    when "cf" then "Fold"
+    when "sf" then "Superfamily"
+    when "fa" then "Family"
+    when "dm" then "Protein"
+    when "sp" then "Species"
+    when "px" then "Domain"
+    else; "Unknown"; end
   end
 
   def registered_ancestors

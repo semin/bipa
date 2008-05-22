@@ -6,18 +6,20 @@
     <%= javascript_include_tag "jquery.js" %>
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
+    <%= javascript_include_tag "jquery.ui/ui.tabs.js" %>
     <%= javascript_include_tag "jquery-treeview/lib/jquery.cookie.js" %>
     <%= javascript_include_tag "jquery-treeview/jquery.treeview.js" %>
     <%= javascript_include_tag "jquery-treeview/jquery.treeview.edit.js" %>
     <%= javascript_include_tag "jquery-treeview/jquery.treeview.async.bipa.js" %>
 
     <%= stylesheet_link_tag "bipa.css" %>
+    <%= stylesheet_link_tag "ui.tabs.css" %>
     <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
     <script type="text/javascript">
       jQuery.noConflict();
       jQuery(document).ready(function(){
-        jQuery('#accordion_container').accordion({
-          header: 'div.accordion_title',
+        jQuery("#accordion_container").accordion({
+          header: "div.accordion_title",
           active: false,
           alwaysOpen: false,
           autoHeight: false
@@ -53,9 +55,9 @@
         :alt => "University of Cambridge"
       %>
       <div id="menu">
-        <%= link_to "Home",     '/home' %> |
-        <%= link_to "Help",     '/help' %> |
-        <%= link_to "Contact",  '/contact' %>
+        <%= link_to "Home",     "/home" %> |
+        <%= link_to "Help",     "/help" %> |
+        <%= link_to "Contact",  "/contact" %>
       </div>
     </div>
 

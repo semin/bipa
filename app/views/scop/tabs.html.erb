@@ -1,39 +1,16 @@
+<script type="text/javascript">
+  jQuery(document).ready(function() {
+      jQuery("#scop_tabs > ul").tabs({ selected: null });
+  });
+</script>
+
 <div id="main_title">
   <h3><%= @scop.hierarchy %>: <%= @scop.description %></h3>
 </div>
 
 <div id="scop_tabs">
   <ul>
-    <li>
-    <%= link_to_remote("Summary of Interface Properties",
-                       :url => { :action => "summary", :id => @scop.id },
-                       :update => "summary_content") %>
-    </li>
-    <div id="summary_content">
-    </div>
-    <li>
-    <%= link_to_remote("Residue & Secondary Structure Prosensities",
-                      :url => { :action => "propensities", :id => @scop.id },
-                      :update => "propensities_content") %>
-    <div id="propensities_content">
-    </div>
-    <li>
-    <%= link_to_remote("Atomic Interaction Distributions",
-                      :url => { :action => "distributions", :id => @scop.id },
-                      :update => "distributions_content") %>
-    <div id="distributions_content">
-    </div>
-    <li>
-    <%= link_to_remote("Multiple Structural Alignments",
-                      :url => { :action => "msa", :id => @scop.id },
-                      :update => "msa_content") %>
-    <div id="msa_content">
-    </div>
-    <li>
-    <%= link_to_remote("ESSTs",
-                      :url => { :action => "esst", :id => @scop.id },
-                      :update => "esst_content") %>
-    <div id="esst_content">
-    </div>
+    <li><a href="/scop/summary/<%= @scop.id %>"><span>Summary</span></a></li>
+    <li><a href="/scop/propensity/<%= @scop.id %>"><span>Propensity</span></a></li>
   </ul>
 </div>
