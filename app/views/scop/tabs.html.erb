@@ -4,13 +4,15 @@
   });
 </script>
 
-<div id="main_title">
-  <h3><%= @scop.hierarchy %>: <%= @scop.description %></h3>
+<div class="title">
+  <%= @scop.hierarchy %>: <%= @scop.description %>
 </div>
 
-<div id="scop_tabs">
-  <ul>
-    <li><a href="/scop/summary/<%= @scop.id %>"><span>Summary</span></a></li>
-    <li><a href="/scop/propensity/<%= @scop.id %>"><span>Propensity</span></a></li>
-  </ul>
+<div class="content">
+  <div id="scop_tabs" class="tabs">
+    <ul>
+      <li><a href="/scop/summary/<%= @scop.id %>"><span>Summary</span></a></li>
+      <li><a href="/scop/propensity/<%= @scop.id %>"><span>Propensity</span></a></li>
+    </ul>
+  </div>
 </div>

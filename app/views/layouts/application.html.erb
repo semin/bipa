@@ -13,14 +13,15 @@
     <%= javascript_include_tag "jquery-treeview/jquery.treeview.async.bipa.js" %>
 
     <%= stylesheet_link_tag "bipa.css" %>
-    <%= stylesheet_link_tag "ui.tabs.css" %>
+<!--    <%= stylesheet_link_tag "ui.tabs.css" %>-->
+    <%= stylesheet_link_tag "flora/flora.tabs.css" %>
     <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
     <script type="text/javascript">
       jQuery.noConflict();
       jQuery(document).ready(function(){
         jQuery("#accordion_container").accordion({
-          header: "div.accordion_title",
-          active: ".accordion_init",
+          header: "div.title",
+          active: "div.init",
           alwaysOpen: false,
           autoHeight: false
         });
@@ -39,19 +40,18 @@
 
   <body>
     <div id="header"> 
-      <div id="banner">
+      <div id="main_banner">
         BIPA
       </div>
-      <div id="subbanner">
+      <div id="sub_banner">
         : <u>B</u>iological database for <u>I</u>nteraction between 
         <u>P</u>rotein and nucleic <u>A</u>cid
       </div>
-      <%= image_tag "cambridge_logo.gif",
-        :id => "banner_logo",
-        :size => "60x80",
+      <%= image_tag "cambridge_logo.png",
+        :id => "cambridge_logo",
         :alt => "University of Cambridge"
       %>
-      <div id="menu">
+      <div id="header_menu">
         <%= link_to "Home",     "/home" %> |
         <%= link_to "Help",     "/help" %> |
         <%= link_to "Contact",  "/contact" %>
@@ -61,24 +61,24 @@
     <div id="middler">
       <div id="sidebar" class="rounded">
         <div id="accordion_container">
-          <div class="accordion_title accordion_init">
+          <div class="title init">
             SCOP
           </div>
-          <div class="accordion_content">
+          <div class="content">
             <ul id="scop_tree">
             </ul>
           </div>
-          <div class="accordion_title">
+          <div class="title">
             GO
           </div>
-          <div class="accordion_content">
+          <div class="content">
             <ul id="go_tree">
             </ul>
           </div>
-          <div class="accordion_title">
+          <div class="title">
             TAXONOMY
           </div>
-          <div class="accordion_content">
+          <div class="content">
             <ul id="taxonomy_tree">
             </ul>
           </div>
