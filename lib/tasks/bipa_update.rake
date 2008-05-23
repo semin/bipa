@@ -113,7 +113,6 @@ namespace :bipa do
 
     desc "Update chain's mole_code, molecule fields"
     task :chain => [:environment] do
-
       structures = Structure.find(:all)
 
       structures.each do |structure|
@@ -145,5 +144,74 @@ namespace :bipa do
       end
     end
 
+
+    desc "Update 'chains_count' column of 'model' table"
+    task :model_chains_count => [:environment] do
+      models = Model.find(:all)
+      models.each_with_index do |model, i|
+        model.update_attribute :chains_count, model.chains.length
+        $logger.info("Updating 'chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
+      end
+    end
+
+
+    desc "Update 'aa_chains_count' column of 'model' table"
+    task :model_aa_chains_count => [:environment] do
+      models = Model.find(:all)
+      models.each_with_index do |model, i|
+        model.update_attribute :aa_chains_count, model.aa_chains.length
+        $logger.info("Updating 'aa_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
+      end
+    end
+
+
+    desc "Update 'na_chains_count' column of 'model' table"
+    task :model_na_chains_count => [:environment] do
+      models = Model.find(:all)
+      models.each_with_index do |model, i|
+        model.update_attribute :na_chains_count, model.na_chains.length
+        $logger.info("Updating 'na_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
+      end
+    end
+
+
+    desc "Update 'dna_chains_count' column of 'model' table"
+    task :model_dna_chains_count => [:environment] do
+      models = Model.find(:all)
+      models.each_with_index do |model, i|
+        model.update_attribute :dna_chains_count, model.dna_chains.length
+        $logger.info("Updating 'dna_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
+      end
+    end
+
+
+    desc "Update 'rna_chains_count' column of 'model' table"
+    task :model_rna_chains_count => [:environment] do
+      models = Model.find(:all)
+      models.each_with_index do |model, i|
+        model.update_attribute :rna_chains_count, model.rna_chains.length
+        $logger.info("Updating 'rna_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
+      end
+    end
+
+
+    desc "Update 'hna_chains_count' column of 'model' table"
+    task :model_hna_chains_count => [:environment] do
+      models = Model.find(:all)
+      models.each_with_index do |model, i|
+        model.update_attribute :hna_chains_count, model.hna_chains.length
+        $logger.info("Updating 'hna_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
+      end
+    end
+
+
+    desc "Update 'pseudo_chains_count' column of 'model' table"
+    task :model_pseudo_chains_count => [:environment] do
+      models = Model.find(:all)
+      models.each_with_index do |model, i|
+        model.update_attribute :pseudo_chains_count, model.pseudo_chains.length
+        $logger.info("Updating 'pseudo_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
+      end
+    end
   end
 end
