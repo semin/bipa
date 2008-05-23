@@ -7,7 +7,6 @@ module FindAllInChunks
       break unless records.next_page
     end
   end
-
 end
 
 ActiveRecord::Base.extend(FindAllInChunks)
