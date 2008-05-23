@@ -227,23 +227,20 @@ body {
   font-weight: bold;
 }
 
-ul#home_stats_list {
+#footer {
+  position: absolute;
+  bottom: 0px;
+  height: 30px;
+  width: 100%;
+  border-top: 2px black dotted;
+  font-size: 80%;
+  text-align: center;
+}
+
+/* CSS for uncounted list */
+ul.stats {
   margin-top: 5px;
   padding-top: 0px;
-}
-
-#home_news_table {
-}
-
-#home_news_table .news_date {
-}
-
-#home_news_table .news_title {
-  font-weight: bold;
-}
-
-#home_news_table .news_content {
-  font-size: 90%;
 }
 
 ul.contact {
@@ -263,12 +260,46 @@ ul li div.contact_affiliation {}
 
 ul li div.contact_email {}
 
-#footer {
-  position: absolute;
-  bottom: 0px;
-  height: 30px;
-  width: 100%;
-  border-top: 2px black dotted;
-  font-size: 80%;
-  text-align: center;
+
+/* CSS for tables */
+table.news {
 }
+
+table td.news_date {
+}
+
+table td.news_title {
+  font-weight: bold;
+}
+
+table td.news_content {
+  font-size: 90%;
+}
+
+table.stats {
+  text-align: center;
+  color: #FFF;
+  width: 80%;
+  background-color: #666;
+  border: 0px;
+  border-collapse: collapse;
+  border-spacing: 0px;
+}
+
+table.stats td {
+  background-color: #CCC;
+  color: #000;
+  padding: 4px;
+  text-align: left;
+  border: 1px #000 solid;
+}
+
+table.stats td.header {
+  background-color: #666;
+  color: #fff;
+  padding: 4px;
+  text-align: left;
+  border-bottom: 2px #000 solid;
+  font-size: 12px;
+  font-weight: bold;
+} 

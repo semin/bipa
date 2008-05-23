@@ -11,7 +11,7 @@
     <div class="home_title">
       Brief Statistics
     </div>
-    <ul id="home_stats_list">
+    <ul id="home_stats_list" class="stats">
       <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
       <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.registered.count %></li>
       <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.registered.count %></li>
@@ -25,7 +25,7 @@
     <div class="home_title">
       News
     </div>
-    <table id="home_news_table">
+    <table id="home_news_table" class="news">
       <%= render(:partial => "news", :collection => @newses) %>
     </table>
   </div>
