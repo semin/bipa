@@ -62,7 +62,7 @@ end
 class AaChain < Chain
 
   belongs_to  :model,
-              :counter_cache => "aa_chains_count"
+              :counter_cache => :aa_chains_count
 
   has_many  :dna_interfaces,
             :class_name   => "ChainDnaInterface",
@@ -81,33 +81,33 @@ end
 class NaChain < Chain
 
   belongs_to  :model,
-              :counter_cache => "na_chains_count"
+              :counter_cache => :na_chains_count
 end
 
 
 class DnaChain < NaChain
 
   belongs_to  :model,
-              :counter_cache => "dna_chains_count"
+              :counter_cache => :dna_chains_count
 end
 
 
 class RnaChain < NaChain
 
   belongs_to  :model,
-              :counter_cache => "rna_chains_count"
+              :counter_cache => :rna_chains_count
 end
 
 
 class HnaChain < NaChain
 
   belongs_to  :model,
-              :counter_cache => "hna_chains_count"
+              :counter_cache => :hna_chains_count
 end
 
 
 class PseudoChain < Chain
 
   belongs_to  :model,
-              :counter_cache => "pseudo_chains_count"
+              :counter_cache => :pseudo_chains_count
 end

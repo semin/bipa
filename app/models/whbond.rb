@@ -3,12 +3,12 @@ class Whbond < ActiveRecord::Base
   belongs_to  :atom,
               :class_name     => "Atom",
               :foreign_key    => "atom_id",
-              :counter_cache  => "whbonds_count"
+              :counter_cache  => :whbonds_count
 
   belongs_to  :whbonding_atom,
               :class_name     => "Atom",
               :foreign_key    => "whbonding_atom_id",
-              :counter_cache  => "whbonds_count"
+              :counter_cache  => :whbonds_count
 
   belongs_to  :water_atom,
               :class_name   => "Atom",
