@@ -217,7 +217,7 @@ namespace :bipa do
 
     desc "Update 'contacts_count' column of 'atoms' table"
     task :contacts_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
         atom.update_attribute :contacts_count, atom.contacts.length
       end
     end
@@ -225,7 +225,7 @@ namespace :bipa do
 
     desc "Update 'whbonds_count' column of 'atoms' table"
     task :whbonds_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
         atom.update_attribute :whbonds_count, atom.whbonds.length
       end
     end
@@ -233,7 +233,7 @@ namespace :bipa do
 
     desc "Update 'hbonds_as_donor_count' column of 'atoms' table"
     task :hbonds_as_donor_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
         atom.update_attribute :hbonds_as_donor_count, atom.hbonds_as_donor.length
       end
     end
@@ -241,7 +241,7 @@ namespace :bipa do
 
     desc "Update 'hbonds_as_acceptor_count' column of 'atoms' table"
     task :hbonds_as_acceptor_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
         atom.update_attribute :hbonds_as_acceptor_count, atom.hbonds_as_acceptor.length
       end
     end
