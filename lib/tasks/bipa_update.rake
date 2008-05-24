@@ -217,36 +217,32 @@ namespace :bipa do
 
     desc "Update 'contacts_count' column of 'atoms' table"
     task :contacts_count => [:environment] do
-      Atom.find_all_in_chunks do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
         atom.update_attribute :contacts_count, atom.contacts.length
-        $logger.info("Updating 'contacts_count' column of atom, #{atom.id} in 'atoms' table: done")
       end
     end
 
 
     desc "Update 'whbonds_count' column of 'atoms' table"
     task :whbonds_count => [:environment] do
-      Atom.find_all_in_chunks do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
         atom.update_attribute :whbonds_count, atom.whbonds.length
-        $logger.info("Updating 'whbonds_count' column of atom, #{atom.id} in 'atoms' table: done")
       end
     end
 
 
     desc "Update 'hbonds_as_donor_count' column of 'atoms' table"
     task :hbonds_as_donor_count => [:environment] do
-      Atom.find_all_in_chunks do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
         atom.update_attribute :hbonds_as_donor_count, atom.hbonds_as_donor.length
-        $logger.info("Updating 'hbonds_as_donor_count' column of atom, #{atom.id} in 'atoms' table: done")
       end
     end
 
 
     desc "Update 'hbonds_as_acceptor_count' column of 'atoms' table"
     task :hbonds_as_acceptor_count => [:environment] do
-      Atom.find_all_in_chunks do |atom|
+      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 100000) do |atom|
         atom.update_attribute :hbonds_as_acceptor_count, atom.hbonds_as_acceptor.length
-        $logger.info("Updating 'hbonds_as_acceptor_count' column of atom, #{atom.id} in 'atoms' table: done")
       end
     end
   end
