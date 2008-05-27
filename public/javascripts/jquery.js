@@ -1,1 +1,1 @@
-jquery-1.2.5.pack.js
+jquery-1.2.6.pack.js
