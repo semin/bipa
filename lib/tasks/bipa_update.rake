@@ -285,14 +285,14 @@ namespace :bipa do
         klass = "Rep#{si}Subfamily".constantize
         klass.find(:all).each do |subfamily|
           rep = subfamily.representative
-          if !rep.nil?
+          unless rep.nil?
             rep.send("rep#{si}=", true)
             rep.save!
             rep.ancestors.each do |anc|
               anc.send("rep#{si}=", true)
               anc.save!
             end
-            $logger.info("Updating representative structure, #{rep.id} for Rep#{si}Subfamily, #{subfamily.id}: done")
+            $logger.info("Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done")
           else
             $logger.info("No representative structure for Rep#{si}Subfamily, #{subfamily.id}")
           end
