@@ -4,7 +4,7 @@ class ScopController < ApplicationController
     if params[:root] == "root"
       children = Scop.find(1).registered_children
     else
-      children = Scop.registered.find(params[:root]).registered_children
+      children = Scop.repall.find(params[:root]).registered_children
     end
 
     children.each do |child|
@@ -20,7 +20,7 @@ class ScopController < ApplicationController
   end
 
   def tabs
-    @scop = Scop.registered.find(params[:id])
+    @scop = Scop.repall.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -28,7 +28,7 @@ class ScopController < ApplicationController
   end
 
   def summary
-    @scop = Scop.registered.find(params[:id])
+    @scop = Scop.repall.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -36,7 +36,7 @@ class ScopController < ApplicationController
   end
 
   def propensity
-    @scop = Scop.registered.find(params[:id])
+    @scop = Scop.repall.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -44,7 +44,7 @@ class ScopController < ApplicationController
   end
 
   def msa
-    @scop = Scop.registered.find(params[:id])
+    @scop = Scop.repall.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -52,7 +52,7 @@ class ScopController < ApplicationController
   end
 
   def esst
-    @scop = Scop.registered.find(params[:id])
+    @scop = Scop.repall.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
