@@ -18,21 +18,21 @@
     <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
 
     <script type="text/javascript">
-      jQuery.noConflict();
-      jQuery(document).ready(function(){
-        jQuery("#accordion_container").accordion({
+      var $j = jQuery.noConflict();
+      $j(document).ready(function(){
+        $j("#accordion_container").accordion({
           header: "div.title",
           active: "div.init",
           alwaysOpen: false,
           autoHeight: false
         });
-        jQuery("#scop_tree").treeview({
+        $j("#scop_tree").treeview({
           url: "/scop/children"
         });
-        jQuery("#go_tree").treeview({
+        $j("#go_tree").treeview({
           url: "/go/children"
         });
-        jQuery("#taxonomy_tree").treeview({
+        $j("#taxonomy_tree").treeview({
           url: "/taxonomy/children"
         });
       });
