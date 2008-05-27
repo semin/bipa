@@ -282,6 +282,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :type
     t.float       :asa
     t.float       :polarity
+    t.integer     :contacts_count,            :default => 0
+    t.integer     :whbonds_count,             :default => 0
+    t.integer     :hbonds_as_donor_count,     :default => 0
+    t.integer     :hbonds_as_acceptor_count,  :default => 0
 
     AminoAcids::Residues::STANDARD.each do |aa|
       t.float :"singlet_propensity_of_#{aa.downcase}"

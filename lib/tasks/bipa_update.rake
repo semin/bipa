@@ -145,8 +145,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'chains_count' column of 'model' table"
-    task :chains_count => [:environment] do
+    desc "Update 'chains_count' column of 'models' table"
+    task :models_chains_count => [:environment] do
       models = Model.find(:all)
       models.each_with_index do |model, i|
         model.update_attribute :chains_count, model.chains.length
@@ -155,8 +155,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'aa_chains_count' column of 'model' table"
-    task :aa_chains_count => [:environment] do
+    desc "Update 'aa_chains_count' column of 'models' table"
+    task :models_aa_chains_count => [:environment] do
       models = Model.find(:all)
       models.each_with_index do |model, i|
         model.update_attribute :aa_chains_count, model.aa_chains.length
@@ -165,8 +165,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'na_chains_count' column of 'model' table"
-    task :na_chains_count => [:environment] do
+    desc "Update 'na_chains_count' column of 'models' table"
+    task :models_na_chains_count => [:environment] do
       models = Model.find(:all)
       models.each_with_index do |model, i|
         model.update_attribute :na_chains_count, model.na_chains.length
@@ -175,8 +175,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'dna_chains_count' column of 'model' table"
-    task :dna_chains_count => [:environment] do
+    desc "Update 'dna_chains_count' column of 'models' table"
+    task :models_dna_chains_count => [:environment] do
       models = Model.find(:all)
       models.each_with_index do |model, i|
         model.update_attribute :dna_chains_count, model.dna_chains.length
@@ -185,8 +185,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'rna_chains_count' column of 'model' table"
-    task :rna_chains_count => [:environment] do
+    desc "Update 'rna_chains_count' column of 'models' table"
+    task :models_rna_chains_count => [:environment] do
       models = Model.find(:all)
       models.each_with_index do |model, i|
         model.update_attribute :rna_chains_count, model.rna_chains.length
@@ -195,8 +195,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'hna_chains_count' column of 'model' table"
-    task :hna_chains_count => [:environment] do
+    desc "Update 'hna_chains_count' column of 'models' table"
+    task :models_hna_chains_count => [:environment] do
       models = Model.find(:all)
       models.each_with_index do |model, i|
         model.update_attribute :hna_chains_count, model.hna_chains.length
@@ -205,8 +205,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'pseudo_chains_count' column of 'model' table"
-    task :pseudo_chains_count => [:environment] do
+    desc "Update 'pseudo_chains_count' column of 'models' table"
+    task :models_pseudo_chains_count => [:environment] do
       models = Model.find(:all)
       models.each_with_index do |model, i|
         model.update_attribute :pseudo_chains_count, model.pseudo_chains.length
@@ -216,7 +216,7 @@ namespace :bipa do
 
 
     desc "Update 'contacts_count' column of 'atoms' table"
-    task :contacts_count => [:environment] do
+    task :atoms_contacts_count => [:environment] do
       Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
         atom.update_attribute :contacts_count, atom.contacts.length
       end
@@ -224,25 +224,57 @@ namespace :bipa do
 
 
     desc "Update 'whbonds_count' column of 'atoms' table"
-    task :whbonds_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
+    task :atoms_whbonds_count => [:environment] do
+      Atom.find_all_in_chunks(:select => "id, whbonds_count", :per_page => 10000) do |atom|
         atom.update_attribute :whbonds_count, atom.whbonds.length
       end
     end
 
 
     desc "Update 'hbonds_as_donor_count' column of 'atoms' table"
-    task :hbonds_as_donor_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
+    task :atoms_hbonds_as_donor_count => [:environment] do
+      Atom.find_all_in_chunks(:select => "id, hbonds_as_donor_count", :per_page => 10000) do |atom|
         atom.update_attribute :hbonds_as_donor_count, atom.hbonds_as_donor.length
       end
     end
 
 
     desc "Update 'hbonds_as_acceptor_count' column of 'atoms' table"
-    task :hbonds_as_acceptor_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
+    task :atoms_hbonds_as_acceptor_count => [:environment] do
+      Atom.find_all_in_chunks(:select => "id, hbonds_as_acceptor_count", :per_page => 10000) do |atom|
         atom.update_attribute :hbonds_as_acceptor_count, atom.hbonds_as_acceptor.length
+      end
+    end
+
+
+    desc "Update 'contacts_count' column of 'interfaces' table"
+    task :interfaces_contacts_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, contacts_count") do |interface|
+        interface.update_attribute :contacts_count, interface.contacts.length
+      end
+    end
+
+
+    desc "Update 'whbonds_count' column of 'interfaces' table"
+    task :interfaces_whbonds_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, whbonds_count") do |interface|
+        interface.update_attribute :whbonds_count, interface.whbonds.length
+      end
+    end
+
+
+    desc "Update 'hbonds_as_donor_count' column of 'interfaces' table"
+    task :interfaces_hbonds_as_donor_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, hbonds_as_donor_count") do |interface|
+        interface.update_attribute :hbonds_as_donor_count, interface.hbonds_as_donor.length
+      end
+    end
+
+
+    desc "Update 'hbonds_as_acceptor_count' column of 'interfaces' table"
+    task :interfaces_hbonds_as_acceptor_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, hbonds_as_acceptor_count") do |interface|
+        interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
       end
     end
   end
