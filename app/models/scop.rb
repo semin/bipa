@@ -20,7 +20,7 @@ class Scop < ActiveRecord::Base
   end
 
   def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', {asynchronous:true, evalScripts:true, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[#{stype.upcase}] #{description}</a>^
+    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', {asynchronous:true, evalScripts:false, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[#{stype.upcase}] #{description}</a>^
   end
 
   def hierarchy_and_description
@@ -72,17 +72,17 @@ class Scop < ActiveRecord::Base
         memoize :#{property}_#{na}_interface_asa
 
         def #{property}_#{na}_interface_hbonds
-          #{na}_interfaces.map { |i| (i.hbonds_as_donor.size + i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
+          #{na}_interfaces.map { |i| (i.hbonds_as_donor_count + i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_hbonds
 
         def #{property}_#{na}_interface_whbonds
-          #{na}_interfaces.map { |i| i.whbonds.size / i.asa * 100 }.to_stats_array.#{property}
+          #{na}_interfaces.map { |i| i.whbonds_count / i.asa * 100 }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_whbonds
 
         def #{property}_#{na}_interface_contacts
-          #{na}_interfaces.map { |i| (i.contacts.size - i.hbonds_as_donor.size - i.hbonds_as_acceptor.size) / i.asa * 100 }.to_stats_array.#{property}
+          #{na}_interfaces.map { |i| (i.contacts_count - i.hbonds_as_donor_count - i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_contacts
 
