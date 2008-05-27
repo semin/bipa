@@ -13,9 +13,9 @@
     </div>
     <ul id="home_stats_list" class="stats">
       <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
-      <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.registered.count %></li>
-      <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.registered.count %></li>
-      <li>No. of Nucleic Acid Binding SCOP Domains: <%= ScopDomain.registered.count %></li>
+      <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.repall.count %></li>
+      <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.repall.count %></li>
+      <li>No. of Nucleic Acid Binding SCOP Domains: <%= ScopDomain.repall.count %></li>
       <li>No. of Protein-DNA interfaces: <%= DomainDnaInterface.count %></li>
       <li>No. of Protein-RNA interfaces: <%= DomainRnaInterface.count %></li>
     </ul>

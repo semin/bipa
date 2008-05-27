@@ -2,6 +2,7 @@
 <html>
   <head>
     <title><%= @page_title || "Welcome to BIPA!" %></title>
+
     <%= javascript_include_tag :defaults %>
     <%= javascript_include_tag "jquery.js" %>
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
@@ -15,6 +16,7 @@
     <%= stylesheet_link_tag "bipa.css" %>
     <%= stylesheet_link_tag "flora/flora.tabs.css" %>
     <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
+
     <script type="text/javascript">
       jQuery.noConflict();
       jQuery(document).ready(function(){
