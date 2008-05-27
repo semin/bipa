@@ -4,7 +4,9 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  has_finder :registered, :conditions => { :registered => true }
+  ((10..100).select { |i| i % 10 == 0 } << "all").each do |si|
+    has_finder :"rep#{si}", :conditions => { :"rep#{si}" => true }
+  end
 
   def self.factory_create!(opts={})
     case opts[:stype]
@@ -20,7 +22,7 @@ class Scop < ActiveRecord::Base
   end
 
   def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', {asynchronous:true, evalScripts:false, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[#{stype.upcase}] #{description}</a>^
+    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{stype.upcase}] #{description}</a>^
   end
 
   def hierarchy_and_description
@@ -40,15 +42,15 @@ class Scop < ActiveRecord::Base
   end
 
   def registered_ancestors
-    ancestors.select(&:registered)
+    ancestors.select(&:"rep#{$selected_rep}")
   end
 
   def registered_children
-    children.select(&:registered)
+    children.select(&:"rep#{$selected_rep}")
   end
 
   def all_registered_children
-    all_children.select(&:registered)
+    all_children.select(&:"rep#{$selected_rep}")
   end
 
   def all_registered_leaf_children

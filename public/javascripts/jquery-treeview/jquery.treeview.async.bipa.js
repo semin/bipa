@@ -40,6 +40,7 @@ function load(settings, root, child, container) {
 					$.each(this.children, createNode, [branch])
 				}
 			}
+
 		}
 		child.empty();
 		$.each(response, createNode, [child]);

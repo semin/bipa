@@ -37,7 +37,7 @@
 .ui-tabs-nav a, .ui-tabs-nav a span {
     float: left; /* fixes dir=ltr problem and other quirks IE */
     padding: 0 12px;
-    background: url(i/tabs_bw.png) no-repeat;
+    background: transparent url(i/tabs_bw.png) no-repeat;
 }
 .ui-tabs-nav a {
     margin: 5px 0 0; /* position: relative makes opacity fail for disabled tab in IE */
@@ -91,11 +91,13 @@
     padding: 10px;
     background: #fff; /* declare background color for container to avoid distorted fonts in IE while fading */
 }
+
+/*
 .ui-tabs-loading em {
     padding: 0 0 0 20px;
-    background: url(/images/spinner_arrow_tab.gif) no-repeat 0 50%;
+    background: url(/images/spinner_arrow.gif) no-repeat 0 50%;
 }
-
+*/
 /* Additional IE specific bug fixes... */
 * html .ui-tabs-nav { /* auto clear @ IE 6 & IE 7 Quirks Mode */
     display: inline-block;

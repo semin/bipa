@@ -16,7 +16,6 @@ ActiveRecord::Schema.define(:version => 1) do
   # 'scops' table
   create_table :scops, :force => true do |t|
     t.belongs_to  :parent
-    (10..100).step(10) { |i| t.belongs_to :"rep#{i}_subfamily" }
     t.integer     :lft
     t.integer     :rgt
     t.string      :type
@@ -25,7 +24,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :sccs
     t.string      :sid
     t.string      :description
-    t.boolean     :registered, :default => false
+    (10..100).step(10) { |i| t.belongs_to :"rep#{i}_subfamily" }
+    (10..100).step(10) { |i| t.boolean :"rep#{i}", :default => false }
+    t.boolean     :repall, :default => false
   end
 
   add_index :scops, :sunid

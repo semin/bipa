@@ -20,6 +20,7 @@ class Subfamily < ActiveRecord::Base
     end
     rep
   end
+
 end
 
 

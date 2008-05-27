@@ -277,5 +277,28 @@ namespace :bipa do
         interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
       end
     end
+
+
+    desc "Update 'repXXX' columns of 'scop' tables"
+    task :scops_reps => [:environment] do
+      (10..100).step(10).each do |si|
+        klass = "Rep#{si}Subfamily".constantize
+        klass.find(:all).each do |subfamily|
+          rep = subfamily.representative
+          if !rep.nil?
+            rep.send("rep#{si}=", true)
+            rep.save!
+            rep.ancestors.each do |anc|
+              anc.send("rep#{si}=", true)
+              anc.save!
+            end
+            $logger.info("Updating representative structure, #{rep.id} for Rep#{si}Subfamily, #{subfamily.id}: done")
+          else
+            $logger.info("No representative structure for Rep#{si}Subfamily, #{subfamily.id}")
+          end
+        end
+      end
+    end
+
   end
 end

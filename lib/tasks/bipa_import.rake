@@ -656,11 +656,11 @@ namespace :bipa do
               end
 
               if iface_found == true
-                domain.registered = true
+                domain.repall = true
                 domain.save!
-                domain.ancestors.each do |a|
-                  a.registered = true
-                  a.save!
+                domain.ancestors.each do |anc|
+                  anc.repall = true
+                  anc.save!
                 end
               end
             end # domains.each
@@ -722,7 +722,7 @@ namespace :bipa do
     desc "Import Subfamilies for each SCOP family"
     task :subfamilies => [:environment] do
 
-      sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
+      sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -766,7 +766,7 @@ namespace :bipa do
     desc "Import Full & Representative Alignments for each SCOP Family"
     task :full_alignments => [:environment] do
 
-      sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
+      sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -837,7 +837,7 @@ namespace :bipa do
     desc "Import representative alignments for each SCOP Family"
     task :rep_alignments => [:environment] do
 
-      sunids    = ScopFamily.registered.find(:all).map(&:sunid)
+      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -913,7 +913,7 @@ namespace :bipa do
     desc "Import subfamily alignments for each SCOP Family"
     task :sub_alignments => [:environment] do
 
-      sunids    = ScopFamily.registered.find(:all).map(&:sunid)
+      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do

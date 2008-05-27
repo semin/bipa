@@ -2,6 +2,7 @@ class Interface < ActiveRecord::Base
 
   include Bipa::Constants
   include Bipa::ComposedOfResidues
+
 end
 
 

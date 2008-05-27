@@ -83,3 +83,5 @@ BLASTCLUST_DIR  = File.join(RAILS_ROOT, "/public/blastclust/")
 FAMILY_DIR      = File.join(RAILS_ROOT, "/public/families")
 ZAP_DIR         = File.join(RAILS_ROOT, "/public/zap")
 GO_DIR          = File.join(RAILS_ROOT, "/public/go")
+
+$selected_rep   = "all"
