@@ -1,15 +1,17 @@
 class ScopController < ApplicationController
 
   def children
-    if params[:root] == "root"
-      children = Scop.find(1).registered_children
+    root = params[:root]
+
+    if root == "root"
+      children = Scop.send("rep#{@redundancy}").find(1).registered_children(@redundancy)
     else
-      children = Scop.repall.find(params[:root]).registered_children
+      children = Scop.send("rep#{@redundancy}").find(root).registered_children(@redundancy)
     end
 
     children.each do |child|
       child[:tree_title] = child.tree_title
-      if child.registered_children.size > 0
+      if child.registered_children(@redundancy).size > 0
         child[:hasChildren] = true
       end
     end
@@ -20,7 +22,7 @@ class ScopController < ApplicationController
   end
 
   def tabs
-    @scop = Scop.repall.find(params[:id])
+    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -28,7 +30,7 @@ class ScopController < ApplicationController
   end
 
   def summary
-    @scop = Scop.repall.find(params[:id])
+    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -36,7 +38,7 @@ class ScopController < ApplicationController
   end
 
   def propensity
-    @scop = Scop.repall.find(params[:id])
+    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -44,7 +46,7 @@ class ScopController < ApplicationController
   end
 
   def msa
-    @scop = Scop.repall.find(params[:id])
+    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -52,7 +54,7 @@ class ScopController < ApplicationController
   end
 
   def esst
-    @scop = Scop.repall.find(params[:id])
+    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }

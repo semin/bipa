@@ -19,6 +19,7 @@ body {
   height: 100px;
   border-bottom: 2px black dotted;
   padding: 0px;
+  overflow: hidden;
 }
 
 #main_banner {
@@ -51,7 +52,8 @@ body {
   position: absolute;
   top: 75px;
   left: 10px;
-  font-size: 80%;
+  right: 70px;
+  font-size: 85%;
 }
 
 #header_menu a {
@@ -66,6 +68,30 @@ body {
 #header_menu a:hover, a:active {
   color: #000000;
   text-decoration: underline;
+}
+
+#redundancy_form {
+  display: inline;
+}
+
+#search_form {
+  display: inline;
+}
+
+#notice {
+  position: absolute;
+  top: 30%;
+  left: 25%;
+  width: 50%;
+  height: 45px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 15px;
+  z-index: 1;
+  font-size: 130%;
+  color: #C5C2B8;
+  background: #3C3C3C;
+  text-align: center;
 }
 
 #middler {
@@ -141,6 +167,12 @@ body {
   padding-left: 2px; 
   background: #FFFFFF;
   font-size: 80%;
+}
+
+div.auto_complete {
+  margin: 0px;
+  background: yellow;
+  font-size: 90%;
 }
 
 #main_container {
@@ -225,6 +257,7 @@ body {
 .home_title {
   font-size: 110%;
   font-weight: bold;
+  text-decoration: underline;
 }
 
 #footer {
@@ -279,7 +312,7 @@ table td.news_content {
 table.stats {
   text-align: center;
   color: #FFF;
-  width: 80%;
+  width: 100%;
   background-color: #666;
   border: 0px;
   border-collapse: collapse;

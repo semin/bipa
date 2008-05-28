@@ -14,6 +14,9 @@ require_dependency "gloria"
 require_dependency "mmcif"
 
 class ApplicationController < ActionController::Base
+
+  before_filter :set_redundancy
+
   helper :all # include all helpers, all the time
 
   # See ActionController::RequestForgeryProtection for details
@@ -27,5 +30,16 @@ class ApplicationController < ActionController::Base
 
   def local_request?
     false
+  end
+
+  def set_redundancy
+    if params[:redundancy]
+      @redundancy = (session[:redundancy] = params[:redundancy])
+      flash[:notice] = "Redundancy has been set to '#{@redundancy}'"
+    elsif session[:redundancy]
+      @redundancy = session[:redundancy]
+    else
+      @redundancy = "all"
+    end
   end
 end

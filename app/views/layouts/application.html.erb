@@ -35,11 +35,14 @@
         $j("#taxonomy_tree").treeview({
           url: "/taxonomy/children"
         });
+        $j("#notice").fadeOut(4200);
       });
     </script>
   </head>
 
   <body>
+    <%= content_tag "div", h(flash[:notice]), :class => "notice", :id => "notice" if flash[:notice] %>
+
     <div id="header"> 
       <div id="main_banner">
         BIPA
@@ -53,10 +56,25 @@
         :size => "60x80",
         :alt => "University of Cambridge"
       %>
-      <div id="header_menu">
-        <%= link_to "Home",     "/home" %> |
-        <%= link_to "Help",     "/help" %> |
-        <%= link_to "Contact",  "/contact" %>
+      <div id="header_menu" style="display: inline">
+        <%= link_to("Home",     "/home") %> |
+        <%= link_to("Help",     "/help") %> |
+        <%= link_to("Contact",  "/contact") %> |
+        <% form_tag({ :controller => "main", :action => "home" }, { :id => "redundancy_form" }) do %>
+          Redundancy:
+          <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
+          <%= submit_tag("Apply") -%>
+        <% end %> |
+        <% form_tag({ :controller => "search", :action => "new" }, { :id => "search_form" }) do %>
+          <%= text_field_tag(:query) -%>
+          <%= select_tag(:model, "
+          <option selected=selected>SCOP</option>
+          <option>GO</option>
+          <option>Taxonomy</option>
+          <option>Interfaces</option>
+          ") -%>
+          <%= submit_tag("Search") -%>
+        <% end %>
       </div>
     </div>
 
