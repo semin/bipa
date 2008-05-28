@@ -35,6 +35,22 @@
         $j("#taxonomy_tree").treeview({
           url: "/taxonomy/children"
         });
+        $j("#open_settings").click(function() {
+          $j("#open_settings").hide();
+          $j("#settings").show().css("display", "inline");
+        });
+        $j("#close_settings").click(function() {
+          $j("#settings").hide();
+          $j("#open_settings").show();
+        });
+        $j("#open_search").click(function() {
+          $j("#open_search").hide();
+          $j("#search").show().css("display", "inline");
+        });
+        $j("#close_search").click(function() {
+          $j("#search").hide();
+          $j("#open_search").show();
+        });
         $j("#notice").fadeOut(4200);
       });
     </script>
@@ -60,21 +76,32 @@
         <%= link_to("Home",     "/home") %> |
         <%= link_to("Help",     "/help") %> |
         <%= link_to("Contact",  "/contact") %> |
-        <% form_tag({ :controller => "main", :action => "home" }, { :id => "redundancy_form" }) do %>
-          Redundancy:
-          <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
-          <%= submit_tag("Apply") -%>
-        <% end %> |
-        <% form_tag({ :controller => "search", :action => "new" }, { :id => "search_form" }) do %>
-          <%= text_field_tag(:query) -%>
-          <%= select_tag(:model, "
-          <option selected=selected>SCOP</option>
-          <option>GO</option>
-          <option>Taxonomy</option>
-          <option>Interfaces</option>
-          ") -%>
-          <%= submit_tag("Search") -%>
-        <% end %>
+        <a href="#" id="open_settings">Settings</a>
+        <div id="settings">
+          <% form_tag({ :controller => "main", :action => "home" }, { :id => "settings_form" }) do %>
+            Redundancy:
+            <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>,
+            Resolution &lt;
+            <%= text_field_tag(:resolution, "100", :maxlength => 4, :size => 5) -%> &Aring;
+            <%= submit_tag("Apply") -%>
+          <% end %>
+          <a href="#" id="close_settings">&laquo;</a>
+        </div>
+        |
+        <a href="#" id="open_search">Search</a>
+        <div id="search">
+          <% form_tag({ :controller => "search", :action => "new" }, { :id => "search_form" }) do %>
+            <%= select_tag(:model, "
+            <option selected=selected>SCOP</option>
+            <option>GO</option>
+            <option>Taxonomy</option>
+            <option>Interfaces</option>
+            ") -%>
+            <%= text_field_tag(:query) -%>
+            <%= submit_tag("Search") -%>
+          <% end %>
+          <a href="#" id="close_search">&laquo;</a>
+        </div>
       </div>
     </div>
 

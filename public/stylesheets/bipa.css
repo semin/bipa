@@ -70,8 +70,16 @@ body {
   text-decoration: underline;
 }
 
-#redundancy_form {
+div#settings {
+  display: none;
+}
+
+#settings_form {
   display: inline;
+}
+
+div#search {
+  display: none;
 }
 
 #search_form {
