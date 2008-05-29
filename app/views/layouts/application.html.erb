@@ -19,7 +19,7 @@
 
     <script type="text/javascript">
       var $j = jQuery.noConflict();
-      $j(document).ready(function(){
+      $j(document).ready(function() {
         $j("#accordion_container").accordion({
           header: "div.title",
           active: "div.init",
@@ -57,40 +57,55 @@
   </head>
 
   <body>
-    <%= content_tag "div", h(flash[:notice]), :class => "notice", :id => "notice" if flash[:notice] %>
+    <%= content_tag("div",
+                    h(flash[:notice]),
+                    :class => "notice",
+                    :id => "notice") if flash[:notice] %>
 
     <div id="header"> 
       <div id="main_banner">
         BIPA
       </div>
+
       <div id="sub_banner">
         : <u>B</u>iological database for <u>I</u>nteraction between 
         <u>P</u>rotein and nucleic <u>A</u>cid
       </div>
-      <%= image_tag "cambridge_logo.png",
-        :id => "cambridge_logo",
-        :size => "60x80",
-        :alt => "University of Cambridge"
-      %>
+
+      <%= image_tag("cambridge_logo.png",
+                    :id => "cambridge_logo",
+                    :size => "60x80",
+                    :alt => "University of Cambridge") %>
+
       <div id="header_menu" style="display: inline">
-        <%= link_to("Home",     "/home") %> |
+        <%= link_to("Home", "/home") %>
+        |
         <a href="#" class="open_settings">Settings</a>
+
         <div id="settings">
           <a href="#" class="close_settings">&raquo;</a>
-          <% form_tag({ :controller => "main", :action => "home" }, { :id => "settings_form" }) do %>
+
+          <% form_tag({ :controller => "main", :action => "home" },
+                      { :id => "settings_form" }) do %>
             Redundancy:
-            <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
+            <%= select_tag(:redundancy,
+                           options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
             ,
             Resolution &lt;
-            <%= text_field_tag(:resolution, "100", :maxlength => 4, :size => 5) -%> &Aring;
+            <%= text_field_tag(:resolution, "100",
+                               :maxlength => 4,
+                               :size => 5) -%> &Aring;
             <%= submit_tag("Apply") -%>
           <% end %>
+
           <a href="#" class="close_settings">&laquo;</a>
         </div>
         |
         <a href="#" class="open_search">Search</a>
+
         <div id="search">
           <a href="#" class="close_search">&raquo;</a>
+
           <% form_tag({ :controller => "search", :action => "new" }, { :id => "search_form" }) do %>
             <%= select_tag(:model, "
             <option selected=selected>SCOP</option>
@@ -101,11 +116,13 @@
             <%= text_field_tag(:query) -%>
             <%= submit_tag("Search") -%>
           <% end %>
+
           <a href="#" class="close_search">&laquo;</a>
         </div>
         |
-        <%= link_to("Help",     "/help") %> |
-        <%= link_to("Contact",  "/contact") %>
+        <%= link_to("Help", "/help") %>
+        |
+        <%= link_to("Contact", "/contact") %>
       </div>
     </div>
 
