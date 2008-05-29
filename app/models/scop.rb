@@ -57,47 +57,51 @@ class Scop < ActiveRecord::Base
     all_registered_children(redundancy).select { |c| c.children.empty? }
   end
 
-  def dna_interfaces(redundancy)
-    all_registered_leaf_children(redundancy).map(&:dna_interfaces).flatten.compact
-  end
-
-  def rna_interfaces(redundancy)
-    all_registered_leaf_children(redundancy).map(&:rna_interfaces).flatten.compact
-  end
-
   %w(dna rna).each do |na|
+    class_eval <<-END
+      def #{na}_interfaces(redundancy, resolution)
+        all_registered_leaf_children(redundancy).map do |domain|
+          if resolution
+            domain.#{na}_interfaces.max_resolution(resolution).find(:all)
+          else
+            domain.#{na}_interfaces
+          end
+        end.flatten.compact
+      end
+    END
+
     %w(mean stddev).each do |property|
       class_eval <<-END
-        def #{property}_#{na}_interface_asa(redundancy)
-          #{na}_interfaces(redundancy).map { |i| i.asa }.to_stats_array.#{property}
+        def #{property}_#{na}_interface_asa(redundancy, resolution)
+          #{na}_interfaces(redundancy, resolution).map { |i| i.asa }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_asa
 
-        def #{property}_#{na}_interface_hbonds(redundancy)
-          #{na}_interfaces(redundancy).map { |i| (i.hbonds_as_donor_count + i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
+        def #{property}_#{na}_interface_hbonds(redundancy, resolution)
+          #{na}_interfaces(redundancy, resolution).map { |i| (i.hbonds_as_donor_count + i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_hbonds
 
-        def #{property}_#{na}_interface_whbonds(redundancy)
-          #{na}_interfaces(redundancy).map { |i| i.whbonds_count / i.asa * 100 }.to_stats_array.#{property}
+        def #{property}_#{na}_interface_whbonds(redundancy, resolution)
+          #{na}_interfaces(redundancy, resolution).map { |i| i.whbonds_count / i.asa * 100 }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_whbonds
 
-        def #{property}_#{na}_interface_contacts(redundancy)
-          #{na}_interfaces(redundancy).map { |i| (i.contacts_count - i.hbonds_as_donor_count - i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
+        def #{property}_#{na}_interface_contacts(redundancy, resolution)
+          #{na}_interfaces(redundancy, resolution).map { |i| (i.contacts_count - i.hbonds_as_donor_count - i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_contacts
 
-        def #{property}_#{na}_interface_polarity(redundancy)
-          #{na}_interfaces(redundancy).map { |i| i.polarity }.to_stats_array.#{property}
+        def #{property}_#{na}_interface_polarity(redundancy, resolution)
+          #{na}_interfaces(redundancy, resolution).map { |i| i.polarity }.to_stats_array.#{property}
         end
         memoize :#{property}_#{na}_interface_polarity
       END
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
         class_eval <<-END
-          def #{property}_#{na}_interface_singlet_propensity_of_#{aa}(redundancy)
-            #{na}_interfaces(redundancy).map { |i| i.singlet_propensity_of_#{aa} }.to_stats_array.#{property}
+          def #{property}_#{na}_interface_singlet_propensity_of_#{aa}(redundancy, resolution)
+            #{na}_interfaces(redundancy, resolution).map { |i| i.singlet_propensity_of_#{aa} }.to_stats_array.#{property}
           end
           memoize :#{property}_#{na}_interface_singlet_propensity_of_#{aa}
         END
@@ -105,8 +109,8 @@ class Scop < ActiveRecord::Base
 
       Dssp::SSES.map(&:downcase).each do |sse|
         class_eval <<-END
-          def #{property}_#{na}_interface_sse_propensity_of_#{sse}(redundancy)
-            #{na}_interfaces(redundancy).map { |i| i.sse_propensity_of_#{sse} }.to_stats_array.#{property}
+          def #{property}_#{na}_interface_sse_propensity_of_#{sse}(redundancy, resolution)
+            #{na}_interfaces(redundancy, resolution).map { |i| i.sse_propensity_of_#{sse} }.to_stats_array.#{property}
           end
           memoize :#{property}_#{na}_interface_sse_propensity_of_#{sse}
         END
@@ -120,9 +124,9 @@ class Scop < ActiveRecord::Base
       na_residues = "Bipa::Constants::NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize.map(&:downcase)
 
       class_eval <<-END
-        def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}(redundancy)
+        def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}(redundancy, resolution)
           AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
-            send("total_observed_frequency_of_#{int}_between_\#{a}_and_#{na}", redundancy)
+            send("total_observed_frequency_of_#{int}_between_\#{a}_and_#{na}", redundancy, resolution)
           }
         end
         memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}
@@ -130,11 +134,11 @@ class Scop < ActiveRecord::Base
 
       AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
         class_eval <<-END
-          def total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}(redundancy)
+          def total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}(redundancy, resolution)
             na_residues.sum { |r|
-              send("observed_frequency_of_#{int}_between_#{aa}_and_\#{r}", redundancy)
+              send("observed_frequency_of_#{int}_between_#{aa}_and_\#{r}", redundancy, resolution)
             } + %w(sugar phosphate).sum { |m|
-              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_\#{m}", redundancy)
+              send("observed_frequency_of_#{int}_between_#{aa}_and_#{na}_\#{m}", redundancy, resolution)
             }
           end
           memoize :total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}
@@ -143,9 +147,9 @@ class Scop < ActiveRecord::Base
 
       na_residues.each do |res|
         class_eval <<-END
-          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}(redundancy)
+          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}(redundancy, resolution)
             AminoAcids::Residues::STANDARD.map(&:downcase).sum { |r|
-              send("observed_frequency_of_#{int}_between_\#{r}_and_#{res}", redundancy)
+              send("observed_frequency_of_#{int}_between_\#{r}_and_#{res}", redundancy, resolution)
             }
           end
           memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}
@@ -153,15 +157,15 @@ class Scop < ActiveRecord::Base
 
         AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
           class_eval <<-END
-            def observed_frequency_of_#{int}_between_#{aa}_and_#{res}(redundancy)
-              #{na}_interfaces(redundancy).sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{res} }
+            def observed_frequency_of_#{int}_between_#{aa}_and_#{res}(redundancy, resolution)
+              #{na}_interfaces(redundancy, resolution).sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{res} }
             end
             memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{res}
 
-            def expected_frequency_of_#{int}_between_#{aa}_and_#{res}(redundancy)
-              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}(redundancy).to_f *
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}(redundancy).to_f /
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}(redundancy).to_f
+            def expected_frequency_of_#{int}_between_#{aa}_and_#{res}(redundancy, resolution)
+              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}(redundancy, resolution).to_f *
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{res}(redundancy, resolution).to_f /
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}(redundancy, resolution).to_f
               result.nan? ? 0 : result
             end
             memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{res}
@@ -172,9 +176,9 @@ class Scop < ActiveRecord::Base
 
       %w(sugar phosphate).each do |moiety|
         class_eval <<-END
-          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}(redundancy)
+          def total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}(redundancy, resolution)
             AminoAcids::Residues::STANDARD.map(&:downcase).sum { |a|
-              send("observed_frequency_of_#{int}_between_\#{a}_and_#{na}_#{moiety}", redundancy)
+              send("observed_frequency_of_#{int}_between_\#{a}_and_#{na}_#{moiety}", redundancy, resolution)
             }
           end
           memoize :total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}
@@ -182,15 +186,15 @@ class Scop < ActiveRecord::Base
 
         AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa|
           class_eval <<-END
-            def observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}(redundancy)
-              #{na}_interfaces(redundancy).sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{moiety} }
+            def observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}(redundancy, resolution)
+              #{na}_interfaces(redundancy, resolution).sum { |i| i.frequency_of_#{int}_between_#{aa}_and_#{moiety} }
             end
             memoize :observed_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
 
-            def expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}(redundancy)
-              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}(redundancy).to_f *
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}(redundancy).to_f /
-                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}(redundancy).to_f
+            def expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}(redundancy, resolution)
+              result =  total_observed_frequency_of_#{int}_between_#{aa}_and_#{na}(redundancy, resolution).to_f *
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}_#{moiety}(redundancy, resolution).to_f /
+                        total_observed_frequency_of_#{int}_between_amino_acids_and_#{na}(redundancy, resolution).to_f
               result.nan? ? 0 : result
             end
             memoize :expected_frequency_of_#{int}_between_#{aa}_and_#{na}_#{moiety}
