@@ -300,5 +300,16 @@ namespace :bipa do
       end
     end
 
+
+    desc "Update 'resolution' column of 'scop' table"
+    task :scops_resolution => [:environment] do
+      domains = ScopDomain.find(:all, :select => "id, resolution")
+      domains.each_with_index do |domain, i|
+        domain.resolution = domain.chains.first.model.structure.resolution
+        domain.save!
+        $logger.info("Updating resolution of domain, #{domain.id}: done (#{i+1}/#{domains.size})")
+      end
+    end
+
   end
 end

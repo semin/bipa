@@ -58,7 +58,7 @@
 
   <body>
     <%= content_tag("div",
-                    h(flash[:notice]),
+                    flash[:notice],
                     :class => "notice",
                     :id => "notice") if flash[:notice] %>
 
@@ -88,11 +88,10 @@
           <% form_tag({ :controller => "main", :action => "home" },
                       { :id => "settings_form" }) do %>
             Redundancy:
-            <%= select_tag(:redundancy,
-                           options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
+            <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
             ,
             Resolution &lt;
-            <%= text_field_tag(:resolution, "100",
+            <%= text_field_tag(:resolution, params[:resolution] || 100.0,
                                :maxlength => 4,
                                :size => 5) -%> &Aring;
             <%= submit_tag("Apply") -%>

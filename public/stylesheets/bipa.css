@@ -91,13 +91,14 @@ div#search {
   top: 30%;
   left: 25%;
   width: 50%;
-  height: 45px;
+  height: auto;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 15px;
+  padding-top: 10px;
+  padding-bottom: 10px;
   z-index: 1;
   font-size: 130%;
-  color: #C5C2B8;
+  color: #FFFFFF;
   background: #3C3C3C;
   text-align: center;
 }

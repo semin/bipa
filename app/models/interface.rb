@@ -21,6 +21,12 @@ class DomainInterface < Interface
               :update_singlet_propensities,
               :update_sse_propensities
 
+  has_finder :max_resolution, lambda { |res|
+    { :include => :domain,
+      :conditions => ["domains.resolution < ?", res.to_f]
+    }
+  }
+
   def singlet_propensity_of(res)
     result = ((delta_asa_of_residue(res) / delta_asa) /
               (domain.unbound_asa_of_residue(res) / domain.unbound_asa))

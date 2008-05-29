@@ -15,7 +15,7 @@ require_dependency "mmcif"
 
 class ApplicationController < ActionController::Base
 
-  before_filter :set_redundancy
+  before_filter :update_settings
 
   helper :all # include all helpers, all the time
 
@@ -32,14 +32,25 @@ class ApplicationController < ActionController::Base
     false
   end
 
-  def set_redundancy
+  def update_settings
     if params[:redundancy]
       @redundancy = (session[:redundancy] = params[:redundancy])
-      flash[:notice] = "Redundancy has been set to '#{@redundancy}'"
+      flash[:notice] = "Redundancy has been set to #{@redundancy}"
+      flash[:notice] += " %" if @redundancy.to_i > 0
     elsif session[:redundancy]
       @redundancy = session[:redundancy]
     else
       @redundancy = "all"
+    end
+
+    if params[:resolution]
+      @resolution = (session[:resolution] = params[:resolution].to_f)
+      flash[:notice] += "<br/>" if flash[:notice]
+      flash[:notice] += "Resolution has been set to #{@resolution} &Aring"
+    elsif session[:resolution]
+      @resolution = session[:resolution]
+    else
+      @resolution = 100.0
     end
   end
 end
