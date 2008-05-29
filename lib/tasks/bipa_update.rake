@@ -303,7 +303,7 @@ namespace :bipa do
 
     desc "Update 'resolution' column of 'scop' table"
     task :scops_resolution => [:environment] do
-      domains = ScopDomain.find(:all, :select => "id, resolution")
+      domains = ScopDomain.repall.find(:all, :select => "id, resolution")
       domains.each_with_index do |domain, i|
         domain.resolution = domain.chains.first.model.structure.resolution
         domain.save!

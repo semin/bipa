@@ -333,4 +333,4 @@ class ScopDomain < Scop
     residues.sort_by(&:residue_code).map(&:one_letter_code).join
   end
   memoize :to_sequence
-end # class ScopDomain
+end
