@@ -1,7 +1,7 @@
 class InterfacesController < ApplicationController
 
   def index
-    case params[:interface_type] ||= "DomainInterface"
+    case params[:type] ||= "DomainInterface"
     when "DomainInterface"
       @type = "DomainInterface"
     when "ChainInterface"
