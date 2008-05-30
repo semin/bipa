@@ -8,11 +8,12 @@ class InterfacesController < ApplicationController
       @type = "ChainInterface"
     end
 
-    @interfaces = @type.constantize.paginate(:per_page => 10,
+    @interfaces = @type.constantize.paginate(:per_page => 15,
                                              :page => params[:page])
 
     respond_to do |format|
       format.html
+      format.js { render :template => "index.html.erb" }
     end
   end
 end

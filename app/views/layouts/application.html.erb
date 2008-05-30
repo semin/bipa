@@ -23,23 +23,20 @@
       $j(document).ready(function() {
         $j("#accordion_container").accordion({
           header: "div.title",
-          active: "div.init",
+          active: false,
           alwaysOpen: false,
           autoHeight: false
         });
         $j("#scop_tree").treeview({
           url: "/scop/children",
-          persist: "cookie",
           animated: "medium"
         });
         $j("#go_tree").treeview({
           url: "/go/children",
-          persist: "cookie",
           animated: "medium"
         });
         $j("#taxonomy_tree").treeview({
           url: "/taxonomy/children",
-          persist: "cookie",
           animated: "medium"
         });
         $j(".open_search").click(function() {
@@ -133,9 +130,9 @@
     </div>
 
     <div id="middler">
-      <div id="sidebar" class="rounded">
+      <div id="sidebar">
         <div id="accordion_container">
-          <div class="title init">
+          <div class="title">
             SCOP
           </div>
           <div class="content">
@@ -159,7 +156,7 @@
         </div>
       </div>
 
-      <div id="main_container" class="rounded">
+      <div id="main_container">
         <%= yield :layout %>
       </div>
     </div>
