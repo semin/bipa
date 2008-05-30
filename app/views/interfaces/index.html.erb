@@ -1,0 +1,18 @@
+<div id="main_title">
+  <div class="title">
+    Browse: <%= @type %>, <%= @interfaces.size %> entries
+  </div>
+</div>
+
+<div id="main_content">
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>TYPE</th>
+      <th>ASA</th>
+    </tr>
+    <%= render :partial => 'interface', :collection => @interfaces %>
+  </table>
+
+  <%= will_paginate @interfaces %>
+</div>

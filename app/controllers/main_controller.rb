@@ -8,6 +8,13 @@ class MainController < ApplicationController
     end
   end
 
+  def browse
+    redirect_to :controller => "interfaces", :action => "index"
+  end
+
+  def search
+  end
+
   def contact
     respond_to do |format|
       format.html

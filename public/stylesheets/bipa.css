@@ -52,7 +52,6 @@ body {
   position: absolute;
   top: 75px;
   left: 10px;
-  right: 70px;
   font-size: 85%;
 }
 
@@ -70,19 +69,19 @@ body {
   text-decoration: underline;
 }
 
-div#settings {
-  display: none;
-}
-
-#settings_form {
-  display: inline;
-}
-
-div#search {
+#search {
   display: none;
 }
 
 #search_form {
+  display: inline;
+}
+
+#settings {
+  display: none;
+}
+
+#settings_form {
   display: inline;
 }
 
@@ -108,6 +107,8 @@ div#search {
   top: 100px;
   bottom: 30px;
   width: 100%;
+  margin: 0px;
+  padding: 0px;
 }
 
 #sidebar {
@@ -142,13 +143,15 @@ div#search {
 }
 
 #accordion_container div.title {
+  height: 20px;
   margin: 0px;
+  margin-bottom: 1px;
   padding-top: 3px; 
   padding-bottom: 3px; 
   padding-left: 5px; 
   background: #888888;
+  font-size: 100%;
   font-weight: bold;
-  font-size: 90%;
 }
 
 #accordion_container div.title:hover {
@@ -158,7 +161,8 @@ div#search {
   padding-left: 5px; 
   color: #C5C2B8;
   background: #3C3C3C;
-  font-size: 90%;
+  font-size: 100%;
+  font-weight: bold;
 }
 
 #accordion_container div.selected {
@@ -168,7 +172,7 @@ div#search {
   padding-left: 5px; 
   color: #C5C2B8;
   background: #3C3C3C;
-  font-size: 90%;
+  font-size: 100%;
 }
 
 #accordion_container div.content {
@@ -176,12 +180,6 @@ div#search {
   padding-left: 2px; 
   background: #FFFFFF;
   font-size: 80%;
-}
-
-div.auto_complete {
-  margin: 0px;
-  background: yellow;
-  font-size: 90%;
 }
 
 #main_container {
@@ -208,47 +206,36 @@ div.auto_complete {
   color: #000000;
 }
 
-#main_content {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  font-size: 95%;
-  overflow: auto;
-  overflow-x: hidden;
-}
-
-#main_content div.title {
+#main_title {
   position: absolute;
   top: 0px;
   height: 30px;
-  width: 100%;
+  left: 0px;
+  right: 0px;
   margin: 0px;
-  padding-top: 3px;
-  padding-left: 10px;
   color: #C5C2B8;
   background: #3C3C3C;
-  font-size: 140%;
-  font-style: bold;
   overflow: hidden;
 }
 
-#main_content div.content {
-  position: absolute;
-  top: 33px;
-  padding-top: 10px;
-  bottom: 0px;
-  width: 100%;
-  overflow: auto;
+#main_title div.title {
+  padding-top: 3px;
+  padding-left: 10px;
+  font-weight: bold;
+  font-size: 110%;
 }
 
-#main_content div.home {
+#main_content {
   position: absolute;
-  top: 0px;
-  padding-top: 10px;
-  padding-left: 10px;
+  top: 30px;
+  left: 0px;
+  right: 0px;
   bottom: 0px;
-  width: 100%;
+  padding-top: 10px; 
+  padding-left: 10px;
+  font-size: 95%;
   overflow: auto;
+  overflow-x: hidden;
 }
 
 #main_spinner {

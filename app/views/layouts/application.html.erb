@@ -27,21 +27,19 @@
           autoHeight: false
         });
         $j("#scop_tree").treeview({
-          url: "/scop/children"
+          url: "/scop/children",
+          persist: "cookie",
+          animated: "medium"
         });
         $j("#go_tree").treeview({
-          url: "/go/children"
+          url: "/go/children",
+          persist: "cookie",
+          animated: "medium"
         });
         $j("#taxonomy_tree").treeview({
-          url: "/taxonomy/children"
-        });
-        $j(".open_settings").click(function() {
-          $j(".open_settings").hide();
-          $j("#settings").show().css("display", "inline");
-        });
-        $j(".close_settings").click(function() {
-          $j("#settings").hide();
-          $j(".open_settings").show();
+          url: "/taxonomy/children",
+          persist: "cookie",
+          animated: "medium"
         });
         $j(".open_search").click(function() {
           $j(".open_search").hide();
@@ -50,6 +48,14 @@
         $j(".close_search").click(function() {
           $j("#search").hide();
           $j(".open_search").show();
+        });
+        $j(".open_settings").click(function() {
+          $j(".open_settings").hide();
+          $j("#settings").show().css("display", "inline");
+        });
+        $j(".close_settings").click(function() {
+          $j("#settings").hide();
+          $j(".open_settings").show();
         });
         $j("#notice").fadeOut(6000);
       });
@@ -80,8 +86,27 @@
       <div id="header_menu" style="display: inline">
         <%= link_to("Home", "/home") %>
         |
-        <a href="#" class="open_settings">Settings</a>
+        <%= link_to("Browse", "/browse") %>
+        |
+        <a href="#" class="open_search">Search</a>
+        <div id="search">
+          <a href="#" class="close_search">&raquo;</a>
 
+          <% form_tag({ :controller => "search", :action => "new" }, { :id => "search_form" }) do %>
+            <%= select_tag(:model, "
+            <option selected=selected>SCOP</option>
+            <option>GO</option>
+            <option>Taxonomy</option>
+            <option>Interfaces</option>
+            ") -%>
+            <%= text_field_tag(:query) -%>
+            <%= submit_tag("Search") -%>
+          <% end %>
+
+          <a href="#" class="close_search">&laquo;</a>
+        </div>
+        |
+        <a href="#" class="open_settings">Settings</a>
         <div id="settings">
           <a href="#" class="close_settings">&raquo;</a>
 
@@ -98,25 +123,6 @@
           <% end %>
 
           <a href="#" class="close_settings">&laquo;</a>
-        </div>
-        |
-        <a href="#" class="open_search">Search</a>
-
-        <div id="search">
-          <a href="#" class="close_search">&raquo;</a>
-
-          <% form_tag({ :controller => "search", :action => "new" }, { :id => "search_form" }) do %>
-            <%= select_tag(:model, "
-            <option selected=selected>SCOP</option>
-            <option>GO</option>
-            <option>Taxonomy</option>
-            <option>Interfaces</option>
-            ") -%>
-            <%= text_field_tag(:query) -%>
-            <%= submit_tag("Search") -%>
-          <% end %>
-
-          <a href="#" class="close_search">&laquo;</a>
         </div>
         |
         <%= link_to("Help", "/help") %>
@@ -153,16 +159,7 @@
       </div>
 
       <div id="main_container" class="rounded">
-        <div id="main_content">
-          <%= yield :layout %>
-        </div>
-        <%= image_tag(
-                "spinner_spike.gif",
-                :alt => "Loading ...",
-                :border => 0,
-                :id => "main_spinner",
-                :style => "display: none;")
-        %>
+        <%= yield :layout %>
       </div>
     </div>
 

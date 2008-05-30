@@ -22,7 +22,7 @@ class Scop < ActiveRecord::Base
   end
 
   def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/scop/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{stype.upcase}] #{description}</a>^
+    %Q^<a href="#" onclick="new Ajax.Updater('main_container', '/scop/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{stype.upcase}] #{description}</a>^
   end
 
   def hierarchy_and_description
