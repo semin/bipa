@@ -21,7 +21,7 @@ class DomainInterface < Interface
               :update_singlet_propensities,
               :update_sse_propensities
 
-  has_finder :max_resolution, lambda { |res|
+  named_scope :max_resolution, lambda { |res|
     {
       :include    => :domain,
       :conditions => ["scops.resolution < ?", res.to_f]

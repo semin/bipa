@@ -5,7 +5,7 @@ class Scop < ActiveRecord::Base
   acts_as_nested_set
 
   ((10..100).select { |i| i % 10 == 0 } << "all").each do |si|
-    has_finder :"rep#{si}", :conditions => { :"rep#{si}" => true }
+    named_scope :"rep#{si}", :conditions => { :"rep#{si}" => true }
   end
 
   def self.factory_create!(opts={})

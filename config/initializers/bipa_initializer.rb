@@ -3,11 +3,10 @@ require "simple_memoize"
 
 require "matrix"
 require "inline"
-require "has_finder"
 require "fork_manager"
 require "will_paginate"
 require "ar-extensions"
-require "composite_primary_keys"
+#require "composite_primary_keys"
 
 require "bio_extensions"
 require "array_extensions"
