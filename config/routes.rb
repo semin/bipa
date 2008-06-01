@@ -3,8 +3,9 @@ ActionController::Routing::Routes.draw do |map|
 
   map.connect '',         :controller => "main", :action => "home"
   map.connect 'home',     :controller => "main", :action => "home"
-  map.connect 'contact',  :controller => "main", :action => "contact"
   map.connect 'browse',   :controller => "main", :action => "browse"
+  map.connect 'help',     :controller => "main", :action => "help"
+  map.connect 'contact',  :controller => "main", :action => "contact"
 
   # Sample of regular route:
   #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'

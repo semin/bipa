@@ -1,6 +1,6 @@
 html, body { 
-  margin: 0px;
   border: 0px;
+  margin: 0px;
   padding: 0px;
   height: 100%;
 }
@@ -51,6 +51,7 @@ body {
 #header_menu {
   position: absolute;
   top: 75px;
+  bottom: 0px;
   left: 10px;
   font-size: 85%;
 }
@@ -107,8 +108,6 @@ body {
   top: 100px;
   bottom: 30px;
   width: 100%;
-  margin: 0px;
-  padding: 0px;
 }
 
 #sidebar {
@@ -229,20 +228,13 @@ body {
   position: absolute;
   top: 30px;
   left: 0px;
-  right: 0px;
+  right: 10px;
   bottom: 0px;
   padding-top: 10px; 
   padding-left: 10px;
   font-size: 95%;
   overflow: auto;
   overflow-x: hidden;
-}
-
-#main_spinner {
-  position: absolute;
-  top: 50%;
-  left: 48%;
-  margin-top: -25px;
 }
 
 #home_intro {
@@ -266,6 +258,7 @@ body {
   text-align: center;
 }
 
+
 /* CSS for uncounted list */
 ul.stats {
   margin-top: 5px;
@@ -275,6 +268,7 @@ ul.stats {
 ul.contact {
   margin: 0px;
   padding: 0px;
+  font-size: 90%;
 }
 
 ul li.contact {
@@ -332,5 +326,4 @@ table.stats td.header {
   font-size: 12px;
   font-weight: bold;
 } 
-
 

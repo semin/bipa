@@ -1,7 +1,9 @@
 <!DOCTYPE HTML PUBLIC "-//W4C//DTD XHTML 1.0 Transitional//EN"> 
 <html>
   <head>
-    <title><%= @page_title || "Welcome to BIPA!" %></title>
+    <title>
+      <%= @page_title || "Welcome to BIPA!" %>
+    </title>
 
     <%= javascript_include_tag :defaults %>
     <%= javascript_include_tag "jquery.js" %>
@@ -61,10 +63,7 @@
   </head>
 
   <body>
-    <%= content_tag("div",
-                    flash[:notice],
-                    :class => "notice",
-                    :id => "notice") if flash[:notice] %>
+    <%= content_tag("div", flash[:notice], :class => "notice", :id => "notice") if flash[:notice] %>
 
     <div id="header"> 
       <div id="main_banner">
@@ -72,16 +71,12 @@
       </div>
 
       <div id="sub_banner">
-        : <u>B</u>iological database for <u>I</u>nteraction between 
-        <u>P</u>rotein and nucleic <u>A</u>cid
+        : <u>B</u>iological database for <u>I</u>nteraction between <u>P</u>rotein and nucleic <u>A</u>cid
       </div>
 
-      <%= image_tag("cambridge_logo.png",
-                    :id => "cambridge_logo",
-                    :size => "60x80",
-                    :alt => "University of Cambridge") %>
+      <%= image_tag("cambridge_logo.png", :id => "cambridge_logo", :size => "60x80", :alt => "University of Cambridge") %>
 
-      <div id="header_menu" style="display: inline">
+      <div id="header_menu">
         <%= link_to("Home", "/home") %>
         |
         <%= link_to("Browse", "/browse") %>
@@ -89,37 +84,23 @@
         <a href="#" class="open_search">Search</a>
         <div id="search">
           <a href="#" class="close_search">&raquo;</a>
-
           <% form_tag({ :controller => "search", :action => "new" }, { :id => "search_form" }) do %>
-            <%= select_tag(:model, "
-            <option selected=selected>SCOP</option>
-            <option>GO</option>
-            <option>Taxonomy</option>
-            <option>Interfaces</option>
-            ") -%>
+            <%= select_tag(:model, "<option selected=selected>SCOP</option> <option>GO</option> <option>Taxonomy</option> <option>Interfaces</option>") -%>
             <%= text_field_tag(:query) -%>
             <%= submit_tag("Search") -%>
           <% end %>
-
           <a href="#" class="close_search">&laquo;</a>
         </div>
         |
         <a href="#" class="open_settings">Settings</a>
         <div id="settings">
           <a href="#" class="close_settings">&raquo;</a>
-
-          <% form_tag({ :controller => "main", :action => "home" },
-                      { :id => "settings_form" }) do %>
-            Redundancy:
-            <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
+          <% form_tag({ :controller => "main", :action => "home" }, { :id => "settings_form" }) do %>
+            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
             ,
-            Resolution &lt;
-            <%= text_field_tag(:resolution, params[:resolution] || 100.0,
-                               :maxlength => 4,
-                               :size => 5) -%> &Aring;
+            Resolution &lt; <%= text_field_tag(:resolution, params[:resolution] || 100.0, :maxlength => 4, :size => 5) -%> &Aring;
             <%= submit_tag("Apply") -%>
           <% end %>
-
           <a href="#" class="close_settings">&laquo;</a>
         </div>
         |
