@@ -11,6 +11,14 @@ RAILS_GEM_VERSION = '2.1.0' unless defined? RAILS_GEM_VERSION
 require File.join(File.dirname(__FILE__), 'boot')
 
 Rails::Initializer.run do |config|
+  config.gem "rubygems"
+  config.gem "simple_memoize"
+  config.gem "fork_manager"
+  config.gem "will_paginate"
+  config.gem "ar-extensions"
+  config.gem "RubyInline", :lib => "inline"
+  #config.gem "composite_primary_keys"
+
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
   # -- all .rb files in that directory are automatically loaded.

@@ -1,19 +1,9 @@
-require "rubygems"
-require "simple_memoize"
-
 require "matrix"
-require "inline"
-require "fork_manager"
-require "will_paginate"
-require "ar-extensions"
-#require "composite_primary_keys"
-
 require "bio_extensions"
 require "array_extensions"
 require "vector_extensions"
 require "math_extensions"
 require "active_record_extensions"
-
 require "bipa"
 
 # STI dependency
