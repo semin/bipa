@@ -21,6 +21,10 @@ class Scop < ActiveRecord::Base
     else; raise "Unknown SCOP hierarchy: #{opts[:stype]}"; end
   end
 
+  def self.search(query)
+    find(:all, :conditions => ["description LIKE ?", "%#{query}%"])
+  end
+
   def tree_title
     %Q^<a href="#" onclick="new Ajax.Updater('main_container', '/scop/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{stype.upcase}] #{description}</a>^
   end
