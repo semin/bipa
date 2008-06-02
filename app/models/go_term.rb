@@ -1,6 +1,7 @@
 class GoTerm < ActiveRecord::Base
 
   acts_as_ferret  :fields => [:go_id, :name, :namespace, :definition],
+                  :store_classname => true,
                   :remote => true
 
   # abstract source <-> target relationship

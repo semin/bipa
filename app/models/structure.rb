@@ -3,6 +3,7 @@ class Structure < ActiveRecord::Base
   include Bipa::ComposedOfResidues
 
   acts_as_ferret  :fields => [:pdb_code, :classification, :title, :exp_method, :resolution, :r_value, :r_free, :space_group],
+                  :store_classname => true,
                   :remote => true
 
   named_scope :untainted, :conditions => { :tainted => false }
