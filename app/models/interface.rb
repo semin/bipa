@@ -5,10 +5,11 @@ class Interface < ActiveRecord::Base
 
 end
 
-
 class DomainInterface < Interface
 
-#  acts_as_ferret :fields => [:type, :asa, :polarity, :hbonds_as_donor_count, :hbonds_as_acceptor_count, :contacts_count, :whbonds_count, :sunid, :sccs, :sid, :description, :resolution], :remote => true
+  acts_as_ferret  :fields => [:type, :asa, :polarity, :hbonds_as_donor_count, :hbonds_as_acceptor_count, :contacts_count, :whbonds_count, :sunid, :sccs, :sid, :description, :resolution],
+                  :store_classname => true,
+                  :remote => true
 
   belongs_to  :domain,
               :class_name   => "ScopDomain",
@@ -317,6 +318,7 @@ class DomainRnaInterface < DomainInterface
       end
     END
   end
+
 end # class DomainRnaInterface
 
 

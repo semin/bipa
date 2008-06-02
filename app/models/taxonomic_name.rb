@@ -1,6 +1,8 @@
 class TaxonomicName < ActiveRecord::Base
 
-#  acts_as_ferret :fields => [:name_txt, :unique_name, :name_class, :rank], :remote => true
+  acts_as_ferret  :fields => [:name_txt, :unique_name, :name_class, :rank],
+                  :store_classname => true,
+                  :remote => true
 
   belongs_to  :node,
               :class_name   => "TaxonomicNode",

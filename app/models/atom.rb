@@ -202,6 +202,7 @@ class Atom < ActiveRecord::Base
         }
     C_CODE
   end
+
 end # class Atom
 
 
