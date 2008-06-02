@@ -11,7 +11,7 @@ RAILS_GEM_VERSION = '2.1.0' unless defined? RAILS_GEM_VERSION
 require File.join(File.dirname(__FILE__), 'boot')
 
 Rails::Initializer.run do |config|
-  config.gem "rubygems"
+  config.gem "bio"
   config.gem "simple_memoize"
   config.gem "fork_manager"
   config.gem "will_paginate"
