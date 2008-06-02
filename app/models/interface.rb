@@ -25,6 +25,7 @@ class DomainInterface < Interface
               :update_sse_propensities
 
   delegate :sunid, :sccs, :sid, :description, :resolution, :to => :domain
+
   named_scope :max_resolution, lambda { |res|
     {
       :include    => :domain,
