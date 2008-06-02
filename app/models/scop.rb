@@ -5,7 +5,6 @@ class Scop < ActiveRecord::Base
   acts_as_nested_set
 
   acts_as_ferret  :fields => [:sunid, :stype, :sccs, :sid, :description, :resolution],
-                  :store_classname => true,
                   :remote => true
 
   ((10..100).select { |i| i % 10 == 0 } << "all").each do |si|
