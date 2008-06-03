@@ -22,7 +22,7 @@ class DomainInterface < Interface
 
   delegate :sunid, :sccs, :sid, :description, :resolution, :to => :domain
 
-  acts_as_ferret :fields => {
+  acts_as_ferret(:fields => {
     :type => {},
     :asa  => {},
     :polarity => {},
@@ -30,7 +30,7 @@ class DomainInterface < Interface
     :hbonds_as_acceptor_count => {},
     :contacts_count => {},
     :whbonds_count => {}
-  }, :remote => true
+  }, :remote => true)
 
   named_scope :max_resolution, lambda { |res|
     {
