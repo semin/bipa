@@ -31,7 +31,7 @@ class DomainInterface < Interface
                     :contacts_count => {},
                     :whbonds_count => {}
                   },
-                  :remote => true
+                  :remote => false
 
   named_scope :max_resolution, lambda { |res|
     {

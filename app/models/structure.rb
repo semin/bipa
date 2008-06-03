@@ -37,7 +37,7 @@ class Structure < ActiveRecord::Base
                     :r_value => {},
                     :r_free => {}
                   },
-                  :remote => true
+                  :remote => false
 
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }
