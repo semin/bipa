@@ -12,7 +12,8 @@ class Interface < ActiveRecord::Base
       :hbonds_as_acceptor_count,
       :contacts_count,
       :whbonds_count
-    ]
+    ],
+    :remote => true
   )
 
 end

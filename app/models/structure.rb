@@ -28,7 +28,8 @@ class Structure < ActiveRecord::Base
   has_many  :het_chains,
             :through    => :models
 
-  acts_as_ferret( :fields => [
+  acts_as_ferret(
+    :fields => [
       :pdb_code,
       :classification,
       :title,
@@ -36,7 +37,8 @@ class Structure < ActiveRecord::Base
       :resolution,
       :r_value,
       :r_free
-    ]
+    ],
+    :remote => true
   )
 
   def residues
