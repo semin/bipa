@@ -28,15 +28,16 @@ class Structure < ActiveRecord::Base
   has_many  :het_chains,
             :through    => :models
 
-  acts_as_ferret(:fields => {
-    :pdb_code => {},
-    :classification => {},
-    :title => {},
-    :exp_method => {},
-    :resolution => {},
-    :r_value => {},
-    :r_free => {}
-  }, :remote => true)
+  acts_as_ferret  :fields => {
+                    :pdb_code => {},
+                    :classification => {},
+                    :title => {},
+                    :exp_method => {},
+                    :resolution => {},
+                    :r_value => {},
+                    :r_free => {}
+                  },
+                  :remote => true
 
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }
