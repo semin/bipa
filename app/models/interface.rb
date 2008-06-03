@@ -4,15 +4,15 @@ class Interface < ActiveRecord::Base
   include Bipa::ComposedOfResidues
 
   acts_as_ferret(
-    :fields => {
-      :type => {},
-      :asa  => {},
-      :polarity => {},
-      :hbonds_as_donor_count => {},
-      :hbonds_as_acceptor_count => {},
-      :contacts_count => {},
-      :whbonds_count => {}
-    }
+    :fields => [
+      :type,
+      :asa ,
+      :polarity,
+      :hbonds_as_donor_count,
+      :hbonds_as_acceptor_count,
+      :contacts_count,
+      :whbonds_count
+    ]
   )
 
 end
