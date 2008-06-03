@@ -7,6 +7,12 @@ end
 
 class DomainInterface < Interface
 
+  acts_as_ferret :fields => {
+    :type => {},
+    :asa  => {},
+    :polarity => {}
+  }
+
   belongs_to  :domain,
               :class_name   => "ScopDomain",
               :foreign_key  => 'scop_id'
