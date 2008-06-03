@@ -37,8 +37,7 @@ class Structure < ActiveRecord::Base
       :resolution => {},
       :r_value => {},
       :r_free => {}
-    },
-    :remote => true
+    }
   )
 
   def residues
