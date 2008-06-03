@@ -3,6 +3,19 @@ class Interface < ActiveRecord::Base
   include Bipa::Constants
   include Bipa::ComposedOfResidues
 
+  acts_as_ferret(
+    :fields => {
+      :type => {},
+      :asa  => {},
+      :polarity => {},
+      :hbonds_as_donor_count => {},
+      :hbonds_as_acceptor_count => {},
+      :contacts_count => {},
+      :whbonds_count => {}
+    },
+    :remote => true
+  )
+
 end
 
 class DomainInterface < Interface
@@ -21,17 +34,6 @@ class DomainInterface < Interface
               :update_sse_propensities
 
   delegate :sunid, :sccs, :sid, :description, :resolution, :to => :domain
-
-  acts_as_ferret(  :fields => {
-                    :type => {},
-                    :asa  => {},
-                    :polarity => {},
-                    :hbonds_as_donor_count => {},
-                    :hbonds_as_acceptor_count => {},
-                    :contacts_count => {},
-                    :whbonds_count => {}
-                  },
-                  :remote => true)
 
   named_scope :max_resolution, lambda { |res|
     {
