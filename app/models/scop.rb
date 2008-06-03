@@ -4,6 +4,9 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
+  acts_as_ferret  :fields => [ :sunid, :stype, :sccs, :sid, :description, :resolution ],
+                  :remote => true
+
   ((10..100).select { |i| i % 10 == 0 } << "all").each do |si|
     named_scope :"rep#{si}", :conditions => { :"rep#{si}" => true }
   end
