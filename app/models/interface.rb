@@ -7,11 +7,8 @@ end
 
 class DomainInterface < Interface
 
-  acts_as_ferret :fields => {
-    :type => {},
-    :asa  => {},
-    :polarity => {}
-  }
+  acts_as_ferret  :fields => [:type, :asa, :polarity],
+                  :remote => true
 
   belongs_to  :domain,
               :class_name   => "ScopDomain",
