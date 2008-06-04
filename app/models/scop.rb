@@ -33,27 +33,10 @@ class Scop < ActiveRecord::Base
 #  end
 
   def tree_title
-    <<-HTML
-      <script>
-        $j(document).ready(function() {
-          $j("a.remote").remote("#main_cotainer", function() {
-            if (window.console && window.console.info) {
-              console.info('content loaded');
-            }
-          });
-          $j.ajaxHistory.initialize();
-        });
-      </script>
-      <a href="/scop/tabs/#{id}" class="remote">[#{stype.upcase}] #{description}</a>
-    HTML
+    %Q^<a href="#scop/#{id}" onclick="new Ajax.Updater('main_container', '/scop/show/#{id}', { asynchronous:true, evalScripts:true}); return false;">
+    [#{stype.upcase}] #{description}
+    </a>^
   end
-
-#  $('a.remote').remote('#chapter', function() {
-#                        if (window.console && window.console.info) {
-#                            console.info('content loaded');
-#                                                }
-#                                                                });
-#
 
   def hierarchy_and_description
     "#{hierarchy}: #{description}"

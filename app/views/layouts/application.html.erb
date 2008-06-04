@@ -6,8 +6,8 @@
     </title>
 
     <%= javascript_include_tag :defaults %>
+    <%= javascript_include_tag "rsh.js" %>
     <%= javascript_include_tag "jquery-1.2.5.pack.js" %>
-    <%= javascript_include_tag "jquery.history_remote.pack.js" %>
     <%= javascript_include_tag "jquery.ui/ui.core.js" %>
     <%= javascript_include_tag "jquery.ui/ui.accordion.js" %>
     <%= javascript_include_tag "jquery.ui/ui.tabs.js" %>
@@ -22,6 +22,24 @@
     <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
 
     <script type="text/javascript">
+      window.dhtmlHistory.create({
+        toJSON: function(o) {
+          return Object.toJSON(o);
+        },
+        fromJSON: function(s) {
+          return s.evalJSON();
+        }
+      });
+
+      var yourListener = function(newLocation, historyData) {
+        eval(historyData);
+      }
+
+      window.onload = function() {
+        dhtmlHistory.initialize();
+        dhtmlHistory.addListener(yourListener);
+      }
+
       var $j = jQuery.noConflict();
       $j(document).ready(function() {
         $j("#accordion_container").accordion({
@@ -42,7 +60,7 @@
           url: "/taxonomy/children",
           animated: "fast"
         });
-        $j("#notice").fadeOut(6000);
+        $j("#notice").fadeOut(7000);
       });
     </script>
   </head>
@@ -62,7 +80,7 @@
       <%= image_tag("cambridge_logo.png", :id => "cambridge_logo", :size => "60x80", :alt => "University of Cambridge") %>
 
       <div id="header_menu">
-        <%= link_to("Home", "/home", :id => "menu_home") %>
+        <%= link_to("Home", "/") %>
         |
         <%= link_to("Browse", "/browse") %>
         |
@@ -72,9 +90,9 @@
         |
         <div id="settings">
           <% form_tag({ :controller => "main", :action => "home" }, { :id => "settings_form" }) do %>
-            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, params[:redundancy])) -%>
+            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, @redundancy)) -%>
             ,
-            Resolution &lt; <%= text_field_tag(:resolution, params[:resolution] || 100.0, :maxlength => 4, :size => 5) -%> &Aring;
+            Resolution &lt; <%= text_field_tag(:resolution, @resolution || 100.0, :maxlength => 4, :size => 5) -%> &Aring;
             <%= submit_tag("Apply") -%>
           <% end %>
         </div>

@@ -21,10 +21,12 @@ class ScopController < ApplicationController
     end
   end
 
-  def tabs
-    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+  def show
+    id = params[:id]
+    @scop = Scop.send("rep#{@redundancy}").find(id)
 
     respond_to do |format|
+      format.js
       format.html { render :layout => false }
     end
   end
