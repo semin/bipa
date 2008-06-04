@@ -7,6 +7,10 @@ class Residue < ActiveRecord::Base
               :class_name   => "Chain",
               :foreign_key  => "chain_id"
 
+  belongs_to  :domain,
+              :class_name   => "ScopDomain",
+              :foreign_key  => "scop_id"
+
   belongs_to  :chain_interface
 
   has_many  :atoms,
@@ -103,10 +107,6 @@ end
 
 
 class AaResidue < StdResidue
-
-  belongs_to  :domain,
-              :class_name   => "ScopDomain",
-              :foreign_key  => "scop_id"
 
   belongs_to  :domain_interface,
               :class_name   => "DomainInterface",

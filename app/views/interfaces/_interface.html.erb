@@ -1,5 +1,13 @@
 <tr>
-  <td>ID: <%= interface.id %></td>
-  <td>TYPE: <%= interface.type %></td>
-  <td>ASA: <%= interface.asa %></td>
+  <td><%= interface.pdb_code %></td>
+  <td><%= interface.sid %></td>
+  <td><%= interface.description %></td>
+  <td><%= interface.resolution || "N/A" %></td>
+  <td><%= interface.na_type %></td>
+  <td><%= interface.asa %></td>
+  <td><%= interface.residues_count %></td>
+  <td><%= interface.atoms_count %></td>
+  <td><%= interface.contacts_count %></td>
+  <td><%= interface.hbonds_count %></td>
+  <td><%= interface.whbonds_count %></td>
 </tr>

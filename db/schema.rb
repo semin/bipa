@@ -284,8 +284,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :type
     t.float       :asa
     t.float       :polarity
+    t.integer     :residues_count,            :default => 0
+    t.integer     :atoms_count,               :default => 0
     t.integer     :contacts_count,            :default => 0
     t.integer     :whbonds_count,             :default => 0
+    t.integer     :hbonds_count,              :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0
     t.integer     :hbonds_as_acceptor_count,  :default => 0
 

@@ -293,6 +293,10 @@ class ScopDomain < Scop
     find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
   end
 
+  def pdb_code
+    sid[1..4].upcase
+  end
+
   def ranges_on_chains
     # "2hz1 A:2-124, B:1-50" => [A:2-124, B:1-50]
     description.gsub(/^\S{4}\s+/, '').split(',')

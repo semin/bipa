@@ -1,15 +1,23 @@
 <div id="main_title">
   <div class="title">
-    Browse: <%= @type %> 
+    Browse: Interfaces
   </div>
 </div>
 
 <div id="main_content">
-  <table>
+  <table class="stats">
     <tr>
-      <th>ID</th>
-      <th>TYPE</th>
-      <th>ASA</th>
+      <th>PDB</th>
+      <th>SCOP<br />sid</th>
+      <th>SCOP<br />description</th>
+      <th>Resolution</th>
+      <th>Binding</th>
+      <th>ASA(&Aring;<sup>2</sup>)</th>
+      <th>No. of<br />residues</th>
+      <th>No. of<br />atoms</th>
+      <th>No. of<br />van der Waals contacts</th>
+      <th>No. of<br />hydrogen bonds</th>
+      <th>No. of<br />water-mediated hydrogen bonds</th>
     </tr>
     <%= render :partial => 'interface', :collection => @interfaces %>
   </table>

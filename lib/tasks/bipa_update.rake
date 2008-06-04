@@ -247,6 +247,22 @@ namespace :bipa do
     end
 
 
+    desc "Update 'residues_count' column of 'interfaces' table"
+    task :interfaces_residues_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, residues_count") do |interface|
+        interface.update_attribute :residues_count, interface.residues.length
+      end
+    end
+
+
+    desc "Update 'atoms_count' column of 'interfaces' table"
+    task :interfaces_atoms_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, atoms_count") do |interface|
+        interface.update_attribute :atoms_count, interface.atoms.length
+      end
+    end
+
+
     desc "Update 'contacts_count' column of 'interfaces' table"
     task :interfaces_contacts_count => [:environment] do
       DomainInterface.find_all_in_chunks(:select => "id, contacts_count") do |interface|
@@ -275,6 +291,14 @@ namespace :bipa do
     task :interfaces_hbonds_as_acceptor_count => [:environment] do
       DomainInterface.find_all_in_chunks(:select => "id, hbonds_as_acceptor_count") do |interface|
         interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
+      end
+    end
+
+
+    desc "Update 'hbonds_count' column of 'interfaces' table"
+    task :interfaces_hbonds_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, hbonds_count") do |interface|
+        interface.update_attribute :hbonds_count, interface.hbonds_as_donor.length + interface.hbonds_as_acceptor.length
       end
     end
 
