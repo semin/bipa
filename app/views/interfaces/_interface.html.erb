@@ -1,10 +1,9 @@
 <tr>
   <td><%= interface.pdb_code %></td>
   <td><%= interface.sid %></td>
-  <td><%= interface.description %></td>
-  <td><%= interface.resolution || "N/A" %></td>
+  <td><%= "%.2f" % interface.resolution || "N/A" %></td>
   <td><%= interface.na_type %></td>
-  <td><%= interface.asa %></td>
+  <td><%= "%.2f" % interface.asa %></td>
   <td><%= interface.residues_count %></td>
   <td><%= interface.atoms_count %></td>
   <td><%= interface.contacts_count %></td>

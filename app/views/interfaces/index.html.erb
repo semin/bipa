@@ -7,17 +7,116 @@
 <div id="main_content">
   <table class="stats">
     <tr>
-      <th>PDB</th>
-      <th>SCOP<br />sid</th>
-      <th>SCOP<br />description</th>
-      <th>Resolution</th>
-      <th>Binding</th>
-      <th>ASA(&Aring;<sup>2</sup>)</th>
-      <th>No. of<br />residues</th>
-      <th>No. of<br />atoms</th>
-      <th>No. of<br />van der Waals contacts</th>
-      <th>No. of<br />hydrogen bonds</th>
-      <th>No. of<br />water-mediated hydrogen bonds</th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=pdb">&and;</a>
+        </div>
+        <div>
+          PDB
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=pdb_reverse">&or</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=sid">&and;</a>
+        </div>
+        <div>
+          SCOP<br />sid
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=sid_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=resolution">&and;</a>
+        </div>
+        <div>
+          Resolution
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=resolution_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=type">&and;</a>
+        </div>
+        <div>
+          Binding
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=type_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=asa">&and;</a>
+        </div>
+        <div>
+          ASA(&Aring;<sup>2</sup>)
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=asa_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_residues">&and;</a>
+        </div>
+        <div>
+          No. of<br />residues
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_residues_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_atoms">&and;</a>
+        </div>
+        <div>
+          No. of<br />atoms
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_atoms_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_contacts">&and;</a>
+        </div>
+        <div>
+          No. of<br />van der Waals contacts
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_contacts_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_hbonds">&and;</a>
+        </div>
+        <div>
+          No. of<br />hydrogen bonds
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_hbonds_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_whbonds">&and;</a>
+        </div>
+        <div>
+          No. of<br />water-mediated hydrogen bonds
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=no_whbonds_reverse">&or;</a>
+        </div>
+      </th>
     </tr>
     <%= render :partial => 'interface', :collection => @interfaces %>
   </table>

@@ -1,13 +1,13 @@
-<table id="scop_summary_table" class="stats">
+<table class="stats">
 
   <tr>
-    <th></th>
-    <th>Protein-DNA</th>
+    <th style="border: 0px; background: white;"></th>
+    <th style="border-left: 0px">Protein-DNA</th>
     <th>Protein-RNA</th>
   </tr>
 
   <tr>
-    <th>Number of interfaces </th>
+    <th style="border-top: 0px">Number of interfaces </th>
     <td><%= @scop.dna_interfaces(@redundancy, @resolution).size %></td>
     <td><%= @scop.rna_interfaces(@redundancy, @resolution).size %></td>
   </tr>
