@@ -10,6 +10,6 @@ class TaxonomicNode < ActiveRecord::Base
             :conditions   => ["name_class = 'scientific name'"]
 
   def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/taxonomy/tabs/#{id}', {asynchronous:true, evalScripts:true, onLoading:function(request){ Element.hide('main_content'); Element.show('main_spinner') }, onComplete:function(request){ Element.hide('main_spinner'); Element.show('main_content'); }}); return false;">[TaxID:#{id}]: #{scientific_name.name_txt}</a>^
+    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/taxonomy/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[TaxID:#{id}]: #{scientific_name.name_txt}</a>^
   end
 end
