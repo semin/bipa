@@ -18,7 +18,7 @@
 function load(settings, root, child, container) {
 	$.getJSON(settings.url, {root: root}, function(response) {
 		function createNode(parent) {
-			var current = $("<li/>").attr("id", this.id || "").html(this.tree_title).appendTo(parent);
+			var current = $("<li/>").attr("id", this.id).html(this.tree_title).appendTo(parent);
 
 			if (this.classes) {
 				current.children("a").addClass(this.classes);
