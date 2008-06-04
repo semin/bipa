@@ -28,9 +28,32 @@ class Scop < ActiveRecord::Base
     find(:all, :conditions => ["description LIKE ?", "%#{query}%"])
   end
 
+#  def tree_title
+#    %Q^<a href="#" onclick="new Ajax.Updater('main_container', '/scop/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{stype.upcase}] #{description}</a>^
+#  end
+
   def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_container', '/scop/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{stype.upcase}] #{description}</a>^
+    <<-HTML
+      <script>
+        $j(document).ready(function() {
+          $j("a.remote").remote("#main_cotainer", function() {
+            if (window.console && window.console.info) {
+              console.info('content loaded');
+            }
+          });
+          $j.ajaxHistory.initialize();
+        });
+      </script>
+      <a href="/scop/tabs/#{id}" class="remote">[#{stype.upcase}] #{description}</a>
+    HTML
   end
+
+#  $('a.remote').remote('#chapter', function() {
+#                        if (window.console && window.console.info) {
+#                            console.info('content loaded');
+#                                                }
+#                                                                });
+#
 
   def hierarchy_and_description
     "#{hierarchy}: #{description}"
