@@ -1,6 +1,12 @@
 <script type="text/javascript">
   dhtmlHistory.add("scop/<%= @scop.id %>", "new Ajax.Updater('main_container', '/scop/show/<%= @scop.id %>', { asynchronous:false, evalScripts:true, method:'post' });");
-  jQuery(function() { jQuery("#scop_tabs > ul").tabs({ selected: 0 }); });
+  $j(function() {
+      $j("#scop_tabs > ul").tabs({
+          select: function(ui) { $j("#main_spinner").css("display", "block"); },
+          show: function(ui) { $j("#main_spinner").css("display", "none"); },
+          selected: 0,
+      });
+  });
 </script>
 
 <div id="main_title">
@@ -10,16 +16,15 @@
 </div>
 
 <div id="main_content">
-  <div class="content">
-    <div id="scop_tabs" class="tabs">
-      <ul>
-        <li><a href="/scop/summary/<%= @scop.id %>"><span>Summary</span></a></li>
-        <li><a href="/scop/propensity/<%= @scop.id %>"><span>Distributions</span></a></li>
-        <li><a href="/scop/propensity/<%= @scop.id %>"><span>Propensites</span></a></li>
-        <li><a href="/scop/propensity/<%= @scop.id %>"><span>Alignments</span></a></li>
-        <li><a href="/scop/propensity/<%= @scop.id %>"><span>Profiles</span></a></li>
-        <li><a href="/scop/propensity/<%= @scop.id %>"><span>Interfaces</span></a></li>
-      </ul>
-    </div>
+  <div id="scop_tabs" class="tabs">
+    <ul>
+      <li><a href="/scop/summary/<%= @scop.id %>"><span>Summary</span></a></li>
+      <li><a href="/scop/distributions/<%= @scop.id %>"><span>Distributions</span></a></li>
+      <li><a href="/scop/propensities/<%= @scop.id %>"><span>Propensites</span></a></li>
+      <li><a href="/scop/alignments/<%= @scop.id %>"><span>Alignments</span></a></li>
+      <li><a href="/scop/profiles/<%= @scop.id %>"><span>Profiles</span></a></li>
+      <li><a href="/scop/interfaces/<%= @scop.id %>"><span>Interfaces</span></a></li>
+    </ul>
   </div>
+  <%= image_tag("spinner_spike.gif", :id => "main_spinner") -%>
 </div>
