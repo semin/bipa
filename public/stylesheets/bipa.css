@@ -291,10 +291,8 @@ table td.news_content {
 
 table.stats {
   text-align: center;
-  color: #FFFFFF;
   height: 90%;
   width: 100%;
-  background-color: #666;
   border: 1px #FFFFFF solid;
   border-collapse: collapse;
   border-spacing: 0px;
@@ -302,9 +300,11 @@ table.stats {
 }
 
 table.stats th {
-  background-color: #666;
+  background-color: #666666;
   color: #FFFFFF;
   padding: 4px;
+  padding-top: 0px;
+  padding-bottom: 0px;
   text-align: center;
   border: 1px #000000 dotted;
   font-weight: bold;
@@ -316,7 +316,18 @@ table.stats td {
   padding: 4px;
   border: 1px #000 dotted;
   font-family: Monaco, Courier New, Courier, monospace;
+  font-size: 90%;
   text-align: right;
+}
+
+div.sorter {
+  margin: 0px;
+  padding: 0px;
+}
+
+div.header {
+  margin: 0px;
+  padding: 0px;
 }
 
 div.sorter a {
