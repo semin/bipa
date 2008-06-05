@@ -221,6 +221,7 @@ body {
   margin-right: 10px;
   color: #000000;
   background: #FFFFFF;
+  overflow: hidden;
 }
 
 #main_title {
@@ -248,11 +249,18 @@ body {
   left: 0px;
   right: 0px;
   bottom: 0px;
+  min-width: 200px;
   padding-top: 10px; 
   padding-left: 10px;
   padding-right: 10px;
   font-size: 0.9em;
   overflow: auto;
+}
+
+#main_spinner {
+  position: absolute;
+  top: 45%;
+  left: 45%;
 }
 
 #home_intro {
@@ -331,8 +339,6 @@ table.stats th {
   background-color: #666666;
   color: #FFFFFF;
   padding: 4px;
-  padding-top: 0px;
-  padding-bottom: 0px;
   text-align: center;
   border: 1px #000000 dotted;
   font-weight: bold;

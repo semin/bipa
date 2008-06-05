@@ -39,7 +39,7 @@ class ScopController < ApplicationController
     end
   end
 
-  def propensity
+  def propensities
     @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
@@ -47,7 +47,7 @@ class ScopController < ApplicationController
     end
   end
 
-  def msa
+  def distributions
     @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
@@ -55,7 +55,15 @@ class ScopController < ApplicationController
     end
   end
 
-  def esst
+  def alignments
+    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+
+    respond_to do |format|
+      format.html { render :layout => false }
+    end
+  end
+
+  def profiles
     @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
