@@ -3,14 +3,6 @@ class Interface < ActiveRecord::Base
   include Bipa::Constants
   include Bipa::ComposedOfResidues
 
-  def na_type
-    case self[:type]
-    when /Dna/i then "DNA"
-    when /Rna/i then "RNA"
-    else; "Unknown"
-    end
-  end
-
 end
 
 class DomainInterface < Interface
@@ -23,10 +15,10 @@ class DomainInterface < Interface
             :class_name   => "Residue",
             :foreign_key  => "domain_interface_id"
 
-#  before_save :update_asa,
-#              :update_polarity,
-#              :update_singlet_propensities,
-#              :update_sse_propensities
+  before_save :update_asa,
+              :update_polarity,
+              :update_singlet_propensities,
+              :update_sse_propensities
 
   delegate :sunid, :sccs, :sid, :description, :resolution, :to => :domain
 
@@ -42,6 +34,14 @@ class DomainInterface < Interface
 
   def pdb_code
     domain.pdb_code
+  end
+
+  def na_type
+    case self[:type]
+    when /Dna/i then "DNA"
+    when /Rna/i then "RNA"
+    else; "Unknown"
+    end
   end
 
   def hbonds_count
@@ -218,43 +218,43 @@ class DomainInterface < Interface
     end
   end
 
-#  %w(hbond whbond contact).each do |intact|
-#
-#    AminoAcids::Residues::STANDARD.each do |aa|
-#      class_eval <<-END
-#        before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
-#
-#        def update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
-#          self.frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids =
-#          frequency_of_#{intact}_between_nucleic_acids_and_("#{aa}")
-#        end
-#      END
-#    end
-#
-#    %w(sugar phosphate).each do |moiety|
-#      class_eval <<-END
-#        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
-#
-#        def update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
-#          self.frequency_of_#{intact}_between_amino_acids_and_#{moiety} =
-#            AminoAcids::Residues::STANDARD.inject(0) { |sum, aa|
-#              sum + frequency_of_#{intact}_between_#{moiety}_and_(aa)
-#            }
-#        end
-#      END
-#
-#      AminoAcids::Residues::STANDARD.each do |aa|
-#        class_eval <<-END
-#          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-#
-#          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-#            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
-#            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
-#          end
-#        END
-#      end
-#    end
-#  end
+  %w(hbond whbond contact).each do |intact|
+
+    AminoAcids::Residues::STANDARD.each do |aa|
+      class_eval <<-END
+        before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
+
+        def update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
+          self.frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids =
+          frequency_of_#{intact}_between_nucleic_acids_and_("#{aa}")
+        end
+      END
+    end
+
+    %w(sugar phosphate).each do |moiety|
+      class_eval <<-END
+        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
+
+        def update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
+          self.frequency_of_#{intact}_between_amino_acids_and_#{moiety} =
+            AminoAcids::Residues::STANDARD.inject(0) { |sum, aa|
+              sum + frequency_of_#{intact}_between_#{moiety}_and_(aa)
+            }
+        end
+      END
+
+      AminoAcids::Residues::STANDARD.each do |aa|
+        class_eval <<-END
+          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+
+          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
+            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
+          end
+        END
+      end
+    end
+  end
 end # class DomainInterface
 
 

@@ -25,10 +25,14 @@ class InterfacesController < ApplicationController
             else; "scops.sid"
             end
 
-    @interfaces = DomainInterface.paginate(:per_page => 10,
-                                           :page => params[:page],
-                                           :include => :domain,
-                                           :order => order)
+    @interfaces = DomainInterface.paginate(
+      :per_page => 10,
+      :page => params[:page],
+      :include => :domain,
+      :select => "id, type, asa, polarity, contact_count, whbonds_count, hbonds_count, hbonds_as_donor_count, hbonds_as_acceptor_count, atoms_coutn, residues_count, scops.sid, scops.resolution",
+      :order => order
+    )
+
     respond_to do |format|
       format.html
       format.js { render :template => "index.html.erb" }
