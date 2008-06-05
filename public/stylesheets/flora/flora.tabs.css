@@ -16,8 +16,8 @@
 
 /* Skin */
 .ui-tabs-nav, .ui-tabs-panel {
-    font-family: Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
-    font-size: 15px;
+    font-family: Lucida Grande, Lucida Sans Unicode, Verdana, Arial, sans-serif;
+    font-size: 1em; 
 }
 .ui-tabs-nav {
     list-style: none;
@@ -32,7 +32,6 @@
 .ui-tabs-nav li {
     float: left;
     margin: 0 0 0 2px;
-    font-weight: bold;
 }
 .ui-tabs-nav a, .ui-tabs-nav a span {
     float: left; /* fixes dir=ltr problem and other quirks IE */

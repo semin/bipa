@@ -1,3 +1,7 @@
+html {
+  font-size:100%;
+}
+
 html, body { 
   border: 0px;
   margin: 0px;
@@ -8,7 +12,8 @@ html, body {
 body {
   color: #000000;
   background: #C5C2B8;
-  font-family: Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
+  font-family: Lucida Grande, Lucida, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
+  font-size: 1em;
 }
 
 #header {
@@ -27,7 +32,7 @@ body {
   top: 10px;
   left: 10px;
   font-family: Georgia, serif;
-  font-size: 150%;
+  font-size: 1.5em;
   font-weight: bold;
   text-align: left;
   display: inline;
@@ -38,7 +43,7 @@ body {
   top: 40px;
   left: 10px;
   font-family: Georgia, serif;
-  font-size: 105%;
+  font-size: 1.1em;
   text-align: left;
 }
 
@@ -53,7 +58,7 @@ body {
   top: 75px;
   bottom: 0px;
   left: 10px;
-  font-size: 85%;
+  font-size: 0.8em;
 }
 
 #header_menu a {
@@ -90,17 +95,17 @@ body {
 }
 
 #notice {
-  position: absolute;
+  position: fixed;
   top: 30%;
-  left: 25%;
-  width: 50%;
+  left: 20%;
+  width: 60%;
   height: auto;
   margin-left: auto;
   margin-right: auto;
   padding-top: 10px;
   padding-bottom: 10px;
-  z-index: 1;
-  font-size: 130%;
+  z-index: 1000;
+  font-size: 1.2em;
   color: #FFFFFF;
   background: #000000;
   text-align: center;
@@ -117,9 +122,11 @@ body {
   position: fixed;
   top: 110px;
   bottom: 40px;
-  width: 300px;
+  left: 0px;
+  width: 270px;
   margin: 0px;
   margin-left: 10px;
+  display: block;
 }
 
 #sidebar a {
@@ -152,7 +159,7 @@ body {
   padding-bottom: 3px; 
   padding-left: 5px; 
   background: #888888;
-  font-size: 100%;
+  font-size: 0.9em;
   font-weight: bold;
 }
 
@@ -164,34 +171,54 @@ body {
   padding-left: 5px; 
   color: #C5C2B8;
   background: #3C3C3C;
-  font-size: 100%;
+  font-size: 0.9em;
   font-weight: bold;
 }
 
 #accordion_container div.selected {
   margin: 0px;
+  margin-bottom: 1px;
   padding-top: 3px; 
   padding-bottom: 3px; 
   padding-left: 5px; 
   color: #C5C2B8;
   background: #3C3C3C;
-  font-size: 100%;
+  font-size: 0.9em;
 }
 
 #accordion_container div.content {
   margin: 0px;
   padding-left: 2px; 
   background: #FFFFFF;
-  font-size: 80%;
+  font-size: 0.8em;
+}
+
+#gap {
+  position: fixed;
+  top: 110px;
+  bottom: 40px;
+  left: 280px;
+  width: 10px;
+  color: black;
+}
+
+#gap:hover {
+  background: #AAAAAA;
+}
+
+#gap_middle {
+  position: absolute;
+  top: 45%;
+  padding-left: 2px;
 }
 
 #main_container {
   position: fixed;
   top: 110px;
   bottom: 40px;
-  left: 312px;
-  right: 10px;
-  border-left: 10px #C5C2B8 solid;
+  left: 290px;
+  right: 0px;
+  margin-right: 10px;
   color: #000000;
   background: #FFFFFF;
 }
@@ -211,20 +238,21 @@ body {
 #main_title div.title {
   padding-top: 3px;
   padding-left: 10px;
-  font-size: 110%;
+  font-size: 1.0em;
+  font-weight: bold;
 }
 
 #main_content {
   position: absolute;
   top: 30px;
   left: 0px;
-  right: 10px;
+  right: 0px;
   bottom: 0px;
   padding-top: 10px; 
   padding-left: 10px;
-  font-size: 95%;
+  padding-right: 10px;
+  font-size: 0.9em;
   overflow: auto;
-  overflow-x: hidden;
 }
 
 #home_intro {
@@ -233,7 +261,7 @@ body {
 }
 
 .home_title {
-  font-size: 110%;
+  font-size: 1.1em;
   font-weight: bold;
   text-decoration: underline;
 }
@@ -244,7 +272,7 @@ body {
   height: 30px;
   width: 100%;
   border-top: 2px black dotted;
-  font-size: 80%;
+  font-size: 0.8em;
   text-align: center;
 }
 
@@ -258,7 +286,7 @@ ul.stats {
 ul.contact {
   margin: 0px;
   padding: 0px;
-  font-size: 90%;
+  font-size: 1.0em;
 }
 
 ul li.contact {
@@ -286,7 +314,7 @@ table td.news_title {
 }
 
 table td.news_content {
-  font-size: 90%;
+  font-size: 0.9em;
 }
 
 table.stats {
@@ -296,7 +324,7 @@ table.stats {
   border: 1px #FFFFFF solid;
   border-collapse: collapse;
   border-spacing: 0px;
-  font-size: 90%;
+  font-size: 0.9em;
 }
 
 table.stats th {
@@ -315,8 +343,8 @@ table.stats td {
   color: #000000;
   padding: 4px;
   border: 1px #000 dotted;
-  font-family: Monaco, Courier New, Courier, monospace;
-  font-size: 90%;
+  font-family: Monaco, Lucida Console, Courier New, Courier, monospace;
+  font-size: 1.0em;
   text-align: right;
 }
 
