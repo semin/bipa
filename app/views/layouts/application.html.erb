@@ -61,6 +61,32 @@
           animated: "fast"
         });
         $j("#notice").fadeOut(7000);
+        if ($j.cookie("sidebar") == "hide") {
+            $j("#sidebar").css("display", "none");
+            $j("#gap").css("left", "0px");
+            $j("#gap_middle").html("&rsaquo;");
+            $j("#main_container").css("left", "10px");
+        } else {
+            $j("#sidebar").css("display", "block");
+            $j("#gap").css("left", "280px");
+            $j("#gap_middle").html("&lsaquo;");
+            $j("#main_container").css("left", "290px");
+        }
+        $j("#gap").click(function() {
+          if ($j("#sidebar").css("display") == "block") {
+            $j("#sidebar").css("display", "none");
+            $j("#gap").css("left", "0px");
+            $j("#gap_middle").html("&rsaquo;");
+            $j("#main_container").css("left", "10px");
+            $j.cookie("sidebar", "hide");
+          } else {
+            $j("#sidebar").css("display", "block");
+            $j("#gap").css("left", "280px");
+            $j("#gap_middle").html("&lsaquo;");
+            $j("#main_container").css("left", "290px");
+            $j.cookie("sidebar", "show");
+          }
+        });
       });
     </script>
   </head>
@@ -90,7 +116,7 @@
         |
         <div id="settings">
           <% form_tag({ :controller => "main", :action => "home" }, { :id => "settings_form" }) do %>
-            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, @redundancy)) -%>
+            NR: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, @redundancy)) -%>
             ,
             Resolution &lt; <%= text_field_tag(:resolution, @resolution || 100.0, :maxlength => 4, :size => 5) -%> &Aring;
             <%= submit_tag("Apply") -%>
@@ -131,6 +157,12 @@
             <ul id="taxonomy_tree">
             </ul>
           </div>
+        </div>
+      </div>
+
+      <div id="gap">
+        <div id="gap_middle">
+          &lsaquo; 
         </div>
       </div>
 
