@@ -20,7 +20,8 @@ class DomainInterface < Interface
               :update_singlet_propensities,
               :update_sse_propensities
 
-  delegate :sunid, :sccs, :sid, :description, :resolution, :to => :domain
+  delegate  :pdb_code, :sunid, :sccs, :sid, :description, :resolution,
+            :to => :domain
 
   acts_as_ferret  :fields => [ :asa , :polarity, :hbonds_as_donor_count, :hbonds_as_acceptor_count, :contacts_count, :whbonds_count, :sunid, :sccs, :sid, :description, :resolution ],
                   :remote => true
@@ -32,20 +33,12 @@ class DomainInterface < Interface
     }
   }
 
-  def pdb_code
-    domain.pdb_code
-  end
-
   def na_type
     case self[:type]
     when /Dna/i then "DNA"
     when /Rna/i then "RNA"
     else; "Unknown"
     end
-  end
-
-  def hbonds_count
-    hbonds_as_donor_count + hbonds_as_acceptor_count
   end
 
   def singlet_propensity_of(res)

@@ -47,7 +47,7 @@ class ScopController < ApplicationController
     end
   end
 
-  def distributions
+  def frequencies
     @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
@@ -63,11 +63,15 @@ class ScopController < ApplicationController
     end
   end
 
-  def profiles
+  def interfaces
     @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+    @dna_interfaces = @scop.dna_interfaces(@redundancy, @resolution)
+    @rna_interfaces = @scop.rna_interfaces(@redundancy, @resolution)
+    @interfaces = @dna_interfaces + @rna_interfaces
 
     respond_to do |format|
       format.html { render :layout => false }
     end
   end
+
 end

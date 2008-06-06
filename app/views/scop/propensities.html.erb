@@ -1,0 +1,69 @@
+<h4>1. Nucleic Acid binding Amino Acid Propensities</h4>
+
+<table class="stats">
+  <tr>
+    <th></th>
+    <th>Protein-DNA</th>
+    <th>Protein-RNA</th>
+  </tr>
+
+  <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| %>
+    <tr>
+      <th><%= aa.upcase %></th>
+      <td>
+        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.send("mean_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
+          (<%= "%.2f" % @scop.send("stddev_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.send("mean_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
+          (<%= "%.2f" % @scop.send("stddev_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  <% end -%>
+</table>
+
+<small>* number in a bracket: standard deviation</small>
+<br />
+
+
+<h4>2. Secondary Structure Propensities</h4>
+
+<table class="stats">
+  <tr>
+    <th></th>
+    <th>Protein-DNA</th>
+    <th>Protein-RNA</th>
+  </tr>
+
+  <% Bipa::Constants::Dssp::SSES.map(&:downcase).each do |sse| -%>
+    <tr>
+      <th><%= dssp_description(sse.upcase) %></th>
+      <td>
+        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.send("mean_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
+          (<%= "%.2f" % @scop.send("stddev_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.send("mean_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
+          (<%= "%.2f" % @scop.send("stddev_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  <% end -%>
+</table>
+
+<small>* number in a bracket: standard deviation</small>

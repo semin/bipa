@@ -35,7 +35,6 @@ class InterfacesController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js { render :template => "index.html.erb" }
     end
   end
 end
