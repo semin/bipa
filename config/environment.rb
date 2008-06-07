@@ -17,9 +17,9 @@ Rails::Initializer.run do |config|
   config.gem "fork_manager"
   config.gem "will_paginate"
   config.gem "ar-extensions"
-  config.gem "RubyInline", :lib => "inline"
   config.gem "acts_as_ferret"
   config.gem "composite_primary_keys"
+  config.gem "RubyInline", :lib => "inline"
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
