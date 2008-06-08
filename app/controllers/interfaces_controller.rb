@@ -35,6 +35,11 @@ class InterfacesController < ApplicationController
 
     respond_to do |format|
       format.html
+      format.js do
+        render :update do |page|
+          page.replace_html "#table_body", :partial => @interfaces
+        end
+      end
     end
   end
 end
