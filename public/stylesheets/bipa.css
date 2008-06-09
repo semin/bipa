@@ -260,7 +260,7 @@ body {
 #main_spinner {
   position: absolute;
   top: 45%;
-  left: 47%;
+  left: 50%;
 }
 
 #home_intro {
@@ -284,6 +284,35 @@ body {
   text-align: center;
 }
 
+.list {
+  padding: 4px;
+  width: 99%;
+  background: #EEEEEE;
+}
+
+.list:hover {
+  padding: 4px;
+  width: 99%;
+  background: #CCCCCC;
+}
+
+.list_title {
+  font-weight: bold;
+}
+
+.list_content {
+  padding-left: 15px;
+}
+
+.list_score {
+  text-align: right;
+}
+
+.list_spacer {
+  height: 2px;
+  width: 100%;
+  background: wliste;
+}
 
 /* CSS for uncounted list */
 ul.stats {
@@ -344,8 +373,15 @@ table.stats th {
   font-weight: bold;
 }
 
-table.stats td {
+table.stats tr {
+  background-color: #EEEEEE;
+}
+
+table.stats tr:hover {
   background-color: #CCCCCC;
+}
+
+table.stats td {
   color: #000000;
   padding: 4px;
   border: 1px #000 dotted;

@@ -13,6 +13,15 @@ class MainController < ApplicationController
   end
 
   def search
+    case params[:classification]
+    when "SCOP"
+      redirect_to params.merge(:controller => "scop", :action => "search")
+    when "GO"
+      redirect_to :controller => "go", :action => "search"
+    when "TAXONOMY"
+      redirect_to :controller => "taxonomy", :action => "search"
+    else; raise "Unknow classification: #{params[:classification]}"
+    end
   end
 
   def contact

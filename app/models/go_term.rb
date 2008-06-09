@@ -101,7 +101,7 @@ class GoTerm < ActiveRecord::Base
 
 
   def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/go/tabs/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{go_id}]: #{name}</a>^
+    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/go/show/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{go_id}]: #{name}</a>^
   end
 
 end

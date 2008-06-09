@@ -1,0 +1,30 @@
+<script type="text/javascript">
+  dhtmlHistory.add("go/<%= @go_term.id %>", "new Ajax.Updater('main_container', '/go/show/<%= @go_term.id %>', { asynchronous:false, evalScripts:true, method:'post' });");
+
+  $j(document).ready(function() {
+      $j("#go_tabs > ul").tabs({
+          selected: 0,
+          select: function(ui) { $j(".ui-tabs-panel").html(""); $j("#main_spinner").css("display", "block"); },
+          show:   function(ui) { $j("#main_spinner").css("display", "none"); },
+      });
+  });
+</script>
+
+<div id="main_title">
+  <div class="title">
+    <%= @go_term.go_id %>: <%= @go_term.name %>
+  </div>
+</div>
+
+<div id="main_content">
+  <div id="go_tabs" class="tabs">
+    <ul>
+      <li><a href="/go/summary/<%= @go_term.id %>"><span>Summary</span></a></li>
+      <li><a href="/go/propensities/<%= @go_term.id %>"><span>Propensites</span></a></li>
+      <li><a href="/go/frequencies/<%= @go_term.id %>"><span>Frequencies</span></a></li>
+      <li><a href="/go/alignments/<%= @go_term.id %>"><span>Alignments</span></a></li>
+      <li><a href="/go/interfaces/<%= @go_term.id %>"><span>Interfaces</span></a></li>
+    </ul>
+  </div>
+  <%= image_tag("spinner_spike.gif", :id => "main_spinner") -%>
+</div>

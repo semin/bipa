@@ -4,14 +4,14 @@ class ScopController < ApplicationController
     root = params[:root]
 
     if root == "root"
-      children = Scop.send("rep#{@redundancy}").find(1).registered_children(@redundancy)
+      children = Scop.send("rep#{@redundancy}").find(1).filtered_children(@redundancy)
     else
-      children = Scop.send("rep#{@redundancy}").find(root).registered_children(@redundancy)
+      children = Scop.send("rep#{@redundancy}").find(root).filtered_children(@redundancy)
     end
 
     children.each do |child|
       child[:tree_title] = child.tree_title
-      if child.registered_children(@redundancy).size > 0
+      if child.filtered_children(@redundancy).size > 0
         child[:hasChildren] = true
       end
     end
@@ -21,13 +21,21 @@ class ScopController < ApplicationController
     end
   end
 
+  def search
+    @query = params[:query]
+    @hits = Scop.find_with_ferret(@query, :limit => :all)
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
   def show
-    id = params[:id]
-    @scop = Scop.send("rep#{@redundancy}").find(id)
+    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
       format.js
-      format.html { render :layout => false }
+      format.html
     end
   end
 
