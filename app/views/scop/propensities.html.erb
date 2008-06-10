@@ -1,69 +1,88 @@
-<h4>1. Nucleic Acid binding Amino Acid Propensities</h4>
+<% content_for :main_title do %>
+  <div class="title">
+    <%= @scop.hierarchy %>: <%= @scop.description %>
+  </div>
+<% end %>
 
-<table class="stats">
-  <tr>
-    <th></th>
-    <th>Protein-DNA</th>
-    <th>Protein-RNA</th>
-  </tr>
+<div id="tab_menu_container">
+  <ul id="tab_menu">
+    <li><a href="/scops/<%= @scop.id %>/summary">Summary</a></li>
+    <li><a href="/scops/<%= @scop.id %>/propensities" class="current">Propensites</a></li>
+    <li><a href="/scops/<%= @scop.id %>/frequencies">Frequencies</a></li>
+    <li><a href="/scops/<%= @scop.id %>/alignments">Alignments</a></li>
+    <li><a href="/scops/<%= @scop.id %>/interfaces">Interfaces</a></li>
+  </ul>
+</div>
 
-  <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| %>
+<div id="below_tab_menu">
+
+  <h4>1. Nucleic Acid binding Amino Acid Propensities</h4>
+
+  <table class="stats">
     <tr>
-      <th><%= aa.upcase %></th>
-      <td>
-        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-          <%= "%.2f" % @scop.send("mean_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
-          (<%= "%.2f" % @scop.send("stddev_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
-        <% else %>
-          N/A
-        <% end %>
-      </td>
-      <td>
-        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-          <%= "%.2f" % @scop.send("mean_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
-          (<%= "%.2f" % @scop.send("stddev_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
-        <% else %>
-          N/A
-        <% end %>
-      </td>
+      <th></th>
+      <th>Protein-DNA</th>
+      <th>Protein-RNA</th>
     </tr>
-  <% end -%>
-</table>
 
-<small>* number in a bracket: standard deviation</small>
-<br />
+    <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| %>
+      <tr>
+        <th><%= aa.upcase %></th>
+        <td>
+          <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
+            (<%= "%.2f" % @scop.send("stddev_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
+          <% else %>
+            N/A
+          <% end %>
+        </td>
+        <td>
+          <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
+            (<%= "%.2f" % @scop.send("stddev_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
+          <% else %>
+            N/A
+          <% end %>
+        </td>
+      </tr>
+    <% end -%>
+  </table>
+
+  <small>* number in a bracket: standard deviation</small>
+  <br />
 
 
-<h4>2. Secondary Structure Propensities</h4>
+  <h4>2. Secondary Structure Propensities</h4>
 
-<table class="stats">
-  <tr>
-    <th></th>
-    <th>Protein-DNA</th>
-    <th>Protein-RNA</th>
-  </tr>
-
-  <% Bipa::Constants::Dssp::SSES.map(&:downcase).each do |sse| -%>
+  <table class="stats">
     <tr>
-      <th><%= dssp_description(sse.upcase) %></th>
-      <td>
-        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-          <%= "%.2f" % @scop.send("mean_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
-          (<%= "%.2f" % @scop.send("stddev_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
-        <% else %>
-          N/A
-        <% end %>
-      </td>
-      <td>
-        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-          <%= "%.2f" % @scop.send("mean_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
-          (<%= "%.2f" % @scop.send("stddev_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
-        <% else %>
-          N/A
-        <% end %>
-      </td>
+      <th></th>
+      <th>Protein-DNA</th>
+      <th>Protein-RNA</th>
     </tr>
-  <% end -%>
-</table>
 
-<small>* number in a bracket: standard deviation</small>
+    <% Bipa::Constants::Dssp::SSES.map(&:downcase).each do |sse| -%>
+      <tr>
+        <th><%= dssp_description(sse.upcase) %></th>
+        <td>
+          <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
+            (<%= "%.2f" % @scop.send("stddev_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
+          <% else %>
+            N/A
+          <% end %>
+        </td>
+        <td>
+          <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
+            (<%= "%.2f" % @scop.send("stddev_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
+          <% else %>
+            N/A
+          <% end %>
+        </td>
+      </tr>
+    <% end -%>
+  </table>
+
+  <small>* number in a bracket: standard deviation</small>
+</div>

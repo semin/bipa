@@ -1,418 +1,354 @@
-<h4>1. Protein-DNA complexes</h4>
-
-<% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-  <h4>a. Distribution of hydrogen bonds</h4>
-
-  <table class="stats">
-    <tr>
-      <th rowspan="2"></th>
-      <th colspan="2">DA</th>
-      <th colspan="2">DC</th>
-      <th colspan="2">DG</th>
-      <th colspan="2">DT</th>
-      <th colspan="2">Sugar</th>
-      <th colspan="2">Phosphate</th>
-      <th rowspan="2">Total</th>
-    </tr>
-    <tr>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-    </tr>
-    <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
-      <tr>
-        <th><%= aa.upcase %></th>
-        <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-          <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
-          <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
-        <% end -%>
-        <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_dna", @redundancy, @resolution) %></td>
-      </tr>
-    <% end -%>
-    <tr>
-      <th>Total</th>
-      <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-        <th colspan=2><%= @scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{dna}", @redundancy, @resolution) %></th>
-      <% end -%>
-      <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_sugar(@redundancy, @resolution) %></th>
-      <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_phosphate(@redundancy, @resolution) %></th>
-      <th><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna(@redundancy, @resolution) %></th>
-    </tr>
-  </table>
-  <br />
-
-
-  <h4>b. Distribution of water-mediated hydrogen bonds</h4>
-
-  <table class="stats">
-    <tr>
-      <th rowspan="2"></th>
-      <th colspan="2">DA</th>
-      <th colspan="2">DC</th>
-      <th colspan="2">DG</th>
-      <th colspan="2">DT</th>
-      <th colspan="2">Sugar</th>
-      <th colspan="2">Phosphate</th>
-      <th rowspan="2">Total</th>
-    </tr>
-    <tr>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-    </tr>
-    <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
-      <tr>
-        <th><%= aa.upcase %></th>
-        <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-          <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
-          <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
-        <% end -%>
-        <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_dna", @redundancy, @resolution)%></td>
-      </tr>
-    <% end -%>
-    <tr>
-      <th>Total</th>
-      <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-        <th colspan=2><%= @scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{dna}", @redundancy, @resolution) %></th>
-      <% end -%>
-      <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna_sugar(@redundancy, @resolution) %></th>
-      <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna_phosphate(@redundancy, @resolution) %></th>
-      <th><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna(@redundancy, @resolution) %></th>
-    </tr>
-  </table>
-  <br />
-
-
-  <h4>c. Distribution of van der Waals contacts</h4>
-
-  <table class="stats">
-    <tr>
-      <th rowspan="2"></th>
-      <th colspan="2">DA</th>
-      <th colspan="2">DC</th>
-      <th colspan="2">DG</th>
-      <th colspan="2">DT</th>
-      <th colspan="2">Sugar</th>
-      <th colspan="2">Phosphate</th>
-      <th rowspan="2">Total</th>
-    </tr>
-    <tr>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-    </tr>
-    <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
-      <tr>
-        <th><%= aa.upcase %></th>
-        <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-          <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
-          <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
-        <% end -%>
-        <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("total_observed_frequency_of_contact_between_#{aa}_and_dna", @redundancy, @resolution)%></td>
-      </tr>
-    <% end -%>
-    <tr>
-      <th>Total</th>
-      <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-        <th colspan=2><%= @scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{dna}", @redundancy, @resolution) %></th>
-      <% end -%>
-      <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_dna_sugar(@redundancy, @resolution) %></th>
-      <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_dna_phosphate(@redundancy, @resolution) %></th>
-      <th><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_dna(@redundancy, @resolution) %></th>
-    </tr>
-  </table>
-  <br />
-<% else %>
-  N/A
+<% content_for :main_title do %>
+  <div class="title">
+    <%= @scop.hierarchy %>: <%= @scop.description %>
+  </div>
 <% end %>
 
+<div id="tab_menu_container">
+  <ul id="tab_menu">
+    <li><a href="/scops/<%= @scop.id %>/summary">Summary</a></li>
+    <li><a href="/scops/<%= @scop.id %>/propensities">Propensites</a></li>
+    <li><a href="/scops/<%= @scop.id %>/frequencies" class="current">Frequencies</a></li>
+    <li><a href="/scops/<%= @scop.id %>/alignments">Alignments</a></li>
+    <li><a href="/scops/<%= @scop.id %>/interfaces">Interfaces</a></li>
+  </ul>
+</div>
 
-<h4>2. Protein-RNA complexes</h4>
+<div id="below_tab_menu">
 
-<% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+  <h4>1. Protein-DNA complexes</h4>
 
-  <h4>a. Distribution of hydrogen bonds</h4>
+  <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+    <h4>a. Distribution of hydrogen bonds</h4>
 
-  <table class="stats">
-    <tr>
-      <th rowspan="2"></th>
-      <th colspan="2">A</th>
-      <th colspan="2">C</th>
-      <th colspan="2">G</th>
-      <th colspan="2">T</th>
-      <th colspan="2">Sugar</th>
-      <th colspan="2">Phosphate</th>
-      <th rowspan="2">Total</th>
-    </tr>
-    <tr>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-    </tr>
-    <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
+    <table class="stats">
       <tr>
-        <th><%= aa.upcase %></th>
-        <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
-          <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
-          <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
-        <% end -%>
-        <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_rna", @redundancy, @resolution)%></td>
+        <th rowspan="2"></th>
+        <th colspan="2">DA</th>
+        <th colspan="2">DC</th>
+        <th colspan="2">DG</th>
+        <th colspan="2">DT</th>
+        <th colspan="2">Sugar</th>
+        <th colspan="2">Phosphate</th>
+        <th rowspan="2">Total</th>
       </tr>
-    <% end -%>
-    <tr>
-      <th>Total</th>
-      <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
-        <th colspan=2><%= @scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{rna}", @redundancy, @resolution) %></th>
-      <% end -%>
-      <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna_sugar(@redundancy, @resolution) %></th>
-      <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna_phosphate(@redundancy, @resolution) %></th>
-      <th><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna(@redundancy, @resolution) %></th>
-    </tr>
-  </table>
-  <br />
-
-
-  <h4>b. Distribution of water-mediated hydrogen bonds</h4>
-
-  <table class="stats">
-    <tr>
-      <th rowspan="2"></th>
-      <th colspan="2">A</th>
-      <th colspan="2">C</th>
-      <th colspan="2">G</th>
-      <th colspan="2">T</th>
-      <th colspan="2">Sugar</th>
-      <th colspan="2">Phosphate</th>
-      <th rowspan="2">Total</th>
-    </tr>
-    <tr>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-    </tr>
-    <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
       <tr>
-        <th><%= aa.upcase %></th>
-        <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
-          <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
-          <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
-        <% end -%>
-        <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_rna", @redundancy, @resolution)%></td>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
       </tr>
-    <% end -%>
-    <tr>
-      <th>Total</th>
-      <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
-        <th colspan=2><%= @scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{rna}", @redundancy, @resolution) %></th>
+      <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
+        <tr>
+          <th><%= aa.upcase %></th>
+          <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
+            <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
+            <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
+          <% end -%>
+          <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_dna", @redundancy, @resolution) %></td>
+        </tr>
       <% end -%>
-      <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna_sugar(@redundancy, @resolution) %></th>
-      <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna_phosphate(@redundancy, @resolution) %></th>
-      <th><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna(@redundancy, @resolution) %></th>
-    </tr>
-  </table>
-  <br />
-
-
-  <h4>c. Distribution of van der Waals contacts</h4>
-
-  <table class="stats">
-    <tr>
-      <th rowspan="2"></th>
-      <th colspan="2">A</th>
-      <th colspan="2">C</th>
-      <th colspan="2">G</th>
-      <th colspan="2">T</th>
-      <th colspan="2">Sugar</th>
-      <th colspan="2">Phosphate</th>
-      <th rowspan="2">Total</th>
-    </tr>
-    <tr>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-      <th>Obs</th>
-      <th>Exp</th>
-    </tr>
-    <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
       <tr>
-        <th><%= aa.upcase %></th>
-        <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
-          <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
-          <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
+        <th>Total</th>
+        <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
+          <th colspan=2><%= @scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{dna}", @redundancy, @resolution) %></th>
         <% end -%>
-        <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
-        <td><%= @scop.send("total_observed_frequency_of_contact_between_#{aa}_and_rna", @redundancy, @resolution)%></td>
+        <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_sugar(@redundancy, @resolution) %></th>
+        <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_phosphate(@redundancy, @resolution) %></th>
+        <th><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna(@redundancy, @resolution) %></th>
       </tr>
-    <% end -%>
-    <tr>
-      <th>Total</th>
-      <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
-        <th colspan=2><%= @scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{rna}", @redundancy, @resolution) %></th>
+    </table>
+    <br />
+
+
+    <h4>b. Distribution of water-mediated hydrogen bonds</h4>
+
+    <table class="stats">
+      <tr>
+        <th rowspan="2"></th>
+        <th colspan="2">DA</th>
+        <th colspan="2">DC</th>
+        <th colspan="2">DG</th>
+        <th colspan="2">DT</th>
+        <th colspan="2">Sugar</th>
+        <th colspan="2">Phosphate</th>
+        <th rowspan="2">Total</th>
+      </tr>
+      <tr>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+      </tr>
+      <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
+        <tr>
+          <th><%= aa.upcase %></th>
+          <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
+            <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
+            <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
+          <% end -%>
+          <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_dna", @redundancy, @resolution)%></td>
+        </tr>
       <% end -%>
-      <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_rna_sugar(@redundancy, @resolution) %></th>
-      <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_rna_phosphate(@redundancy, @resolution) %></th>
-      <th><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_rna(@redundancy, @resolution) %></th>
-    </tr>
-  </table>
-  <br />
-<% else %>
-  N/A
-<% end %>
+      <tr>
+        <th>Total</th>
+        <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
+          <th colspan=2><%= @scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{dna}", @redundancy, @resolution) %></th>
+        <% end -%>
+        <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna_sugar(@redundancy, @resolution) %></th>
+        <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna_phosphate(@redundancy, @resolution) %></th>
+        <th><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_dna(@redundancy, @resolution) %></th>
+      </tr>
+    </table>
+    <br />
 
 
-<!-- <h4>a. Distribution of hydrogen bonds</h4>
+    <h4>c. Distribution of van der Waals contacts</h4>
 
-<table class="stats">
-  <tr>
-    <th rowspan="3"></th>
-    <th colspan="4">DA</th>
-    <th colspan="4">DC</th>
-    <th colspan="4">DG</th>
-    <th colspan="4">DT</th>
-    <th colspan="4">Sugar</th>
-    <th colspan="4">Phosphate</th>
-    <th colspan="2">Total</th>
-  </tr>
-  <tr>
-    <th colspan="2">DNA</th>
-    <th colspan="2">RNA</th>
-    <th colspan="2">DNA</th>
-    <th colspan="2">RNA</th>
-    <th colspan="2">DNA</th>
-    <th colspan="2">RNA</th>
-    <th colspan="2">DNA</th>
-    <th colspan="2">RNA</th>
-    <th colspan="2">DNA</th>
-    <th colspan="2">RNA</th>
-    <th colspan="2">DNA</th>
-    <th colspan="2">RNA</th>
-    <th rowspan="2">DNA</th>
-    <th rowspan="2">RNA</th>
-  </tr>
-  <tr>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-    <th>Obs</th>
-    <th>Exp</th>
-  </tr>
-  <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
-    <tr>
-      <th><%= aa.upcase %></th>
-      <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-        <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
-        <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
+    <table class="stats">
+      <tr>
+        <th rowspan="2"></th>
+        <th colspan="2">DA</th>
+        <th colspan="2">DC</th>
+        <th colspan="2">DG</th>
+        <th colspan="2">DT</th>
+        <th colspan="2">Sugar</th>
+        <th colspan="2">Phosphate</th>
+        <th rowspan="2">Total</th>
+      </tr>
+      <tr>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+      </tr>
+      <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
+        <tr>
+          <th><%= aa.upcase %></th>
+          <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
+            <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
+            <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_#{dna}", @redundancy, @resolution) %></td>
+          <% end -%>
+          <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("total_observed_frequency_of_contact_between_#{aa}_and_dna", @redundancy, @resolution)%></td>
+        </tr>
       <% end -%>
-      <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-      <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_sugar", @redundancy, @resolution) %></td>
-      <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-      <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_dna_phosphate", @redundancy, @resolution) %></td>
-      <td><%= @scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_dna", @redundancy, @resolution) %></td>
-    </tr>
-  <% end -%>
-  <tr>
-    <th>Total</th>
-    <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
-      <th colspan=2><%= @scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{dna}", @redundancy, @resolution) %></th>
-    <% end -%>
-    <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_sugar(@redundancy, @resolution) %></th>
-    <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna_phosphate(@redundancy, @resolution) %></th>
-    <th><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_dna(@redundancy, @resolution) %></th>
-  </tr>
-</table>
--->
+      <tr>
+        <th>Total</th>
+        <% Bipa::Constants::NucleicAcids::Dna::Residues::STANDARD.map(&:downcase).each do |dna| -%>
+          <th colspan=2><%= @scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{dna}", @redundancy, @resolution) %></th>
+        <% end -%>
+        <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_dna_sugar(@redundancy, @resolution) %></th>
+        <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_dna_phosphate(@redundancy, @resolution) %></th>
+        <th><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_dna(@redundancy, @resolution) %></th>
+      </tr>
+    </table>
+    <br />
+  <% else %>
+    N/A
+  <% end %>
 
+
+  <h4>2. Protein-RNA complexes</h4>
+
+  <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+
+    <h4>a. Distribution of hydrogen bonds</h4>
+
+    <table class="stats">
+      <tr>
+        <th rowspan="2"></th>
+        <th colspan="2">A</th>
+        <th colspan="2">C</th>
+        <th colspan="2">G</th>
+        <th colspan="2">T</th>
+        <th colspan="2">Sugar</th>
+        <th colspan="2">Phosphate</th>
+        <th rowspan="2">Total</th>
+      </tr>
+      <tr>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+      </tr>
+      <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
+        <tr>
+          <th><%= aa.upcase %></th>
+          <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
+            <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
+            <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
+          <% end -%>
+          <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("observed_frequency_of_hbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_hbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("total_observed_frequency_of_hbond_between_#{aa}_and_rna", @redundancy, @resolution)%></td>
+        </tr>
+      <% end -%>
+      <tr>
+        <th>Total</th>
+        <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
+          <th colspan=2><%= @scop.send("total_observed_frequency_of_hbond_between_amino_acids_and_#{rna}", @redundancy, @resolution) %></th>
+        <% end -%>
+        <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna_sugar(@redundancy, @resolution) %></th>
+        <th colspan=2><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna_phosphate(@redundancy, @resolution) %></th>
+        <th><%= @scop.total_observed_frequency_of_hbond_between_amino_acids_and_rna(@redundancy, @resolution) %></th>
+      </tr>
+    </table>
+    <br />
+
+
+    <h4>b. Distribution of water-mediated hydrogen bonds</h4>
+
+    <table class="stats">
+      <tr>
+        <th rowspan="2"></th>
+        <th colspan="2">A</th>
+        <th colspan="2">C</th>
+        <th colspan="2">G</th>
+        <th colspan="2">T</th>
+        <th colspan="2">Sugar</th>
+        <th colspan="2">Phosphate</th>
+        <th rowspan="2">Total</th>
+      </tr>
+      <tr>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+      </tr>
+      <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
+        <tr>
+          <th><%= aa.upcase %></th>
+          <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
+            <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
+            <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
+          <% end -%>
+          <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("observed_frequency_of_whbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_whbond_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("total_observed_frequency_of_whbond_between_#{aa}_and_rna", @redundancy, @resolution)%></td>
+        </tr>
+      <% end -%>
+      <tr>
+        <th>Total</th>
+        <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
+          <th colspan=2><%= @scop.send("total_observed_frequency_of_whbond_between_amino_acids_and_#{rna}", @redundancy, @resolution) %></th>
+        <% end -%>
+        <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna_sugar(@redundancy, @resolution) %></th>
+        <th colspan=2><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna_phosphate(@redundancy, @resolution) %></th>
+        <th><%= @scop.total_observed_frequency_of_whbond_between_amino_acids_and_rna(@redundancy, @resolution) %></th>
+      </tr>
+    </table>
+    <br />
+
+
+    <h4>c. Distribution of van der Waals contacts</h4>
+
+    <table class="stats">
+      <tr>
+        <th rowspan="2"></th>
+        <th colspan="2">A</th>
+        <th colspan="2">C</th>
+        <th colspan="2">G</th>
+        <th colspan="2">T</th>
+        <th colspan="2">Sugar</th>
+        <th colspan="2">Phosphate</th>
+        <th rowspan="2">Total</th>
+      </tr>
+      <tr>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+        <th>Obs</th>
+        <th>Exp</th>
+      </tr>
+      <% Bipa::Constants::AminoAcids::Residues::STANDARD.map(&:downcase).each do |aa| -%>
+        <tr>
+          <th><%= aa.upcase %></th>
+          <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
+            <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
+            <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_#{rna}", @redundancy, @resolution) %></td>
+          <% end -%>
+          <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_rna_sugar", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("observed_frequency_of_contact_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= "%.2f" % @scop.send("expected_frequency_of_contact_between_#{aa}_and_rna_phosphate", @redundancy, @resolution) %></td>
+          <td><%= @scop.send("total_observed_frequency_of_contact_between_#{aa}_and_rna", @redundancy, @resolution)%></td>
+        </tr>
+      <% end -%>
+      <tr>
+        <th>Total</th>
+        <% Bipa::Constants::NucleicAcids::Rna::Residues::STANDARD.map(&:downcase).each do |rna| -%>
+          <th colspan=2><%= @scop.send("total_observed_frequency_of_contact_between_amino_acids_and_#{rna}", @redundancy, @resolution) %></th>
+        <% end -%>
+        <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_rna_sugar(@redundancy, @resolution) %></th>
+        <th colspan=2><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_rna_phosphate(@redundancy, @resolution) %></th>
+        <th><%= @scop.total_observed_frequency_of_contact_between_amino_acids_and_rna(@redundancy, @resolution) %></th>
+      </tr>
+    </table>
+    <br />
+  <% else %>
+    N/A
+  <% end %>
+</div>

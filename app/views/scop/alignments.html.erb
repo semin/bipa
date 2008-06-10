@@ -1,1 +1,67 @@
-Alignments...
+<% content_for :main_title do %>
+  <div class="title">
+    <%= @scop.hierarchy %>: <%= @scop.description %>
+  </div>
+<% end %>
+
+<div id="tab_menu_container">
+  <ul id="tab_menu">
+    <li><a href="/scops/<%= @scop.id %>/summary">Summary</a></li>
+    <li><a href="/scops/<%= @scop.id %>/propensities">Propensites</a></li>
+    <li><a href="/scops/<%= @scop.id %>/frequencies">Frequencies</a></li>
+    <li><a href="/scops/<%= @scop.id %>/alignments" class="current">Alignments</a></li>
+    <li><a href="/scops/<%= @scop.id %>/interfaces">Interfaces</a></li>
+  </ul>
+</div>
+
+<div id="below_tab_menu">
+  <table class="stats">
+    <tr>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=sid">&and;</a>
+        </div>
+        <div class="header">
+          SCOP<br />sunid
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=sid_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=resolution">&and;</a>
+        </div>
+        <div class="header">
+          Redundancy
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=resolution_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=type">&and;</a>
+        </div>
+        <div class="header">
+          No. of <br />Representative<br />Structures
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=type_reverse">&or;</a>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <a href="/interfaces?sort=asa">&and;</a>
+        </div>
+        <div class="header">
+          No. of <br />Alignment<br />Columns
+        </div>
+        <div class="sorter">
+          <a href="/interfaces?sort=asa_reverse">&or;</a>
+        </div>
+      </th>
+    </tr>
+    <%= render :partial => "/alignments/alignment", :collection => @alignments %>
+  </table>
+</div>

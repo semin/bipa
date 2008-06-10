@@ -1,109 +1,125 @@
-<table class="stats">
-  <tr>
-    <th style="border: 0px; background: white;"></th>
-    <th style="border-left: 0px; width: 30%;">Protein-DNA</th>
-    <th style="width: 30%;">Protein-RNA</th>
-  </tr>
-  <tr>
-    <th style="border-top: 0px">Number of interfaces </th>
-    <td><%= @scop.dna_interfaces(@redundancy, @resolution).size %></td>
-    <td><%= @scop.rna_interfaces(@redundancy, @resolution).size %></td>
-  </tr>
-  <tr>
-    <th>Average<br />ASA(&Aring;<sup>2</sup>)</th>
-    <td>
-      <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_dna_interface_asa(@redundancy, @resolution) %>
-        (<%= "%.2f" % @scop.stddev_dna_interface_asa(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-    <td>
-      <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_rna_interface_asa(@redundancy, @resolution) %>
-        (<%= "%.2f" % @scop.stddev_rna_interface_asa(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-  </tr>
-  <tr>
-    <th>Average<br />Hydrogen bonds <br /> (per 100&Aring;<sup>2</sup>)</th>
-    <td>
-      <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_dna_interface_hbonds(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_dna_interface_hbonds(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-    <td>
-      <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_rna_interface_hbonds(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_rna_interface_hbonds(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-  </tr>
-  <tr>
-    <th>Average<br />Water-mediated hydrogen bonds <br />(per 100&Aring;<sup>2</sup>)</th>
-    <td>
-      <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_dna_interface_whbonds(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_dna_interface_whbonds(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-    <td>
-      <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_rna_interface_whbonds(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_rna_interface_whbonds(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-  </tr>
-  <tr>
-    <th>Average<br />van der Waals contacts<br />(per 100&Aring;<sup>2</sup>)</th>
-    <td>
-      <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_dna_interface_contacts(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_dna_interface_contacts(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-    <td>
-      <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_rna_interface_contacts(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_rna_interface_contacts(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-  </tr>
-  <tr>
-    <th>Average<br />Polarity</th>
-    <td>
-      <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_dna_interface_polarity(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_dna_interface_polarity(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-    <td>
-      <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-        <%= "%.2f" % @scop.mean_rna_interface_polarity(@redundancy, @resolution) %> 
-        (<%= "%.2f" % @scop.stddev_rna_interface_polarity(@redundancy, @resolution) %>)
-      <% else %>
-        N/A
-      <% end %>
-    </td>
-  </tr>
-</table>
+<% content_for :main_title do %>
+  <div class="title">
+    <%= @scop.hierarchy %>: <%= @scop.description %>
+  </div>
+<% end %>
 
-<small>* number in a bracket: standard deviation</small>
+<div id="tab_menu_container">
+  <ul id="tab_menu">
+    <li><a href="/scops/<%= @scop.id %>/summary" class="current">Summary</a></li>
+    <li><a href="/scops/<%= @scop.id %>/propensities">Propensites</a></li>
+    <li><a href="/scops/<%= @scop.id %>/frequencies">Frequencies</a></li>
+    <li><a href="/scops/<%= @scop.id %>/alignments">Alignments</a></li>
+    <li><a href="/scops/<%= @scop.id %>/interfaces">Interfaces</a></li>
+  </ul>
+</div>
+
+<div id="below_tab_menu">
+  <table class="stats">
+    <tr>
+      <th style="border: 0px; background: white;"></th>
+      <th style="border-left: 0px; width: 30%;">Protein-DNA</th>
+      <th style="width: 30%;">Protein-RNA</th>
+    </tr>
+    <tr>
+      <th style="border-top: 0px">Number of interfaces </th>
+      <td><%= @scop.dna_interfaces(@redundancy, @resolution).size %></td>
+      <td><%= @scop.rna_interfaces(@redundancy, @resolution).size %></td>
+    </tr>
+    <tr>
+      <th>Average<br />ASA(&Aring;<sup>2</sup>)</th>
+      <td>
+        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_dna_interface_asa(@redundancy, @resolution) %>
+          (<%= "%.2f" % @scop.stddev_dna_interface_asa(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_rna_interface_asa(@redundancy, @resolution) %>
+          (<%= "%.2f" % @scop.stddev_rna_interface_asa(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th>Average<br />Hydrogen bonds <br /> (per 100&Aring;<sup>2</sup>)</th>
+      <td>
+        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_dna_interface_hbonds(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_dna_interface_hbonds(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_rna_interface_hbonds(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_rna_interface_hbonds(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th>Average<br />Water-mediated hydrogen bonds <br />(per 100&Aring;<sup>2</sup>)</th>
+      <td>
+        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_dna_interface_whbonds(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_dna_interface_whbonds(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_rna_interface_whbonds(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_rna_interface_whbonds(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th>Average<br />van der Waals contacts<br />(per 100&Aring;<sup>2</sup>)</th>
+      <td>
+        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_dna_interface_contacts(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_dna_interface_contacts(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_rna_interface_contacts(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_rna_interface_contacts(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+    <tr>
+      <th>Average<br />Polarity</th>
+      <td>
+        <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_dna_interface_polarity(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_dna_interface_polarity(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
+          <%= "%.2f" % @scop.mean_rna_interface_polarity(@redundancy, @resolution) %> 
+          (<%= "%.2f" % @scop.stddev_rna_interface_polarity(@redundancy, @resolution) %>)
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  </table>
+</div>
