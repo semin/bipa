@@ -32,7 +32,7 @@ class ScopController < ApplicationController
     @scop = Scop.find(params[:id])
 
     respond_to do |format|
-      format.html
+      format.html { redirect_to summary_scop_url(@scop) }
     end
   end
 
@@ -49,7 +49,7 @@ class ScopController < ApplicationController
     @scop = Scop.find(params[:id])
 
     respond_to do |format|
-      format.html { render :layout => false }
+      format.html
     end
   end
 
@@ -57,7 +57,7 @@ class ScopController < ApplicationController
     @scop = Scop.find(params[:id])
 
     respond_to do |format|
-      format.html { render :layout => false }
+      format.html
     end
   end
 
@@ -65,15 +65,22 @@ class ScopController < ApplicationController
     @scop = Scop.find(params[:id])
 
     respond_to do |format|
-      format.html { render :layout => false }
+      format.html
     end
   end
 
   def alignments
     @scop = Scop.find(params[:id])
 
+    if @scop.level < 5
+      @families = @scop.all_filtered_children(@redundancy).select { |c| c.level == 4 }
+      @alignments = @families.map { |f| f.send("rep#{@redundancy}_alignment") }.compact
+    else
+      @alignments = nil
+    end
+
     respond_to do |format|
-      format.html { render :layout => false }
+      format.html
     end
   end
 
@@ -84,7 +91,7 @@ class ScopController < ApplicationController
     @interfaces = @dna_interfaces + @rna_interfaces
 
     respond_to do |format|
-      format.html { render :layout => false }
+      format.html
     end
   end
 

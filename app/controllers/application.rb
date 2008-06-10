@@ -65,7 +65,7 @@ class ApplicationController < ActionController::Base
       if params[:per_page].to_i < 1
         session[:per_page] = 10
       else
-        session[:per_page] = params[:per_page]
+        session[:per_page] = params[:per_page].to_i
       end
     end
   end

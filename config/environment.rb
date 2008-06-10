@@ -15,7 +15,7 @@ Rails::Initializer.run do |config|
   config.gem "bio"
   config.gem "simple_memoize"
   config.gem "fork_manager"
-  config.gem "will_paginate"
+#  config.gem "will_paginate"
   config.gem "ar-extensions"
   config.gem "acts_as_ferret"
   config.gem "composite_primary_keys"
@@ -70,3 +70,5 @@ Rails::Initializer.run do |config|
   # Run "rake -D time" for a list of tasks for finding time zone names. Uncomment to use default local time.
   config.time_zone = 'UTC'
 end
+
+WillPaginate.enable_named_scope

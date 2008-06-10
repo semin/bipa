@@ -143,7 +143,7 @@ form.search_form {
   width: 270px;
   margin: 0px;
   margin-left: 10px;
-  display: none;
+  display: block;
 }
 
 #sidebar a {
@@ -230,11 +230,12 @@ form.search_form {
 }
 
 #main_container {
-  position: fixed;
-  top: 110px;
-  bottom: 40px;
+  position: absolute;
+  top: 0px;
+  bottom: 10px;
   left: 290px;
   right: 0px;
+  margin-top: 10px;
   margin-right: 10px;
   color: #000000;
   background: #FFFFFF;
@@ -254,7 +255,7 @@ form.search_form {
 }
 
 #main_title div.title {
-  float: left;
+  position: absolute;
   padding-top: 3px;
   padding-left: 10px;
   font-size: 1.0em;
@@ -273,12 +274,6 @@ form.search_form {
   padding-right: 10px;
   font-size: 0.9em;
   overflow: auto;
-}
-
-#main_spinner {
-  position: absolute;
-  top: 45%;
-  left: 50%;
 }
 
 #home_intro {
@@ -387,15 +382,13 @@ table td.news_content {
 }
 
 table.stats {
-  text-align: center;
-  height: 90%;
   width: 100%;
   border: 1px #FFFFFF solid;
   border-collapse: collapse;
   border-spacing: 0px;
-  border-tom: 1px #000000 solid;
   border-bottom: 1px #000000 solid;
   font-size: 0.9em;
+  text-align: center;
 }
 
 table.stats th {
@@ -460,3 +453,58 @@ div.sorter a:hover, a:active {
   color: #000000;
   text-decoration: none;
 }
+
+#tab_menu_container {
+  position: absolute;
+  margin-top: 10px;
+  top: 0px;
+  height: 30px;
+  left: 10px;
+  right: 10px;
+  border-bottom: 1px #3C3C3C solid;
+}
+
+#below_tab_menu {
+  position: absolute;
+  padding-top: 10px;
+  top: 40px;
+  bottom: 0px;
+  left: 10px;
+  right: 10px;
+}
+
+#tab_menu_container ul#tab_menu {
+  list-style-type:none;
+  position:absolute;
+  width:100%;
+  height:27px;
+  bottom: 0px;
+  margin: 0px; 
+  padding: 0px;
+}
+
+#tab_menu_container ul#tab_menu li {
+  display:block;
+  float:left;
+  margin:0 0 0 4px;
+  height:27px;
+}
+
+#tab_menu_container ul#tab_menu li.left {
+  margin:0;
+}
+
+#tab_menu_container ul#tab_menu li a {
+  display:block;
+  float:left;
+  color:#fff;
+  background:#888888;
+  line-height:27px;
+  text-decoration:none;
+  padding:0 17px 0 18px;
+  height:27px;
+}
+
+#tab_menu_container ul#tab_menu li a.right{padding-right:19px;}
+#tab_menu_container ul#tab_menu li a:hover{background: #3C3C3C;}
+#tab_menu_container ul#tab_menu li a.current{color:#C5C2B8; background:#3C3C3C;}
