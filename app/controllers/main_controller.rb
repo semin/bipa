@@ -9,18 +9,17 @@ class MainController < ApplicationController
   end
 
   def browse
-    redirect_to :controller => "interfaces", :action => "index"
-  end
+    session[:classification] = params[:classification]
 
-  def search
     case params[:classification]
     when "SCOP"
-      redirect_to params.merge(:controller => "scop", :action => "search")
+      redirect_to scops_url
     when "GO"
-      redirect_to :controller => "go", :action => "search"
+      redirect_to gos_url
     when "TAXONOMY"
-      redirect_to :controller => "taxonomy", :action => "search"
-    else; raise "Unknow classification: #{params[:classification]}"
+      redirect_to taxa_url
+    when "INTERFACES"
+      redirect_to interfaces_url
     end
   end
 

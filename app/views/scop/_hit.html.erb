@@ -1,8 +1,8 @@
 <div class="list">
   <div class="list_title">
-    &gt; <%= link_to "#{hit.hierarchy}: #{hit.description}", :controller => "scop", :action => "show", :id => hit.id %>
+    &gt; <%= link_to "#{hit.hierarchy}: #{hit.description}", scop_url(hit.id) %>
   </div>
-  <div class="hit_content">
+  <div class="list_content">
     (sunid: <%= hit.sunid %>, sccs: <%= hit.sccs %>, 
     <% if hit.type == ScopDomain %>
       sid: <%= hit.sid %>

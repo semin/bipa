@@ -64,16 +64,17 @@
           animated: "fast"
         });
         $j("#notice").fadeOut(7000);
-        if ($j.cookie("sidebar") == "hide") {
-            $j("#sidebar").css("display", "none");
-            $j("#gap").css("left", "0px");
-            $j("#gap_middle").html("&rsaquo;");
-            $j("#main_container").css("left", "10px");
-        } else {
+
+        if ($j.cookie("sidebar") == "show") {
             $j("#sidebar").css("display", "block");
             $j("#gap").css("left", "280px");
             $j("#gap_middle").html("&lsaquo;");
             $j("#main_container").css("left", "290px");
+        } else {
+            $j("#sidebar").css("display", "none");
+            $j("#gap").css("left", "0px");
+            $j("#gap_middle").html("&rsaquo;");
+            $j("#main_container").css("left", "10px");
         }
         $j("#gap").click(function() {
           if ($j("#sidebar").css("display") == "block") {
@@ -111,28 +112,25 @@
       <div id="header_menu">
         <%= link_to("Home", "/") %>
         |
-        <!--<%= link_to("Browse", "/browse") %>
-        |-->
+        <div id="browse">
+          <% form_tag({ :controller => "main", :action => "browse" }, { :id => "browse_form" }) do %>
+            <%= select_tag(:classification, options_for_select(%w{SCOP GO TAXONOMY INTERFACES}, session[:classification] || "SCOP")) -%>
+            <%= submit_tag("Browse") -%>
+          <% end %>
+        </div>
+        |
         <div id="settings">
           <% form_tag({ :controller => "main", :action => "home" }, { :id => "settings_form" }) do %>
-            NR: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, @redundancy)) -%>
+            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, @redundancy)) -%>
             ,
-            Resolution &lt; <%= text_field_tag(:resolution, @resolution || 100.0, :maxlength => 4, :size => 5) -%> &Aring;
+            Resolution &lt; <%= text_field_tag(:resolution, @resolution, :maxlength => 4, :size => 4) -%> &Aring;
             <%= submit_tag("Apply") -%>
           <% end %>
         </div>
         |
-        <div id="search">
-          <% form_tag({ :controller => "main", :action => "search" }, { :id => "search_form" }) do %>
-            <%= select_tag(:classification, "<option selected=selected>SCOP</option> <option>GO</option> <option>TAXONOMY</option>") -%>
-            <%= text_field_tag(:query) -%>
-            <%= submit_tag("Search") -%>
-          <% end %>
-        </div>
+        <%= link_to("Contact", "/contact") %>
         |
         <%= link_to("Help", "/help") %>
-        |
-        <%= link_to("Contact", "/contact") %>
       </div>
     </div>
 

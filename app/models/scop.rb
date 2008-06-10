@@ -40,10 +40,14 @@ class Scop < ActiveRecord::Base
   end
   memoize :ul_tree
 
+#  def tree_title
+#    %Q^<a href="#scop/#{id}" onclick="new Ajax.Updater('main_container', '/scop/show/#{id}', { asynchronous:true, evalScripts:true}); return false;">
+#    [#{stype.upcase}] #{description}
+#    </a>^
+#  end
+
   def tree_title
-    %Q^<a href="#scop/#{id}" onclick="new Ajax.Updater('main_container', '/scop/show/#{id}', { asynchronous:true, evalScripts:true}); return false;">
-    [#{stype.upcase}] #{description}
-    </a>^
+    %Q"<a href='#scop/#{id}'>[#{stype.upcase}] #{description}</a>"
   end
 
   def hierarchy_and_description
@@ -81,6 +85,10 @@ class Scop < ActiveRecord::Base
     all_filtered_children(redundancy).select { |c| c.children.empty? }
   end
   memoize :all_filtered_leaf_children
+
+  def interfaces(redundancy, resolution)
+    dna_interfaces + rna_interfaces
+  end
 
   %w(dna rna).each do |na|
     class_eval <<-END

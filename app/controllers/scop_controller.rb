@@ -1,29 +1,27 @@
 class ScopController < ApplicationController
 
-  def children
-    root = params[:root]
+  def index
+    order = case params[:sort]
+            when "id"           then "id"
+            when "stype"        then "stype"
+            when "sunid"        then "sunid"
+            when "sccs"         then "sccs"
+            when "sid"          then "sid"
+            when "description"  then "description"
+            when "id_reverse"           then "id DESC"
+            when "stype_reverse"        then "stype DESC"
+            when "sunid_reverse"        then "sunid DESC"
+            when "sccs_reverse"         then "sccs DESC"
+            when "sid_reverse"          then "sid DESC"
+            when "description_reverse"  then "description DESC"
+            else; "id"
+            end
 
-    if root == "root"
-      children = Scop.send("rep#{@redundancy}").find(1).filtered_children(@redundancy)
-    else
-      children = Scop.send("rep#{@redundancy}").find(root).filtered_children(@redundancy)
-    end
-
-    children.each do |child|
-      child[:tree_title] = child.tree_title
-      if child.filtered_children(@redundancy).size > 0
-        child[:hasChildren] = true
-      end
-    end
-
-    respond_to do |format|
-      format.json { render :json => children.to_json }
-    end
-  end
-
-  def search
-    @query = params[:query]
-    @hits = Scop.find_with_ferret(@query, :limit => :all)
+    @scops = Scop.send("rep#{@redundancy}").paginate(
+      :per_page => 10,
+      :page => params[:page],
+      :order => order
+    )
 
     respond_to do |format|
       format.html
@@ -34,7 +32,16 @@ class ScopController < ApplicationController
     @scop = Scop.send("rep#{@redundancy}").find(params[:id])
 
     respond_to do |format|
-      format.js
+      format.html
+    end
+  end
+
+  def search
+    session[:classification] = params[:classification]
+    @query = params[:query]
+    @hits = Scop.find_with_ferret(@query, :limit => :all)
+
+    respond_to do |format|
       format.html
     end
   end
@@ -82,4 +89,24 @@ class ScopController < ApplicationController
     end
   end
 
+  def children
+    root = params[:root]
+
+    if root == "root"
+      children = Scop.send("rep#{@redundancy}").find(1).filtered_children(@redundancy)
+    else
+      children = Scop.send("rep#{@redundancy}").find(root).filtered_children(@redundancy)
+    end
+
+    children.each do |child|
+      child[:tree_title] = child.tree_title
+      if child.filtered_children(@redundancy).size > 0
+        child[:hasChildren] = true
+      end
+    end
+
+    respond_to do |format|
+      format.json { render :json => children.to_json }
+    end
+  end
 end

@@ -2,6 +2,12 @@
   <div class="title">
     Browse: Interfaces
   </div>
+  <div class="search_form">
+    <% form_tag("/interfaces/search", :method => "get", :class => "search_form") do %>
+      <%= text_field_tag :query, nil, :size => 30 %>
+      <%= submit_tag "Search" %>
+    <% end %>
+  </div>
 </div>
 
 <div id="main_content">
@@ -11,118 +17,118 @@
       <tr>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=pdb">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "pdb") %>
           </div>
           <div class="header">
             PDB
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=pdb_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "pdb_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=sid">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "sid") %>
           </div>
           <div class="header">
             SCOP<br />sid
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=sid_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "sid_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=resolution">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "resolution") %>
           </div>
           <div class="header">
             Resolution
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=resolution_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "resolution_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=type">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "type") %>
           </div>
           <div class="header">
             Binding
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=type_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "type_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=asa">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "asa") %>
           </div>
           <div class="header">
             ASA(&Aring;<sup>2</sup>)
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=asa_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "asa_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=no_residues">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "no_residues") %>
           </div>
           <div class="header">
             No. of<br />residues
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=no_residues_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "no_residues_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=no_atoms">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "no_atoms") %>
           </div>
           <div class="header">
             No. of<br />atoms
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=no_atoms_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "no_atoms_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=no_contacts">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "no_contacts") %>
           </div>
           <div class="header">
             No. of<br />van der Waals<br />contacts
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=no_contacts_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "no_contacts_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=no_hbonds">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "no_hbonds") %>
           </div>
           <div class="header">
             No. of<br />hydrogen bonds
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=no_hbonds_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "no_hbonds_reverse") %>
           </div>
         </th>
         <th>
           <div class="sorter">
-            <a href="/interfaces?sort=no_whbonds">&and;</a>
+            <%= link_to "&and;", interfaces_url(:sort => "no_whbonds") %>
           </div>
           <div class="header">
             No. of<br />water-mediated<br />hydrogen bonds
           </div>
           <div class="sorter">
-            <a href="/interfaces?sort=no_whbonds_reverse">&or;</a>
+            <%= link_to "&or;", interfaces_url(:sort => "no_whbonds_reverse") %>
           </div>
         </th>
       </tr>
     </thead>
     <tbody id="table_body">
-      <%= render :partial => 'interface', :collection => @interfaces %>
+      <%= render :partial => "interface", :collection => @interfaces %>
     </tbody>
   </table>
 

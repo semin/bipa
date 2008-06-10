@@ -42,4 +42,15 @@ class InterfacesController < ApplicationController
       end
     end
   end
+
+  def search
+    session[:classification] = params[:classification]
+    @query = params[:query]
+    @hits = DomainInterface.find_with_ferret(@query, :limit => :all)
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
 end

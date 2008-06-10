@@ -40,7 +40,7 @@ class ApplicationController < ActionController::Base
     elsif session[:redundancy]
       @redundancy = session[:redundancy]
     else
-      @redundancy = session[:redundancy] = "all"
+      @redundancy = session[:redundancy] = "90"
     end
 
     if params[:resolution]
@@ -50,7 +50,7 @@ class ApplicationController < ActionController::Base
     elsif session[:resolution]
       @resolution = session[:resolution]
     else
-      @resolution = session[:resolution] = 100.0
+      @resolution = session[:resolution] = "3.5"
     end
   end
 end

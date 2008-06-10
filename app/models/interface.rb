@@ -34,7 +34,7 @@ class DomainInterface < Interface
   }
 
   def na_type
-    case self[:type]
+    "Protein-" + case self[:type]
     when /Dna/i then "DNA"
     when /Rna/i then "RNA"
     else; "Unknown"
