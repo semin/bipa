@@ -1,9 +1,7 @@
-<div id="main_title">
+<% content_for :main_title do %>
   <div class="title">
     SCOP Search: <%= @query %>, Hits: <%= @hits.total_hits %>
   </div>
-</div>
+<% end %>
 
-<div id="main_content">
-  <%= render :partial => "hit", :collection => @hits, :spacer_template => "hit_spacer" %>
-</div>
+<%= render :partial => "hit", :collection => @hits, :spacer_template => "hit_spacer" %>

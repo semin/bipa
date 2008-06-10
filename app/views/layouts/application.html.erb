@@ -168,7 +168,12 @@
       </div>
 
       <div id="main_container">
-        <%= yield :layout %>
+        <div id="main_title">
+          <%= yield :main_title %>
+        </div>
+        <div id="main_content">
+          <%= yield :layout %>
+        </div>
       </div>
     </div>
 

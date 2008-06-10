@@ -1,7 +1,6 @@
 <tr>
-  <td><%= link_to scop.id, scop_url(scop) %></td>
   <td><%= scop.stype.upcase %></td>
-  <td><%= scop.sunid %></td>
+  <td><%= link_to scop.sunid, scop_url(scop) %></td>
   <td><%= scop.sccs %></td>
   <td><%= scop.sid %></td>
   <td style="text-align: left"><%= scop.description %></td>
