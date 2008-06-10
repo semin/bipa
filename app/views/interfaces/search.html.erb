@@ -1,0 +1,7 @@
+<% content_for :main_title do %>
+  <div class="title">
+    INTERFACE Search: <%= @query %>, Hits: <%= @hits.total_hits %>
+  </div>
+<% end %>
+
+<%= render :partial => "hit", :collection => @hits, :spacer_template => "hit_spacer" %>

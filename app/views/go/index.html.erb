@@ -1,0 +1,56 @@
+<% content_for :main_title do %>
+  <div class="title">
+    Browse: GO
+  </div>
+  <div class="search_form">
+    <% form_tag(search_gos_path, :method => "get", :class => "search_form") do %>
+      <%= text_field_tag :query, nil, :size => 30 %>
+      <%= submit_tag "Search", :name => nil %>
+    <% end %>
+  </div>
+<% end %>
+
+<table class="stats">
+  <thead>
+    <tr>
+      <th>
+        <div class="sorter">
+          <%= link_to "&and;", gos_url(:sort => "go_id") %>
+        </div>
+        <div class="header">
+          GO ID
+        </div>
+        <div class="sorter">
+          <%= link_to "&or;", gos_url(:sort => "go_id_reverse") %>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <%= link_to "&and;", gos_url(:sort => "namespace") %>
+        </div>
+        <div class="header">
+          Ontology
+        </div>
+        <div class="sorter">
+          <%= link_to "&or;", gos_url(:sort => "namespace_reverse") %>
+        </div>
+      </th>
+      <th>
+        <div class="sorter">
+          <%= link_to "&and;", gos_url(:sort => "name") %>
+        </div>
+        <div class="header">
+          Name
+        </div>
+        <div class="sorter">
+          <%= link_to "&or;", gos_url(:sort => "name_reverse") %>
+        </div>
+      </th>
+    </tr>
+  </thead>
+  <tbody id="table_body">
+    <%= render :partial => "go", :collection => @gos %>
+  </tbody>
+</table>
+
+<%= will_paginate @gos %>

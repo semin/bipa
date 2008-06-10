@@ -1,0 +1,11 @@
+<div class="list">
+  <div class="list_title">
+    &gt; <%= link_to "PDB: #{hit.pdb_code}, SCOP sid: #{hit.description}, Type: #{hit.na_type}", interface_url(hit.id) %>
+  </div>
+  <div class="list_content">
+    (ASA: <%= hit.asa %>&Aring;, No. of residues: <%= hit.residues_count %>)
+  </div>
+  <div class="list_score">
+    Search Score: <%= "%.2f" % hit.ferret_score %>
+  </div>
+</div>

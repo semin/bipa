@@ -1,0 +1,11 @@
+<div class="list">
+  <div class="list_title">
+    &gt; <%= link_to "GO ID: #{hit.go_it}, Name: #{hit.name}", go_url(go) %>
+  </div>
+  <div class="list_content">
+    (<%= hit.namespace %>)
+  </div>
+  <div class="list_score">
+    Search Score: <%= "%.2f" % hit.ferret_score %>
+  </div>
+</div>
