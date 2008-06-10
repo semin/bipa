@@ -1,5 +1,38 @@
 class GoController < ApplicationController
 
+  def index
+    order = case params[:sort]
+            when "go_id"        then "go_id"
+            when "name"         then "name"
+            when "namespace"    then "namespace"
+            when "definition"   then "definition"
+            when "go_id_reverse"      then "go_id DESC"
+            when "name_reverse"       then "name DESC"
+            when "namespace_reverse"  then "namespace DESC"
+            when "definition_reverse" then "definition DESC"
+            else; "go_id"
+            end
+
+    @gos = GoTerm.paginate(
+      :per_page => 10,
+      :page => params[:page],
+      :order => order
+    )
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
+  def search
+    @query = params[:query]
+    @hits = Go.find_with_ferret(@query, :limit => :all)
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
   def children
     if params[:root] == "root"
       children = []

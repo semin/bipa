@@ -16,6 +16,7 @@ require_dependency "mmcif"
 class ApplicationController < ActionController::Base
 
   before_filter :update_settings
+  before_filter :update_classification, :only => :search
 
   helper :all # include all helpers, all the time
 
@@ -53,4 +54,9 @@ class ApplicationController < ActionController::Base
       @resolution = session[:resolution] = "3.5"
     end
   end
+
+  def update_classification
+    session[:classification] = params[:classification]
+  end
+
 end

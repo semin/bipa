@@ -3,7 +3,7 @@ class InterfacesController < ApplicationController
   def index
     order = case params[:sort]
             when "pdb"          then "scops.sid"
-            when "sid"          then "scops.sid"
+            when "sunid"        then "scops.sunid"
             when "resolution"   then "scops.resolution"
             when "type"         then "type"
             when "asa"          then "asa"
@@ -22,29 +22,23 @@ class InterfacesController < ApplicationController
             when "no_contacts_reverse"  then "contacts_count DESC"
             when "no_hbonds_reverse"    then "hbonds_count DESC"
             when "no_whbonds_reverse"   then "whbonds_count DESC"
-            else; "scops.sid"
+            else; "scops.pdb"
             end
 
     @interfaces = DomainInterface.paginate(
       :per_page => 10,
       :page => params[:page],
       :include => :domain,
-      :select => "id, type, asa, polarity, contact_count, whbonds_count, hbonds_count, hbonds_as_donor_count, hbonds_as_acceptor_count, atoms_coutn, residues_count, scops.sid, scops.resolution",
+      :select => "id, type, asa, contact_count, whbonds_count, hbonds_count, hbonds_as_donor_count, hbonds_as_acceptor_count, atoms_coutn, residues_count, scops.sid, scops.resolution",
       :order => order
     )
 
     respond_to do |format|
       format.html
-      format.js do
-        render :update do |page|
-          page.replace_html "#table_body", :partial => @interfaces
-        end
-      end
     end
   end
 
   def search
-    session[:classification] = params[:classification]
     @query = params[:query]
     @hits = DomainInterface.find_with_ferret(@query, :limit => :all)
 

@@ -87,8 +87,9 @@ class Scop < ActiveRecord::Base
   memoize :all_filtered_leaf_children
 
   def interfaces(redundancy, resolution)
-    dna_interfaces + rna_interfaces
+    dna_interfaces(redundancy, resolution) + rna_interfaces(redundancy, resolution)
   end
+  memoize :interfaces
 
   %w(dna rna).each do |na|
     class_eval <<-END

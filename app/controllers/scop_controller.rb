@@ -29,7 +29,7 @@ class ScopController < ApplicationController
   end
 
   def show
-    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+    @scop = Scop.find(params[:id])
 
     respond_to do |format|
       format.html
@@ -37,7 +37,6 @@ class ScopController < ApplicationController
   end
 
   def search
-    session[:classification] = params[:classification]
     @query = params[:query]
     @hits = Scop.find_with_ferret(@query, :limit => :all)
 
@@ -47,7 +46,7 @@ class ScopController < ApplicationController
   end
 
   def summary
-    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+    @scop = Scop.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -55,7 +54,7 @@ class ScopController < ApplicationController
   end
 
   def propensities
-    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+    @scop = Scop.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -63,7 +62,7 @@ class ScopController < ApplicationController
   end
 
   def frequencies
-    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+    @scop = Scop.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -71,7 +70,7 @@ class ScopController < ApplicationController
   end
 
   def alignments
-    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+    @scop = Scop.find(params[:id])
 
     respond_to do |format|
       format.html { render :layout => false }
@@ -79,7 +78,7 @@ class ScopController < ApplicationController
   end
 
   def interfaces
-    @scop = Scop.send("rep#{@redundancy}").find(params[:id])
+    @scop = Scop.find(params[:id])
     @dna_interfaces = @scop.dna_interfaces(@redundancy, @resolution)
     @rna_interfaces = @scop.rna_interfaces(@redundancy, @resolution)
     @interfaces = @dna_interfaces + @rna_interfaces

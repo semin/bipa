@@ -1,38 +1,36 @@
-<div id="main_title">
+<% content_for :main_title do %>
   <div class="title">
     Home: Welcome to BIPA!
   </div>
+<% end %>
+
+<div id="home_ver" class="home_title">
+  BIPA ver1.0
 </div>
 
-<div id="main_content">
-  <div id="home_ver" class="home_title">
-    BIPA ver1.0
-  </div>
+<p id="home_intro">
+BIPA is the best and the most thorough database for protein-nucleic acid interaction. blah blah ...
+</p>
 
-  <p id="home_intro">
-  BIPA is the best and the most thorough database for protein-nucleic acid interaction. blah blah ...
-  </p>
-
-  <div id="home_stats">
-    <div class="home_title">
-      Brief Statistics
-    </div>
-    <ul id="home_stats_list" class="stats">
-      <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
-      <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.repall.count %></li>
-      <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.repall.count %></li>
-      <li>No. of Nucleic Acid Binding SCOP Domains: <%= ScopDomain.repall.count %></li>
-      <li>No. of Protein-DNA interfaces: <%= DomainDnaInterface.count %></li>
-      <li>No. of Protein-RNA interfaces: <%= DomainRnaInterface.count %></li>
-    </ul>
+<div id="home_stats">
+  <div class="home_title">
+    Brief Statistics
   </div>
+  <ul id="home_stats_list" class="stats">
+    <li>No. of Protein-Nucleic Acid Complexes: <%= Structure.count %></li>
+    <li>No. of Nucleic Acid Binding SCOP Superfamilies: <%= ScopSuperFamily.repall.count %></li>
+    <li>No. of Nucleic Acid Binding SCOP Families: <%= ScopFamily.repall.count %></li>
+    <li>No. of Nucleic Acid Binding SCOP Domains: <%= ScopDomain.repall.count %></li>
+    <li>No. of Protein-DNA interfaces: <%= DomainDnaInterface.count %></li>
+    <li>No. of Protein-RNA interfaces: <%= DomainRnaInterface.count %></li>
+  </ul>
+</div>
 
-  <div id="home_news">
-    <div class="home_title">
-      News
-    </div>
-    <table id="home_news_table" class="news">
-      <%= render(:partial => "news", :collection => @newses) %>
-    </table>
+<div id="home_news">
+  <div class="home_title">
+    News
   </div>
+  <table id="home_news_table" class="news">
+    <%= render(:partial => "news", :collection => @newses) %>
+  </table>
 </div>
