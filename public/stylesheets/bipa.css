@@ -83,15 +83,26 @@ body {
   display: inline;
 }
 
+div.per_page_form {
+  position: absolute;
+  right: 300px;
+  padding-top: 5px;
+  font-size: 0.8em;
+}
+
+form.per_page_form {
+  display: inline;
+}
+
 div.search_form {
+  position: absolute;
+  right: 10px;
   padding-top: 3px;
-  float: right;
 }
 
 form.search_form {
   display: inline;
 }
-
 #settings {
   display: inline;
 }
@@ -132,7 +143,7 @@ form.search_form {
   width: 270px;
   margin: 0px;
   margin-left: 10px;
-  display: block;
+  display: none;
 }
 
 #sidebar a {

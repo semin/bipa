@@ -66,11 +66,12 @@
         $j("#notice").fadeOut(7000);
 
         if ($j.cookie("sidebar") == "show") {
-            $j("#sidebar").css("display", "block");
             $j("#gap").css("left", "280px");
             $j("#gap_middle").html("&lsaquo;");
             $j("#main_container").css("left", "290px");
-        } else {
+            $j("#sidebar").css("display", "block");
+        }
+        if ($j.cookie("sidebar") == "hide") {
             $j("#sidebar").css("display", "none");
             $j("#gap").css("left", "0px");
             $j("#gap_middle").html("&rsaquo;");
@@ -84,10 +85,10 @@
             $j("#main_container").css("left", "10px");
             $j.cookie("sidebar", "hide");
           } else {
-            $j("#sidebar").css("display", "block");
             $j("#gap").css("left", "280px");
             $j("#gap_middle").html("&lsaquo;");
             $j("#main_container").css("left", "290px");
+            $j("#sidebar").css("display", "block");
             $j.cookie("sidebar", "show");
           }
         });

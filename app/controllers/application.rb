@@ -17,6 +17,7 @@ class ApplicationController < ActionController::Base
 
   before_filter :update_settings
   before_filter :update_classification, :only => :search
+  before_filter :update_per_page, :only => :index
 
   helper :all # include all helpers, all the time
 
@@ -57,6 +58,16 @@ class ApplicationController < ActionController::Base
 
   def update_classification
     session[:classification] = params[:classification]
+  end
+
+  def update_per_page
+    if params[:per_page]
+      if params[:per_page].to_i < 1
+        session[:per_page] = 10
+      else
+        session[:per_page] = params[:per_page]
+      end
+    end
   end
 
 end

@@ -22,11 +22,11 @@ class InterfacesController < ApplicationController
             when "no_contacts_reverse"  then "contacts_count DESC"
             when "no_hbonds_reverse"    then "hbonds_count DESC"
             when "no_whbonds_reverse"   then "whbonds_count DESC"
-            else; "scops.pdb"
+            else; "scops.sid"
             end
 
     @interfaces = DomainInterface.paginate(
-      :per_page => 10,
+      :per_page => session[:per_page] || 10,
       :page => params[:page],
       :include => :domain,
       :select => "id, type, asa, contact_count, whbonds_count, hbonds_count, hbonds_as_donor_count, hbonds_as_acceptor_count, atoms_coutn, residues_count, scops.sid, scops.resolution",

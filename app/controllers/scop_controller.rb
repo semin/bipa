@@ -18,7 +18,7 @@ class ScopController < ApplicationController
             end
 
     @scops = Scop.send("rep#{@redundancy}").paginate(
-      :per_page => 10,
+      :per_page => session[:per_page] || 10,
       :page => params[:page],
       :order => order
     )
