@@ -1,4 +1,4 @@
-class TaxonomyController < ApplicationController
+class TaxaController < ApplicationController
 
   def children
     if params[:root] == "root"

@@ -1,4 +1,4 @@
-class ScopController < ApplicationController
+class ScopsController < ApplicationController
 
   def index
     order = case params[:sort]
