@@ -362,10 +362,6 @@ class ScopDomain < Scop
     result
   end
 
-  def resolution
-    chains.first.model.structure.resolution
-  end
-
   def to_pdb
     atoms.sort_by(&:atom_code).inject("") { |p, a| p + (a.to_pdb + "\n") }
   end

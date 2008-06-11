@@ -74,7 +74,11 @@ class ScopController < ApplicationController
 
     if @scop.level < 5
       @families = @scop.all_filtered_children(@redundancy).select { |c| c.level == 4 }
-      @alignments = @families.map { |f| f.send("rep#{@redundancy}_alignment") }.compact
+      if @redundancy == "all"
+        @alignments = @families.map { |f| f.send("full_alignment") }.compact
+      else
+        @alignments = @families.map { |f| f.send("rep#{@redundancy}_alignment") }.compact
+      end
     else
       @alignments = nil
     end
@@ -86,9 +90,7 @@ class ScopController < ApplicationController
 
   def interfaces
     @scop = Scop.find(params[:id])
-    @dna_interfaces = @scop.dna_interfaces(@redundancy, @resolution)
-    @rna_interfaces = @scop.rna_interfaces(@redundancy, @resolution)
-    @interfaces = @dna_interfaces + @rna_interfaces
+    @interfaces = @scop.interfaces(@redundancy, @resolution)
 
     respond_to do |format|
       format.html

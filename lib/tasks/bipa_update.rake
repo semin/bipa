@@ -329,9 +329,14 @@ namespace :bipa do
     task :scops_resolution => [:environment] do
       domains = ScopDomain.repall.find(:all)
       domains.each_with_index do |domain, i|
-        domain.resolution = domain.chains.first.model.structure.resolution
+        resolution = domain.chains.first.model.structure.resolution
+        if resolution.nil?
+          domain.update_attribute(:resolution, 999.0)
+        else
+          domain.update_attribute(:resolution, resolution)
+        end
         domain.save!
-        $logger.info("Updating resolution of domain, #{domain.id}: done (#{i+1}/#{domains.size})")
+        $logger.info("Updating resolution, #{domain.resolution} of domain, #{domain.id}: done (#{i+1}/#{domains.size})")
       end
     end
 

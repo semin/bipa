@@ -122,7 +122,7 @@
         |
         <div id="settings">
           <% form_tag({ :controller => "main", :action => "home" }, { :id => "settings_form" }) do %>
-            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, @redundancy)) -%>
+            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, @redundancy || 90)) -%>
             ,
             Resolution &lt; <%= text_field_tag(:resolution, @resolution, :maxlength => 4, :size => 4) -%> &Aring;
             <%= submit_tag("Apply") -%>

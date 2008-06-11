@@ -10,7 +10,7 @@ html, body {
 }
 
 body {
-  color: #000000;
+  color: #000;
   background: #C5C2B8;
   font-family: Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
   font-size: 1em;
@@ -62,16 +62,16 @@ body {
 }
 
 #header_menu a {
-  color: #000000;
+  color: #000;
 }
 
 #header_menu a:link, a:visited {
-  color: #000000;
+  color: #000;
   text-decoration: none;
 }
 
 #header_menu a:hover, a:active {
-  color: #000000;
+  color: #000;
   text-decoration: underline;
 }
 
@@ -123,8 +123,8 @@ form.search_form {
   padding-bottom: 10px;
   z-index: 1000;
   font-size: 1.2em;
-  color: #FFFFFF;
-  background: #000000;
+  color: #FFF;
+  background: #000;
   text-align: center;
 }
 
@@ -147,16 +147,16 @@ form.search_form {
 }
 
 #sidebar a {
-  color: #000000;
+  color: #000;
 }
 
 #sidebar a:link, a:visited {
-  color: #000000;
+  color: #000;
   text-decoration: none;
 }
 
 #sidebar a:hover, a:active {
-  color: #000000;
+  color: #000;
   text-decoration: underline;
 }
 
@@ -206,7 +206,7 @@ form.search_form {
 #accordion_container div.content {
   margin: 0px;
   padding-left: 2px; 
-  background: #FFFFFF;
+  background: #FFF;
   font-size: 0.8em;
 }
 
@@ -237,8 +237,8 @@ form.search_form {
   right: 0px;
   margin-top: 10px;
   margin-right: 10px;
-  color: #000000;
-  background: #FFFFFF;
+  color: #000;
+  background: #FFF;
   overflow: hidden;
 }
 
@@ -310,16 +310,16 @@ form.search_form {
 }
 
 .list a {
-  color: #000000;
+  color: #000;
 }
 
 .list a:link, a:visited {
-  color: #000000;
+  color: #000;
   text-decoration: none;
 }
 
 .list a:hover, a:active {
-  color: #000000;
+  color: #000;
   text-decoration: underline;
 }
 
@@ -383,20 +383,20 @@ table td.news_content {
 
 table.stats {
   width: 100%;
-  border: 1px #FFFFFF solid;
+  border: 1px #FFF solid;
   border-collapse: collapse;
   border-spacing: 0px;
-  border-bottom: 1px #000000 solid;
+  border-bottom: 1px #000 solid;
   font-size: 0.9em;
   text-align: center;
 }
 
 table.stats th {
   background-color: #666666;
-  color: #FFFFFF;
+  color: #FFF;
   padding: 4px;
   text-align: center;
-  border: 1px #000000 dotted;
+  border: 1px #000 dotted;
   font-weight: bold;
 }
 
@@ -409,7 +409,7 @@ table.stats tr:hover {
 }
 
 table.stats td {
-  color: #000000;
+  color: #000;
   padding: 4px;
   border: 1px #000 dotted;
   font-family: Monaco, Lucida Console, Courier New, Courier, monospace;
@@ -418,16 +418,16 @@ table.stats td {
 }
 
 table.stats a {
-  color: #000000;
+  color: #000;
 }
 
 table.stats a:link, a:visited {
-  color: #000000;
+  color: #000;
   text-decoration: none;
 }
 
 table.stats a:hover, a:active {
-  color: #000000;
+  color: #000;
   text-decoration: underline;
 }
 
@@ -450,7 +450,7 @@ div.sorter a:link, a:visited {
 }
 
 div.sorter a:hover, a:active {
-  color: #000000;
+  color: #000;
   text-decoration: none;
 }
 
@@ -461,7 +461,7 @@ div.sorter a:hover, a:active {
   height: 30px;
   left: 10px;
   right: 10px;
-  border-bottom: 1px #3C3C3C solid;
+  border-bottom: 2px #3C3C3C solid;
 }
 
 #below_tab_menu {
@@ -497,8 +497,8 @@ div.sorter a:hover, a:active {
 #tab_menu_container ul#tab_menu li a {
   display:block;
   float:left;
-  color:#fff;
-  background:#888888;
+  color:#EEE;
+  background:#888;
   line-height:27px;
   text-decoration:none;
   padding:0 17px 0 18px;
@@ -507,4 +507,4 @@ div.sorter a:hover, a:active {
 
 #tab_menu_container ul#tab_menu li a.right{padding-right:19px;}
 #tab_menu_container ul#tab_menu li a:hover{background: #3C3C3C;}
-#tab_menu_container ul#tab_menu li a.current{color:#C5C2B8; background:#3C3C3C;}
+#tab_menu_container ul#tab_menu li a.current{color:#FFF; background:#3C3C3C; font-weight: bold;}

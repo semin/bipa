@@ -73,7 +73,7 @@ class AaChain < Chain
             :foreign_key  => "chain_id"
 
   has_many  :domains,
-            :through      => :aa_residues,
+            :through      => :residues,
             :uniq         => true
 end
 

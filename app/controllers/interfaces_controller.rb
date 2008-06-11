@@ -29,7 +29,8 @@ class InterfacesController < ApplicationController
       :per_page => session[:per_page] || 10,
       :page => params[:page],
       :include => :domain,
-      :select => "id, type, asa, contact_count, whbonds_count, hbonds_count, hbonds_as_donor_count, hbonds_as_acceptor_count, atoms_coutn, residues_count, scops.sid, scops.resolution",
+      :select => "id, type, asa, contacts_count, whbonds_count, hbonds_count, hbonds_as_donor_count, hbonds_as_acceptor_count, atoms_count, residues_count, scops.sid, scops.resolution, scops.repall, scops.rep100, scops.rep90, scops.rep80, scops.rep70, scops.rep60, scops.rep50, scops.rep40, scops.rep30, scops.rep20, scops.rep10",
+      :conditions => "scops.rep#{@redundancy} = 1 and scops.resolution < #{@resolution}",
       :order => order
     )
 

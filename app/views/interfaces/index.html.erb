@@ -4,7 +4,7 @@
   </div>
   <div class="per_page_form">
     <% form_tag(interfaces_path, :method => "get", :class => "per_page_form") do %>
-      <%= select_tag :per_page, options_for_select(%w{100 90 80 70 60 50 40 30 20 10}, session[:per_page].to_s) %> per page
+      <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, @per_page) %> per page
       <%= submit_tag("Apply", :name => nil) %>
     <% end %>|
   </div>
@@ -135,5 +135,7 @@
     <%= render :partial => "interface", :collection => @interfaces %>
   </tbody>
 </table>
+
+<small>* As a matter of convenience, 999.0 &Aring;<sup>2</sup> was assinged to the structures solved by certain types of experiments (e.g. NMR).</small>
 
 <%= will_paginate @interfaces %>

@@ -4,7 +4,7 @@
   </div>
   <div class="per_page_form">
     <% form_tag(scops_path, :method => "get", :class => "per_page_form") do %>
-      <%= select_tag :per_page, options_for_select(%w{100 90 80 70 60 50 40 30 20 10}, session[:per_page].to_s) %> per page
+      <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, @per_page) %> per page
       <%= submit_tag("Apply", :name => nil) %>
     <% end %>|
   </div>

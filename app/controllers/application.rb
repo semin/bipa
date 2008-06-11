@@ -62,11 +62,15 @@ class ApplicationController < ActionController::Base
 
   def update_per_page
     if params[:per_page]
-      if params[:per_page].to_i < 1
-        session[:per_page] = 10
-      else
-        session[:per_page] = params[:per_page].to_i
+      if ((session[:per_page].nil?) ||
+          (session[:per_page] && (session[:per_page] != params[:per_page])))
+        flash[:notice] = "Entries per page has been set to #{params[:per_page]}"
       end
+      @per_page = (session[:per_page] = params[:per_page])
+    elsif session[:per_page]
+      @per_page = session[:per_page]
+    else
+      @per_page = (session[:per_page] = "10")
     end
   end
 
