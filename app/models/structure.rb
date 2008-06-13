@@ -1,11 +1,13 @@
 class Structure < ActiveRecord::Base
 
-  include Bipa::ComposedOfResidues
+#  include Bipa::ComposedOfResidues
 
   named_scope :untainted, :conditions => { :tainted => false }
 
   has_many  :models,
             :dependent  => :destroy
+
+  has_many  :atoms, :through => :models
 
   has_many  :chains,
             :through    => :models
