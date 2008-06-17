@@ -1,7 +1,7 @@
 class Residue < ActiveRecord::Base
 
   include Bipa::Constants
-  include Bipa::ComposedOfAtoms
+#  include Bipa::ComposedOfAtoms
 
   belongs_to  :chain,
               :class_name   => "Chain",
@@ -27,6 +27,12 @@ class Residue < ActiveRecord::Base
 
   has_many  :hbonds_as_acceptor,
             :through      => :atoms
+
+  has_many  :hbonding_donors,
+            :through      => :hbonds_as_acceptor
+
+  has_many  :hbonding_acceptors,
+            :through      => :hbonds_as_donor
 
   has_many  :positions
 

@@ -2,6 +2,18 @@ class Structure < ActiveRecord::Base
 
 #  include Bipa::ComposedOfResidues
 
+  define_index do
+    indexes pdb_code, :sortable => true
+    indexes classification, :sortable => true
+    indexes title, :sortable => true
+    indexes exp_method, :sortable => true
+    indexes resolution, :sortable => true
+    indexes r_value, :sortable => true
+    indexes r_free, :sortable => true
+
+    has deposited_at
+  end
+
   named_scope :untainted, :conditions => { :tainted => false }
 
   has_many  :models,
@@ -30,17 +42,17 @@ class Structure < ActiveRecord::Base
   has_many  :het_chains,
             :through    => :models
 
-  acts_as_ferret  :fields => [ :pdb_code, :classification, :title, :exp_method, :resolution, :r_value, :r_free ],
-                  :remote => true
+#  acts_as_ferret  :fields => [ :pdb_code, :classification, :title, :exp_method, :resolution, :r_value, :r_free ],
+#                  :remote => true
 
-  def residues
-    chains.inject([]) { |s, c| s.concat(c.residues) }
-  end
-  memoize :residues
+#  def residues
+#    chains.inject([]) { |s, c| s.concat(c.residues) }
+#  end
+#  memoize :residues
 
-  def domains
-    aa_chains.inject([]) { |s, a| s.concat(a.domains) }
-  end
-  memoize :domains
+#  def domains
+#    aa_chains.inject([]) { |s, a| s.concat(a.domains) }
+#  end
+#  memoize :domains
 
 end

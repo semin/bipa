@@ -1,6 +1,6 @@
 class Chain < ActiveRecord::Base
 
-  include Bipa::ComposedOfResidues
+#  include Bipa::ComposedOfResidues
 
   belongs_to  :model,
               :counter_cache => true

@@ -55,7 +55,31 @@ class Atom < ActiveRecord::Base
 
   has_one   :zap
 
-  %w(unbound bound delta).each { |s| delegate :"#{s}_asa", :to => :naccess }
+  delegate :unbound_asa, :bound_asa, :delta_asa, :to => :naccess
+
+  named_scope :surface, lambda { |*args|
+    {
+      :include    => :naccess,
+      :conditions => ["naccess.unbound_asa > ?",
+                      (args.first || MIN_SURFACE_ATOM_ASA)]
+    }
+  }
+
+  named_scope :buried, lambda { |*args|
+    {
+      :include    => :naccess,
+      :conditions => ["naccess.unbound_asa <= ?",
+                      (args.first || MIN_SURFACE_ATOM_ASA)]
+    }
+  }
+
+  named_scope :interface, lambda { |*args|
+    {
+      :include    => :naccess,
+      :conditions => ["naccess.delta_asa > ?",
+                      (args.first || MIN_INTERFACE_ATOM_DELTA_ASA)]
+    }
+  }
 
   # ASA related
   def on_surface?
