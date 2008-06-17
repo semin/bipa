@@ -144,6 +144,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :tempfactor
     t.string      :element
     t.string      :charge
+    t.float       :unbound_asa
+    t.float       :bound_asa
+    t.float       :delta_asa
     t.integer     :contacts_count,            :default => 0
     t.integer     :whbonds_count,             :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0

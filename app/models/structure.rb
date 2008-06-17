@@ -14,8 +14,6 @@ class Structure < ActiveRecord::Base
     has deposited_at
   end
 
-  named_scope :untainted, :conditions => { :tainted => false }
-
   has_many  :models,
             :dependent  => :destroy
 
@@ -41,6 +39,12 @@ class Structure < ActiveRecord::Base
 
   has_many  :het_chains,
             :through    => :models
+
+  named_scope :untainted, :conditions => { :tainted => false }
+
+  named_scope :max_resolution, lambda { |res|
+     { :conditions => ["resolution <= ?", res.to_f] }
+  }
 
 #  acts_as_ferret  :fields => [ :pdb_code, :classification, :title, :exp_method, :resolution, :r_value, :r_free ],
 #                  :remote => true
