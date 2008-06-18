@@ -96,8 +96,8 @@ class GoTerm < ActiveRecord::Base
   has_many  :chains,
             :through      => :goa_pdbs
 
-  acts_as_ferret  :fields => [ :go_id, :name, :namespace, :definition ],
-                  :remote => true
+#  acts_as_ferret  :fields => [ :go_id, :name, :namespace, :definition ],
+#                  :remote => true
 
 
   def tree_title

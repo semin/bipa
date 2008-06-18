@@ -55,8 +55,6 @@ class Atom < ActiveRecord::Base
 
   has_one   :zap
 
-  delegate :unbound_asa, :bound_asa, :delta_asa, :to => :naccess
-
   named_scope :surface, lambda { |*args|
     {
       :include    => :naccess,
@@ -95,29 +93,8 @@ class Atom < ActiveRecord::Base
   end
 
   # Atom specific properties
-  def aa?
-    residue.aa?
-  end
 
-  def dna?
-    residue.dna?
-  end
-
-  def rna?
-    residue.rna?
-  end
-
-  def na?
-    dna? || rna?
-  end
-
-  def het?
-    residue.het?
-  end
-
-  def water?
-    residue.water?
-  end
+  delegate :aa?, :dna?, :rna?, :na?, :het?, :water?, :to => :residue
 
   def polar?
     atom_name =~ /O|N/

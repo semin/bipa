@@ -6,7 +6,7 @@ class TaxonomicName < ActiveRecord::Base
 
   delegate :rank, :to => :node
 
-  acts_as_ferret  :fields => [ :name_txt, :unique_name, :name_class, :rank ],
-                  :remote => true
+#  acts_as_ferret  :fields => [ :name_txt, :unique_name, :name_class, :rank ],
+#                  :remote => true
 
 end

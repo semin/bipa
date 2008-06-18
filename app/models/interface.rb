@@ -23,8 +23,8 @@ class DomainInterface < Interface
   delegate  :pdb_code, :sunid, :sccs, :sid, :description, :resolution,
             :to => :domain
 
-  acts_as_ferret  :fields => [ :asa , :polarity, :hbonds_as_donor_count, :hbonds_as_acceptor_count, :contacts_count, :whbonds_count, :sunid, :sccs, :sid, :description, :resolution ],
-                  :remote => true
+#  acts_as_ferret  :fields => [ :asa , :polarity, :hbonds_as_donor_count, :hbonds_as_acceptor_count, :contacts_count, :whbonds_count, :sunid, :sccs, :sid, :description, :resolution ],
+#                  :remote => true
 
   named_scope :max_resolution, lambda { |res|
     {
