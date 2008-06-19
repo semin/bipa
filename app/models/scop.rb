@@ -4,11 +4,17 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-#  acts_as_ferret  :fields => [ :sunid, :stype, :sccs, :sid, :description, :resolution ],
-#                  :remote => true
-
   ((10..100).select { |i| i % 10 == 0 } << "all").each do |si|
     named_scope :"rep#{si}", :conditions => { :"rep#{si}" => true }
+  end
+
+  define_index do
+    indexes sunid,        :sortable => true
+    indexes stype,        :sortable => true
+    indexes sccs,         :sortable => true
+    indexes sid,          :sortable => true
+    indexes description,  :sortable => true
+    indexes resolution,   :sortable => true
   end
 
   def self.factory_create!(opts={})
@@ -39,12 +45,6 @@ class Scop < ActiveRecord::Base
     tree
   end
   memoize :ul_tree
-
-#  def tree_title
-#    %Q^<a href="#scop/#{id}" onclick="new Ajax.Updater('main_container', '/scop/show/#{id}', { asynchronous:true, evalScripts:true}); return false;">
-#    [#{stype.upcase}] #{description}
-#    </a>^
-#  end
 
   def tree_title
     %Q"<a href='/scops/#{id}'>[#{stype.upcase}] #{description}</a>"

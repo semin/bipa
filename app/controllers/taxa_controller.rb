@@ -26,4 +26,13 @@ class TaxaController < ApplicationController
       format.html { render :text => "#{@node.id}, #{@node.scientific_name.name_txt}" }
     end
   end
+
+  def search
+    @query = params[:query]
+    @hits = TaxonomicName.search(@query)
+
+    respond_to do |format|
+      format.html
+    end
+  end
 end

@@ -6,7 +6,11 @@ class TaxonomicName < ActiveRecord::Base
 
   delegate :rank, :to => :node
 
-#  acts_as_ferret  :fields => [ :name_txt, :unique_name, :name_class, :rank ],
-#                  :remote => true
+  define_index do
+    indexes name_txt,     :sortable => true
+    indexes unique_name,  :sortable => true
+    indexes name_class,   :sortable => true
+    indexes node.rank,    :sortable => true, :as => :rank
+  end
 
 end

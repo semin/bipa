@@ -233,9 +233,10 @@ form.search_form {
   position: absolute;
   top: 0px;
   bottom: 10px;
-  left: 290px;
+  left: 0px;
   right: 0px;
   margin-top: 10px;
+  margin-left: 10px;
   margin-right: 10px;
   color: #000;
   background: #FFF;

@@ -96,12 +96,11 @@ class GoTerm < ActiveRecord::Base
   has_many  :chains,
             :through      => :goa_pdbs
 
-#  acts_as_ferret  :fields => [ :go_id, :name, :namespace, :definition ],
-#                  :remote => true
-
-
-  def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/go/show/#{id}', { asynchronous:true, evalScripts:true }); return false;">[#{go_id}]: #{name}</a>^
+  define_index do
+    indexes go_id,      :sortable => true
+    indexes :name,      :sortable => true
+    indexes :namespace, :sortable => true
+    indexes definition, :sortable => true
   end
 
 end

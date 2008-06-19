@@ -7,91 +7,14 @@
 
     <%= javascript_include_tag :defaults %>
     <%= javascript_include_tag "jquery-1.2.5.pack" %>
-    <%= javascript_include_tag "jquery.livequery" %>
-    <%= javascript_include_tag "jquery.ui/ui.core" %>
-    <%= javascript_include_tag "jquery.ui/ui.accordion" %>
-    <%= javascript_include_tag "jquery.ui/ui.tabs" %>
-    <%= javascript_include_tag "jquery-treeview/lib/jquery.cookie" %>
-    <%= javascript_include_tag "jquery-treeview/jquery.treeview" %>
-    <%= javascript_include_tag "jquery-treeview/jquery.treeview.edit" %>
-    <%= javascript_include_tag "jquery-treeview/jquery.treeview.async.bipa" %>
-    <%= javascript_include_tag "rsh" %>
 
     <%= stylesheet_link_tag "bipa.css" %>
     <%= stylesheet_link_tag "will_paginate.css" %>
-    <%= stylesheet_link_tag "flora/flora.tabs.css" %>
-    <%= stylesheet_link_tag "/javascripts/jquery-treeview/jquery.treeview.css" %>
 
     <script type="text/javascript">
-      window.dhtmlHistory.create({
-        toJSON: function(o) {
-          return Object.toJSON(o);
-        },
-        fromJSON: function(s) {
-          return s.evalJSON();
-        }
-      });
-
-      var yourListener = function(newLocation, historyData) {
-        eval(historyData);
-      }
-
-      window.onload = function() {
-        dhtmlHistory.initialize();
-        dhtmlHistory.addListener(yourListener);
-      }
-
       var $j = jQuery.noConflict();
       $j(document).ready(function() {
-        $j("#accordion_container").accordion({
-          header: "div.title",
-          active: false,
-          alwaysOpen: false,
-          autoHeight: false
-        });
-        $j("#scop_tree").treeview({
-          url: "/scop/children",
-          collapsed: true,
-          persist: "localtion",
-          animated: "fast"
-        });
-        $j("#go_tree").treeview({
-          url: "/go/children",
-          animated: "fast"
-        });
-        $j("#taxonomy_tree").treeview({
-          url: "/taxonomy/children",
-          animated: "fast"
-        });
         $j("#notice").fadeOut(7000);
-
-        if ($j.cookie("sidebar") == "show") {
-            $j("#gap").css("left", "280px");
-            $j("#gap_middle").html("&lsaquo;");
-            $j("#main_container").css("left", "290px");
-            $j("#sidebar").css("display", "block");
-        }
-        if ($j.cookie("sidebar") == "hide") {
-            $j("#sidebar").css("display", "none");
-            $j("#gap").css("left", "0px");
-            $j("#gap_middle").html("&rsaquo;");
-            $j("#main_container").css("left", "10px");
-        }
-        $j("#gap").click(function() {
-          if ($j("#sidebar").css("display") == "block") {
-            $j("#sidebar").css("display", "none");
-            $j("#gap").css("left", "0px");
-            $j("#gap_middle").html("&rsaquo;");
-            $j("#main_container").css("left", "10px");
-            $j.cookie("sidebar", "hide");
-          } else {
-            $j("#gap").css("left", "280px");
-            $j("#gap_middle").html("&lsaquo;");
-            $j("#main_container").css("left", "290px");
-            $j("#sidebar").css("display", "block");
-            $j.cookie("sidebar", "show");
-          }
-        });
       });
     </script>
   </head>
@@ -136,38 +59,6 @@
     </div>
 
     <div id="middler">
-      <div id="sidebar">
-        <div id="accordion_container">
-          <div class="title">
-            SCOP
-          </div>
-          <div class="content">
-            <ul id="scop_tree">
-            </ul>
-          </div>
-          <div class="title">
-            GO
-          </div>
-          <div class="content">
-            <ul id="go_tree">
-            </ul>
-          </div>
-          <div class="title">
-            TAXONOMY
-          </div>
-          <div class="content">
-            <ul id="taxonomy_tree">
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div id="gap">
-        <div id="gap_middle">
-          &lsaquo; 
-        </div>
-      </div>
-
       <div id="main_container">
         <div id="main_title">
           <%= yield :main_title %>

@@ -26,7 +26,7 @@ class GosController < ApplicationController
 
   def search
     @query = params[:query]
-    @hits = Go.find_with_ferret(@query, :limit => :all)
+    @hits = Go.search(@query)
 
     respond_to do |format|
       format.html

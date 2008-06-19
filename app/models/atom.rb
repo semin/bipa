@@ -55,28 +55,22 @@ class Atom < ActiveRecord::Base
 
   has_one   :zap
 
+  delegate :aa?, :dna?, :rna?, :na?, :het?, :water?, :to => :residue
+
   named_scope :surface, lambda { |*args|
-    {
-      :include    => :naccess,
-      :conditions => ["naccess.unbound_asa > ?",
-                      (args.first || MIN_SURFACE_ATOM_ASA)]
-    }
+    { :conditions => ["unbound_asa > ?", (args.first || MIN_SURFACE_ATOM_ASA)] }
   }
 
   named_scope :buried, lambda { |*args|
-    {
-      :include    => :naccess,
-      :conditions => ["naccess.unbound_asa <= ?",
-                      (args.first || MIN_SURFACE_ATOM_ASA)]
-    }
+    { :conditions => ["unbound_asa <= ?", (args.first || MIN_SURFACE_ATOM_ASA)] }
   }
 
   named_scope :interface, lambda { |*args|
-    {
-      :include    => :naccess,
-      :conditions => ["naccess.delta_asa > ?",
-                      (args.first || MIN_INTERFACE_ATOM_DELTA_ASA)]
-    }
+    { :conditions => ["delta_asa > ?", (args.first || MIN_INTERFACE_ATOM_DELTA_ASA)] }
+  }
+
+  named_scope :polar, lambda { |*args|
+    { :conditions => ["atom_name like '%N%' OR atom_name like '%O%'"] }
   }
 
   # ASA related
@@ -92,22 +86,16 @@ class Atom < ActiveRecord::Base
     delta_asa ? delta_asa > MIN_INTERFACE_ATOM_DELTA_ASA : false
   end
 
-  # Atom specific properties
-
-  delegate :aa?, :dna?, :rna?, :na?, :het?, :water?, :to => :residue
-
   def polar?
     atom_name =~ /O|N/
   end
 
   def on_major_groove?
-    residue.dna? &&
-    NucleicAcids::Dna::Atoms::MAJOR_GROOVE[residue.residue_name].include?(atom_name)
+    residue.dna? && NucleicAcids::Dna::Atoms::MAJOR_GROOVE[residue.residue_name].include?(atom_name)
   end
 
   def on_minor_groove?
-    residue.dna? &&
-    NucleicAcids::Dna::Atoms::MINOR_GROOVE[residue.residue_name].include?(atom_name)
+    residue.dna? && NucleicAcids::Dna::Atoms::MINOR_GROOVE[residue.residue_name].include?(atom_name)
   end
 
   def justified_atom_name

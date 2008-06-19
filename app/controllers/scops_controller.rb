@@ -38,7 +38,7 @@ class ScopsController < ApplicationController
 
   def search
     @query = params[:query]
-    @hits = Scop.find_with_ferret(@query, :limit => :all)
+    @hits = Scop.search(@query)
 
     respond_to do |format|
       format.html
