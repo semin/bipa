@@ -5,7 +5,8 @@ class MainController < ApplicationController
 
     session[:classification]  = "SCOP"  unless session[:classification]
     session[:redundancy]      = "90"    unless session[:redundancy]
-    session[:resolution]      = "3.0"   unless session[:resolution]
+    session[:resolution]      = "3"     unless session[:resolution]
+    session[:per_page]        = "15"    unless session[:per_page]
 
     respond_to do |format|
       format.html
@@ -32,4 +33,5 @@ class MainController < ApplicationController
       format.html
     end
   end
+
 end

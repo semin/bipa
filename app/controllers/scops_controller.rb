@@ -73,7 +73,7 @@ class ScopsController < ApplicationController
     @scop = Scop.find(params[:id])
 
     if @scop.level < 5
-      @families = @scop.all_filtered_children(session[:redundancy]).select { |c| c.level == 4 }
+      @families = @scop.descendants.send("res#{session[:resolution]}").select { |d| d.level == 4 }
       if session[:redundancy] == "all"
         @alignments = @families.map { |f| f.send("full_alignment") }.compact
       else

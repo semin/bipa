@@ -26,11 +26,10 @@ class ApplicationController < ActionController::Base
 
   def set_redundancy_and_resolution
     session[:redundancy] = params[:redundancy]
-    session[:resolution] = params[:resolution].to_f
+    session[:resolution] = params[:resolution]
 
     flash[:notice] = "Maximum seqeunce identity has been set to #{session[:redundancy]}"
     flash[:notice] += " %" if session[:redundancy].to_i > 0
-
     flash[:notice] += "<br/>" if flash[:notice]
     flash[:notice] += "Maximum resolution has been set to #{session[:resolution]} &Aring"
 
@@ -42,6 +41,7 @@ class ApplicationController < ActionController::Base
     flash[:notice] = "Entries per page has been set to #{params[:per_page]}"
     redirect_to :back
   end
+
 
   private
 

@@ -7,6 +7,7 @@ html, body {
   margin: 0px;
   padding: 0px;
   height: 100%;
+  width: 100%;
 }
 
 body {
@@ -163,6 +164,7 @@ form.search_form {
   position: absolute;
   padding-top: 3px;
   padding-left: 10px;
+  padding-left: 10px;
   font-size: 1.0em;
   font-weight: bold;
 }
@@ -173,7 +175,6 @@ form.search_form {
   left: 0px;
   right: 0px;
   bottom: 0px;
-  min-width: 200px;
   padding-top: 10px; 
   padding-left: 10px;
   padding-right: 10px;

@@ -8,7 +8,7 @@
     <% form_tag(:action => "set_per_page", :method => "get", :class => "per_page_form") do %>
       <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, session[:per_page]) %> per page
       <%= submit_tag("Apply", :name => nil) %>
-    <% end %>|
+    <% end %> |
   </div>
 
   <div class="search_form">
