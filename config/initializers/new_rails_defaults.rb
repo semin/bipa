@@ -1,6 +1,6 @@
 # These settings change the behavior of Rails 2 apps and will be defaults
 # for Rails 3. You can remove this initializer when Rails 3 is released.
-ActiveRecord::Base.partial_updates = true
+ActiveRecord::Base.partial_updates = false
 
 # Include Active Record class name as root for JSON serialized output.
 ActiveRecord::Base.include_root_in_json = false

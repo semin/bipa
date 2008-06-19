@@ -3,6 +3,10 @@ class MainController < ApplicationController
   def home
     @newses = News.find(:all)
 
+    session[:classification]  = "SCOP"  unless session[:classification]
+    session[:redundancy]      = "90"    unless session[:redundancy]
+    session[:resolution]      = "3.5"   unless session[:resolution]
+
     respond_to do |format|
       format.html
     end

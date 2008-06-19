@@ -15,10 +15,6 @@ require_dependency "mmcif"
 
 class ApplicationController < ActionController::Base
 
-  before_filter :update_settings
-  before_filter :update_classification, :only => :search
-  before_filter :update_per_page, :only => :index
-
   helper :all # include all helpers, all the time
 
   # See ActionController::RequestForgeryProtection for details
@@ -28,50 +24,29 @@ class ApplicationController < ActionController::Base
   # Semin: disable forgery protection
   self.allow_forgery_protection = false
 
+  def set_redundancy_and_resolution
+    session[:redundancy] = params[:redundancy]
+    session[:resolution] = params[:resolution].to_f
+
+    flash[:notice] = "Maximum seqeunce identity has been set to #{session[:redundancy]}"
+    flash[:notice] += " %" if session[:redundancy].to_i > 0
+
+    flash[:notice] += "<br/>" if flash[:notice]
+    flash[:notice] += "Maximum resolution has been set to #{session[:resolution]} &Aring"
+
+    redirect_to :back
+  end
+
+  def set_per_page
+    session[:per_page] = params[:per_page]
+    flash[:notice] = "Entries per page has been set to #{params[:per_page]}"
+    redirect_to :back
+  end
+
   private
 
   def local_request?
     false
-  end
-
-  def update_settings
-    if params[:redundancy]
-      @redundancy = (session[:redundancy] = params[:redundancy])
-      flash[:notice] = "Maximum seqeunce identity has been set to #{@redundancy}"
-      flash[:notice] += " %" if @redundancy.to_i > 0
-    elsif session[:redundancy]
-      @redundancy = session[:redundancy]
-    else
-      @redundancy = session[:redundancy] = "90"
-    end
-
-    if params[:resolution]
-      @resolution = (session[:resolution] = params[:resolution].to_f)
-      flash[:notice] += "<br/>" if flash[:notice]
-      flash[:notice] += "Maximum resolution has been set to #{@resolution} &Aring"
-    elsif session[:resolution]
-      @resolution = session[:resolution]
-    else
-      @resolution = session[:resolution] = "3.5"
-    end
-  end
-
-  def update_classification
-    session[:classification] = params[:classification]
-  end
-
-  def update_per_page
-    if params[:per_page]
-      if ((session[:per_page].nil?) ||
-          (session[:per_page] && (session[:per_page] != params[:per_page])))
-        flash[:notice] = "Entries per page has been set to #{params[:per_page]}"
-      end
-      @per_page = (session[:per_page] = params[:per_page])
-    elsif session[:per_page]
-      @per_page = session[:per_page]
-    else
-      @per_page = (session[:per_page] = "10")
-    end
   end
 
 end

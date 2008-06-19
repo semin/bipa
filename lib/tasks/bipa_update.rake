@@ -303,7 +303,7 @@ namespace :bipa do
     end
 
 
-    desc "Update 'repXXX' columns of 'scop' tables"
+    desc "Update 'repXXX' columns of 'scops' table"
     task :scops_reps => [:environment] do
       (10..100).step(10).each do |si|
         klass = "Rep#{si}Subfamily".constantize
@@ -321,6 +321,46 @@ namespace :bipa do
             $logger.info("No representative structure for Rep#{si}Subfamily, #{subfamily.id}")
           end
         end
+      end
+    end
+
+
+    desc "Update 'resXXX' columns of 'scops' table"
+    task :scops_reses => [:environment] do
+      domains = ScopDomain.repall.find(:all)
+
+      domains.each_with_index do |domain, i|
+        domain.res1    = true if domain.resolution < 1
+        domain.res2    = true if domain.resolution < 2
+        domain.res3    = true if domain.resolution < 3
+        domain.res4    = true if domain.resolution < 4
+        domain.res5    = true if domain.resolution < 5
+        domain.res6    = true if domain.resolution < 6
+        domain.res7    = true if domain.resolution < 7
+        domain.res8    = true if domain.resolution < 8
+        domain.res9    = true if domain.resolution < 9
+        domain.res10   = true if domain.resolution < 10
+        domain.resall  = true if domain.resolution < 1000
+
+        domain.save!
+
+        domain.ancestors.each do |ancestor|
+          ancestor.res1    = true if domain.res1    == true
+          ancestor.res2    = true if domain.res2    == true
+          ancestor.res3    = true if domain.res3    == true
+          ancestor.res4    = true if domain.res4    == true
+          ancestor.res5    = true if domain.res5    == true
+          ancestor.res6    = true if domain.res6    == true
+          ancestor.res7    = true if domain.res7    == true
+          ancestor.res8    = true if domain.res8    == true
+          ancestor.res9    = true if domain.res9    == true
+          ancestor.res10   = true if domain.res10   == true
+          ancestor.resall  = true if domain.resall  == true
+
+          ancestor.save!
+        end
+
+        $logger.info("Processing #{domain.id} : done (#{i+1}/#{domains.size}")
       end
     end
 

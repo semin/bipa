@@ -4,8 +4,12 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  ((10..100).select { |i| i % 10 == 0 } << "all").each do |si|
-    named_scope :"rep#{si}", :conditions => { :"rep#{si}" => true }
+  ((10..100).step(10).to_a << "all").each do |identity|
+    named_scope :"rep#{identity}", :conditions => { :"rep#{identity}" => true }
+  end
+
+  ((1..10).step(1).to_a << "all").each do |resolution|
+    named_scope :"res#{resolution}", :conditions => { :"res#{resolution}" => true }
   end
 
   define_index do
@@ -30,22 +34,6 @@ class Scop < ActiveRecord::Base
     else; raise "Unknown SCOP hierarchy: #{opts[:stype]}"; end
   end
 
-  def ul_tree(redundancy, resolution = nil)
-    tree = ""
-    filtered_children(redundancy).each do |child|
-      tree += %Q{<li>}
-      tree += %Q{<a href="/scop/#{id}">[#{child.stype.upcase}] #{child.description}</a>}
-      if child.children_count != 0
-        tree += %Q{<ul>}
-        tree += child.ul_tree(redundancy, resolution = nil)
-        tree += %Q{</ul>}
-      end
-      tree += %Q{</li>}
-    end
-    tree
-  end
-  memoize :ul_tree
-
   def tree_title
     %Q"<a href='/scops/#{id}'>[#{stype.upcase}] #{description}</a>"
   end
@@ -56,6 +44,7 @@ class Scop < ActiveRecord::Base
 
   def hierarchy
     case stype
+    when "root" then "Root"
     when "cl" then "Class"
     when "cf" then "Fold"
     when "sf" then "Superfamily"

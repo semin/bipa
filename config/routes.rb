@@ -7,7 +7,7 @@ ActionController::Routing::Routes.draw do |map|
   map.connect "help",     :controller => "main", :action => "help"
   map.connect "contact",  :controller => "main", :action => "contact"
 
-  map.resources :scops,   :singular => "scop", :member => { :summary => :get, :propensities => :get, :frequencies => :get, :alignments => :get, :interfaces => :get }, :collection => { :search => :get }
+  map.resources :scops,   :singular => "scop", :member => { :summary => :get, :propensities => :get, :frequencies => :get, :alignments => :get, :interfaces => :get }, :collection => { :search => :get, :set => :get }
   map.resources :gos,     :singular => "go", :collection => { :search => :get }
   map.resources :taxa,    :singular => "taxon", :collection => { :search => :get }
   map.resources :interfaces, :collection => { :search => :get }

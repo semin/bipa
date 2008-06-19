@@ -17,9 +17,9 @@ class ScopsController < ApplicationController
             else; "id"
             end
 
-    @scops = Scop.send("rep#{@redundancy}").paginate(
+    @scops = Scop.send("rep#{session[:redundancy]}").paginate(
       :per_page => session[:per_page] || 10,
-      :page => params[:page],
+      :page => params[:page] || 1,
       :order => order
     )
 
@@ -73,11 +73,11 @@ class ScopsController < ApplicationController
     @scop = Scop.find(params[:id])
 
     if @scop.level < 5
-      @families = @scop.all_filtered_children(@redundancy).select { |c| c.level == 4 }
-      if @redundancy == "all"
+      @families = @scop.all_filtered_children(session[:redundancy]).select { |c| c.level == 4 }
+      if session[:redundancy] == "all"
         @alignments = @families.map { |f| f.send("full_alignment") }.compact
       else
-        @alignments = @families.map { |f| f.send("rep#{@redundancy}_alignment") }.compact
+        @alignments = @families.map { |f| f.send("rep#{session[:redundancy]}_alignment") }.compact
       end
     else
       @alignments = nil
@@ -90,7 +90,7 @@ class ScopsController < ApplicationController
 
   def interfaces
     @scop = Scop.find(params[:id])
-    @interfaces = @scop.interfaces(@redundancy, @resolution)
+    @interfaces = @scop.interfaces(session[:redundancy], session[:resolution])
 
     respond_to do |format|
       format.html
@@ -101,14 +101,14 @@ class ScopsController < ApplicationController
     root = params[:root]
 
     if root == "root"
-      children = Scop.send("rep#{@redundancy}").find(1).filtered_children(@redundancy)
+      children = Scop.send("rep#{session[:redundancy]}").find(1).filtered_children(session[:redundancy])
     else
-      children = Scop.send("rep#{@redundancy}").find(root).filtered_children(@redundancy)
+      children = Scop.send("rep#{session[:redundancy]}").find(root).filtered_children(session[:redundancy])
     end
 
     children.each do |child|
       child[:tree_title] = child.tree_title
-      if child.filtered_children(@redundancy).size > 0
+      if child.filtered_children(session[:redundancy]).size > 0
         child[:hasChildren] = true
       end
     end

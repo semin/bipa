@@ -29,17 +29,17 @@
       <tr>
         <th><%= aa.upcase %></th>
         <td>
-          <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-            <%= "%.2f" % @scop.send("mean_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
-            (<%= "%.2f" % @scop.send("stddev_dna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
+          <% if @scop.dna_interfaces(session[:redundancy], session[:resolution]).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_dna_interface_singlet_propensity_of_#{aa}", session[:redundancy], session[:resolution]) %>
+            (<%= "%.2f" % @scop.send("stddev_dna_interface_singlet_propensity_of_#{aa}", session[:redundancy], session[:resolution]) %>)
           <% else %>
             N/A
           <% end %>
         </td>
         <td>
-          <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-            <%= "%.2f" % @scop.send("mean_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>
-            (<%= "%.2f" % @scop.send("stddev_rna_interface_singlet_propensity_of_#{aa}", @redundancy, @resolution) %>)
+          <% if @scop.rna_interfaces(session[:redundancy], session[:resolution]).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_rna_interface_singlet_propensity_of_#{aa}", session[:redundancy], session[:resolution]) %>
+            (<%= "%.2f" % @scop.send("stddev_rna_interface_singlet_propensity_of_#{aa}", session[:redundancy], session[:resolution]) %>)
           <% else %>
             N/A
           <% end %>
@@ -65,17 +65,17 @@
       <tr>
         <th><%= dssp_description(sse.upcase) %></th>
         <td>
-          <% if @scop.dna_interfaces(@redundancy, @resolution).size > 0 %>
-            <%= "%.2f" % @scop.send("mean_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
-            (<%= "%.2f" % @scop.send("stddev_dna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
+          <% if @scop.dna_interfaces(session[:redundancy], session[:resolution]).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_dna_interface_sse_propensity_of_#{sse}", session[:redundancy], session[:resolution]) %>
+            (<%= "%.2f" % @scop.send("stddev_dna_interface_sse_propensity_of_#{sse}", session[:redundancy], session[:resolution]) %>)
           <% else %>
             N/A
           <% end %>
         </td>
         <td>
-          <% if @scop.rna_interfaces(@redundancy, @resolution).size > 0 %>
-            <%= "%.2f" % @scop.send("mean_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>
-            (<%= "%.2f" % @scop.send("stddev_rna_interface_sse_propensity_of_#{sse}", @redundancy, @resolution) %>)
+          <% if @scop.rna_interfaces(session[:redundancy], session[:resolution]).size > 0 %>
+            <%= "%.2f" % @scop.send("mean_rna_interface_sse_propensity_of_#{sse}", session[:redundancy], session[:resolution]) %>
+            (<%= "%.2f" % @scop.send("stddev_rna_interface_sse_propensity_of_#{sse}", session[:redundancy], session[:resolution]) %>)
           <% else %>
             N/A
           <% end %>

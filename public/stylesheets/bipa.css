@@ -135,109 +135,13 @@ form.search_form {
   width: 100%;
 }
 
-#sidebar {
-  position: fixed;
-  top: 110px;
-  bottom: 40px;
-  left: 0px;
-  width: 270px;
-  margin: 0px;
-  margin-left: 10px;
-  display: block;
-}
-
-#sidebar a {
-  color: #000;
-}
-
-#sidebar a:link, a:visited {
-  color: #000;
-  text-decoration: none;
-}
-
-#sidebar a:hover, a:active {
-  color: #000;
-  text-decoration: underline;
-}
-
-#accordion_container {
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  overflow: auto;
-  overflow-x: hidden;
-}
-
-#accordion_container div.title {
-  height: 20px;
-  margin: 0px;
-  margin-bottom: 1px;
-  padding-top: 3px; 
-  padding-bottom: 3px; 
-  padding-left: 5px; 
-  background: #888888;
-  font-size: 0.9em;
-  font-weight: bold;
-}
-
-#accordion_container div.title:hover {
-  margin: 0px;
-  margin-bottom: 1px;
-  padding-top: 3px; 
-  padding-bottom: 3px; 
-  padding-left: 5px; 
-  color: #C5C2B8;
-  background: #3C3C3C;
-  font-size: 0.9em;
-  font-weight: bold;
-}
-
-#accordion_container div.selected {
-  margin: 0px;
-  margin-bottom: 1px;
-  padding-top: 3px; 
-  padding-bottom: 3px; 
-  padding-left: 5px; 
-  color: #C5C2B8;
-  background: #3C3C3C;
-  font-size: 0.9em;
-}
-
-#accordion_container div.content {
-  margin: 0px;
-  padding-left: 2px; 
-  background: #FFF;
-  font-size: 0.8em;
-}
-
-#gap {
-  position: fixed;
-  top: 110px;
-  bottom: 40px;
-  left: 280px;
-  width: 10px;
-  color: black;
-}
-
-#gap:hover {
-  background: #AAAAAA;
-}
-
-#gap_middle {
-  position: absolute;
-  top: 45%;
-  padding-left: 2px;
-}
-
 #main_container {
   position: absolute;
   top: 0px;
-  bottom: 10px;
+  bottom: 0px;
   left: 0px;
   right: 0px;
-  margin-top: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin: 10px;
   color: #000;
   background: #FFF;
   overflow: hidden;

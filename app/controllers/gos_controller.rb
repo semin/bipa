@@ -26,7 +26,7 @@ class GosController < ApplicationController
 
   def search
     @query = params[:query]
-    @hits = Go.search(@query)
+    @hits = GoTerm.search(@query)
 
     respond_to do |format|
       format.html

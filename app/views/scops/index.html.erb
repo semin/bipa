@@ -1,19 +1,23 @@
 <% content_for :main_title do %>
+
   <div class="title">
     Browse: SCOP
   </div>
+
   <div class="per_page_form">
-    <% form_tag(scops_path, :method => "get", :class => "per_page_form") do %>
-      <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, @per_page) %> per page
+    <% form_tag(:action => "set_per_page", :method => "get", :class => "per_page_form") do %>
+      <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, session[:per_page]) %> per page
       <%= submit_tag("Apply", :name => nil) %>
     <% end %>|
   </div>
+
   <div class="search_form">
     <% form_tag(search_scops_path, :method => "get", :class => "search_form") do %>
       <%= text_field_tag :query, nil, :size => 30 %>
       <%= submit_tag "Search", :name => nil %>
     <% end %>
   </div>
+
 <% end %>
 
 <table class="stats">
@@ -80,4 +84,5 @@
     <%= render :partial => "scop", :collection => @scops %>
   </tbody>
 </table>
+
 <%= will_paginate @scops %>
