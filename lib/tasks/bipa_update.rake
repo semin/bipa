@@ -360,7 +360,7 @@ namespace :bipa do
           ancestor.save!
         end
 
-        $logger.info("Processing #{domain.id} : done (#{i+1}/#{domains.size}")
+        $logger.info("Processing #{domain.id} : done (#{i+1}/#{domains.size})")
       end
     end
 

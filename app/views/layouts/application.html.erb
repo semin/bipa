@@ -45,9 +45,9 @@
         |
         <div id="settings">
           <% form_tag({ :action => "set_redundancy_and_resolution" }, { :id => "settings_form" }) do %>
-            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{all 100 90 80 70 60 50 40 30 20 10}, session[:redundancy])) -%>
+            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{ all 100 90 80 70 60 50 40 30 20 10 }, session[:redundancy])) -%>
             ,
-            Resolution &lt; <%= text_field_tag(:resolution, session[:resolution], :maxlength => 4, :size => 4) -%> &Aring;
+            Resolution &lt; <%= select_tag(:resolution, options_for_select(%w{ all 10.0 9.0 8.0 7.0 6.0 5.0 4.0 3.0 2.0 1.0 }, session[:resolution])) -%> &Aring;
             <%= submit_tag("Apply") -%>
           <% end %>
         </div>

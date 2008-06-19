@@ -17,7 +17,7 @@ class ScopsController < ApplicationController
             else; "id"
             end
 
-    @scops = Scop.send("rep#{session[:redundancy]}").paginate(
+    @scops = Scop.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}").paginate(
       :per_page => session[:per_page] || 10,
       :page => params[:page] || 1,
       :order => order
