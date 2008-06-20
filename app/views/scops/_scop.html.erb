@@ -4,4 +4,6 @@
   <td><%= scop.sccs %></td>
   <td><%= scop.sid %></td>
   <td style="text-align: left"><%= scop.description %></td>
+  <td><%= scop.rna_interfaces(session[:redundancy], session[:resolution]).size %></td>
+  <td><%= scop.dna_interfaces(session[:redundancy], session[:resolution]).size %></td>
 </tr>

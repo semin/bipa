@@ -6,12 +6,12 @@
 
 <div id="tab_menu_container">
   <ul id="tab_menu">
-    <li><a href="/scops/<%= @scop.id %>/hierarchy">Hierarchy</a></li>
-    <li><a href="/scops/<%= @scop.id %>/summary">Summary</a></li>
-    <li><a href="/scops/<%= @scop.id %>/propensities">Propensites</a></li>
-    <li><a href="/scops/<%= @scop.id %>/frequencies" class="current">Frequencies</a></li>
-    <li><a href="/scops/<%= @scop.id %>/alignments">Alignments</a></li>
-    <li><a href="/scops/<%= @scop.id %>/interfaces">Interfaces</a></li>
+    <li><%= link_to "Hierarchy", hierarchy_scop_path(@scop) %></li>
+    <li><%= link_to "Distributions", distributions_scop_path(@scop) %></li>
+    <li><%= link_to "Propensites", propensities_scop_path(@scop) %></li>
+    <li><%= link_to "Chi-square Test", chisquare_test_scop_path(@scop), :class=> "current" %></li>
+    <li><%= link_to "Alignments", scop_alignments_path(@scop) %></li>
+    <li><%= link_to "Interfaces", scop_interfaces_path(@scop) %></li>
   </ul>
 </div>
 
