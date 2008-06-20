@@ -16,19 +16,19 @@
 </div>
 
 <div id="below_tab_menu">
-  <h3>> Ancestors</h3>
+  <h4>> Ancestors</h4>
   <% if @scop.ancestors.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.ancestors %>
   <% else %>
     N/A
   <% end %>
-  <h3>> Children</h3>
+  <h4>> Children</h4>
   <% if @scop.children.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.children %>
   <% else %>
     N/A
   <% end %>
-  <h3>> Siblings</h3>
+  <h4>> Siblings</h4>
   <% if @scop.siblings.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.siblings %>
   <% else %>

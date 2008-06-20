@@ -311,7 +311,6 @@ table.stats {
   border-spacing: 0px;
   border-bottom: 1px #000 solid;
   text-align: center;
-  font-size: 13px;
 }
 
 table.stats th {
@@ -321,6 +320,7 @@ table.stats th {
   text-align: center;
   border: 1px #000 dotted;
   font-weight: bold;
+  font-size: 14px;
 }
 
 table.stats tr {
