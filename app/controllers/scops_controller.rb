@@ -53,7 +53,7 @@ class ScopsController < ApplicationController
     end
   end
 
-  def summary
+  def distributions
     @scop = Scop.find(params[:id])
 
     respond_to do |format|
@@ -69,7 +69,7 @@ class ScopsController < ApplicationController
     end
   end
 
-  def frequencies
+  def chisquare_test
     @scop = Scop.find(params[:id])
 
     respond_to do |format|
@@ -96,14 +96,14 @@ class ScopsController < ApplicationController
     end
   end
 
-  def interfaces
-    @scop = Scop.find(params[:id])
-    @interfaces = @scop.interfaces(session[:redundancy], session[:resolution])
-
-    respond_to do |format|
-      format.html
-    end
-  end
+#  def interfaces
+#    @scop = Scop.find(params[:id])
+#    @interfaces = @scop.interfaces(session[:redundancy], session[:resolution])
+#
+#    respond_to do |format|
+#      format.html
+#    end
+#  end
 
   def children
     root = params[:root]

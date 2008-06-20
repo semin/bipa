@@ -3,24 +3,25 @@ ActionController::Routing::Routes.draw do |map|
 
   map.connect "",         :controller => "main", :action => "home"
   map.connect "home",     :controller => "main", :action => "home"
-  map.connect "browse",   :controller => "main", :action => "browse"
   map.connect "help",     :controller => "main", :action => "help"
   map.connect "contact",  :controller => "main", :action => "contact"
 
-  map.resources :scops,
+  map.resources(:scops,
                 :singular => "scop",
                 :member => {
-                  :hierarchy => :get,
-                  :summary => :get,
-                  :propensities => :get,
-                  :frequencies => :get,
-                  :alignments => :get,
-                  :interfaces => :get
+                  :hierarchy      => :get,
+                  :distributions  => :get,
+                  :propensities   => :get,
+                  :chisquare_test => :get,
+                  :alignments     => :get
                 },
                 :collection => {
                   :search => :get,
                   :set => :get
-                }
+                }) do |scop|
+    scop.resources :interfaces
+    scop.resources :alignments
+  end
 
   map.resources :gos,
                 :singular => "go",
@@ -30,8 +31,6 @@ ActionController::Routing::Routes.draw do |map|
                 :singular => "taxon",
                 :collection => { :search => :get }
 
-  map.resources :interfaces,
-                :collection => { :search => :get }
 
   # Sample of regular route:
   #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'

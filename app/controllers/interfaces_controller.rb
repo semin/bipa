@@ -1,51 +1,30 @@
 class InterfacesController < ApplicationController
 
+  before_filter :find_scop
+
   def index
-    order = case params[:sort]
-            when "pdb"          then "scops.sid"
-            when "sunid"        then "scops.sunid"
-            when "resolution"   then "scops.resolution"
-            when "type"         then "type"
-            when "asa"          then "asa"
-            when "no_residues"  then "residues_count"
-            when "no_atoms"     then "atoms_count"
-            when "no_contacts"  then "contacts_count"
-            when "no_hbonds"    then "hbonds_count"
-            when "no_whbonds"   then "whbonds_count"
-            when "pdb_reverse"          then "scops.sid DESC"
-            when "sid_reverse"          then "scops.sid DESC"
-            when "resolution_reverse"   then "scops.resolution DESC"
-            when "type_reverse"         then "type DESC"
-            when "asa_reverse"          then "asa DESC"
-            when "no_residues_reverse"  then "residues_count DESC"
-            when "no_atoms_reverse"     then "atoms_count DESC"
-            when "no_contacts_reverse"  then "contacts_count DESC"
-            when "no_hbonds_reverse"    then "hbonds_count DESC"
-            when "no_whbonds_reverse"   then "whbonds_count DESC"
-            else; "scops.sid"
-            end
-
-    @interfaces = DomainInterface.paginate(
-      :per_page => session[:per_page] || 10,
-      :page => params[:page],
-      :include => :domain,
-      :select => "id, type, asa, contacts_count, whbonds_count, hbonds_count, hbonds_as_donor_count, hbonds_as_acceptor_count, atoms_count, residues_count, scops.sid, scops.resolution, scops.repall, scops.rep100, scops.rep90, scops.rep80, scops.rep70, scops.rep60, scops.rep50, scops.rep40, scops.rep30, scops.rep20, scops.rep10",
-      :conditions => "scops.rep#{@redundancy} = 1 and scops.resolution < #{@resolution}",
-      :order => order
-    )
+    @interfaces = @scop.interfaces(session[:redundancy], session[:resolution])
 
     respond_to do |format|
       format.html
     end
   end
 
-  def search
-    @query = params[:query]
-    @hits = DomainInterface.find_with_ferret(@query, :limit => :all)
+  def show
+    @interface = Interface.find(params[:id])
 
+    redirect_to :back unless @interface
     respond_to do |format|
       format.html
     end
   end
 
+  private
+
+  def find_scop
+    @scop_id = params[:scop_id]
+
+    redirect_to :back unless @scop_id
+    @scop = Scop.find(@scop_id)
+  end
 end

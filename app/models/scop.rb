@@ -55,11 +55,12 @@ class Scop < ActiveRecord::Base
     dna_interfaces(redundancy, resolution) +
     rna_interfaces(redundancy, resolution)
   end
+  memoize :interfaces
 
   %w(dna rna).each do |na|
     class_eval <<-END
       def #{na}_interfaces(redundancy, resolution)
-        leaves.send(:"rep\#{redundancy}").send(:"res\#{resolution}").map { |d| d.#{na}_interfaces }.flatten.compact
+        leaves.send(:"rep\#{redundancy}").send(:"res\#{resolution}").map(&:#{na}_interfaces).flatten.compact
       end
       memoize :#{na}_interfaces
     END
