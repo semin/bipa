@@ -7,31 +7,31 @@
 <div id="tab_menu_container">
   <ul id="tab_menu">
     <li><a href="/scops/<%= @scop.id %>/hierarchy" class="current">Hierarchy</a></li>
-    <li><a href="/scops/<%= @scop.id %>/summary">Summary</a></li>
+    <li><a href="/scops/<%= @scop.id %>/summary">Distributions</a></li>
     <li><a href="/scops/<%= @scop.id %>/propensities">Propensites</a></li>
-    <li><a href="/scops/<%= @scop.id %>/frequencies">Frequencies</a></li>
+    <li><a href="/scops/<%= @scop.id %>/frequencies">Correlations</a></li>
     <li><a href="/scops/<%= @scop.id %>/alignments">Alignments</a></li>
     <li><a href="/scops/<%= @scop.id %>/interfaces">Interfaces</a></li>
   </ul>
 </div>
 
 <div id="below_tab_menu">
-  <h4>> Ancestors</h4>
+  <h4>&sect; Ancestors</h4>
   <% if @scop.ancestors.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.ancestors %>
   <% else %>
-    N/A
+    <div class="relative">N/A</div>
   <% end %>
-  <h4>> Children</h4>
+  <h4>&sect; Children</h4>
   <% if @scop.children.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.children %>
   <% else %>
-    N/A
+    <div class="relative">N/A</div>
   <% end %>
-  <h4>> Siblings</h4>
+  <h4>&sect; Siblings</h4>
   <% if @scop.siblings.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.siblings %>
   <% else %>
-    N/A
+    <div class="relative">N/A</div>
   <% end %>
 </div>
