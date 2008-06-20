@@ -17,6 +17,12 @@ body {
   font-size: 1em;
 }
 
+h4 {
+  color: #000;
+  background: #FFF;
+  padding: 5px;
+}
+
 #header {
   position: fixed;
   top: 0px;
@@ -217,13 +223,14 @@ div.relative a:link, a:visited {
 
 div.relative a:hover, a:active {
   color: #000;
+  background: #CCC;
   text-decoration: underline;
 }
 
 .list {
   padding: 4px;
   width: 99%;
-  background: #EEEEEE;
+  background: #EEE;
 }
 
 .list:hover {
@@ -261,7 +268,7 @@ div.relative a:hover, a:active {
 .list_spacer {
   height: 2px;
   width: 100%;
-  background: wliste;
+  background: #AAA;
 }
 
 /* CSS for uncounted list */
@@ -314,7 +321,7 @@ table.stats {
 }
 
 table.stats th {
-  background-color: #666666;
+  background-color: #666;
   color: #FFF;
   padding: 4px;
   text-align: center;
@@ -324,11 +331,11 @@ table.stats th {
 }
 
 table.stats tr {
-  background-color: #EEEEEE;
+  background-color: #EEE;
 }
 
 table.stats tr:hover {
-  background-color: #CCCCCC;
+  background-color: #CCC;
 }
 
 table.stats td {
@@ -365,11 +372,11 @@ div.header {
 }
 
 div.sorter a {
-  color: #666666;
+  color: #666;
 }
 
 div.sorter a:link, a:visited {
-  color: #666666;
+  color: #666;
 }
 
 div.sorter a:hover, a:active {
@@ -429,5 +436,5 @@ div.sorter a:hover, a:active {
 }
 
 #tab_menu_container ul#tab_menu li a.right{padding-right:19px;}
-#tab_menu_container ul#tab_menu li a:hover{background: #3C3C3C;}
+#tab_menu_container ul#tab_menu li a:hover{ background: #3C3C3C;}
 #tab_menu_container ul#tab_menu li a.current{color:#FFF; background:#3C3C3C; font-weight: bold;}
