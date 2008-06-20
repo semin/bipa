@@ -203,6 +203,23 @@ form.search_form {
   text-align: center;
 }
 
+div.relative {
+}
+
+div.relative a {
+  color: #000;
+}
+
+div.relative a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+div.relative a:hover, a:active {
+  color: #000;
+  text-decoration: underline;
+}
+
 .list {
   padding: 4px;
   width: 99%;
@@ -293,8 +310,8 @@ table.stats {
   border-collapse: collapse;
   border-spacing: 0px;
   border-bottom: 1px #000 solid;
-  font-size: 0.9em;
   text-align: center;
+  font-size: 13px;
 }
 
 table.stats th {
@@ -319,7 +336,7 @@ table.stats td {
   padding: 4px;
   border: 1px #000 dotted;
   font-family: Monaco, Lucida Console, Courier New, Courier, monospace;
-  font-size: 1.0em;
+  font-size: 12px;
   text-align: right;
 }
 

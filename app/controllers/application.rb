@@ -31,7 +31,8 @@ class ApplicationController < ActionController::Base
     flash[:notice] = "Maximum seqeunce identity has been set to #{session[:redundancy]}"
     flash[:notice] += " %" if session[:redundancy].to_i > 0
     flash[:notice] += "<br/>" if flash[:notice]
-    flash[:notice] += "Maximum resolution has been set to #{session[:resolution]} &Aring"
+    flash[:notice] += "Maximum resolution has been set to #{session[:resolution]}"
+    flash[:notice] += " &Aring" if session[:resolution].to_f > 0.0
 
     redirect_to :back
   end

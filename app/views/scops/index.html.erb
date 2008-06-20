@@ -23,61 +23,11 @@
 <table class="stats">
   <thead>
     <tr>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", scops_url(:sort => "stype") %>
-        </div>
-        <div class="header">
-          TYPE
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", scops_url(:sort => "stype_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", scops_url(:sort => "sunid") %>
-        </div>
-        <div class="header">
-          SUNID
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", scops_url(:sort => "sunid_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", scops_url(:sort => "sccs") %>
-        </div>
-        <div class="header">
-          SCCS
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", scops_url(:sort => "sccs_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", scops_url(:sort => "sid") %>
-        </div>
-        <div class="header">
-          SID
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", scops_url(:sort => "sid_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", scops_url(:sort => "description") %>
-        </div>
-        <div class="header">
-          Description
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", scops_url(:sort => "description_reverse") %>
-        </div>
-      </th>
+      <th> TYPE </th>
+      <th> SUNID </th>
+      <th> SCCS </th>
+      <th> SID </th>
+      <th> Description </th>
     </tr>
   </thead>
   <tbody id="table_body">
