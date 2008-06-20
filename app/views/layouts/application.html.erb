@@ -34,14 +34,9 @@
       <%= image_tag("cambridge_logo.png", :id => "cambridge_logo", :size => "60x80", :alt => "University of Cambridge") %>
 
       <div id="header_menu">
-        <%= link_to("Home", "/") %>
+        <%= link_to "Home", "/" %>
         |
-        <div id="browse">
-          <% form_tag({ :controller => "main", :action => "browse" }, { :id => "browse_form" }) do %>
-            <%= select_tag(:classification, options_for_select(%w{SCOP GO TAXONOMY INTERFACES}, session[:classification])) -%>
-            <%= submit_tag("Browse") -%>
-          <% end %>
-        </div>
+        <%= link_to "Browse", scops_path %>
         |
         <div id="settings">
           <% form_tag({ :action => "set_redundancy_and_resolution" }, { :id => "settings_form" }) do %>
@@ -52,9 +47,9 @@
           <% end %>
         </div>
         |
-        <%= link_to("Contact", "/contact") %>
+        <%= link_to "Contact", "/contact" %>
         |
-        <%= link_to("Help", "/help") %>
+        <%= link_to "Help", "/help" %>
       </div>
     </div>
 

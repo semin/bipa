@@ -2,140 +2,39 @@
   <div class="title">
     Browse: Interfaces
   </div>
-  <div class="per_page_form">
-    <% form_tag(interfaces_path, :method => "get", :class => "per_page_form") do %>
-      <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, @per_page) %> per page
-      <%= submit_tag("Apply", :name => nil) %>
-    <% end %>|
-  </div>
-  <div class="search_form">
-    <% form_tag(search_interfaces_path, :method => "get", :class => "search_form") do %>
-      <%= text_field_tag :query, nil, :size => 30 %>
-      <%= submit_tag "Search", :name => nil %>
-    <% end %>
-  </div>
 <% end %>
 
-<table class="stats">
-  <thead>
-    <tr>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "pdb") %>
-        </div>
-        <div class="header">
-          PDB
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "pdb_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "sunid") %>
-        </div>
-        <div class="header">
-          SCOP<br />sunid
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "sunid_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "resolution") %>
-        </div>
-        <div class="header">
-          Resolution
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "resolution_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "type") %>
-        </div>
-        <div class="header">
-          Binding
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "type_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "asa") %>
-        </div>
-        <div class="header">
-          ASA(&Aring;<sup>2</sup>)
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "asa_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "no_residues") %>
-        </div>
-        <div class="header">
-          No. of<br />residues
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "no_residues_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "no_atoms") %>
-        </div>
-        <div class="header">
-          No. of<br />atoms
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "no_atoms_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "no_contacts") %>
-        </div>
-        <div class="header">
-          No. of<br />van der Waals<br />contacts
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "no_contacts_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "no_hbonds") %>
-        </div>
-        <div class="header">
-          No. of<br />hydrogen bonds
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "no_hbonds_reverse") %>
-        </div>
-      </th>
-      <th>
-        <div class="sorter">
-          <%= link_to "&and;", interfaces_url(:sort => "no_whbonds") %>
-        </div>
-        <div class="header">
-          No. of<br />water-mediated<br />hydrogen bonds
-        </div>
-        <div class="sorter">
-          <%= link_to "&or;", interfaces_url(:sort => "no_whbonds_reverse") %>
-        </div>
-      </th>
-    </tr>
-  </thead>
-  <tbody id="table_body">
-    <%= render :partial => "interface", :collection => @interfaces %>
-  </tbody>
-</table>
+<div id="tab_menu_container">
+  <ul id="tab_menu">
+    <li><%= link_to "Hierarchy", hierarchy_scop_path(@scop) %></li>
+    <li><%= link_to "Distributions", distributions_scop_path(@scop) %></li>
+    <li><%= link_to "Propensites", propensities_scop_path(@scop) %></li>
+    <li><%= link_to "Chi-square Test", chisquare_test_scop_path(@scop) %></li>
+    <li><%= link_to "Alignments", alignments_scop_path(@scop) %></li>
+    <li><%= link_to "Interfaces", scop_interfaces_path(@scop), :class => "current" %></li>
+  </ul>
+</div>
 
-<small>* As a matter of convenience, 999.0 &Aring;<sup>2</sup> was assinged to the structures solved by certain types of experiments (e.g. NMR).</small>
+<div id="below_tab_menu">
+  <table class="stats">
+    <thead>
+      <tr>
+        <th> PDB </th>
+        <th> SCOP<br />sunid </th>
+        <th> Resolution </th>
+        <th> Binding </th>
+        <th> ASA(&Aring;<sup>2</sup>) </th>
+        <th> No. of<br />residues </th>
+        <th> No. of<br />atoms </th>
+        <th> No. of<br />van der Waals<br />contacts </th>
+        <th> No. of<br />hydrogen bonds </th>
+        <th> No. of<br />water-mediated<br />hydrogen bonds </th>
+      </tr>
+    </thead>
+    <tbody id="table_body">
+      <%= render :partial => "interface", :collection => @interfaces %>
+    </tbody>
+  </table>
 
-<%= will_paginate @interfaces %>
+  <small>* As a matter of convenience, 999.0 &Aring;<sup>2</sup> was assinged to the structures solved by certain types of experiments (e.g. NMR), which doesn't give you a fixed resolution.</small>
+</div>
