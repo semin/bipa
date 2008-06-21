@@ -1,6 +1,6 @@
 class InterfacesController < ApplicationController
 
-  before_filter :find_scop
+  before_filter :find_scop, :only => :index
 
   def index
     @interfaces = @scop.interfaces(session[:redundancy], session[:resolution])

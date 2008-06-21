@@ -13,7 +13,6 @@ ActionController::Routing::Routes.draw do |map|
                   :distributions  => :get,
                   :propensities   => :get,
                   :chisquare_test => :get,
-                  :alignments     => :get
                 },
                 :collection => {
                   :search => :get,

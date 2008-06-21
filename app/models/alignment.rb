@@ -6,11 +6,13 @@ class Alignment < ActiveRecord::Base
             :order      => "id",
             :dependent  => :delete_all
 
-
   has_many  :columns,
             :order      => "number",
             :dependent  => :delete_all
 
+  def identity
+    type.match(/\d+/)[1] || "All"
+  end
 
   def to_fasta
     sequences.each do |seq|
