@@ -16,18 +16,5 @@
 </div>
 
 <div id="below_tab_menu">
-  <table class="stats">
-    <thead>
-      <tr>
-        <th>SunID</th>
-        <th>Family</th>
-        <th>Type</th>
-        <th>No. of Sequences</th>
-        <th>No. of Columns</th>
-      </tr>
-    </thead>
-    <tbody id="table_body">
-      <%= render :partial => "alignment", :collection => @alignments %>
-    </tbody>
-  </table>
+  <%= render :partial => "alignment", :collection => @alignments, :spacer_template => "/shared/list_spacer" %>
 </div>

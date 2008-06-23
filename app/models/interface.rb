@@ -15,12 +15,16 @@ class DomainInterface < Interface
             :class_name   => "Residue",
             :foreign_key  => "domain_interface_id"
 
+  has_one   :structure,
+            :through      => :residues
+
+
   before_save :update_asa,
               :update_polarity,
               :update_singlet_propensities,
               :update_sse_propensities
 
-  delegate  :pdb_code, :sunid, :sccs, :sid, :description, :resolution,
+  delegate  :pdb_code, :r_value, :r_free, :sunid, :sccs, :sid, :description, :resolution,
             :to => :domain
 
   named_scope :max_resolution, lambda { |res|

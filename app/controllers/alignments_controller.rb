@@ -1,6 +1,6 @@
 class AlignmentsController < ApplicationController
 
-  before_filter :find_scop, :only => :index
+  before_filter :find_scop, :only => [:index, :show]
 
   def index
     if @scop.level < 5
@@ -13,6 +13,14 @@ class AlignmentsController < ApplicationController
     else
       @alignments = nil
     end
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
+  def show
+    @alignment = Alignment.find(params[:id])
 
     respond_to do |format|
       format.html

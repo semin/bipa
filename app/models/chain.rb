@@ -2,8 +2,10 @@ class Chain < ActiveRecord::Base
 
 #  include Bipa::ComposedOfResidues
 
-  belongs_to  :model,
-              :counter_cache => true
+  belongs_to  :model
+
+  has_one   :structure,
+            :through      => :model
 
   has_many  :residues,
             :dependent    => :destroy

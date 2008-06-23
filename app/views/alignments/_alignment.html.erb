@@ -1,7 +1,11 @@
-<tr>
-  <td><%= alignment.family.sunid %></td>
-  <td style="text-align: left"><%= alignment.family.description %></td>
-  <td><%= alignment.class %></td>
-  <td><%= alignment.sequences.size %></td>
-  <td><%= alignment.columns.size %></td>
-</tr>
+<div class="list">
+  <div class="list_title">
+    <%= link_to alignment.family.description, scop_alignment_path(@scop, alignment) %>
+  </div>
+  <div class="list_content">
+    <%= link_to "SCOP sunid: #{alignment.family.sunid}", scop_path(alignment.family) %><br />
+    Alignment Type: <%= alignment.class %><br />
+    No. of Sequences: <%= alignment.sequences.size %><br />
+    No. of Columns: <%= alignment.columns.size %><br />
+  </div>
+</div>

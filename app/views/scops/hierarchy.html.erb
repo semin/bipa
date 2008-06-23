@@ -16,22 +16,22 @@
 </div>
 
 <div id="below_tab_menu">
-  <h4>&sect; Ancestors</h4>
   <% if @scop.ancestors.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.ancestors %>
-  <% else %>
-    <div class="relative">N/A</div>
   <% end %>
-  <h4>&sect; Children</h4>
+
+  <div class="current_hierarchy">
+    <% @scop.level.times do %>
+      &nbsp;&nbsp; 
+    <% end %>
+
+    &#45; <%= @scop.hierarchy %>: <%= link_to "#{@scop.description}", hierarchy_scop_path(@scop) %>
+  </div>
+
   <% if @scop.children.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.children %>
-  <% else %>
-    <div class="relative">N/A</div>
   <% end %>
-  <h4>&sect; Siblings</h4>
   <% if @scop.siblings.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.siblings %>
-  <% else %>
-    <div class="relative">N/A</div>
   <% end %>
 </div>

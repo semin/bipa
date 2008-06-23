@@ -228,6 +228,26 @@ div.relative a:hover, a:active {
   text-decoration: underline;
 }
 
+div.current_hierarchy {
+  margin-left: 20px;
+}
+
+div.current_hierarchy a {
+  color: #000;
+  background: #CCC;
+}
+
+div.current_hierarchy a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+div.current_hierarchy a:hover, a:active {
+  color: #000;
+  background: #CCC;
+  text-decoration: underline;
+}
+
 .list {
   padding: 4px;
   width: 99%;

@@ -17,8 +17,6 @@ class Structure < ActiveRecord::Base
   has_many  :models,
             :dependent  => :destroy
 
-  has_many  :atoms, :through => :models
-
   has_many  :chains,
             :through    => :models
 
@@ -39,6 +37,29 @@ class Structure < ActiveRecord::Base
 
   has_many  :het_chains,
             :through    => :models
+
+  has_many  :residues,
+            :through    => :models
+
+  has_many  :aa_residues,
+            :through    => :models
+
+  has_many  :na_residues,
+            :through    => :models
+
+  has_many  :dna_residues,
+            :through    => :models
+
+  has_many  :rna_residues,
+            :through    => :models
+
+  has_many  :het_residues,
+            :through    => :models
+
+  has_many  :rna_residues,
+            :through    => :models
+
+  has_many  :atoms, :through => :models
 
   named_scope :untainted, :conditions => { :tainted => false }
 
