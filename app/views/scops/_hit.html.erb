@@ -1,14 +1,10 @@
 <div class="list">
   <div class="list_title">
-    &gt; <%= link_to "#{hit.hierarchy}: #{hit.description}", scop_url(hit.id) %>
+    <%= link_to "#{hit.hierarchy}: #{hit.description}", scop_url(hit.id) %>
   </div>
   <div class="list_content">
-    (sunid: <%= hit.sunid %>, sccs: <%= hit.sccs %>, 
-    <% if hit.type == ScopDomain %>
-      sid: <%= hit.sid %>
-    <% else %>
-      sid: -
-    <% end %>
-    )
+    SCOP sunid: <%= hit.sunid %><br />
+    No. of Protein-DNA interfaces: <%= hit.dna_interfaces(session[:redundancy], session[:resolution]).size %><br />
+    No. of Protein-RNA interfaces: <%= hit.rna_interfaces(session[:redundancy], session[:resolution]).size %><br />
   </div>
 </div>

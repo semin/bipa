@@ -19,7 +19,7 @@ class ScopsController < ApplicationController
 
   def search
     @query = params[:query]
-    @hits = Scop.search(@query)
+    @hits = Scop.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}").search(@query)
 
     respond_to do |format|
       format.html
