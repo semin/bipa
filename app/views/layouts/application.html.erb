@@ -47,9 +47,12 @@
           <% end %>
         </div>
         |
-        <%= link_to "Contact", "/contact" %>
-        |
-        <%= link_to "Help", "/help" %>
+        <div class="search_form">
+          <% form_tag(search_scops_path, :method => "get", :class => "search_form") do %>
+            <%= text_field_tag :query, nil, :size => 20 %>
+            <%= submit_tag "Search", :name => nil %>
+          <% end %>
+        </div>
       </div>
     </div>
 

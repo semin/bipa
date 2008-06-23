@@ -3,8 +3,8 @@
     <%= link_to "#{interface.description} (#{interface.na_type})", scop_interface_path(@scop, interface) %>
   </div>
   <div class="list_content">
-    Resolution: <%= interface.resolution || "N/A" %><br />
-    ASA (&Aring;): <%= "%.2f" % interface.asa %><br />
+    Resolution: <%= interface.resolution || "N/A" %> &Aring;<br />
+    ASA : <%= "%.2f" % interface.asa %> &Aring;<sup>2</sup><br />
     No. of Residues: <%= interface.residues_count %><br />
     No. of Atoms: <%= interface.atoms_count %><br />
     No. of van der Waals contacts: <%= interface.contacts_count %><br />

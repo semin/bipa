@@ -65,6 +65,7 @@ h4 {
   top: 75px;
   bottom: 0px;
   left: 10px;
+  right: 20px;
   font-size: 0.85em;
 }
 
@@ -90,21 +91,8 @@ h4 {
   display: inline;
 }
 
-div.per_page_form {
-  position: absolute;
-  right: 300px;
-  padding-top: 5px;
-  font-size: 0.8em;
-}
-
-form.per_page_form {
-  display: inline;
-}
-
 div.search_form {
-  position: absolute;
-  right: 10px;
-  padding-top: 3px;
+  display: inline;
 }
 
 form.search_form {
@@ -115,6 +103,17 @@ form.search_form {
 }
 
 #settings_form {
+  display: inline;
+}
+
+div.per_page_form {
+  position: absolute;
+  right: 10px;
+  padding-top: 5px;
+  font-size: 0.8em;
+}
+
+form.per_page_form {
   display: inline;
 }
 
@@ -418,10 +417,11 @@ div.sorter a:hover, a:active {
 #below_tab_menu {
   position: absolute;
   padding-top: 10px;
-  top: 40px;
+  top: 42px;
   bottom: 0px;
   left: 10px;
   right: 10px;
+  overflow: auto;
 }
 
 #tab_menu_container ul#tab_menu {

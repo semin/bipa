@@ -1,7 +1,7 @@
 class Residue < ActiveRecord::Base
 
   include Bipa::Constants
-#  include Bipa::ComposedOfAtoms
+  include Bipa::ComposedOfAtoms
 
   belongs_to  :chain,
               :class_name   => "Chain",
@@ -12,10 +12,6 @@ class Residue < ActiveRecord::Base
               :foreign_key  => "scop_id"
 
   belongs_to  :chain_interface
-
-  has_many  :structures,
-            :through      => :chain,
-            :uniq         => true
 
   has_many  :atoms,
             :dependent    => :destroy

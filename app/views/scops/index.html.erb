@@ -8,26 +8,18 @@
     <% form_tag(:action => "set_per_page", :method => "get", :class => "per_page_form") do %>
       <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, session[:per_page]) %> per page
       <%= submit_tag("Apply", :name => nil) %>
-    <% end %> |
-  </div>
-
-  <div class="search_form">
-    <% form_tag(search_scops_path, :method => "get", :class => "search_form") do %>
-      <%= text_field_tag :query, nil, :size => 30 %>
-      <%= submit_tag "Search", :name => nil %>
     <% end %>
   </div>
-
 <% end %>
 
 <table class="stats">
   <thead>
     <tr>
-      <th> TYPE </th>
       <th> SUNID </th>
+      <th> Type </th>
       <th> SCCS </th>
       <th> SID </th>
-      <th> DESCRIPTION </th>
+      <th> Description </th>
       <th> No. of <br />Protein-DNA<br />Interfaces </th>
       <th> No. of <br />Protein-RNA<br />Interfaces </th>
     </tr>

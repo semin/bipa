@@ -16,25 +16,5 @@
 </div>
 
 <div id="below_tab_menu">
-  <table class="stats">
-    <thead>
-      <tr>
-        <th> PDB </th>
-        <th> SCOP<br />sunid </th>
-        <th> Resolution </th>
-        <th> Binding </th>
-        <th> ASA(&Aring;<sup>2</sup>) </th>
-        <th> No. of<br />residues </th>
-        <th> No. of<br />atoms </th>
-        <th> No. of<br />van der Waals<br />contacts </th>
-        <th> No. of<br />hydrogen bonds </th>
-        <th> No. of<br />water-mediated<br />hydrogen bonds </th>
-      </tr>
-    </thead>
-    <tbody id="table_body">
-      <%= render :partial => "interface", :collection => @interfaces, :spacer_template => "/shared/list_spacer" %>
-    </tbody>
-  </table>
-
-  <small>* As a matter of convenience, 999.0 &Aring;<sup>2</sup> was assinged to the structures solved by certain types of experiments (e.g. NMR), which doesn't give you a fixed resolution.</small>
+  <%= render :partial => "interface", :collection => @interfaces, :spacer_template => "/shared/list_spacer" %>
 </div>

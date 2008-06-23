@@ -34,10 +34,6 @@ class Scop < ActiveRecord::Base
     else; raise "Unknown SCOP hierarchy: #{opts[:stype]}"; end
   end
 
-  def tree_title
-    %Q"<a href='/scops/#{id}'>[#{stype.upcase}] #{description}</a>"
-  end
-
   def hierarchy
     case stype
     when "root" then "Root"
@@ -264,10 +260,6 @@ class ScopDomain < Scop
   has_many  :residues,
             :class_name   => "Residue",
             :foreign_key  => "scop_id"
-
-  has_many  :structures,
-            :through      => :residues,
-            :uniq         => :true
 
   has_many  :chains,
             :through      => :residues,

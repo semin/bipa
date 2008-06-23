@@ -1,7 +1,7 @@
 <% content_for :main_title do %>
   <div class="title">
-    SCOP Search: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @hits.size %></font>
+    Search: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @hits.size %></font>
   </div>
 <% end %>
 
-<%= render :partial => "hit", :collection => @hits, :spacer_template => "/shared/hit_spacer" %>
+<%= render :partial => "hit", :collection => @hits, :spacer_template => "/shared/list_spacer" %>

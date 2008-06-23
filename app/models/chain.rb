@@ -1,11 +1,8 @@
 class Chain < ActiveRecord::Base
 
-#  include Bipa::ComposedOfResidues
+  include Bipa::ComposedOfResidues
 
   belongs_to  :model
-
-  has_many  :structures,
-            :through      => :model
 
   has_many  :residues,
             :dependent    => :destroy

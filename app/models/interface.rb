@@ -15,9 +15,12 @@ class DomainInterface < Interface
             :class_name   => "Residue",
             :foreign_key  => "domain_interface_id"
 
-  has_one   :structure,
-            :through      => :residues
+  has_many  :chains,
+            :through      => :residues,
+            :uniq         => true
 
+  has_many  :atoms,
+            :through      => :residues
 
   before_save :update_asa,
               :update_polarity,
