@@ -13,8 +13,9 @@ class Residue < ActiveRecord::Base
 
   belongs_to  :chain_interface
 
-  has_one   :structure,
-            :through      => :chain
+  has_many  :structures,
+            :through      => :chain,
+            :uniq         => true
 
   has_many  :atoms,
             :dependent    => :destroy

@@ -56,10 +56,26 @@ class Structure < ActiveRecord::Base
   has_many  :het_residues,
             :through    => :models
 
-  has_many  :rna_residues,
+  has_many  :atoms,
             :through    => :models
 
-  has_many  :atoms, :through => :models
+  has_many  :contacts,
+            :through    => :atoms
+
+  has_many  :whbonds,
+            :through    => :atoms
+
+  has_many  :hbonds_as_donor,
+            :through    => :atoms
+
+  has_many  :hbonds_as_acceptor,
+            :through    => :atoms
+
+  has_many  :hbonding_donors,
+            :through    => :hbonds_as_acceptor
+
+  has_many  :hbonding_acceptors,
+            :through    => :hbonds_as_donor
 
   named_scope :untainted, :conditions => { :tainted => false }
 

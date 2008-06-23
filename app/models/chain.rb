@@ -4,7 +4,7 @@ class Chain < ActiveRecord::Base
 
   belongs_to  :model
 
-  has_one   :structure,
+  has_many  :structures,
             :through      => :model
 
   has_many  :residues,
