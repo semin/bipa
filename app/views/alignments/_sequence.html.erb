@@ -1,0 +1,5 @@
+<% next if sequence.domain.resolution > session[:resolution].to_f %>
+
+<div class="sequence">
+  <%= sequence.domain.sid %> (<%= sequence.domain.resolution %>) : <%= sequence.sequence %>
+</div>

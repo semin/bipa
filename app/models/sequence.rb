@@ -11,4 +11,10 @@ class Sequence < ActiveRecord::Base
   has_many  :positions,
             :order  => "number"
 
+  delegate  :resolution, :to => :domain
+
+  def sequence
+    positions.map(&:residue_name).join
+  end
+
 end

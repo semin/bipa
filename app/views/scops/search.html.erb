@@ -4,4 +4,8 @@
   </div>
 <% end %>
 
-<%= render :partial => "hit", :collection => @hits, :spacer_template => "/shared/list_spacer" %>
+<% if @hits && @hits.size > 0 %>
+  <%= render :partial => "hit", :collection => @hits, :spacer_template => "/shared/list_spacer" %>
+<% else %>
+  No hits
+<% end %>

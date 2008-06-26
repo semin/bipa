@@ -1,0 +1,12 @@
+<% content_for :main_title do %>
+  <div class="title">
+    <%= @alignment.class %>: <%= @alignment.family.description %>
+  </div>
+<% end %>
+
+<div id="alignment_description">
+</div>
+
+<div id="alignment">
+  <%= render :partial => "/alignments/sequence", :collection => @alignment.sequences.select { |s| s.resolution < session[:resolution].to_f } %>
+</div>

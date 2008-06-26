@@ -17,7 +17,7 @@
 
 <div id="below_tab_menu">
   <% if @scop.ancestors.size > 0 %>
-    <%= render :partial => "/scops/relative", :collection => @scop.ancestors %>
+    <%= render :partial => "/scops/relative", :collection => @scop.ancestors.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}") %>
   <% end %>
 
   <div class="current_hierarchy">
@@ -29,9 +29,10 @@
   </div>
 
   <% if @scop.children.size > 0 %>
-    <%= render :partial => "/scops/relative", :collection => @scop.children %>
+    <%= render :partial => "/scops/relative", :collection => @scop.children.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}") %>
   <% end %>
+
   <% if @scop.siblings.size > 0 %>
-    <%= render :partial => "/scops/relative", :collection => @scop.siblings %>
+    <%= render :partial => "/scops/relative", :collection => @scop.siblings.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}") %>
   <% end %>
 </div>

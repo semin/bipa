@@ -17,7 +17,7 @@
 
 <div id="below_tab_menu">
 
-  <h4>1. Protein-DNA complexes</h4>
+  <h4>&sect; Protein-DNA complexes</h4>
 
   <% if @scop.dna_interfaces(session[:redundancy], session[:resolution]).size > 0 %>
     <h4>a. Distribution of hydrogen bonds</h4>
@@ -185,7 +185,7 @@
   <% end %>
 
 
-  <h4>2. Protein-RNA complexes</h4>
+  <h4>&sect; Protein-RNA complexes</h4>
 
   <% if @scop.rna_interfaces(session[:redundancy], session[:resolution]).size > 0 %>
 

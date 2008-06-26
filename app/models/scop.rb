@@ -96,6 +96,15 @@ class Scop < ActiveRecord::Base
           end
           memoize :#{property}_#{na}_interface_singlet_propensity_of_#{aa}
         END
+
+#        %w(hbond whbond contact).each do |intact|
+#          class_eval <<-END
+#            def #{property}_#{dna}_interface_#{intact}_singlet_propensity_of_#{aa}(redundancy, resolution)
+#              #{na}_interfaces(redundancy, resolution).map(&:#{intact}_singlet_propensity_of_#{aa}).to_stats_array.#{property}
+#            end
+#            memoize :#{property}_#{dna}_interface_#{intact}_singlet_propensity_of_#{aa}
+#          END
+#        end
       end
 
       Dssp::SSES.map(&:downcase).each do |sse|

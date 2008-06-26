@@ -1,11 +1,7 @@
 class ScopsController < ApplicationController
 
   def index
-    @scops = Scop.send("rep#{session[:redundancy]}").
-                  send("res#{session[:resolution]}").
-                  paginate(
-                    :per_page => session[:per_page] || 10,
-                    :page => params[:page] || 1)
+    @scops = Scop.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}").paginate(:per_page => session[:per_page] || 10, :page => params[:page] || 1)
 
     respond_to do |format|
       format.html
@@ -19,7 +15,7 @@ class ScopsController < ApplicationController
 
   def search
     @query = params[:query]
-    @hits = Scop.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}").search(@query)
+    @hits = Scop.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}").search(@query).compact
 
     respond_to do |format|
       format.html
