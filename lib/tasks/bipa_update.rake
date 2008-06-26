@@ -380,5 +380,79 @@ namespace :bipa do
       end
     end
 
+
+    desc "Update JOY templates to include atomic interaction information"
+    task :joy_templates => [:environment] do
+      Dir["./public/families/rep90/*"].grep(/\d+/).each_with_index do |dir, i|
+        temp_file = File.join(dir, "baton.tem")
+        new_temp_file = File.join(dir, "baton_na.tem")
+
+
+        if File.size? temp_file
+          cp temp_file, new_temp_file
+
+          flat_file = Bio::FlatFile.auto(temp_file)
+
+          flat_file.each_entry do |entry|
+
+            if entry.seq_type == "P1" && entry.definition == "sequence"
+
+              hbond_tem = []
+              whbond_tem = []
+              contact_tem = []
+
+              domain = ScopDomain.find_by_sunid(entry.entry_id)
+
+              if domain.nil?
+                warn "Cannot find #{entry.entry_id}"
+                exit
+              end
+
+              db_residues = domain.residues
+              ff_residues = entry.data.gsub(/\n/, "").split("")
+
+              pos = 0
+
+              ff_residues.each_with_index do |res, fi|
+                if res == "-"
+                  hbond_tem << "-"
+                  whbond_tem << "-"
+                  contact_tem << "-"
+                  next
+                else
+                  if res == db_residues[pos].one_letter_code
+                    puts "Matched residue at #{pos}, #{db_residues[pos].one_letter_code}"
+                    db_residues[pos].hbonding_na? ? hbond_tem << "T" : hbond_tem << "F"
+                    db_residues[pos].whbonding_na? ? whbond_tem << "T" : whbond_tem << "F"
+                    db_residues[pos].contacting_na? ? contact_tem << "T" : contact_tem << "F"
+                    pos += 1
+                  else
+                    warn "Different residues at #{pos}, #{res} <=> #{db_residues[pos].one_letter_code}"
+                    exit
+                  end
+                end
+              end
+
+              File.open(new_temp_file, "a") do |file|
+                file.puts ">P1;#{entry.entry_id}"
+                file.puts "hydrogen bond to nucleic acid"
+                file.puts hbond_tem.join
+
+                file.puts ">P1;#{entry.entry_id}"
+                file.puts "water-mediated hydrogen bond to nucleic acid"
+                file.puts whbond_tem.join
+
+                file.puts ">P1;#{entry.entry_id}"
+                file.puts "van der Waals contact to nucleic acid"
+                file.puts contact_tem.join
+              end
+            end
+          end
+        else
+          puts "Cannot find 'baton.tem'"
+        end
+      end
+    end
+
   end
 end

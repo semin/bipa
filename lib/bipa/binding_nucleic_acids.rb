@@ -17,12 +17,12 @@ module Bipa
     end
 
     def hbonding_dna_as_donor?
-      hbonding_donors.each { |a| return true if a.dna? }
+      hbonding_acceptors.each { |a| return true if a.dna? }
       false
     end
 
     def hbonding_dna_as_acceptor?
-      hbonding_acceptors.each { |a| return true if a.dna? }
+      hbonding_donors.each { |a| return true if a.dna? }
       false
     end
 
@@ -31,17 +31,21 @@ module Bipa
     end
 
     def hbonding_rna_as_donor?
-      hbonding_donors.each { |a| return true if a.rna? }
+      hbonding_acceptors.each { |a| return true if a.rna? }
       false
     end
 
     def hbonding_rna_as_acceptor?
-      hbonding_acceptors.each { |a| return true if a.rna? }
+      hbonding_donors.each { |a| return true if a.rna? }
       false
     end
 
     def hbonding_rna?
       hbonding_rna_as_donor? or hbonding_rna_as_acceptor?
+    end
+
+    def hbonding_na?
+      hbonding_dna? or hbonding_rna?
     end
 
     def whbonding_dna?

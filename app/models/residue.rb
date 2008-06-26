@@ -16,24 +16,6 @@ class Residue < ActiveRecord::Base
   has_many  :atoms,
             :dependent    => :destroy
 
-  has_many  :contacts,
-            :through      => :atoms
-
-  has_many  :whbonds,
-            :through      => :atoms
-
-  has_many  :hbonds_as_donor,
-            :through      => :atoms
-
-  has_many  :hbonds_as_acceptor,
-            :through      => :atoms
-
-  has_many  :hbonding_donors,
-            :through      => :hbonds_as_acceptor
-
-  has_many  :hbonding_acceptors,
-            :through      => :hbonds_as_donor
-
   has_many  :positions
 
   has_one :dssp,
