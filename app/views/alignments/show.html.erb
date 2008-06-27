@@ -7,6 +7,6 @@
 <div id="alignment_description">
 </div>
 
-<div id="alignment">
-  <%= render :partial => "/alignments/sequence", :collection => @alignment.sequences.select { |s| s.resolution < session[:resolution].to_f } %>
+<div class="alignment">
+  <%= render :partial => "/alignments/sequence", :collection => @sequences %>
 </div>

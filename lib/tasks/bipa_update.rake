@@ -383,31 +383,30 @@ namespace :bipa do
 
     desc "Update JOY templates to include atomic interaction information"
     task :joy_templates => [:environment] do
+
       Dir["./public/families/rep90/*"].grep(/\d+/).each_with_index do |dir, i|
-        temp_file = File.join(dir, "baton.tem")
-        new_temp_file = File.join(dir, "baton_na.tem")
+        tem_file = File.join(dir, "baton.tem")
 
+        if File.size? tem_file
+          sunid = dir.match(/(\d+)/)[1]
+          new_tem_file = File.join(dir, "#{sunid}.tem")
 
-        if File.size? temp_file
-          cp temp_file, new_temp_file
+          cp tem_file, new_tem_file
 
-          flat_file = Bio::FlatFile.auto(temp_file)
-
+          flat_file = Bio::FlatFile.auto(tem_file)
           flat_file.each_entry do |entry|
 
             if entry.seq_type == "P1" && entry.definition == "sequence"
-
-              hbond_tem = []
-              whbond_tem = []
-              contact_tem = []
-
               domain = ScopDomain.find_by_sunid(entry.entry_id)
 
               if domain.nil?
-                warn "Cannot find #{entry.entry_id}"
+                warn "Cannot find #{entry.entry_id} from BIPA"
                 exit
               end
 
+              hbond_tem   = []
+              whbond_tem  = []
+              contact_tem = []
               db_residues = domain.residues
               ff_residues = entry.data.gsub(/\n/, "").split("")
 
@@ -421,35 +420,34 @@ namespace :bipa do
                   next
                 else
                   if res == db_residues[pos].one_letter_code
-                    puts "Matched residue at #{pos}, #{db_residues[pos].one_letter_code}"
                     db_residues[pos].hbonding_na? ? hbond_tem << "T" : hbond_tem << "F"
                     db_residues[pos].whbonding_na? ? whbond_tem << "T" : whbond_tem << "F"
                     db_residues[pos].contacting_na? ? contact_tem << "T" : contact_tem << "F"
                     pos += 1
                   else
-                    warn "Different residues at #{pos}, #{res} <=> #{db_residues[pos].one_letter_code}"
+                    warn "Unmatched residues at #{pos} of #{entry.entry_id}, #{res} <=> #{db_residues[pos].one_letter_code}"
                     exit
                   end
                 end
               end
 
-              File.open(new_temp_file, "a") do |file|
+              File.open(new_tem_file, "a") do |file|
                 file.puts ">P1;#{entry.entry_id}"
                 file.puts "hydrogen bond to nucleic acid"
-                file.puts hbond_tem.join
+                file.puts hbond_tem.join + "*"
 
                 file.puts ">P1;#{entry.entry_id}"
                 file.puts "water-mediated hydrogen bond to nucleic acid"
-                file.puts whbond_tem.join
+                file.puts whbond_tem.join + "*"
 
                 file.puts ">P1;#{entry.entry_id}"
                 file.puts "van der Waals contact to nucleic acid"
-                file.puts contact_tem.join
+                file.puts contact_tem.join + "*"
               end
             end
           end
         else
-          puts "Cannot find 'baton.tem'"
+          warn "Cannot find 'baton.tem'"
         end
       end
     end

@@ -346,7 +346,7 @@ namespace :bipa do
     desc "Run JOY for each SCOP family"
     task :joy => [:environment] do
 
-      sunids    = ScopFamily.registered.find(:all).map(&:sunid)
+      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
       full_dir  = File.join(FAMILY_DIR, "full")
       fmanager  = ForkManager.new(MAX_FORK)
 
@@ -355,27 +355,24 @@ namespace :bipa do
         sunids.each_with_index do |sunid, i|
 
           fmanager.fork do
-            cwd     = pwd
+            cwd = pwd
             fam_dir = File.join(full_dir, sunid.to_s)
-            chdir(fam_dir)
 
-            Dir["*.pdb"].each do |pdb_file|
-              system("joy #{pdb_file} 1> #{pdb_file.gsub(/\.pdb/, '') + '.joy.log'} 2>&1")
-            end
+            chdir(fam_dir)
+            system("joy baton.ali 1> joy.log 2>&1")
             chdir(cwd)
 
-            $logger.info("JOY with full set of SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
+            $logger.info "JOY with full set of SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
 
-#            (10..100).step(10) do |si|
-#
-#              cwd = pwd
-#              fam_dir = File.join(FAMILY_DIR, "nr#{si}", "#{sunid}")
-#              chdir(fam_dir)
-#              system("joy baton.ali 1> joy.log 2>&1")
-#              chdir(cwd)
-#
-#              $logger.info("JOY with NR: #{si}, SCOP Family: #{sunid}: done (#{i + 1}/#{sunids.size})")
-#            end
+            (10..100).step(10) do |si|
+              cwd = pwd
+              fam_dir = File.join(FAMILY_DIR, "rep#{si}", "#{sunid}")
+              chdir(fam_dir)
+              system("joy baton.ali 1> joy.log 2>&1")
+              chdir(cwd)
+
+              $logger.info "JOY with non-redundant set (#{si} pid) of SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+            end
 
           end # fmanager.fork
         end

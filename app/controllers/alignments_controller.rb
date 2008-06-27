@@ -21,9 +21,15 @@ class AlignmentsController < ApplicationController
 
   def show
     @alignment = Alignment.find(params[:id])
+    @sequences = @alignment.sequences_with_max_resolution(session[:resolution])
 
     respond_to do |format|
       format.html
+      format.js do
+        render  :partial => "/alignments/sequence",
+                :collection => @sequences,
+                :layout => false
+      end
     end
   end
 

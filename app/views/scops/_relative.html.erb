@@ -2,10 +2,10 @@
   <% relative.level.times do %>
     &nbsp;&nbsp;
   <% end %>
-  <% if relative.children.size > 0 %>
+  <% if relative.level < 4 && relative.children.size > 0 %>
     &#43;
   <% else %>
     &#45;
   <% end %>
-  <%= relative.hierarchy %>: <%= link_to "#{relative.description}", hierarchy_scop_path(relative) %>
+  <b><%= relative.hierarchy %></b>: <%= link_to "#{relative.description}", hierarchy_scop_path(relative) %>
 </div>

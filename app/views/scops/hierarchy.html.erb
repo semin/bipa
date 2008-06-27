@@ -25,10 +25,10 @@
       &nbsp;&nbsp; 
     <% end %>
 
-    &#45; <%= @scop.hierarchy %>: <%= link_to "#{@scop.description}", hierarchy_scop_path(@scop) %>
+    &#45; <b><%= @scop.hierarchy %></b>: <%= link_to "#{@scop.description}", hierarchy_scop_path(@scop) %>
   </div>
 
-  <% if @scop.children.size > 0 %>
+  <% if @scop.level < 4 && @scop.children.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.children.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}") %>
   <% end %>
 

@@ -3,9 +3,29 @@
     <%= link_to alignment.family.description, scop_alignment_path(@scop, alignment) %>
   </div>
   <div class="list_content">
-    <%= link_to "SCOP sunid: #{alignment.family.sunid}", scop_path(alignment.family) %><br />
-    Alignment Type: <%= alignment.class %><br />
+    SCOP sunid: <%= link_to "#{alignment.family.sunid}", scop_path(alignment.family) %><br />
+    Type: <%= alignment.class %><br />
     No. of Sequences: <%= alignment.sequences.size %><br />
     No. of Columns: <%= alignment.columns.size %><br />
+
+    <div id="show_<%= alignment.id %>" class="button">
+      <%= link_to_remote  "Show alignment",
+        :url => scop_alignment_path(@scop, alignment),
+        :method => :get,
+        :update => "alignment_#{alignment.id}",
+        :complete => "Element.hide('show_#{alignment.id}');
+                      Element.show('hide_#{alignment.id}');
+                      Effect.SlideDown('alignment_#{alignment.id}', { duration: 0.5 }); return false;" %>
+    </div>
+    <div id="hide_<%= alignment.id %>" class="button" style="display: none;">
+      <a href="#" onclick="Effect.SlideUp('alignment_<%= alignment.id %>', { duration: 0.5 });
+        Element.hide('hide_<%= alignment.id %>');
+        Element.show('show_<%= alignment.id %>');
+        return false;">Hide alignment</a>
+    </div>
+  </div>
+  <div class="alignment">
+    <div id="alignment_<%= alignment.id %>" class="sequence" style="display: none;"> 
+    </div>
   </div>
 </div>

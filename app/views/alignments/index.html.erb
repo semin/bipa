@@ -16,5 +16,9 @@
 </div>
 
 <div id="below_tab_menu">
-  <%= render :partial => "alignment", :collection => @alignments, :spacer_template => "/shared/list_spacer" %>
+  <% if @alignments.size > 0 %>
+    <%= render :partial => "alignment", :collection => @alignments, :spacer_template => "/shared/list_spacer" %>
+  <% else %>
+    No alignments 
+  <% end %>
 </div>

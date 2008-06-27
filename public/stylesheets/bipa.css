@@ -278,6 +278,7 @@ div.current_hierarchy a:hover, a:active {
 }
 
 .list_content {
+  font-size: 13px;
   padding-left: 15px;
 }
 
@@ -401,12 +402,22 @@ table.stats a:hover, a:active {
   overflow: auto;
 }
 
-#alignment {
-  position: absolute;
-  left: 10px;
-  right: -200px;
+.alignment {
+  margin-top: 10px;
   font-family: courier new, courier, monospace;
+  font-size: 1em;
+  background: #FFF;
+  color: #000;
   overflow: auto;
+}
+
+.sequence {
+  white-space: nowrap;
+}
+
+.button {
+  text-align: right;
+  font-size: 0.8em;
 }
 
 #tab_menu_container ul#tab_menu {

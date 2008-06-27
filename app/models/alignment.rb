@@ -48,6 +48,11 @@ class Alignment < ActiveRecord::Base
     sequences.first.positions.length
   end
 
+  def sequences_with_max_resolution(resolution)
+    resolution = 999.0 if resolution == "all"
+    sequences.select { |s| s.resolution < resolution.to_f }
+  end
+
   # To use Bio::Alignment of BioRuby
   def each_seq
     sequences.each { |s| yield s.positions.map(&:residue_name).join }

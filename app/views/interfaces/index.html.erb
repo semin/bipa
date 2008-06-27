@@ -1,6 +1,6 @@
 <% content_for :main_title do %> 
   <div class="title">
-    Browse: Interfaces
+    <%= @scop.hierarchy %>: <%= @scop.description %>
   </div>
 <% end %>
 
@@ -16,5 +16,9 @@
 </div>
 
 <div id="below_tab_menu">
-  <%= render :partial => "interface", :collection => @interfaces, :spacer_template => "/shared/list_spacer" %>
+  <% if @interfaces.size > 0 %>
+    <%= render :partial => "interface", :collection => @interfaces, :spacer_template => "/shared/list_spacer" %>
+  <% else %>
+    No interfaces
+  <% end %>
 </div>
