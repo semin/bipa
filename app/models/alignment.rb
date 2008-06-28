@@ -10,6 +10,23 @@ class Alignment < ActiveRecord::Base
             :order      => "number",
             :dependent  => :delete_all
 
+  def ruler_with_margin(margin)
+    "&nbsp;" * margin + (1..columns.size).map do |i|
+      case
+      when i <= 10
+        i % 10 == 0 ? i : "&nbsp;"
+      when i > 10 && i < 100
+        if i % 10 == 0 then i
+        elsif i % 10 == 1 then ""
+        else; "&nbsp;"; end
+      when i >= 100 && i < 1000
+        if i % 10 == 0 then i
+        elsif i % 10 == 1 || i % 10 == 2 then ""
+        else; "&nbsp;"; end
+      end
+    end.join
+  end
+
   def identity
     type.match(/\d+/)[1] || "All"
   end

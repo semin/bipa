@@ -403,7 +403,6 @@ table.stats a:hover, a:active {
 }
 
 .alignment {
-  margin-top: 10px;
   font-family: courier new, courier, monospace;
   font-size: 1em;
   background: #FFF;
@@ -412,6 +411,12 @@ table.stats a:hover, a:active {
 }
 
 .sequence {
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+.ruler {
+  margin-top: 10px;
   white-space: nowrap;
 }
 
