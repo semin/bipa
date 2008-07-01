@@ -136,12 +136,12 @@ module Bipa
       end
     end # module NucleicAcids
 
-    module Dssp
+    module Sses
 
       HELIX = %w(H G I)
       SHEET = %w(E B)
       LOOP  = %w(T S L)
-      SSES  = HELIX + SHEET + LOOP
+      ALL   = HELIX + SHEET + LOOP
     end
   end
 end

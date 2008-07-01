@@ -24,6 +24,53 @@ class Residue < ActiveRecord::Base
 
   delegate :sse, :to => :dssp
 
+  def positive_phi?
+    if dssp then dssp.phi > 0 && dssp.phi != 360
+    else; false; end
+  end
+
+  def alpha_helix?
+    if dssp then sse == "H" || sse == "I"
+    else; false; end
+  end
+
+  def three10_helix?
+    if dssp then sse == "G"
+    else; false; end
+  end
+
+  def beta_sheet?
+    if dssp then sse == "E" || sse == "B"
+    else; false; end
+  end
+
+  def html_residue_name
+    css_class = []
+
+    case
+    when positive_phi? then css_class << "positive_phi"
+    end
+
+    case
+    when alpha_helix?   then css_class << "alpha_helix"
+    when three10_helix? then css_class << "three10_helix"
+    when beta_sheet?    then css_class << "beta_sheet"
+    end
+
+    case
+    when on_surface?  then css_class << "on_surface"
+    when buried?      then css_class << "buried"
+    end
+
+    case
+    when hbonding_na?   then css_class << "hbonding_na"
+    when whbonding_na?  then css_class << "whbonding_na"
+    when contacting_na? then css_class << "contacting_na"
+    end
+
+    "<span class='#{css_class.join(' ')}'>#{one_letter_code}</span>"
+  end
+
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?

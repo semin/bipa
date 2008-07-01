@@ -62,7 +62,7 @@
       <th>Protein-RNA</th>
     </tr>
 
-    <% Bipa::Constants::Dssp::SSES.map(&:downcase).each do |sse| -%>
+    <% Bipa::Constants::Sses::ALL.map(&:downcase).each do |sse| -%>
       <tr>
         <th><%= dssp_description(sse.upcase) %></th>
         <td>

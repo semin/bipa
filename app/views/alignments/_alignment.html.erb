@@ -2,36 +2,39 @@
   <div class="list_title">
     <b><%= alignment.family.hierarchy %></b>: <%= link_to alignment.family.description, scop_alignment_path(@scop, alignment) %>
   </div>
+
   <div class="list_content">
     SCOP sunid: <%= link_to "#{alignment.family.sunid}", scop_path(alignment.family) %>,
     Type: <%= alignment.class %>,
     Number of structures: <%= alignment.sequences_with_max_resolution(session[:resolution]).size %>,
     Number of columns: <%= alignment.columns.size %>
+  </div>
 
-    <div id="show_<%= alignment.id %>" class="button">
-      <%= link_to_remote  "Show alignment",
-        :url => scop_alignment_path(@scop, alignment),
-        :method => :get,
-        :update => "alignment_#{alignment.id}",
-        :complete => "Element.hide('show_#{alignment.id}');
-                      Element.show('hide_#{alignment.id}');
-                      Element.show('ruler_#{alignment.id}');
-                      Effect.SlideDown('alignment_#{alignment.id}', { duration: 0.5 }); return false;" %>
+  <div id="alignment_<%= alignment.id %>" class="alignment" style="display: none;">
+    <div id="ruler_<%= alignment.id %>" class="ruler">
+      <%= alignment.ruler_with_margin(9) %>
     </div>
-    <div id="hide_<%= alignment.id %>" class="button" style="display: none;">
-      <a href="#" onclick="
-        Element.hide('ruler_<%= alignment.id %>');
-        Effect.SlideUp('alignment_<%= alignment.id %>', { duration: 0.5 });
-        Element.hide('hide_<%= alignment.id %>');
-        Element.show('show_<%= alignment.id %>');
-        return false;">Hide alignment</a>
+    <div id="sequences_<%= alignment.id %>" class="sequence"> 
     </div>
   </div>
-  <div class="alignment">
-    <div id="ruler_<%= alignment.id %>" class="ruler" style="display: none;">
-      <%= alignment.ruler_with_margin(19) %>
-    </div>
-    <div id="alignment_<%= alignment.id %>" class="sequence" style="display: none;"> 
-    </div>
+
+  <div id="show_<%= alignment.id %>" class="button">
+    <%= image_tag "triangle_down.png", :size => "8x8" %>
+    <%= link_to_remote  "More...",
+      :url => scop_alignment_path(@scop, alignment),
+      :method => :get,
+      :update => "sequences_#{alignment.id}",
+      :complete => "Element.hide('show_#{alignment.id}');
+                    Element.show('hide_#{alignment.id}');
+                    Effect.SlideDown('alignment_#{alignment.id}', { duration: 0.5 });" %>
+  </div>
+
+  <div id="hide_<%= alignment.id %>" class="button" style="display: none;">
+    <%= image_tag "triangle_up.png", :size => "8x8" %>
+    <a href="#" onclick="
+      Effect.SlideUp('alignment_<%= alignment.id %>', { duration: 0.5 });
+      Element.hide('hide_<%= alignment.id %>');
+      Element.show('show_<%= alignment.id %>');
+      return false;">Hide details</a>
   </div>
 </div>

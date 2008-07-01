@@ -107,7 +107,7 @@ class Scop < ActiveRecord::Base
 #        end
       end
 
-      Dssp::SSES.map(&:downcase).each do |sse|
+      Sses::ALL.map(&:downcase).each do |sse|
         class_eval <<-END
           def #{property}_#{na}_interface_sse_propensity_of_#{sse}(redundancy, resolution)
             #{na}_interfaces(redundancy, resolution).map(&:sse_propensity_of_#{sse}).to_stats_array.#{property}

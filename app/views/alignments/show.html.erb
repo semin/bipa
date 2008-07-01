@@ -4,9 +4,8 @@
   </div>
 <% end %>
 
-<div id="alignment_description">
-</div>
-
 <div class="alignment">
-  <%= render :partial => "/alignments/sequence", :collection => @sequences %>
+  <div class="sequence">
+    <%= render :partial => "/alignments/sequence", :collection => @sequences %>
+  </div>
 </div>

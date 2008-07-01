@@ -1,10 +1,9 @@
 <div class="list">
   <div class="list_title">
-    <%= link_to interface.description, scop_interface_path(@scop, interface) %>
+    <b><%= interface.na_type %> interface</b>: <%= link_to interface.description, scop_interface_path(@scop, interface) %>
   </div>
   <div class="list_content">
     PDB Title: <%= interface.residues.first.chain.model.structure.title %><br />
-    Type: <%= interface.na_type %><br />
-    Resolution: <%= interface.resolution %> &Aring;<br />
+    SCOP sunid: <%= interface.domain.sunid %>
   </div>
 </div>

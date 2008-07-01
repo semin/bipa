@@ -210,7 +210,7 @@ class DomainInterface < Interface
   end
 
   def update_sse_propensities
-    Dssp::SSES.each do |sse|
+    Sses::ALL.each do |sse|
       send("sse_propensity_of_#{sse.downcase}=", sse_propensity_of(sse))
     end
   end

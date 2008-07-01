@@ -161,7 +161,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'dssp' table
-  create_table :dssp, :force => true do |t|
+  create_table :dssps, :force => true do |t|
     t.belongs_to  :residue
     t.integer     :dssp_number
     t.string      :sse
