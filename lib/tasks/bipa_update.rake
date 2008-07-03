@@ -385,10 +385,10 @@ namespace :bipa do
     task :joy_templates => [:environment] do
 
       Dir["./public/families/rep90/*"].grep(/\d+/).each_with_index do |dir, i|
+        sunid = dir.match(/rep\d+\/(\d+)/)[1]
         tem_file = File.join(dir, "baton.tem")
 
         if File.size? tem_file
-          sunid = dir.match(/(\d+)/)[1]
           new_tem_file = File.join(dir, "#{sunid}.tem")
 
           cp tem_file, new_tem_file
@@ -413,6 +413,12 @@ namespace :bipa do
               pos = 0
 
               ff_residues.each_with_index do |res, fi|
+                if fi % 75 == 0
+                  hbond_tem << "\n"
+                  whbond_tem << "\n"
+                  contact_tem << "\n"
+                end
+
                 if res == "-"
                   hbond_tem << "-"
                   whbond_tem << "-"
@@ -446,8 +452,9 @@ namespace :bipa do
               end
             end
           end
+          $logger.info "Updateing JOY template of SCOP family, #{sunid}: done"
         else
-          warn "Cannot find 'baton.tem'"
+          $logger.warn "Cannot find 'baton.tem' of SCOP family, #{sunid}"
         end
       end
     end
