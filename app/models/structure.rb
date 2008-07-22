@@ -3,13 +3,13 @@ class Structure < ActiveRecord::Base
   include Bipa::ComposedOfResidues
 
   define_index do
-    indexes pdb_code, :sortable => true
+    indexes pdb_code,       :sortable => true
     indexes classification, :sortable => true
-    indexes title, :sortable => true
-    indexes exp_method, :sortable => true
-    indexes resolution, :sortable => true
-    indexes r_value, :sortable => true
-    indexes r_free, :sortable => true
+    indexes title,          :sortable => true
+    indexes exp_method,     :sortable => true
+    indexes resolution,     :sortable => true
+    indexes r_value,        :sortable => true
+    indexes r_free,         :sortable => true
 
     has deposited_at
   end
