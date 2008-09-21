@@ -14,4 +14,8 @@ class Position < ActiveRecord::Base
     end
   end
 
+  def gap?
+    residue_name == "-"
+  end
+
 end

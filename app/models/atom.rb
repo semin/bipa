@@ -5,11 +5,11 @@ class Atom < ActiveRecord::Base
 
   belongs_to  :residue
 
-  has_many  :contacts,
+  has_many  :vdw_contacts,
             :dependent    => :destroy
 
-  has_many  :contacting_atoms,
-            :through      => :contacts
+  has_many  :vdw_contacting_atoms,
+            :through      => :vdw_contacts
 
   has_many  :whbonds,
             :dependent    => :destroy
@@ -98,6 +98,26 @@ class Atom < ActiveRecord::Base
 
   def on_minor_groove?
     residue.dna? && NucleicAcids::Dna::Atoms::MINOR_GROOVE[residue.residue_name].include?(atom_name)
+  end
+
+  def sidechain?
+    moiety == "sidechain"
+  end
+
+  def backbone?
+    moiety == "backbone"
+  end
+
+  def base?
+    moiety == "base"
+  end
+
+  def sugar?
+    moiety == "sugar"
+  end
+
+  def phosphate?
+    moiety == "phosphate"
   end
 
   def justified_atom_name

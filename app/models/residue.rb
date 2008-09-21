@@ -63,9 +63,9 @@ class Residue < ActiveRecord::Base
     end
 
     case
-    when hbonding_na?   then css_class << "hbonding_na"
-    when whbonding_na?  then css_class << "whbonding_na"
-    when contacting_na? then css_class << "contacting_na"
+    when hbonding_na?       then css_class << "hbonding_na"
+    when whbonding_na?      then css_class << "whbonding_na"
+    when vdw_contacting_na? then css_class << "vdw_contacting_na"
     end
 
     "<span class='#{css_class.join(' ')}'>#{one_letter_code}</span>"

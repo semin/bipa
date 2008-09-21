@@ -89,17 +89,17 @@ class DomainInterface < Interface
   end
   memoize :frequency_of_whbond_between
 
-  def frequency_of_contact_between(aa, na)
+  def frequency_of_vdw_contact_between(aa, na)
     sum = 0
-    contacts.each do |contact|
-      sum += 1 if (contact.atom.residue.residue_name == aa &&
-                   contact.contacting_atom.residue.residue_name == na &&
-                   !NucleicAcids::Atoms::SUGAR.include?(contact.contacting_atom) &&
-                   !NucleicAcids::Atoms::PHOSPHATE.include?(contact.contacting_atom))
+    vdw_contacts.each do |vdw_contact|
+      sum += 1 if (vdw_contact.atom.residue.residue_name == aa &&
+                   vdw_contact.vdw_contacting_atom.residue.residue_name == na &&
+                   !NucleicAcids::Atoms::SUGAR.include?(vdw_contact.vdw_contacting_atom) &&
+                   !NucleicAcids::Atoms::PHOSPHATE.include?(vdw_contact.vdw_contacting_atom))
     end
     sum - frequency_of_hbond_between(aa, na)
   end
-  memoize :frequency_of_contact_between
+  memoize :frequency_of_vdw_contact_between
 
   def frequency_of_hbond_between_sugar_and_(aa)
     sum = 0
@@ -125,15 +125,15 @@ class DomainInterface < Interface
   end
   memoize :frequency_of_whbond_between_sugar_and_
 
-  def frequency_of_contact_between_sugar_and_(aa)
+  def frequency_of_vdw_contact_between_sugar_and_(aa)
     sum = 0
-    contacts.each do |contact|
-      sum += 1 if (contact.atom.residue.residue_name == aa &&
-                   NucleicAcids::Atoms::SUGAR.include?(contact.contacting_atom.atom_name))
+    vdw_contacts.each do |vdw_contact|
+      sum += 1 if (vdw_contact.atom.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::SUGAR.include?(vdw_contact.vdw_contacting_atom.atom_name))
     end
     sum
   end
-  memoize :frequency_of_contact_between_sugar_and_
+  memoize :frequency_of_vdw_contact_between_sugar_and_
 
   def frequency_of_hbond_between_phosphate_and_(aa)
     sum = 0
@@ -159,15 +159,15 @@ class DomainInterface < Interface
   end
   memoize :frequency_of_whbond_between_phosphate_and_
 
-  def frequency_of_contact_between_phosphate_and_(aa)
+  def frequency_of_vdw_contact_between_phosphate_and_(aa)
     sum = 0
-    contacts.each do |contact|
-      sum += 1 if (contact.atom.residue.residue_name == aa &&
-                   NucleicAcids::Atoms::PHOSPHATE.include?(contact.contacting_atom.atom_name))
+    vdw_contacts.each do |vdw_contact|
+      sum += 1 if (vdw_contact.atom.residue.residue_name == aa &&
+                   NucleicAcids::Atoms::PHOSPHATE.include?(vdw_contact.vdw_contacting_atom.atom_name))
     end
     sum
   end
-  memoize :frequency_of_contact_between_phosphate_and_
+  memoize :frequency_of_vdw_contact_between_phosphate_and_
 
   def frequency_of_hbond_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_hbond_between(r, na) }
@@ -179,10 +179,10 @@ class DomainInterface < Interface
   end
   memoize :frequency_of_whbond_between_amino_acids_and_
 
-  def frequency_of_contact_between_amino_acids_and_(na)
-    AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_contact_between(r, na) }
+  def frequency_of_vdw_contact_between_amino_acids_and_(na)
+    AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + frequency_of_vdw_contact_between(r, na) }
   end
-  memoize :frequency_of_contact_between_amino_acids_and_
+  memoize :frequency_of_vdw_contact_between_amino_acids_and_
 
 
   protected
@@ -215,7 +215,7 @@ class DomainInterface < Interface
     end
   end
 
-  %w(hbond whbond contact).each do |intact|
+  %w(hbond whbond vdw_contact).each do |intact|
 
     AminoAcids::Residues::STANDARD.each do |aa|
       class_eval <<-END
@@ -257,7 +257,7 @@ end # class DomainInterface
 
 class DomainDnaInterface < DomainInterface
 
-#  %w(hbond whbond contact).each do |intact|
+#  %w(hbond whbond vdw_contact).each do |intact|
 #
 #    NucleicAcids::Dna::Residues::STANDARD.each do |dna|
 #      class_eval <<-END
@@ -297,7 +297,7 @@ end # class DomainDnaInterface
 
 class DomainRnaInterface < DomainInterface
 
-#  %w(hbond whbond contact).each do |intact|
+#  %w(hbond whbond vdw_contact).each do |intact|
 #    NucleicAcids::Rna::Residues::STANDARD.each do |rna|
 #      class_eval <<-END
 #        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{rna.downcase}
