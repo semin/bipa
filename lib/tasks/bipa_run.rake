@@ -343,38 +343,27 @@ namespace :bipa do
     end # namespace :baton
 
 
-    desc "Run JOY for each SCOP family"
+    desc "Run JOY for each SCOP family alignment"
     task :joy => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
-      full_dir  = File.join(FAMILY_DIR, "full")
       fmanager  = ForkManager.new(MAX_FORK)
-
       fmanager.manage do
-
-        sunids.each_with_index do |sunid, i|
+        (10..100).step(10) do |si|
+          rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
 
           fmanager.fork do
-            cwd = pwd
-            fam_dir = File.join(full_dir, sunid.to_s)
-
-            chdir(fam_dir)
-            system("joy baton.ali 1> joy.log 2>&1")
-            chdir(cwd)
-
-            $logger.info "JOY with full set of SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-
-            (10..100).step(10) do |si|
+            Dir.new(rep_dir).each do |dir|
+              if dir =~ /^\./ then next end # skip if . or ..
               cwd = pwd
-              fam_dir = File.join(FAMILY_DIR, "rep#{si}", "#{sunid}")
+              fam_dir = File.join(rep_dir, dir)
               chdir(fam_dir)
               system("joy baton.ali 1> joy.log 2>&1")
               chdir(cwd)
 
-              $logger.info "JOY with non-redundant set (#{si} pid) of SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              $logger.info "JOY with non-redundant set (#{si} pid) of SCOP Family, #{dir}: done"
             end
-
           end # fmanager.fork
+
         end
       end
     end

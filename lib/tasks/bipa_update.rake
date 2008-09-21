@@ -215,10 +215,10 @@ namespace :bipa do
     end
 
 
-    desc "Update 'contacts_count' column of 'atoms' table"
-    task :atoms_contacts_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, contacts_count", :per_page => 10000) do |atom|
-        atom.update_attribute :contacts_count, atom.contacts.length
+    desc "Update 'vdw_contacts_count' column of 'atoms' table"
+    task :atoms_vdw_contacts_count => [:environment] do
+      Atom.find_all_in_chunks(:select => "id, vdw_contacts_count", :per_page => 10000) do |atom|
+        atom.update_attribute :vdw_contacts_count, atom.vdw_contacts.length
       end
     end
 
@@ -263,10 +263,10 @@ namespace :bipa do
     end
 
 
-    desc "Update 'contacts_count' column of 'interfaces' table"
-    task :interfaces_contacts_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, contacts_count") do |interface|
-        interface.update_attribute :contacts_count, interface.contacts.length
+    desc "Update 'vdw_contacts_count' column of 'interfaces' table"
+    task :interfaces_vdw_contacts_count => [:environment] do
+      DomainInterface.find_all_in_chunks(:select => "id, vdw_contacts_count") do |interface|
+        interface.update_attribute :vdw_contacts_count, interface.vdw_contacts.length
       end
     end
 
@@ -406,7 +406,7 @@ namespace :bipa do
 
               hbond_tem   = []
               whbond_tem  = []
-              contact_tem = []
+              vdw_contact_tem = []
               db_residues = domain.residues
               ff_residues = entry.data.gsub(/\n/, "").split("")
 
@@ -416,19 +416,19 @@ namespace :bipa do
                 if fi % 75 == 0
                   hbond_tem << "\n"
                   whbond_tem << "\n"
-                  contact_tem << "\n"
+                  vdw_contact_tem << "\n"
                 end
 
                 if res == "-"
                   hbond_tem << "-"
                   whbond_tem << "-"
-                  contact_tem << "-"
+                  vdw_contact_tem << "-"
                   next
                 else
                   if res == db_residues[pos].one_letter_code
                     db_residues[pos].hbonding_na? ? hbond_tem << "T" : hbond_tem << "F"
                     db_residues[pos].whbonding_na? ? whbond_tem << "T" : whbond_tem << "F"
-                    db_residues[pos].contacting_na? ? contact_tem << "T" : contact_tem << "F"
+                    db_residues[pos].vdw_contacting_na? ? vdw_contact_tem << "T" : vdw_contact_tem << "F"
                     pos += 1
                   else
                     warn "Unmatched residues at #{pos} of #{entry.entry_id}, #{res} <=> #{db_residues[pos].one_letter_code}"
@@ -447,8 +447,8 @@ namespace :bipa do
                 file.puts whbond_tem.join + "*"
 
                 file.puts ">P1;#{entry.entry_id}"
-                file.puts "van der Waals contact to nucleic acid"
-                file.puts contact_tem.join + "*"
+                file.puts "van der Waals vdw_contact to nucleic acid"
+                file.puts vdw_contact_tem.join + "*"
               end
             end
           end
@@ -459,5 +459,28 @@ namespace :bipa do
       end
     end
 
+
+    desc "Filter 'vdw_contacts' table not to contain any hbonds or whbonds"
+    task :filter_vdw_contacts => [:environment] do
+      i = 0
+      puts "Remvoe hbonds from vdw_contacts"
+      Hbond.find_all_in_chunks do |hbond|
+        vdw_contact = Contact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
+        if vdw_contact
+          Contact.destroy(vdw_contact)
+          puts "Contact: #{vdw_contact.id} destroyed - #{i += 1}"
+        end
+      end
+
+      i = 0
+      puts "Remvoe water-mediated hbonds from vdw_contacts"
+      Whbond.find_all_in_chunks do |whbond|
+        vdw_contact = Contact.find_by_atom_id_and_vdw_contacting_atom_id(whbond.atom, whbond.whbonding_atom)
+        if vdw_contact
+          Contact.destroy(vdw_contact)
+          puts "Contact: #{vdw_contact.id} destroyed - #{i += 1}"
+        end
+      end
+    end
   end
 end

@@ -1,78 +1,189 @@
 module Bipa
   module BindingNucleicAcids
 
-    # Interaction related
-    def contacting_dna?
-      contacting_atoms.each { |a| return true if a.dna? }
-      false
-    end
-
-    def contacting_rna?
-      contacting_atoms.each { |a| return true if a.rna? }
-      false
-    end
-
-    def contacting_na?
-      contacting_dna? or contacting_rna?
-    end
-
     def hbonding_dna_as_donor?
-      hbonding_acceptors.each { |a| return true if a.dna? }
-      false
+      hbonding_acceptors.any? { |a| a.dna? }
     end
 
     def hbonding_dna_as_acceptor?
-      hbonding_donors.each { |a| return true if a.dna? }
-      false
+      hbonding_donors.any? { |a| a.dna? }
     end
 
     def hbonding_dna?
-      hbonding_dna_as_donor? or hbonding_dna_as_acceptor?
+      hbonding_dna_as_donor? || hbonding_dna_as_acceptor?
     end
 
     def hbonding_rna_as_donor?
-      hbonding_acceptors.each { |a| return true if a.rna? }
-      false
+      hbonding_acceptors.any? { |a| a.rna? }
     end
 
     def hbonding_rna_as_acceptor?
-      hbonding_donors.each { |a| return true if a.rna? }
-      false
+      hbonding_donors.any? { |a| a.rna? }
     end
 
     def hbonding_rna?
-      hbonding_rna_as_donor? or hbonding_rna_as_acceptor?
+      hbonding_rna_as_donor? || hbonding_rna_as_acceptor?
     end
 
     def hbonding_na?
-      hbonding_dna? or hbonding_rna?
+      hbonding_dna? || hbonding_rna?
     end
 
     def whbonding_dna?
-      whbonding_atoms.each { |a| return true if a.dna? }
-      false
+      whbonding_atoms.any? { |a| a.dna? }
     end
 
     def whbonding_rna?
-      whbonding_atoms.each { |a| return true if a.rna? }
-      false
+      whbonding_atoms.any? { |a| a.rna? }
     end
 
     def whbonding_na?
-      whbonding_dna? or whbonding_rna?
+      whbonding_dna? || whbonding_rna?
+    end
+
+    def vdw_contacting_dna?
+      vdw_contacting_atoms.any? { |a| a.dna? }
+    end
+
+    def vdw_contacting_rna?
+      vdw_contacting_atoms.any? { |a| a.rna? }
+    end
+
+    def vdw_contacting_na?
+      vdw_contacting_dna? || vdw_contacting_rna?
     end
 
     def binding_dna?
-      contacting_dna? or whbonding_dna?
+      vdw_contacting_dna? || hbonding_dna? || whbonding_dna?
     end
 
     def binding_rna?
-      contacting_rna? or whbonding_rna?
+      vdw_contacting_rna? || hbonding_rna? || whbonding_rna?
     end
 
     def binding_na?
-      binding_dna? or binding_rna?
+      binding_dna? || binding_rna?
     end
 
+    def hbonding_dna_base_as_donor?
+      hbonding_acceptors.any? { |a| a.dna? && a.base? }
+    end
+
+    def hbonding_dna_base_as_acceptor?
+      hbonding_donors.any? { |a| a.dna? && a.base? }
+    end
+
+    def hbonding_dna_base?
+      hbonding_dna_base_as_donor? || hbonding_dna_base_as_acceptor?
+    end
+
+    def hbonding_dna_sugar_as_donor?
+      hbonding_acceptors.any? { |a| a.dna? && a.sugar? }
+    end
+
+    def hbonding_dna_sugar_as_acceptor?
+      hbonding_donors.any? { |a| a.dna? && a.sugar? }
+    end
+
+    def hbonding_dna_sugar?
+      hbonding_dna_sugar_as_donor? || hbonding_dna_sugar_as_acceptor?
+    end
+
+    def hbonding_dna_phosphate_as_donor?
+      hbonding_acceptors.any? { |a| a.dna? && a.phosphate? }
+    end
+
+    def hbonding_dna_phosphate_as_acceptor?
+      hbonding_donors.any? { |a| a.dna? && a.phosphate? }
+    end
+
+    def hbonding_dna_phosphate?
+      hbonding_dna_phosphate_as_donor? || hbonding_dna_phosphate_as_acceptor?
+    end
+
+    def whbonding_dna_base?
+      whbonding_atoms.any? { |a| a.dna? && a.base? }
+    end
+
+    def whbonding_dna_sugar?
+      whbonding_atoms.any? { |a| a.dna? && a.sugar? }
+    end
+
+    def whbonding_dna_phosphate?
+      whbonding_atoms.any? { |a| a.dna? && a.phosphate? }
+    end
+
+    def vdw_contacting_dna_base?
+      vdw_contacting_atoms.any? { |a| a.dna? && a.base? }
+    end
+
+    def vdw_contacting_dna_sugar?
+      vdw_contacting_atoms.any? { |a| a.dna? && a.sugar? }
+    end
+
+    def vdw_contacting_dna_phosphate?
+      vdw_contacting_atoms.any? { |a| a.dna? && a.phosphate? }
+    end
+
+    def hbonding_rna_base_as_donor?
+      hbonding_acceptors.any? { |a| a.rna? && a.base? }
+    end
+
+    def hbonding_rna_base_as_acceptor?
+      hbonding_donors.any? { |a| a.rna? && a.base? }
+    end
+
+    def hbonding_rna_base?
+      hbonding_rna_base_as_donor? || hbonding_rna_base_as_acceptor?
+    end
+
+    def hbonding_rna_sugar_as_donor?
+      hbonding_acceptors.any? { |a| a.rna? && a.sugar? }
+    end
+
+    def hbonding_rna_sugar_as_acceptor?
+      hbonding_donors.any? { |a| a.rna? && a.sugar? }
+    end
+
+    def hbonding_rna_sugar?
+      hbonding_rna_sugar_as_donor? or
+      hbonding_rna_sugar_as_acceptor?
+    end
+
+    def hbonding_rna_phosphate_as_donor?
+      hbonding_acceptors.any? { |a| a.rna? && a.phosphate? }
+    end
+
+    def hbonding_rna_phosphate_as_acceptor?
+      hbonding_donors.any? { |a| a.rna? && a.phosphate? }
+    end
+
+    def hbonding_rna_phosphate?
+      hbonding_rna_phosphate_as_donor? || hbonding_rna_phosphate_as_acceptor?
+    end
+
+    def whbonding_rna_base?
+      whbonding_atoms.any? { |a| a.rna? && a.base? }
+    end
+
+    def whbonding_rna_sugar?
+      whbonding_atoms.any? { |a| a.rna? && a.sugar? }
+    end
+
+    def whbonding_rna_phosphate?
+      whbonding_atoms.any? { |a| a.rna? && a.phosphate? }
+    end
+
+    def vdw_contacting_rna_base?
+      vdw_contacting_atoms.any? { |a| a.rna? && a.base? }
+    end
+
+    def vdw_contacting_rna_sugar?
+      vdw_contacting_atoms.any? { |a| a.rna? && a.sugar? }
+    end
+
+    def vdw_contacting_rna_phosphate?
+      vdw_contacting_atoms.any? { |a| a.rna? && a.phosphate? }
+    end
   end
 end

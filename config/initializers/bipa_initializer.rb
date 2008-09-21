@@ -70,5 +70,7 @@ BLASTCLUST_BIN  = "/usr/bin/blastclust"
 BLASTCLUST_DIR  = File.join(RAILS_ROOT, "/public/blastclust/")
 
 FAMILY_DIR      = File.join(RAILS_ROOT, "/public/families")
+ALIGNMENT_DIR   = File.join(RAILS_ROOT, "/public/alignments")
 ZAP_DIR         = File.join(RAILS_ROOT, "/public/zap")
 GO_DIR          = File.join(RAILS_ROOT, "/public/go")
+ESST_DIR        = File.join(RAILS_ROOT, "/public/essts")

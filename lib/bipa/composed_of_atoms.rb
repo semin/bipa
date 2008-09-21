@@ -35,10 +35,10 @@ module Bipa
       atoms.select { |a| a.water? }
     end
 
-    def contacts
-      atoms.inject([]) { |s, a| s.concat(a.contacts) }
+    def vdw_contacts
+      atoms.inject([]) { |s, a| s.concat(a.vdw_contacts) }
     end
-    memoize :contacts
+    memoize :vdw_contacts
 
     def whbonds
       atoms.inject([]) { |s, a| s.concat(a.whbonds) }
@@ -65,10 +65,10 @@ module Bipa
     end
     memoize :hbonds_as_acceptor
 
-    def contacting_atoms
-      atoms.inject([]) { |s, a| s.concat(a.contacting_atoms) }
+    def vdw_contacting_atoms
+      atoms.inject([]) { |s, a| s.concat(a.vdw_contacting_atoms) }
     end
-    memoize :contacting_atoms
+    memoize :vdw_contacting_atoms
 
     def whbonding_atoms
       atoms.inject([]) { |s, a| s.concat(a.whbonding_atoms) }

@@ -149,5 +149,213 @@ namespace :bipa do
       end
     end
 
+
+    desc "Generate simple (DNA/RNA) TEM file for each alignments"
+    task :simple_tem_files => [:environment] do
+
+      (10..100).step(10) do |si|
+        rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
+
+        Dir.new(rep_dir).each do |dir|
+          next if dir =~ /^\./
+
+          family    = Scop.find_by_sunid(dir)
+          alignment = family.send(:"rep#{si}_alignment")
+
+          next unless alignment
+
+          family_dir  = File.join(rep_dir, dir)
+          tem_file    = File.join(family_dir, "baton.tem")
+
+          next unless File.size? tem_file
+
+          new_tem_file = File.join(family_dir, "baton_na.tem")
+          cp tem_file, new_tem_file
+
+          alignment.sequences.each do |sequence|
+            sunid = sequence.domain.sunid
+
+            $logger.info "Annotating Protein-DNA/RNA interfaces of SCOP domain, #{sunid}..."
+
+            dna_tem = []
+            rna_tem = []
+
+            sequence.positions.each_with_index do |position, pi|
+              if pi != 0 and pi % 75 == 0
+                dna_tem << "\n"
+                rna_tem << "\n"
+              end
+
+              if position.gap?
+                dna_tem << "-"
+                rna_tem << "-"
+                next
+              else
+                dna_tem << (position.residue.send(:"binding_dna?") ? "T" : "F")
+                rna_tem << (position.residue.send(:"binding_rna?") ? "T" : "F")
+              end
+            end
+
+            File.open(new_tem_file, "a") do |file|
+              file.puts ">P1;#{sunid}"
+              file.puts "DNA interface"
+              file.puts dna_tem.join + "*"
+
+              file.puts ">P1;#{sunid}"
+              file.puts "RNA interface"
+              file.puts rna_tem.join + "*"
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Generate extended (DNA/RNA) TEM file for each alignments"
+    task :extended_tem_files => [:environment] do
+
+      (10..100).step(10) do |si|
+        rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
+
+        Dir.new(rep_dir).each do |dir|
+          if dir =~ /^\./ then next end # skip if . or ..
+
+          family    = Scop.find_by_sunid(dir)
+          alignment = family.send(:"rep#{si}_alignment")
+
+          unless alignment then next end # skip if there is no alignment
+
+          family_dir  = File.join(rep_dir, dir)
+          tem_file    = File.join(family_dir, "baton.tem")
+
+          unless File.size? tem_file then next end # skip if there is no baton.tem file
+
+          %w(dna rna).each do |na|
+            new_tem_file = File.join(family_dir, "baton_#{na}.tem")
+            cp tem_file, new_tem_file
+
+            alignment.sequences.each do |sequence|
+
+              sunid = sequence.domain.sunid
+              na_up = na.upcase
+
+              $logger.info "Annotating Protein-#{na_up} interactions of SCOP family, #{sunid}..."
+
+              hbond_base_tem        = []
+              hbond_sugar_tem       = []
+              hbond_phosphate_tem   = []
+              whbond_base_tem       = []
+              whbond_sugar_tem      = []
+              whbond_phosphate_tem  = []
+              vdw_contact_base_tem      = []
+              vdw_contact_sugar_tem     = []
+              vdw_contact_phosphate_tem = []
+
+              sequence.positions.each_with_index do |position, pi|
+                if pi != 0 and pi % 75 == 0
+                  hbond_base_tem        << "\n"
+                  hbond_sugar_tem       << "\n"
+                  hbond_phosphate_tem   << "\n"
+                  whbond_base_tem       << "\n"
+                  whbond_sugar_tem      << "\n"
+                  whbond_phosphate_tem  << "\n"
+                  vdw_contact_base_tem      << "\n"
+                  vdw_contact_sugar_tem     << "\n"
+                  vdw_contact_phosphate_tem << "\n"
+                end
+
+                if position.gap?
+                  hbond_base_tem        << "-"
+                  hbond_sugar_tem       << "-"
+                  hbond_phosphate_tem   << "-"
+                  whbond_base_tem       << "-"
+                  whbond_sugar_tem      << "-"
+                  whbond_phosphate_tem  << "-"
+                  vdw_contact_base_tem      << "-"
+                  vdw_contact_sugar_tem     << "-"
+                  vdw_contact_phosphate_tem << "-"
+                  next
+                else
+                  hbond_base_tem        << (position.residue.send(:"hbonding_#{na}_base?")         ? "T" : "F")
+                  hbond_sugar_tem       << (position.residue.send(:"hbonding_#{na}_sugar?")        ? "T" : "F")
+                  hbond_phosphate_tem   << (position.residue.send(:"hbonding_#{na}_phosphate?")    ? "T" : "F")
+                  whbond_base_tem       << (position.residue.send(:"whbonding_#{na}_base?")        ? "T" : "F")
+                  whbond_sugar_tem      << (position.residue.send(:"whbonding_#{na}_sugar?")       ? "T" : "F")
+                  whbond_phosphate_tem  << (position.residue.send(:"whbonding_#{na}_phosphate?")   ? "T" : "F")
+                  vdw_contact_base_tem      << (position.residue.send(:"vdw_contacting_#{na}_base?")       ? "T" : "F")
+                  vdw_contact_sugar_tem     << (position.residue.send(:"vdw_contacting_#{na}_sugar?")      ? "T" : "F")
+                  vdw_contact_phosphate_tem << (position.residue.send(:"vdw_contacting_#{na}_phosphate?")  ? "T" : "F")
+                end
+              end
+
+              File.open(new_tem_file, "a") do |file|
+                file.puts ">P1;#{sunid}"
+                file.puts "hydrogen bond to #{na_up} base"
+                file.puts hbond_base_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "hydrogen bond to #{na_up} sugar"
+                file.puts hbond_sugar_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "hydrogen bond to #{na_up} phosphate"
+                file.puts hbond_phosphate_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "water-mediated hydrogen bond to #{na_up} base"
+                file.puts whbond_base_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "water-mediated hydrogen bond to #{na_up} sugar"
+                file.puts whbond_sugar_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "water-mediated hydrogen bond to #{na_up} phosphate"
+                file.puts whbond_phosphate_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "van der Waals vdw_contact to #{na_up} base"
+                file.puts vdw_contact_base_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "van der Waals vdw_contact to #{na_up} sugar"
+                file.puts vdw_contact_sugar_tem.join + "*"
+
+                file.puts ">P1;#{sunid}"
+                file.puts "van der Waals vdw_contact to #{na_up} phosphate"
+                file.puts vdw_contact_phosphate_tem.join + "*"
+              end
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Generate ESSTs for each representative set of SCOP families"
+    task :essts => [:environment] do
+
+      refresh_dir ESST_DIR
+
+      (10..100).step(10) do |si|
+        rep         = "rep#{si}"
+        ali_dir     = File.join(ALIGNMENT_DIR, rep)
+        est_dir     = File.join(ESST_DIR, rep)
+
+        %w(dna rna).each do |na|
+          est_na_dir = File.join(est_dir, na)
+          mkdir_p est_na_dir
+
+          Dir.new(ali_dir).each do |dir|
+            if dir =~ /^\./ then next end # skip if . or ..
+            na_tem      = File.join(ali_dir, dir, "baton_#{na}.tem")
+            new_na_tem  = File.join(est_na_dir, "#{dir}.tem")
+            cp na_tem, new_na_tem if File.exist? na_tem
+          end
+
+        end # %w(dna rna).each
+      end # (10..100).step(10)
+    end # task :essts
+
   end
 end

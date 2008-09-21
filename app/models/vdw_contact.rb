@@ -1,12 +1,12 @@
-class Contact < ActiveRecord::Base
+class VdwContact < ActiveRecord::Base
 
   belongs_to  :atom,
               :class_name     => 'Atom',
               :foreign_key    => 'atom_id',
-              :counter_cache  => :contacts_count
+              :counter_cache  => :vdw_contacts_count
 
-  belongs_to  :contacting_atom,
+  belongs_to  :vdw_contacting_atom,
               :class_name     => 'Atom',
-              :foreign_key    => 'contacting_atom_id',
-              :counter_cache  => :contacts_count
+              :foreign_key    => 'vdw_contacting_atom_id',
+              :counter_cache  => :vdw_contacts_count
 end

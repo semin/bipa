@@ -131,8 +131,8 @@ module Bipa
 
       module Atoms
 
-        PHOSPHATE = %w(P OP1 OP2 OP3 HOP3 HOP2)
         SUGAR     = %w(C1' C2' C3' C4' C5' O2' O3' H1' H2' H2'' H3' H4' H5' H5' HO2' HO3')
+        PHOSPHATE = %w(P OP1 OP2 OP3 HOP3 HOP2)
       end
     end # module NucleicAcids
 

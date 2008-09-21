@@ -78,10 +78,10 @@ class Scop < ActiveRecord::Base
         end
         memoize :#{property}_#{na}_interface_whbonds
 
-        def #{property}_#{na}_interface_contacts(redundancy, resolution)
-          #{na}_interfaces(redundancy, resolution).map { |i| (i.contacts_count - i.hbonds_as_donor_count - i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
+        def #{property}_#{na}_interface_vdw_contacts(redundancy, resolution)
+          #{na}_interfaces(redundancy, resolution).map { |i| (i.vdw_contacts_count - i.hbonds_as_donor_count - i.hbonds_as_acceptor_count) / i.asa * 100 }.to_stats_array.#{property}
         end
-        memoize :#{property}_#{na}_interface_contacts
+        memoize :#{property}_#{na}_interface_vdw_contacts
 
         def #{property}_#{na}_interface_polarity(redundancy, resolution)
           #{na}_interfaces(redundancy, resolution).map { |i| i.polarity }.to_stats_array.#{property}
@@ -97,7 +97,7 @@ class Scop < ActiveRecord::Base
           memoize :#{property}_#{na}_interface_singlet_propensity_of_#{aa}
         END
 
-#        %w(hbond whbond contact).each do |intact|
+#        %w(hbond whbond vdw_contact).each do |intact|
 #          class_eval <<-END
 #            def #{property}_#{dna}_interface_#{intact}_singlet_propensity_of_#{aa}(redundancy, resolution)
 #              #{na}_interfaces(redundancy, resolution).map(&:#{intact}_singlet_propensity_of_#{aa}).to_stats_array.#{property}
@@ -119,7 +119,7 @@ class Scop < ActiveRecord::Base
   end
 
 
-  %w(hbond whbond contact).each do |int|
+  %w(hbond whbond vdw_contact).each do |int|
     %w(dna rna).each do |na|
 
       class_eval <<-END
