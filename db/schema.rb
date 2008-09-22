@@ -149,7 +149,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :unbound_asa
     t.float       :bound_asa
     t.float       :delta_asa
-    t.integer     :contacts_count,            :default => 0
+    t.integer     :vdw_contacts_count,        :default => 0
     t.integer     :whbonds_count,             :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0
     t.integer     :hbonds_as_acceptor_count,  :default => 0
@@ -160,7 +160,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :atoms, [:residue_id, :atom_name]
 
 
-  # 'dssp' table
+  # 'dssps' table
   create_table :dssps, :force => true do |t|
     t.belongs_to  :residue
     t.integer     :dssp_number
@@ -191,8 +191,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :psi
   end
 
-  add_index :dssp, :residue_id
-  add_index :dssp, :dssp_number
+  add_index :dssps, :residue_id
+  add_index :dssps, :dssp_number
 
 
   # 'naccess' table
@@ -219,17 +219,17 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :zap, :atom_id
 
 
-  # 'contacts' table
-  create_table :contacts, :force => true do |t|
+  # 'vdw_contacts' table
+  create_table :vdw_contacts, :force => true do |t|
     t.belongs_to  :atom
-    t.belongs_to  :contacting_atom
+    t.belongs_to  :vdw_contacting_atom
     t.float       :distance
   end
 
-  add_index :contacts, :atom_id
-  add_index :contacts, :contacting_atom_id
-  add_index :contacts, [:atom_id, :contacting_atom_id]
-  add_index :contacts, [:contacting_atom_id, :atom_id]
+  add_index :vdw_contacts, :atom_id
+  add_index :vdw_contacts, :vdw_contacting_atom_id
+  add_index :vdw_contacts, [:atom_id, :vdw_contacting_atom_id]
+  add_index :vdw_contacts, [:vdw_contacting_atom_id, :atom_id]
 
 
   # 'hbplus' table
@@ -291,7 +291,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :polarity
     t.integer     :residues_count,            :default => 0
     t.integer     :atoms_count,               :default => 0
-    t.integer     :contacts_count,            :default => 0
+    t.integer     :vdw_contacts_count,        :default => 0
     t.integer     :whbonds_count,             :default => 0
     t.integer     :hbonds_count,              :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0
@@ -301,11 +301,11 @@ ActiveRecord::Schema.define(:version => 1) do
       t.float :"singlet_propensity_of_#{aa.downcase}"
     end
 
-    Dssp::SSES.each do |sse|
+    Sses::ALL.each do |sse|
       t.float :"sse_propensity_of_#{sse.downcase}"
     end
 
-    %w(hbond whbond contact).each do |intact|
+    %w(hbond whbond vdw_contact).each do |intact|
 
       %w(sugar phosphate).each do |moiety|
         t.integer :"frequency_of_#{intact}_between_amino_acids_and_#{moiety}"
@@ -496,4 +496,34 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index :news, :date
+
+
+  create_table :essts, :force => true do |t|
+    t.integer :redundancy
+    t.integer :weight
+    t.string  :environment
+    t.string  :secondary_structure
+    t.string  :extended_accessibility
+    t.string  :hbond_to_sidechain
+    t.string  :hbond_to_mainchain_carbonyl
+    t.string  :hbond_to_mainchain_amide
+  end
+
+  # This is for the case sesitivity!
+  execute "ALTER TABLE essts CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
+
+  add_index :essts, [:redundancy, :weight]
+  add_index :essts, [:environment]
+
+
+  create_table :substitutions, :force => true do |t|
+    t.belongs_to  :esst
+    t.string      :aa1
+    t.string      :aa2
+    t.float       :prob
+    t.integer     :log
+    t.integer     :cnt
+  end
+
+  add_index :substitutions, :esst_id
 end

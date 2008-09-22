@@ -154,6 +154,8 @@ namespace :bipa do
     task :simple_tem_files => [:environment] do
 
       (10..100).step(10) do |si|
+        next unless si == 90 # temporary skipping!!!
+
         rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
 
         Dir.new(rep_dir).each do |dir|
@@ -175,35 +177,31 @@ namespace :bipa do
           alignment.sequences.each do |sequence|
             sunid = sequence.domain.sunid
 
-            $logger.info "Annotating Protein-DNA/RNA interfaces of SCOP domain, #{sunid}..."
+            $logger.info "Annotating Protein-DNA/RNA interfaces of SCOP domain, #{sunid} ..."
 
-            dna_tem = []
-            rna_tem = []
+            ext_tem = []
 
             sequence.positions.each_with_index do |position, pi|
-              if pi != 0 and pi % 75 == 0
-                dna_tem << "\n"
-                rna_tem << "\n"
-              end
+              ext_tem << "\n" if pi != 0 and pi % 75 == 0
 
-              if position.gap?
-                dna_tem << "-"
-                rna_tem << "-"
-                next
+              case
+              when position.gap?
+                ext_tem << "-"
+              when position.residue.send(:"binding_dna?")
+                ext_tem << "D"
+              when position.residue.send(:"binding_rna?")
+                ext_tem << "R"
+              when position.residue.send(:"on_surface?")
+                ext_tem << "A"
               else
-                dna_tem << (position.residue.send(:"binding_dna?") ? "T" : "F")
-                rna_tem << (position.residue.send(:"binding_rna?") ? "T" : "F")
+                ext_tem << "B"
               end
             end
 
             File.open(new_tem_file, "a") do |file|
               file.puts ">P1;#{sunid}"
-              file.puts "DNA interface"
-              file.puts dna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "RNA interface"
-              file.puts rna_tem.join + "*"
+              file.puts "extended solvent accessibility"
+              file.puts ext_tem.join + "*"
             end
           end
         end
@@ -354,6 +352,29 @@ namespace :bipa do
           end
 
         end # %w(dna rna).each
+      end # (10..100).step(10)
+    end # task :essts
+
+
+    desc "Generate ESSTs for each representative set of SCOP families"
+    task :simple_essts => [:environment] do
+
+      refresh_dir ESST_DIR
+
+      (10..100).step(10) do |si|
+        next unless si == 90 # temporar skipping!!!
+
+        rep     = "rep#{si}"
+        ali_dir = File.join(ALIGNMENT_DIR, rep)
+        est_dir = File.join(ESST_DIR, rep)
+        mkdir_p est_dir
+
+        Dir.new(ali_dir).each do |dir|
+          if dir =~ /^\./ then next end # skip if . or ..
+          na_tem      = File.join(ali_dir, dir, "baton_na.tem")
+          new_na_tem  = File.join(est_dir, "#{dir}.tem")
+          cp na_tem, new_na_tem if File.exist? na_tem
+        end
       end # (10..100).step(10)
     end # task :essts
 
