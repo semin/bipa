@@ -191,16 +191,14 @@ namespace :bipa do
                 ext_tem << "D"
               when position.residue.send(:"binding_rna?")
                 ext_tem << "R"
-              when position.residue.send(:"on_surface?")
-                ext_tem << "A"
               else
-                ext_tem << "B"
+                ext_tem << "U"
               end
             end
 
             File.open(new_tem_file, "a") do |file|
               file.puts ">P1;#{sunid}"
-              file.puts "extended solvent accessibility"
+              file.puts "DNA/RNA interface"
               file.puts ext_tem.join + "*"
             end
           end

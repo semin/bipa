@@ -1161,5 +1161,27 @@ namespace :bipa do
 #      end
     end
 
+
+    desc "Import ESSTs"
+    task :essts => [:environment] do
+      mat_file = "/BiO/Research/BIPA/bipa/public/essts/rep90/new_essts/allmat.dat.prob.nr100"
+
+      IO.readlines(mat).each do |line|
+        case line
+        when /^#/
+          next
+        when /^>(\w+)\s+(\d+)/
+          # essts << esst if esst
+          break if $1 == "total"
+          env, num = $1, $2
+          esst = Esst.create(:env, num, "")
+        when /^\w/
+          esst.matrix += line
+        else
+          raise "#{line}: unexpected"
+        end
+      end
+    end
+
   end
 end

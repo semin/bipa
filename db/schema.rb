@@ -503,10 +503,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer :weight
     t.string  :environment
     t.string  :secondary_structure
-    t.string  :extended_accessibility
+    t.string  :solvent_accessibility
     t.string  :hbond_to_sidechain
     t.string  :hbond_to_mainchain_carbonyl
     t.string  :hbond_to_mainchain_amide
+    t.string  :dna_rna_interface
   end
 
   # This is for the case sesitivity!
