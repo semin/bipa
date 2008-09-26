@@ -405,7 +405,7 @@ namespace :bipa do
 
 
     desc "Run FUGUE for each profiles of all non-redundant sets of SCOP families"
-    task :fugue => [:environment] do
+    task :fugueprf => [:environment] do
 
       dir = "/BiO/Research/BIPA/bipa/public/essts/rep90"
       seq = ASTRAL40
@@ -421,7 +421,7 @@ namespace :bipa do
 
 
     desc "Run FUGUE for each profiles of all non-redundant sets of SCOP families"
-    task :temp_fugue => [:environment] do
+    task :temp_fugueprf => [:environment] do
 
       dir = "/BiO/Research/BIPA/bipa/public/essts/rep90/old_essts"
       seq = ASTRAL40
