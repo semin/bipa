@@ -1,11 +1,13 @@
 class Esst < ActiveRecord::Base
 
-  has_many :substitutions
+  has_many :substitutions,
+           :class_name  => "Substitution",
+           :foreign_key => "esst_id"
 
 end
 
-class StdEsst < Essts
+class StdEsst < Esst
 end
 
-class NaEsst < Essts
+class NaEsst < Esst
 end
