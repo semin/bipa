@@ -403,5 +403,36 @@ namespace :bipa do
       end
     end
 
+
+    desc "Run FUGUE for each profiles of all non-redundant sets of SCOP families"
+    task :fugue => [:environment] do
+
+      dir = "/BiO/Research/BIPA/bipa/public/essts/rep90"
+      seq = ASTRAL40
+      cwd = pwd
+      chdir dir
+      Dir[dir + "/*.fug"].each_with_index do |fug, i|
+        sunid = File.basename(fug, ".fug")
+        $logger.info("fugueprf: #{sunid} ...")
+        system "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
+      end
+      chdir cwd
+    end
+
+
+    desc "Run FUGUE for each profiles of all non-redundant sets of SCOP families"
+    task :temp_fugue => [:environment] do
+
+      dir = "/BiO/Research/BIPA/bipa/public/essts/rep90/old_essts"
+      seq = ASTRAL40
+      cwd = pwd
+      chdir dir
+      Dir[dir + "/*.fug"].each_with_index do |fug, i|
+        sunid = File.basename(fug, ".fug")
+        $logger.info("fugueprf: #{sunid} ...")
+        system "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
+      end
+      chdir cwd
+    end
   end
 end

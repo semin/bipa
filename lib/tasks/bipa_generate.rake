@@ -151,10 +151,10 @@ namespace :bipa do
 
 
     desc "Generate simple (DNA/RNA) TEM file for each alignments"
-    task :simple_tem_files => [:environment] do
+    task :tem_files => [:environment] do
 
       (10..100).step(10) do |si|
-        next unless si == 90 # temporary skipping!!!
+        next if si == 90 # temporary skipping!!!
 
         rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
 
@@ -177,7 +177,7 @@ namespace :bipa do
           alignment.sequences.each do |sequence|
             sunid = sequence.domain.sunid
 
-            $logger.info "Annotating Protein-DNA/RNA interfaces of SCOP domain, #{sunid} ..."
+            $logger.info "Adding DNA/RNA interface environment for #{sunid} ..."
 
             ext_tem = []
 
@@ -192,7 +192,7 @@ namespace :bipa do
               when position.residue.send(:"binding_rna?")
                 ext_tem << "R"
               else
-                ext_tem << "U"
+                ext_tem << "N"
               end
             end
 
@@ -334,33 +334,7 @@ namespace :bipa do
       refresh_dir ESST_DIR
 
       (10..100).step(10) do |si|
-        rep         = "rep#{si}"
-        ali_dir     = File.join(ALIGNMENT_DIR, rep)
-        est_dir     = File.join(ESST_DIR, rep)
-
-        %w(dna rna).each do |na|
-          est_na_dir = File.join(est_dir, na)
-          mkdir_p est_na_dir
-
-          Dir.new(ali_dir).each do |dir|
-            if dir =~ /^\./ then next end # skip if . or ..
-            na_tem      = File.join(ali_dir, dir, "baton_#{na}.tem")
-            new_na_tem  = File.join(est_na_dir, "#{dir}.tem")
-            cp na_tem, new_na_tem if File.exist? na_tem
-          end
-
-        end # %w(dna rna).each
-      end # (10..100).step(10)
-    end # task :essts
-
-
-    desc "Generate ESSTs for each representative set of SCOP families"
-    task :simple_essts => [:environment] do
-
-      refresh_dir ESST_DIR
-
-      (10..100).step(10) do |si|
-        next unless si == 90 # temporar skipping!!!
+        next if si != 90
 
         rep     = "rep#{si}"
         ali_dir = File.join(ALIGNMENT_DIR, rep)
@@ -368,13 +342,38 @@ namespace :bipa do
         mkdir_p est_dir
 
         Dir.new(ali_dir).each do |dir|
-          if dir =~ /^\./ then next end # skip if . or ..
+          next if dir =~ /^\./
           na_tem      = File.join(ali_dir, dir, "baton_na.tem")
           new_na_tem  = File.join(est_dir, "#{dir}.tem")
           cp na_tem, new_na_tem if File.exist? na_tem
         end
+
+        cp NA_CLASSDEF, est_dir
+        cwd = pwd
+        chdir est_dir
+        system "ls *.tem -1 > TEMLIST"
+        system "subst --tem-list TEMLIST --weight 100 --output 0"
+        system "subst --tem-list TEMLIST --weight 100 --output 1 --outfile allmat.dat.prob.pid100"
+        system "subst --tem-list TEMLIST --weight 100 --output 2 --outfile allmat.dat.log.pid100"
+        chdir cwd
       end # (10..100).step(10)
     end # task :essts
+
+
+    desc "Generate ESSTs for each representative set of SCOP families"
+    task :profiles => [:environment] do
+
+      (10..100).step(10) do |si|
+        next if si != 90
+        rep       = "rep#{si}"
+        cwd       = pwd
+        esst_dir  = File.join(ESST_DIR, rep)
+
+        chdir esst_dir
+        system "melody -list TEMLIST -c classdef.dat -s allmat.dat.log.pid100"
+        chdir cwd
+      end
+    end
 
   end
 end

@@ -74,3 +74,6 @@ ALIGNMENT_DIR   = File.join(RAILS_ROOT, "/public/alignments")
 ZAP_DIR         = File.join(RAILS_ROOT, "/public/zap")
 GO_DIR          = File.join(RAILS_ROOT, "/public/go")
 ESST_DIR        = File.join(RAILS_ROOT, "/public/essts")
+
+NA_CLASSDEF     = File.join(RAILS_ROOT, "/config/classdef.dat")
+ASTRAL40        = "/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa"

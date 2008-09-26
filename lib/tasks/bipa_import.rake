@@ -260,7 +260,7 @@ namespace :bipa do
 
 
     desc "Import DSSP results to BIPA"
-    task :dssp => [:environment] do
+    task :dssps => [:environment] do
 
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
@@ -277,7 +277,7 @@ namespace :bipa do
             dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
             dssps     = Array.new
 
-            if (!File.size?(dssp_file))
+            unless File.size?(dssp_file)
               $logger.warn("Skip #{pdb_code} due to missing DSSP result file")
               structure.tainted = true
               structure.save!
@@ -291,12 +291,12 @@ namespace :bipa do
                     (residue.icode.blank? ? '' : residue.icode) +
                     residue.chain.chain_code
 
-              dssps << residue.build_dssp(dssp_residues[key].to_hash) if dssp_residues.has_key?(key)
+              residue.create_dssp(dssp_residues[key].to_hash) if dssp_residues.has_key?(key)
             end
 
-            Dssp.import(dssps, :validate => false)
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'dssp' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
+
+            $logger.info("Importing 'dssps' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
           end
         end
         ActiveRecord::Base.establish_connection(config)
