@@ -1,5 +1,5 @@
-class Substitutions < ActiveRecord::Base
+class Substitution < ActiveRecord::Base
 
-  belongs_to :esst
+  belongs_to  :esst
 
 end

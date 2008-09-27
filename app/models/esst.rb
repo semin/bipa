@@ -1,8 +1,6 @@
 class Esst < ActiveRecord::Base
 
-  has_many :substitutions,
-           :class_name  => "Substitution",
-           :foreign_key => "esst_id"
+  has_many :substitutions
 
 end
 

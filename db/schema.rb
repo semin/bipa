@@ -499,8 +499,9 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   create_table :essts, :force => true do |t|
+    t.string  :type
     t.integer :redundancy
-    t.integer :weight
+    t.integer :number
     t.string  :environment
     t.string  :secondary_structure
     t.string  :solvent_accessibility
@@ -513,7 +514,7 @@ ActiveRecord::Schema.define(:version => 1) do
   # This is for the case sesitivity!
   execute "ALTER TABLE essts CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
 
-  add_index :essts, [:redundancy, :weight]
+  add_index :essts, [:redundancy, :number]
   add_index :essts, [:environment]
 
 

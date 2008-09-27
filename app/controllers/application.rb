@@ -12,6 +12,7 @@ require_dependency "alignment"
 require_dependency "go_relationship"
 require_dependency "gloria"
 require_dependency "mmcif"
+require_dependency "esst"
 
 class ApplicationController < ActionController::Base
 

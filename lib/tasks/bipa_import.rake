@@ -1164,23 +1164,92 @@ namespace :bipa do
 
     desc "Import ESSTs"
     task :essts => [:environment] do
-      mat_file = "/BiO/Research/BIPA/bipa/public/essts/rep90/new_essts/allmat.dat.prob.nr100"
+      na_esst_dir   = File.join(RAILS_ROOT, "/public/essts/rep90/na")
+      std_esst_dir  = File.join(RAILS_ROOT, "/public/essts/rep90/std")
 
-      IO.readlines(mat).each do |line|
-        case line
-        when /^#/
-          next
-        when /^>(\w+)\s+(\d+)/
-          # essts << esst if esst
-          break if $1 == "total"
-          env, num = $1, $2
-          esst = Esst.create(:env, num, "")
-        when /^\w/
-          esst.matrix += line
-        else
-          raise "#{line}: unexpected"
+      [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
+        log_mat   = File.join(esst_dir, "allmat.dat.log")
+        prob_mat  = File.join(esst_dir, "allmat.dat.prob")
+        raw_cnts  = Dir[esst_dir + "/rawc*"]
+
+        tag = false
+        esst = nil
+        colnames = nil
+        esst_class = (i == 0 ? NaEsst : StdEsst)
+
+#        IO.foreach(prob_mat) do |line|
+#          case line
+#          when /^#/
+#            colnames = line.gsub(/#/, '').strip.split(/\s+/) if tag
+#            next
+#          when /^>(\w+)\s+(\d+)$/
+#            tag = true
+#            env, num = $1, $2
+#            $logger.info "Importing Probability ESST, #{num} under #{env} ..."
+#            if env == "total"
+#              esst = esst_class.create!(:redundancy => 90,
+#                                        :number => num,
+#                                        :environment => env)
+#            else
+#              esst = esst_class.create!(:redundancy => 90,
+#                                        :number => num,
+#                                        :environment => env,
+#                                        :secondary_structure => env[0].chr,
+#                                        :solvent_accessibility => env[1].chr,
+#                                        :hbond_to_sidechain => env[2].chr,
+#                                        :hbond_to_mainchain_carbonyl => env[3].chr,
+#                                        :hbond_to_mainchain_amide => env[4].chr,
+#                                        :dna_rna_interface => begin env[5].chr rescue nil end)
+#            end
+#          when /^(\w)\s+(.*)$/
+#            rowname, cells = $1, $2.strip.split(/\s+/)
+#            cells.each_with_index do |cell, j|
+#              esst.substitutions << Substitution.create!(:aa1 => rowname,
+#                                                         :aa2 => colnames[j],
+#                                                         :prob => cell.to_f)
+#            end
+#            esst.save!
+#          end # case line
+#        end # IO.foreach(prob_mat)
+
+#        IO.foreach(log_mat) do |line|
+#          case line
+#          when /^#/
+#            colnames = line.gsub(/#/, '').strip.split(/\s+/) if tag
+#            next
+#          when /^>(\w+)\s+(\d+)$/
+#            tag = true
+#            env, num = $1, $2
+#            $logger.info "Importing Log Odds Ratio ESST, #{num} under #{env} ..."
+#            esst = esst_class.find_by_redundancy_and_number(90, num)
+#          when /^(\w)\s+(.*)$/
+#            rowname, cells = $1, $2.strip.split(/\s+/)
+#            cells.each_with_index do |cell, j|
+#              if sub = esst.substitutions.find_by_aa1_and_aa2(rowname, colnames[j])
+#                sub.log = cell.to_i
+#                sub.save!
+#              end
+#            end
+#            esst.save!
+#          end # case line
+#        end # IO.foreach(log_mat)
+
+        raw_cnts.each do |raw_cnt|
+          num   = raw_cnt.match(/rawc(\d+)/)[1].to_i
+          esst  = esst_class.find_by_redundancy_and_number(90, num)
+          cnts  = []
+
+          $logger.info "Importing Count ESST, #{num} ..."
+
+          IO.foreach(raw_cnt) { |l| cnts.concat(l.strip.gsub(/\./,'').split(/\s+/)) }
+
+          esst.substitutions.each_with_index do |sub, k|
+            sub.cnt = cnts[k].to_i
+            sub.save
+          end
         end
-      end
+
+      end # [na_esst_dir, std_esst_dir].each
     end
 
   end

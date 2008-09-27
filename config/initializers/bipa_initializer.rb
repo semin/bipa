@@ -17,6 +17,7 @@ require_dependency "alignment"
 require_dependency "go_relationship"
 require_dependency "gloria"
 require_dependency "mmcif"
+require_dependency "esst"
 
 # Constants for BIPA
 RESUME    = ENV["RESUME"].to_i > 0    ? ENV["RESUME"].to_i    : false
