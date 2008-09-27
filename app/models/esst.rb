@@ -9,7 +9,7 @@ class Esst < ActiveRecord::Base
   def nmatrix(value = :prob)
     NMatrix[*substitutions.map(&:"#{value}").in_groups_of(21)]
   end
-  memoize :to_matrix
+  memoize :nmatrix
 
 end
 
