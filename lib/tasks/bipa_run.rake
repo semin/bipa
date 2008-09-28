@@ -404,7 +404,7 @@ namespace :bipa do
     end
 
 
-    desc "Run FUGUE for each profiles of all non-redundant sets of SCOP families"
+    desc "Run fugueprf for each profiles of all non-redundant sets of SCOP families"
     task :fugueprf => [:environment] do
 
       dir = "/BiO/Research/BIPA/bipa/public/essts/rep90"
@@ -420,7 +420,7 @@ namespace :bipa do
     end
 
 
-    desc "Run FUGUE for each profiles of all non-redundant sets of SCOP families"
+    desc "Run fuguprf for each profiles of all non-redundant sets of SCOP families"
     task :temp_fugueprf => [:environment] do
 
       dir = "/BiO/Research/BIPA/bipa/public/essts/rep90/old_essts"
@@ -434,5 +434,11 @@ namespace :bipa do
       end
       chdir cwd
     end
+
+
+    desc "Run fugueali for a selected set of hits from fugueprf"
+    task :fugueali => [:environment] do
+    end
+
   end
 end
