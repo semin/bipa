@@ -528,4 +528,65 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index :substitutions, :esst_id
+
+
+  create_table :profiles, :force => true do |t|
+    t.belongs_to  :alignment
+    t.string      :name
+    t.string      :command
+    t.integer     :length
+    t.integer     :no_sequences
+    t.integer     :no_structures
+    t.integer     :enhance_num
+    t.float       :enhance_div
+    t.integer     :weighting
+    t.float       :weighting_threshold
+    t.integer     :weighting_seed
+    t.float       :multiple_factor
+    t.string      :format
+    t.string      :similarity_matrix
+    t.string      :similarity_matrix_offset
+    t.string      :ignore_gap_weight
+    t.string      :symbol_in_row
+    t.string      :symbol_in_column
+    t.string      :symbol_structural_feature
+    t.integer     :gap_ins_open_terminal
+    t.integer     :gap_del_open_terminal
+    t.integer     :gap_ins_ext_terminal
+    t.integer     :gap_del_ext_terminal
+    t.integer     :evd
+  end
+
+  add_index :profiles, :alignment_id
+
+
+  create_table :profile_columns, :force => true do |t|
+    t.belongs_to  :profile
+    t.belongs_to  :column
+    t.string      :seq
+    t.integer     :aa_A, :aa_C, :aa_D, :aa_E, :aa_F, :aa_G, :aa_H, :aa_I, :aa_K, :aa_L, :aa_M,
+                  :aa_N, :aa_P, :aa_Q, :aa_R, :aa_S, :aa_T, :aa_V, :aa_W, :aa_Y, :aa_J, :aa_U
+    t.integer     :InsO, :InsE, :DelO, :DelE, :COIL, :HNcp, :HCcp, :HIn, :SNcp, :SCcp, :SInt, :NRes, :Ooi, :Acc
+    t.integer     :H, :E, :P, :C, :At, :Af, :St, :Sf, :Ot, :Of, :Nt, :Nf, :D, :R, :N
+  end
+
+  add_index :profile_columns, :profile_id
+  add_index :profile_columns, :column_id
+
+  execute "ALTER TABLE profile_columns CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
+
+
+  create_table :fugue_hits, :force => true do |t|
+    t.belongs_to  :profile
+    t.belongs_to  :scop
+    t.integer     :raws
+    t.integer     :rvn
+    t.integer     :zscore
+    t.integer     :zori
+    t.boolean     :positive
+  end
+
+  add_index :fugue_hits, :profile_id
+  add_index :fugue_hits, :scop_id
+  add_index :fugue_hits, :zscore
 end

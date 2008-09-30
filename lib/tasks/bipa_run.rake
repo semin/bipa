@@ -70,7 +70,7 @@ namespace :bipa do
 #            mv("hbplus.rc", "#{pdb_code}.rc") if File.exists?("hbplus.rc")
 #            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
 
-            system("#{HBPLUS_BIN} #{pdb_file} 1>#{pdb_code}.hbplus.log 2>&1")
+            sh "#{HBPLUS_BIN} #{pdb_file} 1>#{pdb_code}.hbplus.log 2>&1"
             move(Dir["*"], "..")
             chdir(cwd)
             rm_rf(work_dir)
@@ -133,9 +133,9 @@ namespace :bipa do
               f.puts "END\n"
             end
 
-            system("#{NACCESS_BIN} #{co_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}")
-            system("#{NACCESS_BIN} #{aa_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}")
-            system("#{NACCESS_BIN} #{na_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}")
+            sh "#{NACCESS_BIN} #{co_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
+            sh "#{NACCESS_BIN} #{aa_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
+            sh "#{NACCESS_BIN} #{na_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
 
             cp(Dir["#{pdb_code}*"], "..")
             chdir(cwd)
@@ -164,7 +164,7 @@ namespace :bipa do
             cwd = pwd
             chdir(DSSP_DIR)
             pdb_code = File.basename(pdb_file, '.pdb')
-            system("#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err")
+            sh("#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err")
             chdir(cwd)
 
             $logger.info("Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
@@ -219,7 +219,7 @@ namespace :bipa do
                   "-S #{si} " +
                   "-a 2 " +
                   "-p T"
-                  system blastclust_cmd
+                  sh blastclust_cmd
               end
             end
 
@@ -259,7 +259,7 @@ namespace :bipa do
               chdir(fam_dir)
               ENV["PDB_EXT"] = ".pdb"
               File.open("LIST", "w") { |f| f.puts list.join("\n") }
-              system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1")
+              sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1"
               chdir(cwd)
 
               $logger.info("Baton with full set of SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
@@ -296,8 +296,7 @@ namespace :bipa do
                 chdir(rep_dir)
                 ENV["PDB_EXT"] = ".pdb"
                 File.open("LIST", "w") { |f| f.puts list.join("\n") }
-                system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1")
-                #system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+                sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1"
                 chdir(cwd)
               end
 
@@ -328,8 +327,7 @@ namespace :bipa do
 
                 Dir[rep_dir + "/*"].each do |subfam_dir|
                   chdir(subfam_dir)
-                  system("Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1")
-                  #system("Baton -input /home/merlin/Temp/baton.prm.current -features -pdbout -matrixout *.pdb 1> baton.log 2>&1")
+                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
                   chdir(cwd)
                 end
               end
@@ -357,7 +355,7 @@ namespace :bipa do
               cwd = pwd
               fam_dir = File.join(rep_dir, dir)
               chdir(fam_dir)
-              system("joy baton.ali 1> joy.log 2>&1")
+              sh "joy baton.ali 1> joy.log 2>&1"
               chdir(cwd)
 
               $logger.info "JOY with non-redundant set (#{si} pid) of SCOP Family, #{dir}: done"
@@ -394,8 +392,8 @@ namespace :bipa do
                 next
               end
 
-              #system "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
-              system "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
+              #sh "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
+              sh "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
             $logger.info("ZAP: #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
           end
@@ -414,7 +412,7 @@ namespace :bipa do
       Dir[dir + "/*.fug"].each_with_index do |fug, i|
         sunid = File.basename(fug, ".fug")
         $logger.info("fugueprf: #{sunid} ...")
-        system "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
+        sh "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
       end
       chdir cwd
     end
@@ -430,7 +428,7 @@ namespace :bipa do
       Dir[dir + "/*.fug"].each_with_index do |fug, i|
         sunid = File.basename(fug, ".fug")
         $logger.info("fugueprf: #{sunid} ...")
-        system "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
+        sh "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
       end
       chdir cwd
     end
