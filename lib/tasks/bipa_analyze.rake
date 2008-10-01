@@ -22,5 +22,10 @@ namespace :bipa do
       end
     end
 
+
+    desc "Check Alignment Accuracy"
+    task :alignment_accuracy => [:environment] do
+    end
+
   end
 end
