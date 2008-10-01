@@ -1253,5 +1253,185 @@ namespace :bipa do
       end
     end
 
+
+    desc "Import Fugue profiles"
+    task :profiles => [:environment] do
+      (10..100).step(10) do |si|
+        rep_dir       = File.join(ESST_DIR, "rep#{si}")
+        na_esst_dir   = File.join(rep_dir, "na")
+        std_esst_dir  = File.join(rep_dir, "std")
+
+        [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
+          prfs = FileList[esst_dir + "/*.fug"]
+          prfs.each do |prf|
+            name                      = File.basename(prf, ".fug")
+            alignment                 = Scop.find_by_sunid(name).send(:"rep#{si}_alignment")
+            command                   = nil #Command:                       melody -list TEMLIST -c classdef.dat -s allmat.dat.log.pid100
+            length                    = nil #Profile_length:                120   alignment positions
+            no_sequences              = nil #Sequence_in_profile:           3     sequences
+            no_structures             = nil #Real_Structure:                3     structures
+            enhance_num               = nil #Enhance_Num:                   3     sequences
+            enhance_div               = nil #Enhance_Div:                   0.549
+            weighting                 = nil #Weighting:                     1  BlosumWeight -- weighting scheme based on single linkage clustering
+            weighting_threshold       = nil #Weighting_threshold:           0
+            weighting_seed            = nil #Weighting_seed:                -488943
+            multiple_factor           = nil #Multiple_factor:               10.0
+            format                    = nil #Profile_format:                0      FUGUE
+            similarity_matrix         = nil #Similarity_matrix:             OFF
+            similarity_matrix_offset  = nil #Similarity_matrix_offset:      NONE
+            ignore_gap_weight         = nil #Ignore_gap_weight:             ON
+            symbol_in_row             = nil #Symbol_in_row(sequence):       ACDEFGHIKLMNPQRSTVWYJU
+            symbol_in_column          = nil #Symbol_in_column(structure):   ACDEFGHIKLMNPQRSTVWYJ
+            symbol_structural_feature = nil #Symbol_structural_feature:     HEPCAaSsOoNnDRN
+            gap_ins_open_terminal     = nil #GapInsOpenTerminal             100
+            gap_del_open_terminal     = nil #GapDelOpenTerminal             100
+            gap_ins_ext_terminal      = nil #GapInsExtTerminal              100
+            gap_del_ext_terminal      = nil #GapDelExtTerminal              100
+            evd                       = nil #EVD                            0
+            start                     = false #START
+            theend                    = false #THEEND
+            profile_class             = (i == 0 ? NaProfile : StdProfile)
+            profile_column_class      = (i == 0 ? NaProfileColumn : StdProfileColumn)
+            profile                   = nil
+            cnt                       = 0
+
+            IO.foreach(prf) do |line|
+              case line.chomp!
+              when /^Command:\s+(.*)/                         then command = $1
+              when /^Profile_length:\s+(\d+)/                 then length = $1
+              when /^Sequence_in_profile:\s+(\d+)/            then no_sequences = $1
+              when /^Real_Structure:\s+(\d+)/                 then no_structures = $1
+              when /^Enhance_Num:\s+(\d+)/                    then enhance_num = $1
+              when /^Enhance_Div:\s+(\S+)/                    then enhance_div = $1
+              when /^Weighting:\s+(\d+)/                      then weighting = $1
+              when /^Weighting_threshold:\s+(\d+)/            then weighting_threshold = $1
+              when /^Weighting_seed:\s+(\S+)/                 then weighting_seed = $1
+              when /^Multiple_factor:\s+(\S+)/                then multiple_factor = $1
+              when /^Profile_format:\s+(\d+)/                 then format = $1
+              when /^Similarity_matrix:\s+(\S+)/             then similarity_matrix = $1
+              when /^Similarity_matrix_offset:\s+(\S+)/       then similarity_matrix_offset = $1
+              when /^Ignore_gap_weight:\s+(\S+)/              then ignore_gap_weight = $1
+              when /^Symbol_in_row\(sequence\):\s+(\S+)/      then symbol_in_row =  $1
+              when /^Symbol_in_column\(structure\):\s+(\S+)/  then symbol_in_column = $1
+              when /^Symbol_structural_feature:\s+(\S+)/      then symbol_structural_feature = $1
+              when /^GapInsOpenTerminal\s+(\d+)/              then gap_ins_open_terminal = $1
+              when /^GapDelOpenTerminal\s+(\d+)/              then gap_del_open_terminal = $1
+              when /^GapInsExtTerminal\s+(\d+)/               then gap_ins_ext_terminal = $1
+              when /^GapDelExtTerminal\s+(\d+)/               then gap_del_ext_terminal = $1
+              when /^EVD\s+(\d+)/                             then evd = $1
+              when /^START/                                   then start = true
+              when /^THEEND/                                  then theend = true
+              when /^(\S+)\s+(.*)$/
+                if start and !theend
+                  cnt += 1
+                  seq, values = $1, $2.chomp.split(/\s+/)
+
+                  if profile
+                    profile.profile_columns << profile_column_class.create!(
+                      :column_id => alignment.columns[cnt - 1].id, :seq => seq,
+                      :aa_A => values[0], :aa_C => values[1], :aa_D => values[2], :aa_E => values[3],
+                      :aa_F => values[4], :aa_G => values[5], :aa_H => values[6], :aa_I => values[7],
+                      :aa_K => values[8], :aa_L => values[9], :aa_M => values[10],:aa_N => values[11],
+                      :aa_P => values[12],:aa_Q => values[13],:aa_R => values[14],:aa_S => values[15],
+                      :aa_T => values[16],:aa_V => values[17],:aa_W => values[18],:aa_Y => values[19],
+                      :aa_J => values[20],:aa_U => values[21],
+                      :InsO => values[22],:InsE => values[23],:DelO => values[24],:DelE => values[25],
+                      :COIL => values[26],:HNcp => values[27],:HCcp => values[28],:HIn => values[29],
+                      :SNcp => values[30],:SCcp => values[31],:SInt => values[32],:NRes => values[33],
+                      :Ooi  => values[34], :Acc => values[35],
+                      :H    => values[36],   :E => values[37],   :P => values[38],   :C => values[39],
+                      :At   => values[40],  :Af => values[41],  :St => values[42],  :Sf => values[43],
+                      :Ot   => values[44],  :Of => values[45],  :Nt => values[46],  :Nf => values[47],
+                      :D    => (i == 0 ? values[48] : nil),
+                      :R    => (i == 0 ? values[49] : nil),
+                      :N    => (i == 0 ? values[50] : nil))
+                  else
+                    profile = profile_class.create!(:name                       => name,
+                                                    :command                    => command,
+                                                    :length                     => length,
+                                                    :no_sequences               => no_sequences,
+                                                    :no_structures              => no_structures,
+                                                    :enhance_num                => enhance_num,
+                                                    :enhance_div                => enhance_div,
+                                                    :weighting                  => weighting,
+                                                    :weighting_threshold        => weighting_threshold,
+                                                    :weighting_seed             => weighting_seed,
+                                                    :multiple_factor            => multiple_factor,
+                                                    :format                     => format,
+                                                    :similarity_matrix          => similarity_matrix,
+                                                    :similarity_matrix_offset   => similarity_matrix_offset,
+                                                    :ignore_gap_weight          => ignore_gap_weight,
+                                                    :symbol_in_row              => symbol_in_row,
+                                                    :symbol_in_column           => symbol_in_column,
+                                                    :symbol_structural_feature  => symbol_structural_feature,
+                                                    :gap_ins_open_terminal      => gap_ins_open_terminal,
+                                                    :gap_del_open_terminal      => gap_del_open_terminal,
+                                                    :gap_ins_ext_terminal       => gap_ins_ext_terminal,
+                                                    :gap_del_ext_terminal       => gap_del_ext_terminal,
+                                                    :evd                        => evd)
+                    $logger.info("Importing Fugue profile, #{profile.name}: done")
+                  end
+
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Import Fugue hits"
+    task :fugue_hits => [:environment] do
+
+      (10..100).step(10) do |si|
+        rep_dir       = File.join(ESST_DIR, "rep#{si}")
+        na_esst_dir   = File.join(rep_dir, "na")
+        std_esst_dir  = File.join(rep_dir, "std")
+
+        [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
+          frts = FileList[esst_dir + "/*.frt"]
+          frts.each do |frt|
+            sunid           = File.basename(frt, ".frt")
+            profile_class   = (i == 0 ? NaProfile : StdProfile)
+            fugue_hit_class = (i == 0 ? NaFugueHit : StdFugueHit)
+            profile         = profile_class.find_by_name(sunid)
+            scop            = Scop.find_by_sunid(sunid)
+
+            IO.foreach(frt) do |line|
+              case line.chomp!
+              when /^\s*$/ then next
+              when /^#/ then next
+              when /\s+(.{19})\s+(\S+.*)$/ # d2dpia1 d.240.1....  115   419 448   34.24 1.0E+03   35.19 1.0E+03 1.0E+03 0
+                name = $1.strip[0..6]
+                slen, raws, rvn, zscore, pvz, zori, evp, evf, al = $2.strip.split(/\s+/)
+                name[0]   = 'd' if name =~ /^g/
+                zscore    = zscore.to_f
+                scop_dom  = ScopDomain.find_by_sid(name)
+                profile.fugue_hits << fugue_hit_class.create!(:scop_id => scop_dom.id,
+                                                       :name => name,
+                                                       :raws => raws,
+                                                       :rvn => rvn,
+                                                       :zscore => zscore,
+                                                       :zori => zori,
+                                                       :fam_tp => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore >= 6.0 ? true : false),
+                                                       :fam_fp => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore >= 6.0 ? true : false),
+                                                       :fam_tn => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore <  6.0 ? true : false),
+                                                       :fam_fn => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore <  6.0 ? true : false),
+                                                       :supfam_tp => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore >= 6.0 ? true : false),
+                                                       :supfam_fp => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore >= 6.0 ? true : false),
+                                                       :supfam_tn => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore <  6.0 ? true : false),
+                                                       :supfam_fn => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore <  6.0 ? true : false))
+
+                $logger.debug "Importing #{fugue_hit_class}, #{name} with zscore: #{zscore}: done"
+              end
+            end
+
+            $logger.info "Importing #{fugue_hit_class} for #{sunid}: done"
+          end
+        end
+      end
+    end
+
   end
 end

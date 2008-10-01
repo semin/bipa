@@ -532,6 +532,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
   create_table :profiles, :force => true do |t|
     t.belongs_to  :alignment
+    t.string      :type
     t.string      :name
     t.string      :command
     t.integer     :length
@@ -563,6 +564,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :profile_columns, :force => true do |t|
     t.belongs_to  :profile
     t.belongs_to  :column
+    t.string      :type
     t.string      :seq
     t.integer     :aa_A, :aa_C, :aa_D, :aa_E, :aa_F, :aa_G, :aa_H, :aa_I, :aa_K, :aa_L, :aa_M,
                   :aa_N, :aa_P, :aa_Q, :aa_R, :aa_S, :aa_T, :aa_V, :aa_W, :aa_Y, :aa_J, :aa_U
@@ -579,11 +581,20 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :fugue_hits, :force => true do |t|
     t.belongs_to  :profile
     t.belongs_to  :scop
+    t.string      :type
+    t.string      :name
     t.integer     :raws
     t.integer     :rvn
-    t.integer     :zscore
-    t.integer     :zori
-    t.boolean     :positive
+    t.float       :zscore
+    t.float       :zori
+    t.boolean     :fam_tp
+    t.boolean     :fam_fp
+    t.boolean     :fam_tn
+    t.boolean     :fam_fn
+    t.boolean     :supfam_tp
+    t.boolean     :supfam_fp
+    t.boolean     :supfam_tn
+    t.boolean     :supfam_fn
   end
 
   add_index :fugue_hits, :profile_id

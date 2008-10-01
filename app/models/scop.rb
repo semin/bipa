@@ -282,6 +282,10 @@ class ScopDomain < Scop
             :class_name   => "Sequence",
             :foreign_key  => "scop_id"
 
+  has_many  :fugue_hits,
+            :class_name   => "FugueHit",
+            :foreign_key  => "scop_id"
+
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "%#{pdb_code.downcase}%"])
   end
