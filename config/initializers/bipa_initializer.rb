@@ -76,5 +76,10 @@ ZAP_DIR         = File.join(RAILS_ROOT, "/public/zap")
 GO_DIR          = File.join(RAILS_ROOT, "/public/go")
 ESST_DIR        = File.join(RAILS_ROOT, "/public/essts")
 
-NA_CLASSDEF     = File.join(RAILS_ROOT, "/config/classdef.dat")
+NA_CLASSDEF     = File.join(RAILS_ROOT, "/config/classdef.na.dat")
+STD_CLASSDEF    = File.join(RAILS_ROOT, "/config/classdef.std.dat")
+
+NA_ALLMAT_LOG   = File.join(RAILS_ROOT, "/config/allmat.na.log.dat")
+STD_ALLMAT_LOG  = File.join(RAILS_ROOT, "/config/allmat.std.log.dat")
+
 ASTRAL40        = "/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa"

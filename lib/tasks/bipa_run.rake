@@ -411,7 +411,7 @@ namespace :bipa do
       chdir dir
       Dir[dir + "/*.fug"].each_with_index do |fug, i|
         sunid = File.basename(fug, ".fug")
-        $logger.info("fugueprf: #{sunid} ...")
+        $logger.info "fugueprf: #{sunid} ..."
         sh "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
       end
       chdir cwd
@@ -436,6 +436,120 @@ namespace :bipa do
 
     desc "Run fugueali for a selected set of hits from fugueprf"
     task :fugueali => [:environment] do
+
+      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+
+      Dir.new(rep_dir).each do |dir|
+        next if dir =~ /^\./
+
+        fam_dir = File.join(rep_dir, dir)
+
+        unless File.size? File.join(fam_dir, "baton.ali")
+          $logger.warn "Cannot find baton.ali in #{fam_dir}: skip"
+          next
+        end
+
+        cp NA_CLASSDEF, fam_dir
+        cp NA_ALLMAT_LOG, fam_dir
+        cp STD_CLASSDEF, fam_dir
+        cp STD_ALLMAT_LOG, fam_dir
+
+        master  = nil
+        cwd     = pwd
+        chdir fam_dir
+
+        pdbs = FileList[File.join(rep_dir, dir, "/*.pdb")].sort_by { |f| File.basename(f, ".pdb").to_i }
+
+        pdbs.each_with_index do |pdb, i|
+          sunid = File.basename(pdb, ".pdb")
+          tem   = "#{sunid}.tem"
+
+          # JOY
+#          rm tem if File.exists? tem
+#          system "joy #{pdb}"
+
+          # Update template for master structure with DNA/RNA interface environment
+          if i == 0 # only for master structure !!!
+            master  = sunid
+            dom     = ScopDomain.find_by_sunid(sunid)
+
+            unless dom
+              $logger.warn "Cannot find ScopDomain, #{sunid}"
+              next
+            end
+
+            unless tem
+              $logger.warn "Cannot find #{tem}"
+              next
+            end
+#
+#            ff_residues = nil
+#            ff = Bio::FlatFile.auto("#{tem}")
+#            ff.each_entry do |entry|
+#              if entry.entry_id == master and entry.definition =~ /^sequence/
+#                ff_residues = entry.data.split("")
+#              end
+#            end
+#
+#            db_residues = dom.residues
+#            ext_tem     = []
+#            pos         = 0
+#
+#            ff_residues.each_with_index do |res, ri|
+#              case
+#              when res == "\n"
+#                ext_tem << "\n"
+#              when res == "-"
+#                ext_tem << "-"
+#              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_dna?)
+#                ext_tem << "D"
+#                pos += 1
+#              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_rna?)
+#                ext_tem << "R"
+#                pos += 1
+#              when db_residues[pos].one_letter_code == res
+#                ext_tem << "N"
+#                pos += 1
+#              else
+#                raise "Residue position mistach!: #{dir}-#{sunid}-#{pos}"
+#              end
+#            end
+#
+#            File.open(tem, "a") do |file|
+#              file.puts ">P1;#{sunid}"
+#              file.puts "DNA/RNA interface"
+#              file.puts ext_tem.join + "*"
+#            end
+#
+#            # Run melody for generating Fugue profile
+#            system "melody -t #{tem} -c classdef.na.dat -s allmat.na.log.dat -y -o #{master}.na.fug"
+#            system "melody -t #{tem} -c classdef.std.dat -s allmat.std.log.dat -y -o #{master}.std.fug"
+          else # for other entries
+#            File.open("#{master}-#{sunid}.ref.ali", "w") do |f|
+#              flat_file = Bio::FlatFile.auto("baton.ali")
+#              flat_file.each_entry do |entry|
+#                if ((entry.seq_type == "P1" and entry.entry_id == sunid) or
+#                    (entry.seq_type == "P1" and entry.entry_id == master))
+#                  f.puts entry
+#                end
+#              end
+#            end
+#
+#            system "fugueali -seq #{sunid}.ali -prf #{master}.na.fug -y -o #{master}-#{sunid}.na.fug.ali"
+#            system "fugueali -seq #{sunid}.ali -prf #{master}.std.fug -y -o #{master}-#{sunid}.std.fug.ali"
+#
+#            system "mview -in pir -out msf #{master}-#{sunid}.ref.ali > #{master}-#{sunid}.ref.msf"
+#            system "mview -in pir -out msf #{master}-#{sunid}.na.fug.ali > #{master}-#{sunid}.na.fug.msf"
+#            system "mview -in pir -out msf #{master}-#{sunid}.std.fug.ali > #{master}-#{sunid}.std.fug.msf"
+
+            system "needle -asequence #{master}.ali -bsequence #{sunid}.ali -outfile #{master}-#{sunid}.ndl.msf -aformat msf -gapopen 10.0 -gapextend 0.5"
+            system "cat #{master}.ali #{sunid}.ali > #{master}-#{sunid}.ali"
+            system "clustalw2 -INFILE=#{master}-#{sunid}.ali -ALIGN -OUTFILE=#{master}-#{sunid}.clt.msf -OUTPUT=GCG"
+          end
+        end
+
+        chdir cwd
+      end
     end
 
   end
