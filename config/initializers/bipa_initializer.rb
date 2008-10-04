@@ -83,3 +83,4 @@ NA_ALLMAT_LOG   = File.join(RAILS_ROOT, "/config/allmat.na.log.dat")
 STD_ALLMAT_LOG  = File.join(RAILS_ROOT, "/config/allmat.std.log.dat")
 
 ASTRAL40        = "/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa"
+BALISCORE_BIN   = "/BiO/Install/bali_score/bali_score"

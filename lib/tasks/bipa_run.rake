@@ -465,8 +465,8 @@ namespace :bipa do
           tem   = "#{sunid}.tem"
 
           # JOY
-#          rm tem if File.exists? tem
-#          system "joy #{pdb}"
+          rm tem if File.exists? tem
+          system "joy #{pdb}"
 
           # Update template for master structure with DNA/RNA interface environment
           if i == 0 # only for master structure !!!
@@ -482,69 +482,74 @@ namespace :bipa do
               $logger.warn "Cannot find #{tem}"
               next
             end
-#
-#            ff_residues = nil
-#            ff = Bio::FlatFile.auto("#{tem}")
-#            ff.each_entry do |entry|
-#              if entry.entry_id == master and entry.definition =~ /^sequence/
-#                ff_residues = entry.data.split("")
-#              end
-#            end
-#
-#            db_residues = dom.residues
-#            ext_tem     = []
-#            pos         = 0
-#
-#            ff_residues.each_with_index do |res, ri|
-#              case
-#              when res == "\n"
-#                ext_tem << "\n"
-#              when res == "-"
-#                ext_tem << "-"
-#              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_dna?)
-#                ext_tem << "D"
-#                pos += 1
-#              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_rna?)
-#                ext_tem << "R"
-#                pos += 1
-#              when db_residues[pos].one_letter_code == res
-#                ext_tem << "N"
-#                pos += 1
-#              else
-#                raise "Residue position mistach!: #{dir}-#{sunid}-#{pos}"
-#              end
-#            end
-#
-#            File.open(tem, "a") do |file|
-#              file.puts ">P1;#{sunid}"
-#              file.puts "DNA/RNA interface"
-#              file.puts ext_tem.join + "*"
-#            end
-#
-#            # Run melody for generating Fugue profile
-#            system "melody -t #{tem} -c classdef.na.dat -s allmat.na.log.dat -y -o #{master}.na.fug"
-#            system "melody -t #{tem} -c classdef.std.dat -s allmat.std.log.dat -y -o #{master}.std.fug"
-          else # for other entries
-#            File.open("#{master}-#{sunid}.ref.ali", "w") do |f|
-#              flat_file = Bio::FlatFile.auto("baton.ali")
-#              flat_file.each_entry do |entry|
-#                if ((entry.seq_type == "P1" and entry.entry_id == sunid) or
-#                    (entry.seq_type == "P1" and entry.entry_id == master))
-#                  f.puts entry
-#                end
-#              end
-#            end
-#
-#            system "fugueali -seq #{sunid}.ali -prf #{master}.na.fug -y -o #{master}-#{sunid}.na.fug.ali"
-#            system "fugueali -seq #{sunid}.ali -prf #{master}.std.fug -y -o #{master}-#{sunid}.std.fug.ali"
-#
-#            system "mview -in pir -out msf #{master}-#{sunid}.ref.ali > #{master}-#{sunid}.ref.msf"
-#            system "mview -in pir -out msf #{master}-#{sunid}.na.fug.ali > #{master}-#{sunid}.na.fug.msf"
-#            system "mview -in pir -out msf #{master}-#{sunid}.std.fug.ali > #{master}-#{sunid}.std.fug.msf"
 
-            system "needle -asequence #{master}.ali -bsequence #{sunid}.ali -outfile #{master}-#{sunid}.ndl.msf -aformat msf -gapopen 10.0 -gapextend 0.5"
+            ff_residues = nil
+            ff = Bio::FlatFile.auto("#{tem}")
+            ff.each_entry do |entry|
+              if entry.entry_id == master and entry.definition =~ /^sequence/
+                ff_residues = entry.data.split("")
+              end
+            end
+
+            db_residues = dom.residues
+            ext_tem     = []
+            pos         = 0
+
+            ff_residues.each_with_index do |res, ri|
+              case
+              when res == "\n"
+                ext_tem << "\n"
+              when res == "-"
+                ext_tem << "-"
+              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_dna?)
+                ext_tem << "D"
+                pos += 1
+              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_rna?)
+                ext_tem << "R"
+                pos += 1
+              when db_residues[pos].one_letter_code == res
+                ext_tem << "N"
+                pos += 1
+              else
+                raise "Residue position mistach!: #{dir}-#{sunid}-#{pos}"
+              end
+            end
+
+            File.open(tem, "a") do |file|
+              file.puts ">P1;#{sunid}"
+              file.puts "DNA/RNA interface"
+              file.puts ext_tem.join + "*"
+            end
+
+            # Run melody for generating Fugue profile
+            system "melody -t #{tem} -c classdef.na.dat -s allmat.na.log.dat -y -o #{master}.na.fug"
+            system "melody -t #{tem} -c classdef.std.dat -s allmat.std.log.dat -y -o #{master}.std.fug"
+          else # for other entries
+            File.open("#{master}-#{sunid}.ref.ali", "w") do |f|
+              flat_file = Bio::FlatFile.auto("baton.ali")
+              flat_file.each_entry do |entry|
+                if ((entry.seq_type == "P1" and entry.entry_id == sunid) or
+                    (entry.seq_type == "P1" and entry.entry_id == master))
+                  f.puts entry
+                end
+              end
+            end
+            system "mview -in pir -out msf #{master}-#{sunid}.ref.ali > #{master}-#{sunid}.ref.msf"
+
+            system "fugueali -seq #{sunid}.ali -prf #{master}.na.fug -y -o #{master}-#{sunid}.na.fug.ali"
+            system "mview -in pir -out msf #{master}-#{sunid}.na.fug.ali > #{master}-#{sunid}.na.fug.msf"
+            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.na.fug.msf > #{master}-#{sunid}.na.fug.bb"
+
+            system "fugueali -seq #{sunid}.ali -prf #{master}.std.fug -y -o #{master}-#{sunid}.std.fug.ali"
+            system "mview -in pir -out msf #{master}-#{sunid}.std.fug.ali > #{master}-#{sunid}.std.fug.msf"
+            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.std.fug.msf > #{master}-#{sunid}.std.fug.bb"
+
+            system "needle -asequence #{master}.ali -bsequence #{sunid}.ali -aformat msf -outfile #{master}-#{sunid}.ndl.msf -gapopen 10.0 -gapextend 0.5"
+            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.ndl.msf > #{master}-#{sunid}.ndl.bb"
+
             system "cat #{master}.ali #{sunid}.ali > #{master}-#{sunid}.ali"
             system "clustalw2 -INFILE=#{master}-#{sunid}.ali -ALIGN -OUTFILE=#{master}-#{sunid}.clt.msf -OUTPUT=GCG"
+            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.clt.msf > #{master}-#{sunid}.clt.bb"
           end
         end
 
