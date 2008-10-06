@@ -1437,17 +1437,17 @@ namespace :bipa do
     desc "Import Refernce Alignments"
     task :reference_alignments => [:environment] do
 
-      ali_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
 
-      Dir.new(ali_dir).each do |fam_dir|
+      Dir.new(rep_dir).each do |fam_dir|
         next if fam_dir =~ /^\./
 
-        FileList[File.join(ali_dir, fam_dir, "*.ref.ali")].each do |f|
+        FileList[File.join(rep_dir, fam_dir, "*.ref.ali")].each do |f|
           next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
 
           $logger.info "Importing #{f} ..."
 
-          template_sunid, target_sunid = File.basename(f, ".ref.ali").split(/-/)
+          tem_sunid, target_sunid = File.basename(f, ".ref.ali").split(/-/)
           ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
           ident, align, intgp, count = 0, 0, 0, 0
 
@@ -1490,11 +1490,11 @@ namespace :bipa do
 
           family    = Scop.find_by_sunid(fam_dir)
           alignment = Rep90Alignment.find_by_scop_id(family.id)
-          template  = Scop.find_by_sunid(template_sunid)
+          tem  = Scop.find_by_sunid(tem_sunid)
           target    = Scop.find_by_sunid(target_sunid)
 
           if alignment
-            alignment.reference_alignments << ReferenceAlignment.create!(:template_id => template.id,
+            alignment.reference_alignments << ReferenceAlignment.create!(:tem_id => tem.id,
                                                                          :target_id   => target.id,
                                                                          :pid1        => pid1,
                                                                          :pid2        => pid2,
@@ -1511,22 +1511,42 @@ namespace :bipa do
     desc "Import Test Alignments"
     task :test_alignments => [:environment] do
 
-      ali_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
 
-      Dir.new(ali_dir).each do |fam_dir|
+      Dir.new(rep_dir).each do |fam_dir|
         next if fam_dir =~ /^\./
 
-        FileList[File.join(ali_dir, fam_dir, "*.bb")].each do |f|
+        FileList[File.join(rep_dir, fam_dir, "*.bb")].each do |f|
           next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
 
           $logger.info "Importing #{f} ..."
 
-          template_sunid, target_sunid = File.basename(f, ".bb").match(/(\d+)-(\d+)/)[1..2].to_a
-          tempate = Scop.find_by_sunid(template_sunid)
-          target  = Scop.find_by_sunid(target_sunid)
+          stem = File.basename(f, ".bb")
+          tem_sunid, tgt_sunid = stem.match(/(\d+)-(\d+)/)[1..2].to_a
+          tem = Scop.find_by_sunid(tem_sunid)
+          tgt = Scop.find_by_sunid(tgt_sunid)
+          ref_ali = ReferenceAlignment.find_by_template_id_and_target_id(tem.id, tgt.id)
+          ali_class = nil
+          sp_score = nil
+          tc_score = nil
 
-          ref_ali = ReferenceAlignment.find_by_tempate_id_and_target_id(template.id, target.id)
+          IO.foreach(f) do |l|
+            if l =~ /SP\sscore=\s(\S+)/ then sp_score = $1 end
+            if l =~ /TC\sscore=\s(\S+)/ then tc_score = $1 end
+          end
 
+          case stem
+          when /ndl/ then ali_class = TestNeedleAlignment
+          when /clt/ then ali_class = TestClustalwAlignment
+          when /std/ then ali_class = TestStdFugueAlignment
+          when /na/ then ali_class = TestNaFugueAlingment
+          end
+
+          if ref_ali && sp_score && tc_score
+            ref_ali.test_alignments << ali_class.create!(:sp => sp_score, :tc => tc_score)
+          else
+            raise "Something wrong!"
+          end
         end
       end
     end

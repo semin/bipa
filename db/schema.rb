@@ -621,10 +621,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :type
     t.float       :sp
     t.float       :tc
-    t.float       :pid1
-    t.float       :pid2
-    t.float       :pid3
-    t.float       :pid4
   end
 
   add_index :test_alignments, :reference_alignment_id
