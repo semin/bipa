@@ -25,6 +25,13 @@ namespace :bipa do
 
     desc "Check Alignment Accuracy"
     task :alignment_accuracy => [:environment] do
+      (0..90).step(20) do |x|
+        rfs = ReferenceAlignment.pid_range(4, x, x+10).all
+        print "#{rfs.sum { |rf| rf.test_needle_alignment.sp }     / rfs.count}\t"
+        print "#{rfs.sum { |rf| rf.test_clustalw_alignment.sp }   / rfs.count}\t"
+        print "#{rfs.sum { |rf| rf.test_std_fugue_alignment.sp }  / rfs.count}\t"
+        puts  "#{rfs.sum { |rf| rf.test_na_fugue_alignment.sp }   / rfs.count}"
+      end
     end
 
   end

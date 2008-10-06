@@ -13,6 +13,8 @@ require_dependency "go_relationship"
 require_dependency "gloria"
 require_dependency "mmcif"
 require_dependency "esst"
+require_dependency "fugue_hit"
+require_dependency "test_alignment"
 
 class ApplicationController < ActionController::Base
 

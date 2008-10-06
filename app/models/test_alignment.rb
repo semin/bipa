@@ -10,8 +10,8 @@ end
 class TestNeedleAlignment < TestAlignment
 end
 
-class TestNaFugueAlingment < TestAlignment
+class TestStdFugueAlignment < TestAlignment
 end
 
-class TestStdFugueAlignment < TestAlignment
+class TestNaFugueAlignment < TestAlignment
 end

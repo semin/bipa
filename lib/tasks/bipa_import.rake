@@ -1447,7 +1447,7 @@ namespace :bipa do
 
           $logger.info "Importing #{f} ..."
 
-          tem_sunid, target_sunid = File.basename(f, ".ref.ali").split(/-/)
+          tem_sunid, tgt_sunid = File.basename(f, ".ref.ali").split(/-/)
           ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
           ident, align, intgp, count = 0, 0, 0, 0
 
@@ -1491,11 +1491,11 @@ namespace :bipa do
           family    = Scop.find_by_sunid(fam_dir)
           alignment = Rep90Alignment.find_by_scop_id(family.id)
           tem  = Scop.find_by_sunid(tem_sunid)
-          target    = Scop.find_by_sunid(target_sunid)
+          tgt    = Scop.find_by_sunid(tgt_sunid)
 
           if alignment
-            alignment.reference_alignments << ReferenceAlignment.create!(:tem_id => tem.id,
-                                                                         :target_id   => target.id,
+            alignment.reference_alignments << ReferenceAlignment.create!(:template_id => tem.id,
+                                                                         :target_id   => tgt.id,
                                                                          :pid1        => pid1,
                                                                          :pid2        => pid2,
                                                                          :pid3        => pid3,
@@ -1536,17 +1536,14 @@ namespace :bipa do
           end
 
           case stem
-          when /ndl/ then ali_class = TestNeedleAlignment
-          when /clt/ then ali_class = TestClustalwAlignment
-          when /std/ then ali_class = TestStdFugueAlignment
-          when /na/ then ali_class = TestNaFugueAlingment
+          when /ndl/  then ali_class = TestNeedleAlignment
+          when /clt/  then ali_class = TestClustalwAlignment
+          when /std/  then ali_class = TestStdFugueAlignment
+          when /na/   then ali_class = TestNaFugueAlignment
+          else raise "Unknown TestAlignment class!: #{stem}"
           end
 
-          if ref_ali && sp_score && tc_score
-            ref_ali.test_alignments << ali_class.create!(:sp => sp_score, :tc => tc_score)
-          else
-            raise "Something wrong!"
-          end
+          ref_ali.test_alignments << ali_class.create!(:sp => sp_score, :tc => tc_score)
         end
       end
     end
