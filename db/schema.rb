@@ -600,4 +600,35 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :fugue_hits, :profile_id
   add_index :fugue_hits, :scop_id
   add_index :fugue_hits, :zscore
+
+
+  create_table :reference_alignments, :force => true do |t|
+    t.belongs_to  :alignment
+    t.belongs_to  :template
+    t.belongs_to  :target
+    t.float       :pid1
+    t.float       :pid2
+    t.float       :pid3
+    t.float       :pid4
+  end
+
+  add_index :reference_alignments, :alignment_id
+  add_index :reference_alignments, [:template_id, :target_id]
+
+
+  create_table :test_alignments, :force => true do |t|
+    t.belongs_to  :reference_alignment
+    t.string      :type
+    t.float       :sp
+    t.float       :tc
+    t.float       :pid1
+    t.float       :pid2
+    t.float       :pid3
+    t.float       :pid4
+  end
+
+  add_index :test_alignments, :reference_alignment_id
+  add_index :test_alignments, :sp
+  add_index :test_alignments, :tc
+
 end

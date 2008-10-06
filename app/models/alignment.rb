@@ -10,6 +10,8 @@ class Alignment < ActiveRecord::Base
             :order      => "number",
             :dependent  => :delete_all
 
+  has_many  :reference_alignments
+
   has_one   :profile
 
   def ruler_with_margin(margin)

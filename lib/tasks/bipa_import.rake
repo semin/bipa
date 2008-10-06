@@ -1409,19 +1409,19 @@ namespace :bipa do
                 zscore    = zscore.to_f
                 scop_dom  = ScopDomain.find_by_sid(name)
                 profile.fugue_hits << fugue_hit_class.create!(:scop_id => scop_dom.id,
-                                                       :name => name,
-                                                       :raws => raws,
-                                                       :rvn => rvn,
-                                                       :zscore => zscore,
-                                                       :zori => zori,
-                                                       :fam_tp => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore >= 6.0 ? true : false),
-                                                       :fam_fp => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore >= 6.0 ? true : false),
-                                                       :fam_tn => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore <  6.0 ? true : false),
-                                                       :fam_fn => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore <  6.0 ? true : false),
-                                                       :supfam_tp => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore >= 6.0 ? true : false),
-                                                       :supfam_fp => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore >= 6.0 ? true : false),
-                                                       :supfam_tn => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore <  6.0 ? true : false),
-                                                       :supfam_fn => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore <  6.0 ? true : false))
+                                                              :name => name,
+                                                              :raws => raws,
+                                                              :rvn => rvn,
+                                                              :zscore => zscore,
+                                                              :zori => zori,
+                                                              :fam_tp => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore >= 6.0 ? true : false),
+                                                              :fam_fp => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore >= 6.0 ? true : false),
+                                                              :fam_tn => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore <  6.0 ? true : false),
+                                                              :fam_fn => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore <  6.0 ? true : false),
+                                                              :supfam_tp => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore >= 6.0 ? true : false),
+                                                              :supfam_fp => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore >= 6.0 ? true : false),
+                                                              :supfam_tn => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore <  6.0 ? true : false),
+                                                              :supfam_fn => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore <  6.0 ? true : false))
 
                 $logger.debug "Importing #{fugue_hit_class}, #{name} with zscore: #{zscore}: done"
               end
@@ -1429,6 +1429,104 @@ namespace :bipa do
 
             $logger.info "Importing #{fugue_hit_class} for #{sunid}: done"
           end
+        end
+      end
+    end
+
+
+    desc "Import Refernce Alignments"
+    task :reference_alignments => [:environment] do
+
+      ali_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+
+      Dir.new(ali_dir).each do |fam_dir|
+        next if fam_dir =~ /^\./
+
+        FileList[File.join(ali_dir, fam_dir, "*.ref.ali")].each do |f|
+          next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
+
+          $logger.info "Importing #{f} ..."
+
+          template_sunid, target_sunid = File.basename(f, ".ref.ali").split(/-/)
+          ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
+          ident, align, intgp, count = 0, 0, 0, 0
+
+          ref_ali.each_site do |site|
+            if (site[0] != "-") && (site[1] != "-")
+              align += 1
+              if site[0] == site[1]
+                ident += 1
+              end
+            elsif ((count != 0) && (count != (ref_ali.alignment_length-1)) && ((site[0] == "-") || (site[1] == "-")))
+              intgp += 1
+            end
+            count += 1
+          end
+
+          minl = nil
+          ref_ali.each_seq do |s|
+            l = s.gsub(/-/, '').length
+            if minl.nil?
+              minl = l
+            else
+              minl = l if l < minl
+            end
+          end
+
+          mingl = nil
+          ref_ali.each_seq do |s|
+            gl = s.gsub(/^-+/, '').gsub(/-+$/,'').length
+            if mingl.nil?
+              mingl = gl
+            else
+              mingl = gl if gl < mingl
+            end
+          end
+
+          pid1 = 100 * ident.to_f / (align + intgp)
+          pid2 = 100 * ident.to_f / align
+          pid3 = 100 * ident.to_f / minl
+          pid4 = 100 * ident.to_f / mingl
+
+          family    = Scop.find_by_sunid(fam_dir)
+          alignment = Rep90Alignment.find_by_scop_id(family.id)
+          template  = Scop.find_by_sunid(template_sunid)
+          target    = Scop.find_by_sunid(target_sunid)
+
+          if alignment
+            alignment.reference_alignments << ReferenceAlignment.create!(:template_id => template.id,
+                                                                         :target_id   => target.id,
+                                                                         :pid1        => pid1,
+                                                                         :pid2        => pid2,
+                                                                         :pid3        => pid3,
+                                                                         :pid4        => pid4)
+          else
+            raise "Cannot find alignment AR object for SCOP family, #{fam_dir}"
+          end
+        end
+      end
+    end
+
+
+    desc "Import Test Alignments"
+    task :test_alignments => [:environment] do
+
+      ali_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+
+      Dir.new(ali_dir).each do |fam_dir|
+        next if fam_dir =~ /^\./
+
+        FileList[File.join(ali_dir, fam_dir, "*.bb")].each do |f|
+          next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
+
+          $logger.info "Importing #{f} ..."
+
+          template_sunid, target_sunid = File.basename(f, ".bb").match(/(\d+)-(\d+)/)[1..2].to_a
+          tempate = Scop.find_by_sunid(template_sunid)
+          target  = Scop.find_by_sunid(target_sunid)
+
+          ref_ali = ReferenceAlignment.find_by_tempate_id_and_target_id(template.id, target.id)
+
         end
       end
     end
