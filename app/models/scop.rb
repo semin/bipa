@@ -38,14 +38,15 @@ class Scop < ActiveRecord::Base
   def hierarchy
     case stype
     when "root" then "Root"
-    when "cl" then "Class"
-    when "cf" then "Fold"
-    when "sf" then "Superfamily"
-    when "fa" then "Family"
-    when "dm" then "Protein"
-    when "sp" then "Species"
-    when "px" then "Domain"
-    else; "Unknown"; end
+    when "cl"   then "Class"
+    when "cf"   then "Fold"
+    when "sf"   then "Superfamily"
+    when "fa"   then "Family"
+    when "dm"   then "Protein"
+    when "sp"   then "Species"
+    when "px"   then "Domain"
+    else; "Unknown"
+    end
   end
 
   def interfaces(redundancy, resolution)
