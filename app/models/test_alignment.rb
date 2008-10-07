@@ -1,6 +1,6 @@
 class TestAlignment < ActiveRecord::Base
 
-  belongs_to :referece_alingment
+  belongs_to :reference_alignment
 
 end
 

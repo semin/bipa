@@ -20,7 +20,7 @@ class ReferenceAlignment < ActiveRecord::Base
 
   has_one :test_na_fugue_alignment
 
-  named_scope :pid_range,   lambda { |*args|
+  named_scope :pid_range, lambda { |*args|
     { :conditions => ["pid#{args[0]} > ? and pid#{args[0]} <= ?", args[1], args[2]] }
   }
 
