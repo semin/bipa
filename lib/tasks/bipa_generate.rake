@@ -38,7 +38,7 @@ namespace :bipa do
               end
 
               File.open(domain_pdb_file, "w") do |file|
-                file.puts domain.to_pdb + "END\n"
+                file.puts(domain.to_pdb + "END\n")
               end
             end
 

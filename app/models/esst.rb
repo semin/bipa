@@ -17,5 +17,4 @@ class StdEsst < Esst
 end
 
 class NaEsst < Esst
-
 end
