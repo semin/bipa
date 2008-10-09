@@ -78,11 +78,19 @@ ZAP_DIR         = File.join(RAILS_ROOT, "/public/zap")
 GO_DIR          = File.join(RAILS_ROOT, "/public/go")
 ESST_DIR        = File.join(RAILS_ROOT, "/public/essts")
 
-NA_CLASSDEF     = File.join(RAILS_ROOT, "/config/classdef.na.dat")
+DNA16_CLASSDEF  = File.join(RAILS_ROOT, "/config/classdef.dna16.dat")
+DNA64_CLASSDEF  = File.join(RAILS_ROOT, "/config/classdef.dna64.dat")
+RNA16_CLASSDEF  = File.join(RAILS_ROOT, "/config/classdef.rna16.dat")
+RNA64_CLASSDEF  = File.join(RAILS_ROOT, "/config/classdef.rna64.dat")
+DNASTD_CLASSDEF = File.join(RAILS_ROOT, "/config/classdef.dnastd.dat")
+RNASTD_CLASSDEF = File.join(RAILS_ROOT, "/config/classdef.rnastd.dat")
 STD_CLASSDEF    = File.join(RAILS_ROOT, "/config/classdef.std.dat")
 
-NA_ALLMAT_LOG   = File.join(RAILS_ROOT, "/config/allmat.na.log.dat")
-STD_ALLMAT_LOG  = File.join(RAILS_ROOT, "/config/allmat.std.log.dat")
+DNA16_MAT_LOG   = File.join(RAILS_ROOT, "/config/allmat.dna16.log.dat")
+DNA64_MAT_LOG   = File.join(RAILS_ROOT, "/config/allmat.dna64.log.dat")
+RNA16_MAT_LOG   = File.join(RAILS_ROOT, "/config/allmat.rna16.log.dat")
+RNA64_MAT_LOG   = File.join(RAILS_ROOT, "/config/allmat.rna64.log.dat")
+STD_MAT_LOG     = File.join(RAILS_ROOT, "/config/allmat.std.log.dat")
 
 ASTRAL40        = "/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa"
 BALISCORE_BIN   = "/BiO/Install/bali_score/bali_score"

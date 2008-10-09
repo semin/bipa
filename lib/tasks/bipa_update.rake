@@ -482,5 +482,42 @@ namespace :bipa do
         end
       end
     end
+
+
+    desc "Update DNA/RNA interactibility for all residues"
+    task :na_interactibility => [:environment] do
+
+      itfs = DomainInterface.all
+      tot = itfs.count
+
+      itfs.each_with_index do |itf, i|
+        $logger.debug "Checking DNA/RNA interactibility for residues in interface, #{itf.id} (#{i+1}/#{tot})"
+
+        itf.residues.each do |aa|
+          aa.hbond_dna_base       = true if aa.hbonding_dna_as_donor? || aa.hbonding_dna_as_acceptor?
+          aa.hbond_dna_sugar      = true if aa.hbonding_dna_sugar_as_donor? || aa.hbonding_rna_sugar_as_acceptor?
+          aa.hbond_dna_phosphate  = true if aa.hbonding_dna_phosphate_as_donor? || aa.hbonding_dna_phosphate_as_acceptor?
+          aa.whbond_dna_base      = true if aa.whbond_dna_base?
+          aa.whbond_dna_sugar     = true if aa.whbond_dna_sugar?
+          aa.whbond_dna_phosphate = true if aa.whbond_dna_phosphate?
+          aa.vdw_dna_base         = true if aa.vdw_contacting_dna_base?
+          aa.vdw_dna_sugar        = true if aa.vdw_contacting_dna_sugar?
+          aa.vdw_dna_phophate     = true if aa.vdw_contacting_dna_phosphate?
+
+          aa.hbond_rna_base       = true if aa.hbonding_rna_as_donor? || aa.hbonding_rna_as_acceptor?
+          aa.hbond_rna_sugar      = true if aa.hbonding_rna_sugar_as_donor? || aa.hbonding_rna_sugar_as_acceptor?
+          aa.hbond_rna_phosphate  = true if aa.hbonding_rna_phosphate_as_donor? || aa.hbonding_rna_phosphate_as_acceptor?
+          aa.whbond_rna_base      = true if aa.whbond_rna_base?
+          aa.whbond_rna_sugar     = true if aa.whbond_rna_sugar?
+          aa.whbond_rna_phosphate = true if aa.whbond_rna_phosphate?
+          aa.vdw_rna_base         = true if aa.vdw_contacting_rna_base?
+          aa.vdw_rna_sugar        = true if aa.vdw_contacting_rna_sugar?
+          aa.vdw_rna_phophate     = true if aa.vdw_contacting_rna_phosphate?
+
+          aa.save!
+        end
+      end
+    end
+
   end
 end
