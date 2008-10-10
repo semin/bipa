@@ -1,48 +1,46 @@
 namespace :bipa do
   namespace :fetch do
 
-    require "logger"
-
     include FileUtils
-
-    $logger = Logger.new(STDOUT)
 
     desc "Download protein-nucleic acid complexes from PDB ftp"
     task :pdb_remote => [:environment] do
 
-      refresh_dir(PDB_DIR)
+      refresh_dir PDB_DIR
 
       require "net/ftp"
 
       Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
-        ftp.login("anonymous")
-        ftp.chdir("/pub/databases/rcsb/pdb-remediated/")
-        ftp.gettextfile("./derived_data/pdb_entry_type.txt",
-                        File.join(PDB_DIR, "pdb_entry_type.txt"))
-        $logger.info("Downloading pdb_entry_type.txt file: done")
+        ftp.login "anonymous"
+        ftp.chdir "/pub/databases/rcsb/pdb-remediated/"
+        ftp.gettextfile("./derived_data/pdb_entry_type.txt", File.join(PDB_DIR, "pdb_entry_type.txt"))
 
-        IO.readlines(File.join(PDB_DIR, "pdb_entry_type.txt")).each do |line|
+        $logger.info "Downloading pdb_entry_type.txt file: done"
+
+        IO.foreach(File.join(PDB_DIR, "pdb_entry_type.txt")) do |line|
           pdb_code, entry_type, exp_method = line.split(/\s+/)
+
           if entry_type == "prot-nuc"
-            ftp.getbinaryfile("./data/structures/all/pdb/pdb#{pdb_code}.ent.gz",
-                              File.join(PDB_DIR, "#{pdb_code}.pdb.gz"))
+            ftp.getbinaryfile("./data/structures/all/pdb/pdb#{pdb_code}.ent.gz", File.join(PDB_DIR, "#{pdb_code}.pdb.gz"))
+
             $logger.info("Downloading #{pdb_code}: done")
           end
         end
       end
 
       cwd = pwd
-      chdir(PDB_DIR)
-      system("gzip -d *.gz")
-      chdir(cwd)
-      $logger.info("Unzipping downloaded PDB files: done")
+      chdir PDB_DIR
+      system "gzip -d *.gz"
+      chdir cwd
+
+      $logger.info "Unzipping downloaded PDB files: done"
     end
 
 
-    desc "Fetch PDB datasets from local mirror"
+    desc "Copy protein-nucleic acid complexes from local mirror"
     task :pdb_local => [:environment] do
 
-      refresh_dir(PDB_DIR)
+      refresh_dir PDB_DIR
       pna_complexes = []
 
       IO.foreach(File.join(PDB_MIRROR_DIR, PDB_ENTRY_FILE)) do |line|
@@ -54,30 +52,27 @@ namespace :bipa do
       fmanager = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         pna_complexes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             pdb_file = File.join(PDB_MIRROR_DIR, "./data/structures/all/pdb/pdb#{pdb_code}.ent.gz")
 
             if File.size?(pdb_file)
-              system("gzip -cd #{pdb_file} > #{File.join(PDB_DIR, pdb_code + '.pdb')}")
-              $logger.info("Unzipping #{pdb_file} (#{i + 1}/#{pna_complexes.size}): done")
+              system "gzip -cd #{pdb_file} > #{File.join(PDB_DIR, pdb_code + '.pdb')}"
+              $logger.info "Unzipping #{pdb_file} (#{i + 1}/#{pna_complexes.size}): done"
             else
               missings << pdb_code
             end
           end
         end
       end
-      $logger.info("Total: #{pna_complexes.size - missings.size} files.\n" +
-                   "Missing: #{missings.size} files")
+      $logger.info "Total: #{pna_complexes.size - missings.size} files.\n" + "Missing: #{missings.size} files"
     end
 
 
     desc "Fetch SCOP parseable files from MRC-LMB Web site"
     task :scop => [:environment] do
 
-      refresh_dir(SCOP_DIR)
+      refresh_dir SCOP_DIR
 
       require "open-uri"
       require "hpricot"
@@ -95,7 +90,7 @@ namespace :bipa do
         link = "#{stem}_#{version}"
         File.open(File.join(SCOP_DIR, link), 'w') do |f|
           f.puts open(SCOP_URI + "/#{link}").read
-          puts "Downloading #{link}: done"
+          $logger.info "Downloading #{link}: done"
         end
       end
     end

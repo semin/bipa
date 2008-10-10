@@ -22,11 +22,11 @@ require_dependency "fugue_hit"
 require_dependency "test_alignment"
 
 # Constants for BIPA
-RESUME    = ENV["RESUME"].to_i > 0    ? ENV["RESUME"].to_i    : false
-MAX_FORK  = ENV["MAX_FORK"].to_i > 0  ? ENV["MAX_FORK"].to_i  : 2
+RESUME    = (ENV["RESUME"].to_i > 0    ? ENV["RESUME"].to_i    : false)
+MAX_FORK  = (ENV["MAX_FORK"].to_i > 0  ? ENV["MAX_FORK"].to_i  : 2)
 
 EPSILON                           = 1.0E-6
-MAX_VDW_DISTANCE                  = 5.0
+MAX_VDW_DISTANCE                  = 3.9
 MIN_INTERFACE_RESIDUE_DELTA_ASA   = 1.0
 MIN_SURFACE_RESIDUE_ASA           = 0.1
 MIN_SURFACE_RESIDUE_RELATIVE_ASA  = 0.05

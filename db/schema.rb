@@ -25,22 +25,19 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :sid
     t.string      :description
     t.float       :resolution
-    (10..100).step(10) { |i| t.belongs_to :"rep#{i}_subfamily" }
-    (10..100).step(10) { |i| t.boolean :"rep#{i}", :default => false }
-    (1..10).step(1) { |i| t.boolean :"res#{i}", :default => false }
-    t.boolean     :repall, :default => false
-    t.boolean     :resall, :default => false
+    (10..100).step(10)  { |i| t.belongs_to :"rep#{i}_subfamily" }
+    (10..100).step(10)  { |i| t.boolean :"rep#{i}", :default => false }
+    (1..10).step(1)     { |i| t.boolean :"res#{i}", :default => false }
+    t.boolean     :repall,      :default => false
+    t.boolean     :resall,      :default => false
+    t.boolean     :registered,  :default => false
   end
 
   add_index :scops, :sunid
   add_index :scops, :parent_id
   add_index :scops, :lft
   add_index :scops, :rgt
-  add_index :scops, [:lft, :rgt]
-  add_index :scops, [:parent_id, :lft]
-  add_index :scops, [:parent_id, :rgt]
-  add_index :scops, [:parent_id, :lft, :rgt]
-  add_index :scops, [:id, :registered]
+  add_index :scops, :registered
 
 
   # 'structures' table
@@ -94,8 +91,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean     :tainted
   end
 
-  # This is for the case sesitivity of 'chain_code' column!
-  execute "ALTER TABLE chains MODIFY chain_code VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
+  # This is for the case sesitivity of 'chain_code' column
+  # Please uncomment following line if your default collation is not case sensitive!!!
+  #execute "ALTER TABLE chains MODIFY chain_code VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
 
   add_index :chains, :chain_code
   add_index :chains, :model_id
@@ -470,8 +468,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :assigned_by
   end
 
-  execute "ALTER TABLE goa_pdbs MODIFY db_object_id     VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
-  execute "ALTER TABLE goa_pdbs MODIFY db_object_symbol VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
+  # This is for the case sesitivity of 'db_object_id' and 'db_object_symbol' columns
+  # Please uncomment following line if your default collation is not case sensitive!!!
+  #execute "ALTER TABLE goa_pdbs MODIFY db_object_id     VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
+  #execute "ALTER TABLE goa_pdbs MODIFY db_object_symbol VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
 
   add_index :goa_pdbs, :chain_id
   add_index :goa_pdbs, :go_term_id
@@ -529,8 +529,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string  :dna_rna_interface
   end
 
-  # This is for the case sesitivity!
-  execute "ALTER TABLE essts CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
+  # This is for the case sesitivity of 'essts' table
+  # Please uncomment following line if your default collation is not case sensitive!!!
+  #execute "ALTER TABLE essts CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
 
   add_index :essts, [:redundancy, :number]
   add_index :essts, [:environment]
@@ -593,7 +594,9 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :profile_columns, :profile_id
   add_index :profile_columns, :column_id
 
-  execute "ALTER TABLE profile_columns CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
+  # This is for the case sesitivity of 'profile_columns' table
+  # Please uncomment following line if your default collation is not case sensitive!!!
+  #execute "ALTER TABLE profile_columns CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
 
 
   create_table :fugue_hits, :force => true do |t|

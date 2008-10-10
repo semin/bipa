@@ -405,155 +405,229 @@ namespace :bipa do
     desc "Run fugueprf for each profiles of all non-redundant sets of SCOP families"
     task :fugueprf => [:environment] do
 
-      dir = "/BiO/Research/BIPA/bipa/public/essts/rep90"
-      seq = ASTRAL40
-      cwd = pwd
-      chdir dir
-      Dir[dir + "/*.fug"].each_with_index do |fug, i|
-        sunid = File.basename(fug, ".fug")
-        $logger.info "fugueprf: #{sunid} ..."
-        sh "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
+      (10..100).step(10) do |si|
+        next if si != 90
+
+        %w[dna rna].each do |na|
+          %w[16 32 std].each do |env|
+            est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
+            seq     = ASTRAL40
+            cwd     = pwd
+            chdir dir
+
+            FileList[est_dir + "/*.fug"].each_with_index do |fug, i|
+              sunid = File.basename(fug, ".fug")
+              $logger.info "fugueprf: #{sunid} ..."
+              system "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
+            end
+            chdir cwd
+          end
+        end
       end
-      chdir cwd
-    end
-
-
-    desc "Run fuguprf for each profiles of all non-redundant sets of SCOP families"
-    task :temp_fugueprf => [:environment] do
-
-      dir = "/BiO/Research/BIPA/bipa/public/essts/rep90/old_essts"
-      seq = ASTRAL40
-      cwd = pwd
-      chdir dir
-      Dir[dir + "/*.fug"].each_with_index do |fug, i|
-        sunid = File.basename(fug, ".fug")
-        $logger.info("fugueprf: #{sunid} ...")
-        sh "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
-      end
-      chdir cwd
     end
 
 
     desc "Run fugueali for a selected set of hits from fugueprf"
     task :fugueali => [:environment] do
 
-      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+      (10..100).step(10) do |si|
+        next if si != 90
 
-      Dir.new(rep_dir).each do |dir|
-        next if dir =~ /^\./
+        %w[dna rna].each do |na|
+          %w[16 32 std].each do |env|
+            cwd     = pwd
+            est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
+            master  = nil
 
-        fam_dir = File.join(rep_dir, dir)
+            chdir est_dir
 
-        unless File.size? File.join(fam_dir, "baton.ali")
-          $logger.warn "Cannot find baton.ali in #{fam_dir}: skip"
-          next
-        end
+            FileList["./*.tem"].each do |tem_file|
+              fam_sunid = File.basename(tem_file, "*.tem")
+              fam_ali   = Scop.find_by_sunid(fam_sunid).send(:"rep#{si}_alignment")
+              domains   = fam_ali.sequences.map(&:domain)
 
-        cp NA_CLASSDEF, fam_dir
-        cp NA_ALLMAT_LOG, fam_dir
-        cp STD_CLASSDEF, fam_dir
-        cp STD_ALLMAT_LOG, fam_dir
+              domains.each_with_index do |dom, di|
+                sunid = dom.sunid
 
-        master  = nil
-        cwd     = pwd
-        chdir fam_dir
+                if di == 0
+                  master = sunid
 
-        pdbs = FileList[File.join(rep_dir, dir, "/*.pdb")].sort_by { |f| File.basename(f, ".pdb").to_i }
+                  File.open("#{sunid}.tem", "w") do |file|
+                    res_tem = []
+                    sec_tem = []
+                    acc_tem = []
 
-        pdbs.each_with_index do |pdb, i|
-          sunid = File.basename(pdb, ".pdb")
-          tem   = "#{sunid}.tem"
+                    dna_tem = []
+                    rna_tem = []
 
-          # JOY
-          rm tem if File.exists? tem
-          system "joy #{pdb}"
+                    hbond_dna_tem   = []
+                    whbond_dna_tem  = []
+                    vdw_dna_tem     = []
 
-          # Update template for master structure with DNA/RNA interface environment
-          if i == 0 # only for master structure !!!
-            master  = sunid
-            dom     = ScopDomain.find_by_sunid(sunid)
+                    hbond_rna_tem   = []
+                    whbond_rna_tem  = []
+                    vdw_rna_tem     = []
 
-            unless dom
-              $logger.warn "Cannot find ScopDomain, #{sunid}"
-              next
-            end
+                    dom.residues.each_with_index do |res, ri|
+                      if ri != 0 and ri % 75 == 0
+                        res_tem << "\n"
+                        sec_tem << "\n"
+                        acc_tem << "\n"
 
-            unless tem
-              $logger.warn "Cannot find #{tem}"
-              next
-            end
+                        dna_tem << "\n"
+                        rna_tem << "\n"
 
-            ff_residues = nil
-            ff = Bio::FlatFile.auto("#{tem}")
-            ff.each_entry do |entry|
-              if entry.entry_id == master and entry.definition =~ /^sequence/
-                ff_residues = entry.data.split("")
-              end
-            end
+                        hbond_dna_tem   << "\n"
+                        whbond_dna_tem  << "\n"
+                        vdw_dna_tem     << "\n"
 
-            db_residues = dom.residues
-            ext_tem     = []
-            pos         = 0
+                        hbond_rna_tem   << "\n"
+                        whbond_rna_tem  << "\n"
+                        vdw_rna_tem     << "\n"
+                      end
 
-            ff_residues.each_with_index do |res, ri|
-              case
-              when res == "\n"
-                ext_tem << "\n"
-              when res == "-"
-                ext_tem << "-"
-              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_dna?)
-                ext_tem << "D"
-                pos += 1
-              when (db_residues[pos].one_letter_code == res and db_residues[pos].binding_rna?)
-                ext_tem << "R"
-                pos += 1
-              when db_residues[pos].one_letter_code == res
-                ext_tem << "N"
-                pos += 1
-              else
-                raise "Residue position mistach!: #{dir}-#{sunid}-#{pos}"
-              end
-            end
+                      res_tem << res.one_letter_code
+                      sec_tem << case
+                      when res.alpha_helix? || res.three10_helix? then  "H"
+                      when res.beta_sheet? then  "E"
+                      when res.positive_phi? then  "P"
+                      else "C"
+                      end
+                      acc_tem << case
+                      when res.on_surface? then  "T"
+                      else "F"
+                      end
 
-            File.open(tem, "a") do |file|
-              file.puts ">P1;#{sunid}"
-              file.puts "DNA/RNA interface"
-              file.puts ext_tem.join + "*"
-            end
+                      if res.hbonding_dna?
+                        hbond_dna_tem << "T"
+                      else
+                        hbond_dna_tem << "F"
+                      end
 
-            # Run melody for generating Fugue profile
-            system "melody -t #{tem} -c classdef.na.dat -s allmat.na.log.dat -y -o #{master}.na.fug"
-            system "melody -t #{tem} -c classdef.std.dat -s allmat.std.log.dat -y -o #{master}.std.fug"
-          else # for other entries
-            File.open("#{master}-#{sunid}.ref.ali", "w") do |f|
-              flat_file = Bio::FlatFile.auto("baton.ali")
-              flat_file.each_entry do |entry|
-                if ((entry.seq_type == "P1" and entry.entry_id == sunid) or
-                    (entry.seq_type == "P1" and entry.entry_id == master))
-                  f.puts entry
+                      if res.whbonding_dna?
+                        whbond_dna_tem << "T"
+                      else
+                        whbond_dna_tem << "F"
+                      end
+
+                      if res.vdw_contacting_dna?
+                        vdw_dna_tem << "T"
+                      else
+                        vdw_dna_tem << "F"
+                      end
+
+                      if res.binding_dna?
+                        dna_tem << "T"
+                      else
+                        dna_tem << "F"
+                      end
+
+                      if res.hbonding_rna?
+                        hbond_rna_tem << "T"
+                      else
+                        hbond_rna_tem << "F"
+                      end
+
+                      if res.whbonding_rna?
+                        whbond_rna_tem << "T"
+                      else
+                        whbond_rna_tem << "F"
+                      end
+
+                      if res.vdw_contacting_rna?
+                        vdw_rna_tem << "T"
+                      else
+                        vdw_rna_tem << "F"
+                      end
+
+                      if res.binding_rna?
+                        rna_tem << "T"
+                      else
+                        rna_tem << "F"
+                      end
+                    end
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "sequence"
+                    file.puts res_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "secondary structure and phi angle"
+                    file.puts sec_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "solvent accessibility"
+                    file.puts acc_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "hydrogen bond to DNA"
+                    file.puts hbond_dna_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "water-mediated hydrogen bond to DNA"
+                    file.puts whbond_dna_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "vdw contact to DNA"
+                    file.puts vdw_dna_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "DNA interface"
+                    file.puts dna_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "hydrogen bond to RNA"
+                    file.puts hbond_rna_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "water-mediated hydrogen bond to RNA"
+                    file.puts whbond_rna_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "vdw contact to RNA"
+                    file.puts vdw_rna_tem.join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "RNA interface"
+                    file.puts rna_tem.join + "*"
+                  end
+
+                  # Run melody for generating Fugue profile
+                  system "melody -t #{sunid}.tem -c classdef.na.dat -s allmat.na.log.dat -y -o #{sunid}.na.fug"
+                  system "melody -t #{sunid}.tem -c classdef.std.dat -s allmat.std.log.dat -y -o #{sunid}.std.fug"
+                else # for other entries
+                  File.open("#{temp}-#{sunid}.ref.ali", "w") do |f|
+                    file.puts ">P1;#{temp}"
+                    file.puts "sequence"
+                    file.puts  fam_ali.sequnces.select { |s| s.domain.sunid == temp }.positions.map(&:residue_name).join + "*"
+
+                    file.puts ">P1;#{sunid}"
+                    file.puts "sequence"
+                    file.puts  fam_ali.sequnces.select { |s| s.domain.sunid == sunid }.positions.map(&:residue_name).join + "*"
+                  end
+
+                  system "mview -in pir -out msf #{temp}-#{sunid}.ref.ali > #{temp}-#{sunid}.ref.msf"
+
+                  system "fugueali -seq #{sunid}.ali -prf #{temp}.na.fug -y -o #{temp}-#{sunid}.na.fug.ali"
+                  system "mview -in pir -out msf #{temp}-#{sunid}.na.fug.ali > #{temp}-#{sunid}.na.fug.msf"
+                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.na.fug.msf > #{temp}-#{sunid}.na.fug.bb"
+
+                  system "fugueali -seq #{sunid}.ali -prf #{temp}.std.fug -y -o #{temp}-#{sunid}.std.fug.ali"
+                  system "mview -in pir -out msf #{temp}-#{sunid}.std.fug.ali > #{temp}-#{sunid}.std.fug.msf"
+                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.std.fug.msf > #{temp}-#{sunid}.std.fug.bb"
+
+                  system "needle -asequence #{temp}.ali -bsequence #{sunid}.ali -aformat msf -outfile #{temp}-#{sunid}.ndl.msf -gapopen 10.0 -gapextend 0.5"
+                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.ndl.msf > #{temp}-#{sunid}.ndl.bb"
+
+                  system "cat #{temp}.ali #{sunid}.ali > #{temp}-#{sunid}.ali"
+                  system "clustalw2 -INFILE=#{temp}-#{sunid}.ali -ALIGN -OUTFILE=#{temp}-#{sunid}.clt.msf -OUTPUT=GCG"
+                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.clt.msf > #{temp}-#{sunid}.clt.bb"
                 end
               end
             end
-            system "mview -in pir -out msf #{master}-#{sunid}.ref.ali > #{master}-#{sunid}.ref.msf"
-
-            system "fugueali -seq #{sunid}.ali -prf #{master}.na.fug -y -o #{master}-#{sunid}.na.fug.ali"
-            system "mview -in pir -out msf #{master}-#{sunid}.na.fug.ali > #{master}-#{sunid}.na.fug.msf"
-            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.na.fug.msf > #{master}-#{sunid}.na.fug.bb"
-
-            system "fugueali -seq #{sunid}.ali -prf #{master}.std.fug -y -o #{master}-#{sunid}.std.fug.ali"
-            system "mview -in pir -out msf #{master}-#{sunid}.std.fug.ali > #{master}-#{sunid}.std.fug.msf"
-            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.std.fug.msf > #{master}-#{sunid}.std.fug.bb"
-
-            system "needle -asequence #{master}.ali -bsequence #{sunid}.ali -aformat msf -outfile #{master}-#{sunid}.ndl.msf -gapopen 10.0 -gapextend 0.5"
-            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.ndl.msf > #{master}-#{sunid}.ndl.bb"
-
-            system "cat #{master}.ali #{sunid}.ali > #{master}-#{sunid}.ali"
-            system "clustalw2 -INFILE=#{master}-#{sunid}.ali -ALIGN -OUTFILE=#{master}-#{sunid}.clt.msf -OUTPUT=GCG"
-            system "#{BALISCORE_BIN} #{master}-#{sunid}.ref.msf #{master}-#{sunid}.clt.msf > #{master}-#{sunid}.clt.bb"
           end
+          chdir cwd
         end
-
-        chdir cwd
       end
     end
 

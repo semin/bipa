@@ -296,54 +296,6 @@ namespace :bipa do
                 else
                   rna_tem << "F"
                 end
-
-  #              if res.hbond_dna_base || res.hbond_dna_sugar || res.hbond_dna_phosphate
-  #                hbond_dna_tem << "T"
-  #              else
-  #                hbond_dna_tem << "F"
-  #              end
-  #
-  #              if res.whbond_dna_base || res.whbond_dna_sugar || res.whbond_dna_phosphate
-  #                whbond_dna_tem << "T"
-  #              else
-  #                whbond_dna_tem << "F"
-  #              end
-  #
-  #              if res.vdw_dna_base || res.vdw_dna_sugar || res.vdw_dna_phosphate
-  #                vdw_dna_tem << "T"
-  #              else
-  #                vdw_dna_tem << "F"
-  #              end
-  #
-  #              if hbond_dna_tem.last == "T" or whbond_dna_tem.last == "T" or vdw_dna_tem.last == "T"
-  #                dna_tem << "T"
-  #              else
-  #                dna_tem << "F"
-  #              end
-
-  #              if res.hbond_rna_base || res.hbond_rna_sugar || res.hbond_rna_phosphate
-  #                hbond_rna_tem << "T"
-  #              else
-  #                hbond_rna_tem << "F"
-  #              end
-  #
-  #              if res.whbond_rna_base || res.whbond_rna_sugar || res.whbond_rna_phosphate
-  #                whbond_rna_tem << "T"
-  #              else
-  #                whbond_rna_tem << "F"
-  #              end
-  #
-  #              if res.vdw_rna_base || res.vdw_rna_sugar || res.vdw_rna_phosphate
-  #                vdw_rna_tem << "T"
-  #              else
-  #                vdw_rna_tem << "F"
-  #              end
-  #
-  #              if hbond_rna_tem.last == "T" or whbond_rna_tem.last == "T" or vdw_rna_tem.last == "T"
-  #                rna_tem << "T"
-  #              else
-  #                rna_tem << "F"
-  #              end
               end
 
               file.puts ">P1;#{sunid}"
@@ -407,7 +359,7 @@ namespace :bipa do
         ali_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
 
         %w[dna rna].each do |na|
-          %w[16 32 std].each do |env|
+          %w[16 64 std].each do |env|
             est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
             mkdir_p est_dir
 
@@ -420,11 +372,11 @@ namespace :bipa do
               ali90   = fam.rep90_alignment
 
               if ali90 && ali90.sequences.map(&:domain).sum { |d| d.send(:"#{na}_interfaces").size } > 0
-                cp na_tem, new_na_tem if File.exist?(na_tem)
+                cp tem, new_tem if File.exist?(tem)
               end
             end
 
-            cp "#{na.upcase}#{env.upcase}".constantize, est_dir
+            cp "#{na.upcase}#{env.upcase}_CLASSDEF".constantize, est_dir
 
             cwd = pwd
             chdir est_dir
@@ -447,7 +399,7 @@ namespace :bipa do
         next if si != 90
 
         %w[dna rna].each do |na|
-          %w[16 32 std].each do |env|
+          %w[16 64 std].each do |env|
             cwd     = pwd
             est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
 

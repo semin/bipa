@@ -5,141 +5,6 @@ $logger = Logger.new(STDOUT)
 namespace :bipa do
   namespace :import do
 
-    desc "Import protein-nucleic acid complex PDB files to BIPA tables"
-    task :structures => [:environment] do
-
-      # helper methods for Residue and Atom params
-      def residue_params(bio_residue)
-        {
-          :chain_id             => bio_residue.chain.id,
-          :residue_code         => bio_residue.residue_id,
-          :icode                => bio_residue.iCode.blank? ? nil : bio_residue.iCode,
-          :residue_name         => bio_residue.resName.strip,
-        }
-      end
-
-      def atom_params(bio_atom)
-        {
-          :residue_id => bio_atom.residue.id,
-          :moiety     => bio_atom.moiety,
-          :atom_code  => bio_atom.serial,
-          :atom_name  => bio_atom.name.strip,
-          :altloc     => bio_atom.altLoc.blank? ? nil : bio_atom.altLoc,
-          :x          => bio_atom.x,
-          :y          => bio_atom.y,
-          :z          => bio_atom.z,
-          :occupancy  => bio_atom.occupancy,
-          :tempfactor => bio_atom.tempFactor,
-          :element    => bio_atom.element,
-          :charge     => bio_atom.charge.blank? ? nil : bio_atom.charge,
-        }
-      end
-
-      pdb_files = Dir[PDB_DIR+"/*.pdb"].sort
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_files.each_with_index do |pdb_file, i|
-          tainted = false
-
-          fmanager.fork do
-            pdb_code  = File.basename(pdb_file, ".pdb")
-            bio_pdb   = Bio::PDB.new(IO.read(pdb_file))
-
-            # Parse molecule and chain information
-            # Very dirty... it needs refactoring!
-            mol_codes = {}
-            molecules = {}
-
-            compnd = bio_pdb.record('COMPND')[0].original_data.map { |s|
-              s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'')
-            }.join + ";"
-
-            compnd.scan(/MOL_ID:\s+(\d+);MOLECULE:\s+(.*?);CHAIN:\s+(.*?);/) do |mol_id, molecule, chain_codes|
-              chain_codes.split(/,/).each do |chain_code|
-                chain_code.strip!
-                mol_codes[chain_code] = mol_id
-                molecules[chain_code] = molecule
-              end
-            end
-
-            ActiveRecord::Base.establish_connection(config)
-
-            structure = Structure.create!(
-              :pdb_code       => bio_pdb.accession,
-              :classification => bio_pdb.classification,
-              :title          => bio_pdb.definition,
-              :exp_method     => bio_pdb.exp_method,
-              :resolution     => bio_pdb.resolution.to_f < EPSILON ? nil : bio_pdb.resolution,
-              :r_value        => bio_pdb.r_value,
-              :r_free         => bio_pdb.r_free,
-              :space_group    => bio_pdb.space_group,
-              :deposited_at   => bio_pdb.deposition_date
-            )
-
-            bio_model = bio_pdb.models.first
-
-            model = structure.models.create(
-              :model_code   => bio_model.serial ? bio_model.serial : 1
-            )
-
-            # Create empty atoms array for massive importing Atom AREs
-            atoms = Array.new
-
-            bio_model.each do |bio_chain|
-              chain_code = bio_chain.chain_id.blank? ? nil : bio_chain.chain_id
-              chain_type = if bio_chain.aa?
-                             "aa_chains"
-                           elsif bio_chain.dna?
-                             "dna_chains"
-                           elsif bio_chain.rna?
-                             "rna_chains"
-                           elsif bio_chain.hna?
-                             "hna_chains"
-                           else
-                             "pseudo_chains"
-                           end
-
-              chain = model.send(chain_type).create(
-                :chain_code => chain_code,
-                :mol_code   => mol_codes[chain_code] ? mol_codes[chain_code] : nil,
-                :molecule   => molecules[chain_code] ? molecules[chain_code] : nil
-              )
-
-              bio_chain.each_residue do |bio_residue|
-                if bio_residue.aa?
-                  residue = chain.send("aa_residues").create(residue_params(bio_residue))
-                elsif bio_residue.dna?
-                  residue = chain.send("dna_residues").create(residue_params(bio_residue))
-                elsif bio_residue.rna?
-                  residue = chain.send("rna_residues").create(residue_params(bio_residue))
-                elsif bio_residue.na?
-                  residue = chain.send("na_residues").create(residue_params(bio_residue))
-                else
-                  raise "Error: #{bio_residue} is a unknown type of standard residue!"
-                end
-                bio_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
-              end
-
-              bio_chain.each_heterogen do |bio_het_residue|
-                residue = chain.send("het_residues").create(residue_params(bio_het_residue))
-                bio_het_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
-              end
-            end
-
-            Atom.import(atoms, :validate => false)
-            structure.save!
-            ActiveRecord::Base.remove_connection
-            $logger.info("Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})")
-          end
-        end
-        ActiveRecord::Base.establish_connection(config)
-      end
-    end # task :pdb
-
-
     desc "Import SCOP datasets"
     task :scops => [:environment] do
 
@@ -193,9 +58,145 @@ namespace :bipa do
           parent_scop = Scop.find_by_sunid(parent_sunid)
           current_scop.move_to_child_of(parent_scop)
         end
-        #$logger.info("Importing SCOP sunid, #{self_sunid}: (#{i + 1}) done")
+        $logger.info "Importing SCOP, #{self_sunid}: done (#{i + 1})"
       end
     end # task :scops
+
+
+    desc "Import protein-nucleic acid complex PDB files to BIPA tables"
+    task :pdb => [:environment] do
+
+      # helper methods for Residue and Atom params
+      def residue_params(bio_residue)
+        {
+          :chain_id             => bio_residue.chain.id,
+          :residue_code         => bio_residue.residue_id,
+          :icode                => (bio_residue.iCode.blank? ? nil : bio_residue.iCode),
+          :residue_name         => bio_residue.resName.strip,
+        }
+      end
+
+      def atom_params(bio_atom)
+        {
+          :residue_id => bio_atom.residue.id,
+          :moiety     => bio_atom.moiety,
+          :atom_code  => bio_atom.serial,
+          :atom_name  => bio_atom.name.strip,
+          :altloc     => (bio_atom.altLoc.blank? ? nil : bio_atom.altLoc),
+          :x          => bio_atom.x,
+          :y          => bio_atom.y,
+          :z          => bio_atom.z,
+          :occupancy  => bio_atom.occupancy,
+          :tempfactor => bio_atom.tempFactor,
+          :element    => bio_atom.element,
+          :charge     => (bio_atom.charge.blank? ? nil : bio_atom.charge),
+        }
+      end
+
+      pdb_files = FileList[PDB_DIR+"/*.pdb"].sort
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_files.each_with_index do |pdb_file, i|
+          tainted = false
+
+          fmanager.fork do
+            pdb_code  = File.basename(pdb_file, ".pdb")
+            bio_pdb   = Bio::PDB.new(IO.read(pdb_file))
+
+            # Parse molecule and chain information
+            # Very dirty... it needs refactoring!
+            mol_codes = {}
+            molecules = {}
+
+            compnd = bio_pdb.record('COMPND')[0].original_data.map { |s|
+              s.gsub(/^COMPND\s+\d*\s+/,'').gsub(/\s*$/,'')
+            }.join + ";"
+
+            compnd.scan(/MOL_ID:\s+(\d+);MOLECULE:\s+(.*?);CHAIN:\s+(.*?);/) do |mol_id, molecule, chain_codes|
+              chain_codes.split(/,/).each do |chain_code|
+                chain_code.strip!
+                mol_codes[chain_code] = mol_id
+                molecules[chain_code] = molecule
+              end
+            end
+
+            ActiveRecord::Base.establish_connection(config)
+
+            structure = Structure.create!(
+              :pdb_code       => bio_pdb.accession,
+              :classification => bio_pdb.classification,
+              :title          => bio_pdb.definition,
+              :exp_method     => bio_pdb.exp_method,
+              :resolution     => (bio_pdb.resolution.to_f < EPSILON ? nil : bio_pdb.resolution),
+              :r_value        => bio_pdb.r_value,
+              :r_free         => bio_pdb.r_free,
+              :space_group    => bio_pdb.space_group,
+              :deposited_at   => bio_pdb.deposition_date
+            )
+
+            bio_model = bio_pdb.models.first
+
+            model = structure.models.create(
+              :model_code   => bio_model.serial ? bio_model.serial : 1
+            )
+
+            # Create empty atoms array for massive importing Atom AREs
+            atoms = Array.new
+
+            bio_model.each do |bio_chain|
+              chain_code = bio_chain.chain_id.blank? ? nil : bio_chain.chain_id
+              chain_type = if bio_chain.aa?
+                             "aa_chains"
+                           elsif bio_chain.dna?
+                             "dna_chains"
+                           elsif bio_chain.rna?
+                             "rna_chains"
+                           elsif bio_chain.hna?
+                             "hna_chains"
+                           else
+                             "pseudo_chains"
+                           end
+
+              chain = model.send(chain_type).create(
+                :chain_code => chain_code,
+                :mol_code   => (mol_codes[chain_code] ? mol_codes[chain_code] : nil),
+                :molecule   => (molecules[chain_code] ? molecules[chain_code] : nil)
+              )
+
+              bio_chain.each_residue do |bio_residue|
+                if bio_residue.aa?
+                  residue = chain.send("aa_residues").create(residue_params(bio_residue))
+                elsif bio_residue.dna?
+                  residue = chain.send("dna_residues").create(residue_params(bio_residue))
+                elsif bio_residue.rna?
+                  residue = chain.send("rna_residues").create(residue_params(bio_residue))
+                elsif bio_residue.na?
+                  residue = chain.send("na_residues").create(residue_params(bio_residue))
+                else
+                  raise "Error: #{bio_residue} is a unknown type of standard residue!"
+                end
+                bio_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
+              end
+
+              bio_chain.each_heterogen do |bio_het_residue|
+                residue = chain.send("het_residues").create(residue_params(bio_het_residue))
+                bio_het_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
+              end
+            end
+
+            Atom.import(atoms, :validate => false)
+            structure.save!
+            ActiveRecord::Base.remove_connection
+
+            $logger.info "Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})"
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end # task :pdb
 
 
     desc "Import NACCESS results into BIPA"
