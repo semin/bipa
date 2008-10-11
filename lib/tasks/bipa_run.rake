@@ -6,9 +6,9 @@ namespace :bipa do
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
-      refresh_dir(HBPLUS_DIR)
+      refresh_dir HBPLUS_DIR
 
-      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
+      pdb_files = FileList[File.join(PDB_DIR, "*.pdb")]
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -20,8 +20,8 @@ namespace :bipa do
             pdb_code  = File.basename(pdb_file, ".pdb")
             work_dir  = File.join(HBPLUS_DIR, pdb_code)
 
-            mkdir_p(work_dir)
-            chdir(work_dir)
+            mkdir_p work_dir
+            chdir work_dir
 
 #            # CLEAN
 #            File.open(pdb_code + ".clean_stdout", "w") do |log|
@@ -70,12 +70,12 @@ namespace :bipa do
 #            mv("hbplus.rc", "#{pdb_code}.rc") if File.exists?("hbplus.rc")
 #            $logger.info("HBPLUS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
 
-            sh "#{HBPLUS_BIN} #{pdb_file} 1>#{pdb_code}.hbplus.log 2>&1"
-            move(Dir["*"], "..")
-            chdir(cwd)
-            rm_rf(work_dir)
+            sh "#{HBPLUS_BIN} -c #{pdb_file} 1>#{pdb_code}.hbplus.log 2>&1"
+            move Dir["*"], ".."
+            chdir cwd
+            rm_rf work_dir
 
-            $logger.info("HBPlus: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+            $logger.info ">>> Running HBPlus on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end
@@ -90,9 +90,9 @@ namespace :bipa do
       # 2) nucleic acid only,
       # 3) and protein-nucleic acid complex
 
-      refresh_dir(NACCESS_DIR)
+      refresh_dir NACCESS_DIR
 
-      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")].sort
+      pdb_files = FileList[File.join(PDB_DIR, "*.pdb")].sort
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -107,7 +107,7 @@ namespace :bipa do
 
             if (pdb_obj.models.first.aa_chains.empty? ||
                 pdb_obj.models.first.na_chains.empty?)
-              $logger.warn("SKIP: #{pdb_file} has no amino acid chain or nucleic acid chain")
+              $logger.warn "!!! SKIP: #{pdb_file} HAS NO AMINO ACID CHAIN OR NUCLEIC ACID CHAIN"
               next
             end
 
@@ -137,11 +137,11 @@ namespace :bipa do
             sh "#{NACCESS_BIN} #{aa_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
             sh "#{NACCESS_BIN} #{na_pdb_file} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
 
-            cp(Dir["#{pdb_code}*"], "..")
-            chdir(cwd)
-            rm_r(work_dir)
+            cp Dir["#{pdb_code}*"], ".."
+            chdir cwd
+            rm_r work_dir
 
-            $logger.info("NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+            $logger.info ">>> Running NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end
@@ -151,23 +151,21 @@ namespace :bipa do
     desc "Run DSSP on each PDB file"
     task :dssp => [:environment] do
 
-      refresh_dir(DSSP_DIR)
+      refresh_dir DSSP_DIR
 
-      pdb_files = Dir[File.join(PDB_DIR, "*.pdb")]
+      pdb_files = FileList[File.join(PDB_DIR, "*.pdb")]
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         pdb_files.each_with_index do |pdb_file, i|
-
           fmanager.fork do
             cwd = pwd
-            chdir(DSSP_DIR)
+            chdir DSSP_DIR
             pdb_code = File.basename(pdb_file, '.pdb')
-            sh("#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err")
-            chdir(cwd)
+            sh "#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err"
+            chdir cwd
 
-            $logger.info("Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done")
+            $logger.info ">>> Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end

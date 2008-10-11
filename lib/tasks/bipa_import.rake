@@ -58,7 +58,7 @@ namespace :bipa do
           parent_scop = Scop.find_by_sunid(parent_sunid)
           current_scop.move_to_child_of(parent_scop)
         end
-        $logger.info "Importing SCOP, #{self_sunid}: done (#{i + 1})"
+        $logger.info ">>> Importing SCOP, #{self_sunid}: done (#{i + 1})"
       end
     end # task :scops
 
@@ -176,7 +176,7 @@ namespace :bipa do
                 elsif bio_residue.na?
                   residue = chain.send("na_residues").create(residue_params(bio_residue))
                 else
-                  raise "Error: #{bio_residue} is a unknown type of standard residue!"
+                  raise "!!! Error: #{bio_residue} is a unknown type of standard residue!"
                 end
                 bio_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
               end
@@ -191,7 +191,7 @@ namespace :bipa do
             structure.save!
             ActiveRecord::Base.remove_connection
 
-            $logger.info "Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})"
+            $logger.info ">>> Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -213,7 +213,7 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure           = Structure.find_by_pdb_code(pdb_code)
+            structure           = Structure.find_by_pdb_code(pdb_code.upcase)
             bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
             unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
             unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
@@ -222,7 +222,7 @@ namespace :bipa do
             if (!File.size?(bound_asa_file)       ||
                 !File.size?(unbound_aa_asa_file)  ||
                 !File.size?(unbound_na_asa_file))
-              $logger.warn("SKIP: #{pdb_code} might be an improper PDB file. No NACCESS result found!")
+              $logger.warn "!!! Skipped #{pdb_code}, which might be an improper PDB file. No NACCESS result found!"
               structure.tainted = true
               structure.save!
               next
@@ -252,7 +252,8 @@ namespace :bipa do
 
             Naccess.import(naccesses, :validate => false)
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'naccess' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
+
+            $logger.info ">>> Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -274,12 +275,12 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure = Structure.find_by_pdb_code(pdb_code)
+            structure = Structure.find_by_pdb_code(pdb_code.upcase)
             dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
             dssps     = Array.new
 
             unless File.size?(dssp_file)
-              $logger.warn("Skip #{pdb_code} due to missing DSSP result file")
+              $logger.warn "!!! Skipped #{pdb_code} due to missing DSSP result file."
               structure.tainted = true
               structure.save!
               next
@@ -297,7 +298,7 @@ namespace :bipa do
 
             ActiveRecord::Base.remove_connection
 
-            $logger.info("Importing 'dssps' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
+            $logger.info ">>> Importing #{pdb_code}.dssp to 'dssps': done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
