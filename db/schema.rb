@@ -118,6 +118,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :icode
     t.integer     :residue_code
     t.string      :residue_name
+    t.boolean     :ss,                    :default => false
     t.boolean     :hbond_dna_base,        :default => false
     t.boolean     :hbond_dna_sugar,       :default => false
     t.boolean     :hbond_dna_phosphate,   :default => false

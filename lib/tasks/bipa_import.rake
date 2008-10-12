@@ -436,7 +436,7 @@ namespace :bipa do
     desc "Import HBPlus results into BIPA"
     task :hbplus => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
+      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -447,8 +447,8 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure   = Structure.find_by_pdb_code(pdb_code.upcase)
-            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
+            structure   = Structure.find_by_pdb_code(pdb_code)
+            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
             bipa_hbonds = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
             columns     = [
               :donor_id,
@@ -473,21 +473,35 @@ namespace :bipa do
 
             bipa_hbonds.each do |hbond|
               begin
-                donor_atom =
-                  structure.
-                  models.first.
-                  chains.find_by_chain_code(hbond.donor.chain_code).
-                  residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code).
-                  atoms.find_by_atom_name(hbond.donor.atom_name)
+                if hbond.donor.residue_name == "CSS"
+                  donor_ss = true
+                  $logger.info ">>> Disulfide bonding cysteine found!"
+                end
 
-                acceptor_atom =
-                  structure.
-                  models.first.
-                  chains.find_by_chain_code(hbond.acceptor.chain_code).
-                  residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code).
-                  atoms.find_by_atom_name(hbond.acceptor.atom_name)
+                donor_chain   = structure.find_by_chain_code(hbond.donor.chain_code)
+                donor_residue = donor_chain.residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code)
+                donor_atom    = donor_residue.atoms.find_by_atom_name(hbond.donor.atom_name)
+
+                if donor_ss
+                  donor_residue.ss = true
+                  donor_residue.save!
+                end
+
+                if hbond.acceptor.residue_name == "CSS"
+                  acceptor_ss = true
+                  $logger.info ">>> Disulfide bonding cysteine found!"
+                end
+
+                acceptor_chain   = structure.find_by_chain_code(hbond.acceptor.chain_code)
+                acceptor_residue = chain_A.residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code)
+                acceptor_atom    = residue_A.atoms.find_by_atom_name(hbond.acceptor.atom_name)
+
+                if acceptor_ss
+                  acceptor_residue.ss = true
+                  acceptor_residue.save!
+                end
               rescue
-                $logger.warn("Cannot find hbonds: #{hbond.donor} <=> #{hbond.acceptor} in #{pdb_code}")
+                $logger.warn "!!! Cannot find hbplus: #{hbond.donor} <=> #{hbond.acceptor} in #{pdb_code}"
                 next
               else
                 if donor_atom && acceptor_atom
