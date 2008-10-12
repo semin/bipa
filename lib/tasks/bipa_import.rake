@@ -96,7 +96,6 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         pdb_files.each_with_index do |pdb_file, i|
-          tainted = false
 
           fmanager.fork do
             pdb_code  = File.basename(pdb_file, ".pdb")
@@ -218,7 +217,7 @@ namespace :bipa do
                 !File.size?(unbound_aa_asa_file)  ||
                 !File.size?(unbound_na_asa_file))
               $logger.warn "!!! Skipped #{pdb_code}, which might be an improper PDB file. No NACCESS result found!"
-              structure.tainted = true
+              structure.no_naccess = true
               structure.save!
               next
             end
@@ -291,7 +290,7 @@ namespace :bipa do
 
             unless File.size?(dssp_file)
               $logger.warn "!!! Skipped #{pdb_code} due to missing DSSP result file."
-              structure.tainted = true
+              structure.no_dssp = true
               structure.save!
               next
             end
@@ -345,7 +344,7 @@ namespace :bipa do
                 File.size?(aa_zap_err)    ||
                 File.size?(na_zap_err))
               $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
-              structure.tainted = true
+              structure.no_zap = true
               structure.save!
               next
             end
@@ -370,7 +369,7 @@ namespace :bipa do
 
             if tainted_zap
               $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
-              structure.tainted = true
+              structure.no_zap = true
               structure.save!
               next
             end
@@ -467,7 +466,7 @@ namespace :bipa do
 
             if !File.size?(hbplus_file) || bipa_hbonds.empty?
               $logger.warn("Skip #{pdb_code} might be a C-alpha only structure. No HBPLUS results are found!")
-              structure.tainted = true
+              structure.no_hbplus = true
               structure.save!
               next
             end

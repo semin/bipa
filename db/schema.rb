@@ -51,17 +51,23 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float     :r_free
     t.string    :space_group
     t.date      :deposited_at
-    t.boolean   :obsolete,   :default => false
-    t.boolean   :tainted,    :default => false
+    t.boolean   :obsolete,    :default => false
+    t.boolean   :no_zap,      :default => false
+    t.boolean   :no_dssp,     :default => false
+    t.boolean   :no_hbplus,   :default => false
+    t.boolean   :no_naccess,  :default => false
     t.timestamps
   end
 
   add_index :structures, :pdb_code,     :unique => true
-  add_index :structures, :tainted
   add_index :structures, :resolution
   add_index :structures, :r_value
   add_index :structures, :r_free
   add_index :structures, :deposited_at
+  add_index :structures, :no_zap
+  add_index :structures, :no_dssp
+  add_index :structures, :no_hbplus
+  add_index :structures, :no_naccess
 
 
   # 'models' table
@@ -481,7 +487,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :taxonomic_nodes, :force => true do |t|
     t.integer     :parent_id
     t.string      :rank
-    t.string      :embl_code,     :default => false
+    t.string      :embl_code
     t.integer     :division_id
     t.boolean     :inherited_div_flag
     t.integer     :genetic_code_id

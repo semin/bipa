@@ -38,7 +38,12 @@ class Structure < ActiveRecord::Base
   has_many  :het_chains,
             :through    => :models
 
-  named_scope :untainted, :conditions => { :tainted => false }
+  named_scope :untainted, :conditions => {
+    :no_zap     => false,
+    :no_dssp    => false,
+    :no_hbplus  => false,
+    :no_naccess => false
+  }
 
   named_scope :max_resolution, lambda { |res|
      { :conditions => ["resolution <= ?", res.to_f] }
