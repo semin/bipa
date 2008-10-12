@@ -201,13 +201,13 @@ namespace :bipa do
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
-      #fmanager.manage do
-        #config = ActiveRecord::Base.remove_connection
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
-          #fmanager.fork do
-            #ActiveRecord::Base.establish_connection(config)
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
 
             structure           = Structure.find_by_pdb_code(pdb_code.upcase)
             bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
@@ -228,46 +228,46 @@ namespace :bipa do
             unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
             atom_radius         = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_radius
             # Uncomment following lines if you want to use ar-extensions
-            #naccesses           = []
+            naccesses           = []
             # Uncomment following lines if you want to use import_with_load_data_in_file
-            columns             = [:atom_id, :unbound_asa, :bound_asa, :delta_asa, :radius]
-            values              = []
+            #columns             = [:atom_id, :unbound_asa, :bound_asa, :delta_asa, :radius]
+            #values              = []
 
             %w[aa_atoms na_atoms].each do |atoms|
               structure.send(atoms).each do |atom|
                 next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_aa_atom_asa.has_key?(atom.atom_code)
 
                 # Uncomment following lines if you want to use ar-extensions
-                #naccess             = atom.build_naccess
-                #naccess.bound_asa   = bound_atom_asa[atom.atom_code]
-                #naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
-                #naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
-                #naccess.radius      = atom_radius[atom.atom_code]
-                #naccesses << naccess
+                naccess             = atom.build_naccess
+                naccess.bound_asa   = bound_atom_asa[atom.atom_code]
+                naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
+                naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
+                naccess.radius      = atom_radius[atom.atom_code]
+                naccesses << naccess
 
                 # Uncomment following lines if you want to use import_with_load_data_in_file
-                values << [
-                  atom.id,
-                  unbound_aa_atom_asa[atom.atom_code],
-                  bound_atom_asa[atom.atom_code],
-                  unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code],
-                  atom_radius[atom.atom_code]
-                ]
+                #values << [
+                #  atom.id,
+                #  unbound_aa_atom_asa[atom.atom_code],
+                #  bound_atom_asa[atom.atom_code],
+                #  unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code],
+                #  atom_radius[atom.atom_code]
+                #]
               end
             end
 
             # Uncomment following lines if you want to use ar-extensions
-            #Naccess.import(naccesses, :validate => false)
+            Naccess.import(naccesses, :validate => false)
 
             # Uncomment following lines if you want to use import_with_load_data_in_file
-            Naccess.import_with_load_data_infile(columns, values)
+            #Naccess.import_with_load_data_infile(columns, values)
 
-            #ActiveRecord::Base.remove_connection
+            ActiveRecord::Base.remove_connection
             $logger.info ">>> Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
           end
-        #end
-        #ActiveRecord::Base.establish_connection(config)
-      #end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
     end
 
 
