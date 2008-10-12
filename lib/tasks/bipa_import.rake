@@ -521,7 +521,7 @@ namespace :bipa do
             #Hbplus.import(hbplus, :validate => false) unless hbonds.empty?
             Hbplus.import_with_load_data_infile(columns, values)
             ActiveRecord::Base.remove_connection
-            $logger.info ">>> Importing #{pdb_code}.hb2 into 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{pdb_code.downcase}.hb2 into 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
