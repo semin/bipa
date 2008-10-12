@@ -179,6 +179,7 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
   add_index :atoms, :residue_id
+  add_index :atoms, :type
   add_index :atoms, [:residue_id, :atom_code]
   add_index :atoms, [:residue_id, :atom_name]
 
