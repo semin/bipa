@@ -49,6 +49,8 @@ NCBI_FTP        = "ftp.ncbi.nih.gov"
 TAXONOMY_FTP    = "pub/taxonomy"
 TAXONOMY_DIR    = File.join(RAILS_ROOT, "/public/taxonomy")
 
+GO_OBO_URI      = "http://www.geneontology.org/ontology/gene_ontology_edit.obo"
+
 HBPLUS_BIN      = "/BiO/Install/hbplus/hbplus"
 CLEAN_BIN       = "/BiO/Install/hbplus/clean"
 HBADD_BIN       = "/BiO/Install/hbadd/hdadd"

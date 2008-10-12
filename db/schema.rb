@@ -177,7 +177,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'dssps' table
-  create_table :dssps, :force => true do |t|
+  create_table :dssp, :force => true do |t|
     t.belongs_to  :residue
     t.integer     :dssp_number
     t.string      :sse
@@ -207,8 +207,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :psi
   end
 
-  add_index :dssps, :residue_id
-  add_index :dssps, :dssp_number
+  add_index :dssp, :residue_id
+  add_index :dssp, :dssp_number
 
 
   # 'naccess' table
@@ -463,7 +463,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :db_object_name
     t.string      :synonym
     t.string      :db_object_type
-    t.integer     :tax_id
+    t.integer     :taxon_id
     t.date        :date
     t.string      :assigned_by
   end

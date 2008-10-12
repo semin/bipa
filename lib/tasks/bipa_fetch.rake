@@ -90,9 +90,66 @@ namespace :bipa do
         link = "#{stem}_#{version}"
         File.open(File.join(SCOP_DIR, link), 'w') do |f|
           f.puts open(SCOP_URI + "/#{link}").read
-          $logger.info "Downloading #{link}: done"
+          $logger.info ">>> Downloading #{link}: done"
         end
       end
+    end
+
+
+    desc "Fetch GO related files"
+    task :go => [:environment] do
+
+      refresh_dir GO_DIR
+
+      # Download GO-PDB mapping file from EBI
+      require "net/ftp"
+
+      Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
+        ftp.login "anonymous"
+        ftp.chdir "/pub/databases/GO/goa/PDB/"
+        ftp.getbinaryfile("./gene_association.goa_pdb.gz", File.join(GO_DIR, "gene_association.goa_pdb.gz"))
+
+        $logger.info ">>> Downloading gene_association.goa_pdb.gz: done"
+      end
+
+      cwd = pwd
+      chdir GO_DIR
+      system "gzip -d *.gz"
+      chdir cwd
+
+      $logger.info ">>> Uncompressing gene_association.goa_pdb.gz: done"
+
+      # Download GO.obo file from GO Web
+      require "open-uri"
+
+      File.open(File.join(GO_DIR, 'gene_ontology_edit.obo'), 'w') do |f|
+        f.puts open(GO_OBO_URI).read
+        $logger.info ">>> Downloading #{GO_OBO_URI}: done"
+      end
+    end
+
+
+    desc "Fetch NCBI taxonomy files"
+    task :taxonomy => [:environment] do
+
+      refresh_dir TAXONOMY_DIR
+
+      require "net/ftp"
+
+      Net::FTP.open("ftp.ncbi.nih.gov") do |ftp|
+        ftp.login "anonymous"
+        ftp.chdir "/pub/taxonomy/"
+        ftp.getbinaryfile("./taxdump.tar.gz", File.join(TAXONOMY_DIR, 'taxdump.tar.gz'))
+
+        $logger.info ">>> Downloading taxdump.tar.gz: done"
+      end
+
+      cwd = pwd
+      chdir TAXONOMY_DIR
+      system "tar xvzf *.tar.gz"
+      chdir cwd
+
+      $logger.info ">>> Uncompressing taxdump.tar.gz: done"
     end
 
   end

@@ -1,7 +1,3 @@
-require "logger"
-
-$logger = Logger.new(STDOUT)
-
 namespace :bipa do
   namespace :import do
 
@@ -205,19 +201,18 @@ namespace :bipa do
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+      #fmanager.manage do
+        #config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+          #fmanager.fork do
+            #ActiveRecord::Base.establish_connection(config)
 
             structure           = Structure.find_by_pdb_code(pdb_code.upcase)
             bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
             unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
             unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
-            naccesses           = Array.new
 
             if (!File.size?(bound_asa_file)       ||
                 !File.size?(unbound_aa_asa_file)  ||
@@ -231,38 +226,53 @@ namespace :bipa do
             bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
             unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
             unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
+            atom_radius         = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_radius
+            # Uncomment following lines if you want to use ar-extensions
+            #naccesses           = []
+            # Uncomment following lines if you want to use import_with_load_data_in_file
+            columns             = [:atom_id, :unbound_asa, :bound_asa, :delta_asa, :radius]
+            values              = []
 
-            structure.aa_atoms.each do |atom|
-              next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_aa_atom_asa.has_key?(atom.atom_code)
-              naccess             = atom.build_naccess
-              naccess.bound_asa   = bound_atom_asa[atom.atom_code]
-              naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
-              naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
-              naccesses << naccess
+            %w[aa_atoms na_atoms].each do |atoms|
+              structure.send(atoms).each do |atom|
+                next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_aa_atom_asa.has_key?(atom.atom_code)
+
+                # Uncomment following lines if you want to use ar-extensions
+                #naccess             = atom.build_naccess
+                #naccess.bound_asa   = bound_atom_asa[atom.atom_code]
+                #naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
+                #naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
+                #naccess.radius      = atom_radius[atom.atom_code]
+                #naccesses << naccess
+
+                # Uncomment following lines if you want to use import_with_load_data_in_file
+                values << [
+                  atom.id,
+                  unbound_aa_atom_asa[atom.atom_code],
+                  bound_atom_asa[atom.atom_code],
+                  unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code],
+                  atom_radius[atom.atom_code]
+                ]
+              end
             end
 
-            structure.na_atoms.each do |atom|
-              next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_na_atom_asa.has_key?(atom.atom_code)
-              naccess             = atom.build_naccess
-              naccess.bound_asa   = bound_atom_asa[atom.atom_code]
-              naccess.unbound_asa = unbound_na_atom_asa[atom.atom_code]
-              naccess.delta_asa   = unbound_na_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
-              naccesses << naccess
-            end
+            # Uncomment following lines if you want to use ar-extensions
+            #Naccess.import(naccesses, :validate => false)
 
-            Naccess.import(naccesses, :validate => false)
-            ActiveRecord::Base.remove_connection
+            # Uncomment following lines if you want to use import_with_load_data_in_file
+            Naccess.import_with_load_data_infile(columns, values)
 
+            #ActiveRecord::Base.remove_connection
             $logger.info ">>> Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
           end
-        end
-        ActiveRecord::Base.establish_connection(config)
-      end
+        #end
+        #ActiveRecord::Base.establish_connection(config)
+      #end
     end
 
 
     desc "Import DSSP results to BIPA"
-    task :dssps => [:environment] do
+    task :dssp => [:environment] do
 
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
@@ -298,7 +308,7 @@ namespace :bipa do
 
             ActiveRecord::Base.remove_connection
 
-            $logger.info ">>> Importing #{pdb_code}.dssp to 'dssps': done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{pdb_code}.dssp to 'dssp': done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -379,13 +389,8 @@ namespace :bipa do
     end
 
 
-#    desc "Import various hydrophobicity scales to BIPA"
-#    task :hydrophobicity => [:environment] do
-#    end
-
-
     desc "Import van der Waals Contacts"
-    task :contacts => [:environment] do
+    task :vdw_contacts => [:environment] do
 
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
@@ -398,9 +403,10 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure = Structure.find_by_pdb_code(pdb_code)
+            structure = Structure.find_by_pdb_code(pdb_code.upcase)
             kdtree    = Bipa::Kdtree.new
-            contacts  = Array.new
+            columns   = [:atom_id, :vdw_contacting_atom_id, :distance]
+            values    = []
 
             structure.atoms.each { |a| kdtree.insert(a) }
 
@@ -412,16 +418,15 @@ namespace :bipa do
               neighbor_atoms.each do |neighbor_atom|
                 if neighbor_atom.aa?
                   dist = na_atom - neighbor_atom
-                  contacts << Contact.new(:atom_id            => neighbor_atom.id,
-                                          :contacting_atom_id => na_atom.id,
-                                          :distance           => dist)
+                  values << [neighbor_atom.id, na_atom.id, dist]
                 end
               end
             end
 
-            Contact.import(contacts, :validate => false)
+            VdwContact.import_with_load_data_infile(columns, values)
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'contacts' in #{pdb_code} : done (#{i + 1}/#{pdb_codes.size})")
+
+            $logger.info ">>> Importing #{pdb_code} vdw contacts into 'vdw_contacts' table: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -443,10 +448,22 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure   = Structure.find_by_pdb_code(pdb_code)
+            structure   = Structure.find_by_pdb_code(pdb_code.upcase)
             hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code}.hb2")
             bipa_hbonds = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
-            hbonds      = Array.new
+            columns     = [
+              :donor_id,
+              :acceptor_id,
+              :da_distance,
+              :category,
+              :gap,
+              :ca_distance,
+              :dha_angle,
+              :ha_distance,
+              :haaa_angle,
+              :daaa_angle
+            ]
+            values      = []
 
             if !File.size?(hbplus_file) || bipa_hbonds.empty?
               $logger.warn("Skip #{pdb_code} might be a C-alpha only structure. No HBPLUS results are found!")
@@ -476,27 +493,30 @@ namespace :bipa do
               else
                 if donor_atom && acceptor_atom
                   if Hbplus.exists?(:donor_id => donor_atom.id, :acceptor_id => acceptor_atom.id)
-                    #$logger.warn("Skip hbond: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}")
+                    $logger.warn "!!! Skipped hbplus: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}"
                     next
                   else
-                    hbplus << Hbplus.new(:donor_id     => donor_atom.id,
-                                         :acceptor_id  => acceptor_atom.id,
-                                         :da_distance  => hbond.da_distance,
-                                         :category     => hbond.category,
-                                         :gap          => hbond.gap,
-                                         :ca_distance  => hbond.ca_distance,
-                                         :dha_angle    => hbond.dha_angle,
-                                         :ha_distance  => hbond.ha_distance,
-                                         :haaa_angle   => hbond.haaa_angle,
-                                         :daaa_angle   => hbond.daaa_angle)
+                    values << [
+                      donor_atom.id,
+                      acceptor_atom.id,
+                      hbond.da_distance,
+                      hbond.category,
+                      hbond.gap,
+                      hbond.ca_distance,
+                      hbond.dha_angle,
+                      hbond.ha_distance,
+                      hbond.haaa_angle,
+                      hbond.daaa_angle
+                    ]
                   end
                 end
               end
             end
 
-            Hbplus.import(hbplus, :validate => false) unless hbonds.empty?
+            #Hbplus.import(hbplus, :validate => false) unless hbonds.empty?
+            Hbplus.import_with_load_data_infile(columns, values)
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'hbplus' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
+            $logger.info ">>> Importing #{pdb_code}.hb2 into 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
@@ -1000,7 +1020,7 @@ namespace :bipa do
         term_ar = GoTerm.find_by_go_id(go_id)
         if term_ar.nil?
           GoTerm.create!(term.to_hash)
-          $logger.info("Importing #{go_id} into 'go_terms': done")
+          $logger.info ">>> Importing #{go_id} to 'go_terms': done"
         end
       end
 
@@ -1011,32 +1031,22 @@ namespace :bipa do
           target = GoTerm.find_by_go_id(relationship.target_id)
 
           if relationship.type == "is_a"
-            GoIsA.create!(:source_id => source.id,
-                          :target_id => target.id)
-
-            $logger.info("Importing #{go_id} 'is_a' #{relationship.target_id} into 'go_relationships': done")
+            GoIsA.create!(:source_id => source.id, :target_id => target.id)
+            $logger.info ">>> Importing #{go_id} 'is_a' #{relationship.target_id} into 'go_relationships': done"
           elsif relationship.type == "part_of"
-            GoPartOf.create!(:source_id => source.id,
-                             :target_id => target.id)
-
-            $logger.info("Importing #{go_id} 'part_of' #{relationship.target_id} into 'go_relationships': done")
+            GoPartOf.create!(:source_id => source.id, :target_id => target.id)
+            $logger.info ">>> Importing #{go_id} 'part_of' #{relationship.target_id} into 'go_relationships': done"
           elsif relationship.type == "regulates"
-            GoRegulates.create!(:source_id => source.id,
-                                :target_id => target.id)
-
-            $logger.info("Importing #{go_id} 'regulates' #{relationship.target_id} into 'go_relationships': done")
+            GoRegulates.create!(:source_id => source.id, :target_id => target.id)
+            $logger.info ">>> Importing #{go_id} 'regulates' #{relationship.target_id} into 'go_relationships': done"
           elsif relationship.type == "positively_regulates"
-            GoPositivelyRegulates.create!(:source_id => source.id,
-                                          :target_id => target.id)
-
-            $logger.info("Importing #{go_id} 'positively regulates' #{relationship.target_id} into 'go_relationships': done")
+            GoPositivelyRegulates.create!(:source_id => source.id, :target_id => target.id)
+            $logger.info ">>> Importing #{go_id} 'positively regulates' #{relationship.target_id} into 'go_relationships': done"
           elsif relationship.type == "negatively_regulates"
-            GoNegativelyRegulates.create!(:source_id => source.id,
-                                          :target_id => target.id)
-
-            $logger.info("Importing #{go_id} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done")
+            GoNegativelyRegulates.create!(:source_id => source.id, :target_id => target.id)
+            $logger.info ">>> Importing #{go_id} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done"
           else
-            raise "Unknown type of relationship: #{relationship.type}"
+            raise "!!! Unknown type of relationship: #{relationship.type}"
           end
         end
       end
@@ -1084,7 +1094,7 @@ namespace :bipa do
           }.merge!(line_hsh)
         )
 
-        $logger.info("Importing #{pdb_code}, #{chain_code}, #{line_hsh[:go_id]} into 'goa_pdbs' table: done")
+        $logger.info ">>> Importing #{pdb_code}, #{chain_code}, #{line_hsh[:go_id]} into 'goa_pdbs' table: done"
       end
     end
 
@@ -1099,6 +1109,8 @@ namespace :bipa do
           LINES  TERMINATED BY '\t|\n';
         SQL
       )
+
+      $logger.info ">>> Importing nodes.dmp into 'taxonomic_nodes' table: done"
 
 #      nodes_file = File.join(TAXONOMY_DIR, "nodes.dmp")
 #
@@ -1145,6 +1157,8 @@ namespace :bipa do
           (taxonomic_node_id, name_txt, unique_name, name_class);
         SQL
       )
+
+      $logger.info ">>> Importing names.dmp into 'taxonomic_names' table: done"
 
 #      name_file = File.join(TAXONOMY_DIR, "names.dmp")
 #

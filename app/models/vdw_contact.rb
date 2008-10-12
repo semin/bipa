@@ -1,5 +1,7 @@
 class VdwContact < ActiveRecord::Base
 
+  include ImportWithLoadDataInFile
+
   belongs_to  :atom,
               :class_name     => 'Atom',
               :foreign_key    => 'atom_id',
