@@ -425,7 +425,7 @@ namespace :bipa do
             VdwContact.import_with_load_data_infile(columns, values)
             ActiveRecord::Base.remove_connection
 
-            $logger.info ">>> Importing #{pdb_code} vdw contacts into 'vdw_contacts' table: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{values.size} van der Waals contacts in #{pdb_code} to 'vdw_contacts' table: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -518,10 +518,9 @@ namespace :bipa do
               end
             end
 
-            #Hbplus.import(hbplus, :validate => false) unless hbonds.empty?
             Hbplus.import_with_load_data_infile(columns, values)
             ActiveRecord::Base.remove_connection
-            $logger.info ">>> Importing #{pdb_code.downcase}.hb2 into 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code.downcase}.hb2 to 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
@@ -532,7 +531,7 @@ namespace :bipa do
     desc "Import hydrogen bonds between protein and nucleic acids"
     task :hbonds => [:environment] do
 
-      pdb_codes = Structure.untainted.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.untainted.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -544,20 +543,20 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code)
-            hbonds    = Array.new
+            columns   = [:donor_id, :acceptor_id, :hbplus_id]
+            values    = []
 
             structure.hbplus_as_donor.each do |hbplus|
               if ((hbplus.donor.aa? && hbplus.acceptor.na?) ||
                   (hbplus.donor.na? && hbplus.acceptor.aa?))
-                hbonds << Hbond.new(:donor_id    => hbplus.donor,
-                                    :acceptor_id => hbplus.acceptor,
-                                    :hbplus_id   => hbplus)
+                values << [hbplus.donor, hbplus.acceptor, hbplus.id]
               end
             end
 
-            Hbond.import(hbonds, :validate => false) unless hbonds.empty?
+            Hbond.import_with_load_data_infile(columns, values) unless values.empty?
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'hbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+
+            $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code} into 'hbonds' table: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -570,7 +569,7 @@ namespace :bipa do
 
       require "facets/array"
 
-      pdb_codes = Structure.untainted.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.untainted.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -581,64 +580,54 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure   = Structure.find_by_pdb_code(pdb_code)
-            whbonds     = Array.new
+            structure = Structure.find_by_pdb_code(pdb_code)
+            columns   = [:atom_id, :whbonding_atom_id, :water_atom_id, :aa_water_hbond_id, :na_water_hbond_id]
+            values    = []
 
             structure.water_atoms.each do |water|
-              water.hbonding_donors.combination(2).each do |atom1, atom2|
+              water.hbplus_donors.combination(2).each do |atom1, atom2|
                 if atom1.aa? && atom2.na?
-                  whbonds << Whbond.new(:atom_id            => atom1,
-                                        :whbonding_atom_id  => atom2,
-                                        :water_atom_id      => water,
-                                        :aa_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water),
-                                        :na_water_hbond_id  => atom2.hbonds_as_donor.find_by_acceptor_id(water))
+                  values << [atom1.id, atom2.id, water.id,
+                    atom1.hbplus_as_donor.find_by_acceptor_id(water).id,
+                    atom2.hbplus_as_donor.find_by_acceptor_id(water).id]
                 elsif atom1.na? && atom2.aa?
-                  whbonds << Whbond.new(:atom_id            => atom2,
-                                        :whbonding_atom_id  => atom1,
-                                        :water_atom_id      => water,
-                                        :aa_water_hbond_id  => atom2.hbonds_as_donor.find_by_acceptor_id(water),
-                                        :na_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water))
+                  values << [atom2.id, atom1.id, water.id,
+                    atom2.hbplus_as_donor.find_by_acceptor_id(water).id,
+                    atom1.hbplus_as_donor.find_by_acceptor_id(water).id]
                 end
               end
 
-              water.hbonding_acceptors.combination(2).each do |atom1, atom2|
+              water.hbplus_acceptors.combination(2).each do |atom1, atom2|
                 if atom1.aa? && atom2.na?
-                  whbonds << Whbond.new(:atom_id            => atom1,
-                                        :whbonding_atom_id  => atom2,
-                                        :water_atom_id      => water,
-                                        :aa_water_hbond_id  => atom1.hbonds_as_acceptor.find_by_donor_id(water),
-                                        :na_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water))
+                  values << [atom1.id, atom2.id, water.id,
+                    atom1.hbplus_as_acceptor.find_by_donor_id(water).id,
+                    atom2.hbplus_as_acceptor.find_by_donor_id(water).id]
                 elsif atom1.na? && atom2.aa?
-                  whbonds << Whbond.new(:atom_id            => atom2,
-                                        :whbonding_atom_id  => atom1,
-                                        :water_atom_id      => water,
-                                        :aa_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water),
-                                        :na_water_hbond_id  => atom1.hbonds_as_acceptor.find_by_donor_id(water))
+                  values << [atom2.id, atom1.id, water.id,
+                    atom2.hbplus_as_acceptor.find_by_donor_id(water).id,
+                    atom1.hbplus_as_acceptor.find_by_donor_id(water).id]
                 end
               end
 
-              water.hbonding_donors.each do |atom1|
-                water.hbonding_acceptors.each do |atom2|
+              water.hbplus_donors.each do |atom1|
+                water.hbplus_acceptors.each do |atom2|
                   if atom1.aa? && atom2.na?
-                    whbonds << Whbond.new(:atom_id            => atom1,
-                                          :whbonding_atom_id  => atom2,
-                                          :water_atom_id      => water,
-                                          :aa_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water),
-                                          :na_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water))
+                    values << [atom1.id, atom2.id, water.id,
+                      atom1.hbplus_as_donor.find_by_acceptor_id(water).id,
+                      atom2.hbplus_as_acceptor.find_by_donor_id(water).id]
                   elsif atom1.na? && atom2.aa?
-                    whbonds << Whbond.new(:atom_id            => atom2,
-                                          :whbonding_atom_id  => atom1,
-                                          :water_atom_id      => water,
-                                          :aa_water_hbond_id  => atom2.hbonds_as_acceptor.find_by_donor_id(water),
-                                          :na_water_hbond_id  => atom1.hbonds_as_donor.find_by_acceptor_id(water))
+                    values << [atom2.id, atom1.id, water.id,
+                      atom2.hbplus_as_acceptor.find_by_donor_id(water).id,
+                      atom1.hbplus_as_donor.find_by_acceptor_id(water).id]
                   end
                 end
               end
             end
 
-            Whbond.import(whbonds, :validate => false) unless whbonds.empty?
+            Whbond.import_with_load_data_infile(columns, values) unless values.empty?
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'whbonds' for #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+
+            $logger.info ">>> Importing #{values.size} water-mediated hbonds in #{pdb_code} to 'whbonds' table: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
@@ -661,7 +650,6 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             domains = ScopDomain.find_all_by_pdb_code(pdb_code)
-
             domains.each do |domain|
               iface_found = false
 
@@ -691,8 +679,9 @@ namespace :bipa do
                 end
               end
             end # domains.each
+
             ActiveRecord::Base.remove_connection
-            $logger.info("Extracting domain interfaces from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+            $logger.info ">>> Extracting domain interfaces from #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
