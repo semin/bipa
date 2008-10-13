@@ -184,7 +184,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :atoms, [:residue_id, :atom_name]
 
 
-  # 'dssps' table
+  # 'dssp' table
   create_table :dssp, :force => true do |t|
     t.belongs_to  :residue
     t.integer     :dssp_number
