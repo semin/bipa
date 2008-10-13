@@ -10,38 +10,10 @@ require File.expand_path(File.dirname(__FILE__) + "/bipa/binding_nucleic_acids")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_residues")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_atoms")
 
-module Kernel
-
-  private
-
-  def this_method
-   caller[0] =~ /`([^']*)'/ and $1
-  end
-end
-
-
-class String
-  def nil_if_blank
-    self.blank? ? nil : self
-  end
-end
-
-
-class Struct
-  def to_hash
-    hash = Hash.new
-    self.each_pair do |sym, obj|
-      hash[sym] = obj
-    end
-    hash
-  end
-end
-
-
 def refresh_dir(dir)
   include FileUtils
 
   rm_rf(dir) if File.exists?(dir)
   mkdir_p(dir)
-  puts "Refreshing #{dir}: done"
+  puts ">>> Refreshing #{dir}: done"
 end
