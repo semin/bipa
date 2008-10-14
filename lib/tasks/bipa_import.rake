@@ -216,7 +216,7 @@ namespace :bipa do
             if (!File.size?(bound_asa_file)       ||
                 !File.size?(unbound_aa_asa_file)  ||
                 !File.size?(unbound_na_asa_file))
-              $logger.warn "!!! Skipped #{pdb_code}, which might be an improper PDB file. No NACCESS result found!"
+              $logger.warn "!!! Skipped #{pdb_code}: no NACCESS result file"
               structure.no_naccess = true
               structure.save!
               next
@@ -226,23 +226,12 @@ namespace :bipa do
             unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
             unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
             atom_radius         = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_radius
-            # Uncomment following lines if you want to use ar-extensions
-            #naccesses           = []
-            # Uncomment following lines if you want to use import_with_load_data_in_file
             columns             = [:atom_id, :unbound_asa, :bound_asa, :delta_asa, :radius]
             values              = []
 
             %w[aa_atoms na_atoms].each do |atoms|
               structure.send(atoms).each do |atom|
                 next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_aa_atom_asa.has_key?(atom.atom_code)
-
-                # Uncomment following lines if you want to use ar-extensions
-                #naccess             = atom.build_naccess
-                #naccess.bound_asa   = bound_atom_asa[atom.atom_code]
-                #naccess.unbound_asa = unbound_aa_atom_asa[atom.atom_code]
-                #naccess.delta_asa   = unbound_aa_atom_asa[atom.atom_code] - bound_atom_asa[atom.atom_code]
-                #naccess.radius      = atom_radius[atom.atom_code]
-                #naccesses << naccess
 
                 # Uncomment following lines if you want to use import_with_load_data_in_file
                 values << [
@@ -255,13 +244,9 @@ namespace :bipa do
               end
             end
 
-            # Uncomment following lines if you want to use ar-extensions
-            #Naccess.import(naccesses, :validate => false)
-
-            # Uncomment following lines if you want to use import_with_load_data_in_file
             Naccess.import_with_load_data_infile(columns, values)
-
             ActiveRecord::Base.remove_connection
+
             $logger.info ">>> Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
           end
         end
@@ -289,7 +274,7 @@ namespace :bipa do
             dssps     = Array.new
 
             unless File.size?(dssp_file)
-              $logger.warn "!!! Skipped #{pdb_code} due to missing DSSP result file."
+              $logger.warn "!!! Skipped #{pdb_code}: no DSSP result file"
               structure.no_dssp = true
               structure.save!
               next
@@ -343,7 +328,7 @@ namespace :bipa do
                 !File.size?(na_zap_file)  ||
                 File.size?(aa_zap_err)    ||
                 File.size?(na_zap_err))
-              $logger.warn("SKIP: #{pdb_code} due to missing ZAP result")
+              $logger.warn "!!! Skipped #{pdb_code}: no ZAP result file"
               structure.no_zap = true
               structure.save!
               next
@@ -368,7 +353,7 @@ namespace :bipa do
             end
 
             if tainted_zap
-              $logger.warn("SKIP: #{pdb_code} due to tainted ZAP result")
+              $logger.warn "!!! Skipped #{pdb_code}: abnormal ZAP results"
               structure.no_zap = true
               structure.save!
               next
@@ -380,7 +365,7 @@ namespace :bipa do
 
             Zap.import(zaps, :validate => false)
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing 'zap' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})")
+            $logger.info ">>> Importing 'zap' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -465,7 +450,7 @@ namespace :bipa do
             values      = []
 
             if !File.size?(hbplus_file) || bipa_hbonds.empty?
-              $logger.warn "!!! Skipped #{pdb_code}, it might be a C-alpha only structure."
+              $logger.warn "!!! Skipped #{pdb_code}: (maybe) C-alpha only structure"
               structure.no_hbplus = true
               structure.save!
               next
@@ -480,7 +465,7 @@ namespace :bipa do
                 if hbond.donor.residue_name =~ /CSS/
                   donor_residue.ss = true
                   donor_residue.save!
-                  $logger.info ">>> Disulfide bonding cysteine found!"
+                  $logger.info "*** Disulfide bonding cysteine found"
                 end
 
                 acceptor_chain   = structure.models.first.chains.find_by_chain_code(hbond.acceptor.chain_code)
@@ -638,7 +623,7 @@ namespace :bipa do
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
-      pdb_codes = Structure.untainted.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.untainted.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
