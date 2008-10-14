@@ -534,7 +534,7 @@ namespace :bipa do
             structure.hbplus_as_donor.each do |hbplus|
               if ((hbplus.donor.aa? && hbplus.acceptor.na?) ||
                   (hbplus.donor.na? && hbplus.acceptor.aa?))
-                values << [hbplus.donor, hbplus.acceptor, hbplus.id]
+                values << [hbplus.donor.id, hbplus.acceptor.id, hbplus.id]
               end
             end
 
