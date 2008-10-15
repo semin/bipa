@@ -638,9 +638,9 @@ namespace :bipa do
             domains.each do |domain|
               iface_found = false
 
-              %w(dna rna).each do |na|
+              %w[dna rna].each do |na|
                 if domain.send("#{na}_interfaces").size > 0
-                  $logger.info("#{domain.sid} has a already detected #{na} interface")
+                  $logger.warn "!!! #{domain.sid} has a already detected #{na} interface"
                   iface_found = true
                   next
                 end
@@ -651,7 +651,7 @@ namespace :bipa do
                   iface.residues << domain.send("#{na}_binding_interface_residues")
                   iface.save!
                   iface_found = true
-                  $logger.info("#{domain.sid} has a #{na} interface")
+                  $logger.info ">>> #{domain.sid} has a #{na} interface"
                 end
               end
 
@@ -677,7 +677,7 @@ namespace :bipa do
     desc "Import Chain Interfaces"
     task :chain_interfaces => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.untainted.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
