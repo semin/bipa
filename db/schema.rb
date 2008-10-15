@@ -30,14 +30,12 @@ ActiveRecord::Schema.define(:version => 1) do
     (1..10).step(1)     { |i| t.boolean :"res#{i}", :default => false }
     t.boolean     :repall,      :default => false
     t.boolean     :resall,      :default => false
-    t.boolean     :registered,  :default => false
   end
 
   add_index :scops, :sunid
   add_index :scops, :parent_id
   add_index :scops, :lft
   add_index :scops, :rgt
-  add_index :scops, :registered
 
 
   # 'structures' table
@@ -83,8 +81,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :pseudo_chains_count, :default => 0
   end
 
-  add_index :models, :model_code
   add_index :models, :structure_id
+  add_index :models, :model_code
 
 
   # 'chains' table
@@ -169,20 +167,14 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :tempfactor
     t.string      :element
     t.string      :charge
-    t.float       :unbound_asa
-    t.float       :bound_asa
-    t.float       :delta_asa
     t.integer     :vdw_contacts_count,        :default => 0
     t.integer     :whbonds_count,             :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0
     t.integer     :hbonds_as_acceptor_count,  :default => 0
   end
 
-  add_index :atoms, :residue_id
-  add_index :atoms, :type
-  add_index :atoms, [:residue_id, :atom_code]
-  add_index :atoms, [:residue_id, :atom_name]
-
+  add_index :atoms, [:residue_id, :type, :atom_code]
+  add_index :atoms, [:residue_id, :type, :atom_name]
 
   # 'dssp' table
   create_table :dssp, :force => true do |t|

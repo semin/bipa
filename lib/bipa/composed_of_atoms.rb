@@ -130,7 +130,7 @@ module Bipa
     end
     memoize :calpha_only?
 
-    %w(unbound bound delta).each do |state|
+    %w[unbound bound delta].each do |state|
       module_eval <<-END
         def #{state}_asa
           atoms.inject(0) { |s, a| !a.naccess.nil? ? s + a.#{state}_asa : s }

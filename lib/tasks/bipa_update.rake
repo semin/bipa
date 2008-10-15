@@ -463,16 +463,16 @@ namespace :bipa do
     desc "Filter 'vdw_contacts' table not to contain any hbonds or whbonds"
     task :filter_vdw_contacts => [:environment] do
       i = 0
-      puts "Remvoe hbonds from vdw_contacts"
+      puts "Remove hbonds from vdw_contacts"
       Hbond.find_all_in_chunks do |hbond|
-        vdw_contact1 = Contact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
-        vdw_contact2 = Contact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.acceptor, hbond.donor)
+        vdw_contact1 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
+        vdw_contact2 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.acceptor, hbond.donor)
         if vdw_contact1
-          Contact.destroy(vdw_contact1)
+          VdwContact.destroy(vdw_contact1)
           $logger.info ">>> Destroyed contact, #{vdw_contact1.id} (#{i += 1})"
         end
         if vdw_contact2
-          Contact.destroy(vdw_contact2)
+          VdwContact.destroy(vdw_contact2)
           $logger.info ">>> Destroyed contact, #{vdw_contact2.id} (#{i += 1})"
         end
       end
