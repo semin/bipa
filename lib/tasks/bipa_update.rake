@@ -465,20 +465,15 @@ namespace :bipa do
       i = 0
       puts "Remvoe hbonds from vdw_contacts"
       Hbond.find_all_in_chunks do |hbond|
-        vdw_contact = Contact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
-        if vdw_contact
-          Contact.destroy(vdw_contact)
-          puts "Contact: #{vdw_contact.id} destroyed - #{i += 1}"
+        vdw_contact1 = Contact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
+        vdw_contact2 = Contact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.acceptor, hbond.donor)
+        if vdw_contact1
+          Contact.destroy(vdw_contact1)
+          $logger.info ">>> Destroyed contact, #{vdw_contact1.id} (#{i += 1})"
         end
-      end
-
-      i = 0
-      puts "Remvoe water-mediated hbonds from vdw_contacts"
-      Whbond.find_all_in_chunks do |whbond|
-        vdw_contact = Contact.find_by_atom_id_and_vdw_contacting_atom_id(whbond.atom, whbond.whbonding_atom)
-        if vdw_contact
-          Contact.destroy(vdw_contact)
-          puts "Contact: #{vdw_contact.id} destroyed - #{i += 1}"
+        if vdw_contact2
+          Contact.destroy(vdw_contact2)
+          $logger.info ">>> Destroyed contact, #{vdw_contact2.id} (#{i += 1})"
         end
       end
     end

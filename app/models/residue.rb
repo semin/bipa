@@ -16,6 +16,9 @@ class Residue < ActiveRecord::Base
   has_many  :atoms,
             :dependent    => :destroy
 
+  has_many  :vdw_contacting_atoms,
+            :through      => :atoms
+
   has_many  :positions
 
   has_one :dssp,

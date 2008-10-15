@@ -4,7 +4,7 @@ namespace :bipa do
     desc "Associate Residue with SCOP"
     task :residues_scops => [:environment] do
 
-      pdb_codes = Structure.find(:all).map(&:pdb_code)
+      pdb_codes = Structure.all.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -19,7 +19,7 @@ namespace :bipa do
             domains   = ScopDomain.find_all_by_pdb_code(pdb_code)
 
             if domains.empty?
-              puts "No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
+              $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
             else
               domains.each do |domain|
                 structure.models.first.aa_residues.each do |aa_residue|
@@ -27,13 +27,11 @@ namespace :bipa do
                 end
                 domain.save!
               end
-              puts "Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_codes.size}): done"
+              $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_codes.size}): done"
             end
-
             ActiveRecord::Base.remove_connection
           end
         end
-
         ActiveRecord::Base.establish_connection(config)
       end
     end

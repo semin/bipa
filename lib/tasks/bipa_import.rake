@@ -31,8 +31,8 @@ namespace :bipa do
         next if line =~ /^#/ || line.blank?
         sunid, stype, sccs, sid, description = line.chomp.split(/\t/)
         sccs  = nil if sccs =~ /unassigned/
-        sid   = nil if sid  =~ /unassigned/
-        scop_des[sunid] = {
+          sid   = nil if sid  =~ /unassigned/
+          scop_des[sunid] = {
           :sunid        => sunid,
           :stype        => stype,
           :sccs         => sccs,
@@ -184,9 +184,24 @@ namespace :bipa do
 
             Atom.import(atoms, :validate => false)
             structure.save!
-            ActiveRecord::Base.remove_connection
-
             $logger.info ">>> Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})"
+
+            # Associate residues with SCOP domains
+            domains = ScopDomain.find_all_by_pdb_code(pdb_code.upcase)
+
+            if domains.empty?
+              $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_files.size})"
+            else
+              domains.each do |domain|
+                structure.models.first.aa_residues.each do |aa_residue|
+                  domain.residues << aa_residue if domain.include? aa_residue
+                end
+                domain.save!
+              end
+              $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_files.size}): done"
+            end
+
+            ActiveRecord::Base.remove_connection
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -197,7 +212,7 @@ namespace :bipa do
     desc "Import NACCESS results into BIPA"
     task :naccess => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
+      pdb_codes = Structure.all.map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -284,8 +299,8 @@ namespace :bipa do
 
             structure.models.first.aa_residues.each do |residue|
               key = residue.residue_code.to_s +
-                    (residue.icode.blank? ? '' : residue.icode) +
-                    residue.chain.chain_code
+                (residue.icode.blank? ? '' : residue.icode) +
+                residue.chain.chain_code
 
               residue.create_dssp(dssp_residues[key].to_hash) if dssp_residues.has_key?(key)
             end
@@ -402,241 +417,243 @@ namespace :bipa do
               neighbor_atoms.each do |neighbor_atom|
                 if neighbor_atom.aa?
                   dist = na_atom - neighbor_atom
-                  values << [neighbor_atom.id, na_atom.id, dist]
-                end
-              end
-            end
-
-            VdwContact.import_with_load_data_infile(columns, values)
-            ActiveRecord::Base.remove_connection
-
-            $logger.info ">>> Importing #{values.size} van der Waals contacts in #{pdb_code} to 'vdw_contacts' table: done (#{i + 1}/#{pdb_codes.size})"
-          end
-        end
-        ActiveRecord::Base.establish_connection(config)
-      end
-    end
-
-
-    desc "Import HBPlus results into BIPA"
-    task :hbplus => [:environment] do
-
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            structure   = Structure.find_by_pdb_code(pdb_code)
-            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
-            bipa_hbonds = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
-            columns     = [
-              :donor_id,
-              :acceptor_id,
-              :da_distance,
-              :category,
-              :gap,
-              :ca_distance,
-              :dha_angle,
-              :ha_distance,
-              :haaa_angle,
-              :daaa_angle
-            ]
-            values      = []
-
-            if !File.size?(hbplus_file) || bipa_hbonds.empty?
-              $logger.warn "!!! Skipped #{pdb_code}: (maybe) C-alpha only structure"
-              structure.no_hbplus = true
-              structure.save!
-              next
-            end
-
-            bipa_hbonds.each do |hbond|
-              begin
-                donor_chain   = structure.models.first.chains.find_by_chain_code(hbond.donor.chain_code)
-                donor_residue = donor_chain.residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code)
-                donor_atom    = donor_residue.atoms.find_by_atom_name(hbond.donor.atom_name)
-
-                if hbond.donor.residue_name =~ /CSS/
-                  donor_residue.ss = true
-                  donor_residue.save!
-                  $logger.info "*** Disulfide bonding cysteine found"
-                end
-
-                acceptor_chain   = structure.models.first.chains.find_by_chain_code(hbond.acceptor.chain_code)
-                acceptor_residue = acceptor_chain.residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code)
-                acceptor_atom    = acceptor_residue.atoms.find_by_atom_name(hbond.acceptor.atom_name)
-
-                if hbond.acceptor.residue_name =~ /CSS/
-                  acceptor_residue.ss = true
-                  acceptor_residue.save!
-                  $logger.info ">>> Disulfide bonding cysteine found!"
-                end
-              rescue
-                $logger.warn "!!! Cannot find hbplus: #{hbond.donor} <=> #{hbond.acceptor} in #{pdb_code}"
-                next
-              else
-                if donor_atom && acceptor_atom
-                  if Hbplus.exists?(:donor_id => donor_atom.id, :acceptor_id => acceptor_atom.id)
-                    $logger.warn "!!! Skipped hbplus: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}"
-                    next
-                  else
-                    values << [
-                      donor_atom.id,
-                      acceptor_atom.id,
-                      hbond.da_distance,
-                      hbond.category,
-                      hbond.gap,
-                      hbond.ca_distance,
-                      hbond.dha_angle,
-                      hbond.ha_distance,
-                      hbond.haaa_angle,
-                      hbond.daaa_angle
-                    ]
+                  if (!Hbond.exists?(:donor_id => neighbor_atom.id, :acceptor_id => na_atom.id) &&
+                      !Hbond.exists?(:donor_id => na_atom.id, :acceptor_id => neighbor_atom.id))
+                    values << [neighbor_atom.id, na_atom.id, dist]
                   end
                 end
               end
+
+              VdwContact.import_with_load_data_infile(columns, values)
+              ActiveRecord::Base.remove_connection
+
+              $logger.info ">>> Importing #{values.size} van der Waals contacts in #{pdb_code} to 'vdw_contacts' table: done (#{i + 1}/#{pdb_codes.size})"
             end
-
-            Hbplus.import_with_load_data_infile(columns, values)
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code.downcase}.hb2 to 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
-          end # fmanager.fork
-        end # pdb_codes.each_with_index
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end
-
-
-    desc "Import hydrogen bonds between protein and nucleic acids"
-    task :hbonds => [:environment] do
-
-      pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            structure = Structure.find_by_pdb_code(pdb_code)
-            columns   = [:donor_id, :acceptor_id, :hbplus_id]
-            values    = []
-
-            structure.hbplus_as_donor.each do |hbplus|
-              if ((hbplus.donor.aa? && hbplus.acceptor.na?) ||
-                  (hbplus.donor.na? && hbplus.acceptor.aa?))
-                values << [hbplus.donor.id, hbplus.acceptor.id, hbplus.id]
-              end
-            end
-
-            Hbond.import_with_load_data_infile(columns, values) unless values.empty?
-            ActiveRecord::Base.remove_connection
-
-            $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code} into 'hbonds' table: done (#{i + 1}/#{pdb_codes.size})"
           end
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
-    end
 
 
-    desc "Import Water-mediated hydrogen bonds"
-    task :whbonds => [:environment] do
+      desc "Import HBPlus results into BIPA"
+      task :hbplus => [:environment] do
 
-      require "facets/array"
+        pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+          pdb_codes.each_with_index do |pdb_code, i|
 
-        pdb_codes.each_with_index do |pdb_code, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+              structure   = Structure.find_by_pdb_code(pdb_code)
+              hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
+              bipa_hbonds = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
+              columns     = [
+                :donor_id,
+                :acceptor_id,
+                :da_distance,
+                :category,
+                :gap,
+                :ca_distance,
+                :dha_angle,
+                :ha_distance,
+                :haaa_angle,
+                :daaa_angle
+              ]
+              values      = []
 
-            structure = Structure.find_by_pdb_code(pdb_code)
-            columns   = [:atom_id, :whbonding_atom_id, :water_atom_id, :aa_water_hbond_id, :na_water_hbond_id]
-            values    = []
+              if !File.size?(hbplus_file) || bipa_hbonds.empty?
+                $logger.warn "!!! Skipped #{pdb_code}: (maybe) C-alpha only structure"
+                structure.no_hbplus = true
+                structure.save!
+                next
+              end
 
-            structure.water_atoms.each do |water|
-              water.hbplus_donors.combination(2).each do |atom1, atom2|
-                if atom1.aa? && atom2.na?
-                  values << [atom1.id, atom2.id, water.id,
-                    atom1.hbplus_as_donor.find_by_acceptor_id(water).id,
-                    atom2.hbplus_as_donor.find_by_acceptor_id(water).id]
-                elsif atom1.na? && atom2.aa?
-                  values << [atom2.id, atom1.id, water.id,
-                    atom2.hbplus_as_donor.find_by_acceptor_id(water).id,
-                    atom1.hbplus_as_donor.find_by_acceptor_id(water).id]
+              bipa_hbonds.each do |hbond|
+                begin
+                  donor_chain   = structure.models.first.chains.find_by_chain_code(hbond.donor.chain_code)
+                  donor_residue = donor_chain.residues.find_by_residue_code_and_icode(hbond.donor.residue_code, hbond.donor.insertion_code)
+                  donor_atom    = donor_residue.atoms.find_by_atom_name(hbond.donor.atom_name)
+
+                  if hbond.donor.residue_name =~ /CSS/
+                    donor_residue.ss = true
+                    donor_residue.save!
+                    $logger.info "*** Disulfide bonding cysteine found"
+                  end
+
+                  acceptor_chain   = structure.models.first.chains.find_by_chain_code(hbond.acceptor.chain_code)
+                  acceptor_residue = acceptor_chain.residues.find_by_residue_code_and_icode(hbond.acceptor.residue_code, hbond.acceptor.insertion_code)
+                  acceptor_atom    = acceptor_residue.atoms.find_by_atom_name(hbond.acceptor.atom_name)
+
+                  if hbond.acceptor.residue_name =~ /CSS/
+                    acceptor_residue.ss = true
+                    acceptor_residue.save!
+                    $logger.info ">>> Disulfide bonding cysteine found!"
+                  end
+                rescue
+                  $logger.warn "!!! Cannot find hbplus: #{hbond.donor} <=> #{hbond.acceptor} in #{pdb_code}"
+                  next
+                else
+                  if donor_atom && acceptor_atom
+                    if Hbplus.exists?(:donor_id => donor_atom.id, :acceptor_id => acceptor_atom.id)
+                      $logger.warn "!!! Skipped hbplus: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}"
+                      next
+                    else
+                      values << [
+                        donor_atom.id,
+                        acceptor_atom.id,
+                        hbond.da_distance,
+                        hbond.category,
+                        hbond.gap,
+                        hbond.ca_distance,
+                        hbond.dha_angle,
+                        hbond.ha_distance,
+                        hbond.haaa_angle,
+                        hbond.daaa_angle
+                      ]
+                    end
+                  end
                 end
               end
 
-              water.hbplus_acceptors.combination(2).each do |atom1, atom2|
-                if atom1.aa? && atom2.na?
-                  values << [atom1.id, atom2.id, water.id,
-                    atom1.hbplus_as_acceptor.find_by_donor_id(water).id,
-                    atom2.hbplus_as_acceptor.find_by_donor_id(water).id]
-                elsif atom1.na? && atom2.aa?
-                  values << [atom2.id, atom1.id, water.id,
-                    atom2.hbplus_as_acceptor.find_by_donor_id(water).id,
-                    atom1.hbplus_as_acceptor.find_by_donor_id(water).id]
+              Hbplus.import_with_load_data_infile(columns, values)
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code.downcase}.hb2 to 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
+            end # fmanager.fork
+          end # pdb_codes.each_with_index
+          ActiveRecord::Base.establish_connection(config)
+        end # fmanager.manage
+      end
+
+
+      desc "Import hydrogen bonds between protein and nucleic acids"
+      task :hbonds => [:environment] do
+
+        pdb_codes = Structure.untainted.map(&:pdb_code)
+        fmanager  = ForkManager.new(MAX_FORK)
+
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+
+          pdb_codes.each_with_index do |pdb_code, i|
+
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
+
+              structure = Structure.find_by_pdb_code(pdb_code)
+              columns   = [:donor_id, :acceptor_id, :hbplus_id]
+              values    = []
+
+              structure.hbplus_as_donor.each do |hbplus|
+                if ((hbplus.donor.aa? && hbplus.acceptor.na?) ||
+                    (hbplus.donor.na? && hbplus.acceptor.aa?))
+                  values << [hbplus.donor.id, hbplus.acceptor.id, hbplus.id]
                 end
               end
 
-              water.hbplus_donors.each do |atom1|
-                water.hbplus_acceptors.each do |atom2|
+              Hbond.import_with_load_data_infile(columns, values) unless values.empty?
+              ActiveRecord::Base.remove_connection
+
+              $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code} into 'hbonds' table: done (#{i + 1}/#{pdb_codes.size})"
+            end
+          end
+          ActiveRecord::Base.establish_connection(config)
+        end
+      end
+
+
+      desc "Import Water-mediated hydrogen bonds"
+      task :whbonds => [:environment] do
+
+        require "facets/array"
+
+        pdb_codes = Structure.untainted.map(&:pdb_code)
+        fmanager  = ForkManager.new(MAX_FORK)
+
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+
+          pdb_codes.each_with_index do |pdb_code, i|
+
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
+
+              structure = Structure.find_by_pdb_code(pdb_code)
+              columns   = [:atom_id, :whbonding_atom_id, :water_atom_id, :aa_water_hbond_id, :na_water_hbond_id]
+              values    = []
+
+              structure.water_atoms.each do |water|
+                water.hbplus_donors.combination(2).each do |atom1, atom2|
                   if atom1.aa? && atom2.na?
                     values << [atom1.id, atom2.id, water.id,
                       atom1.hbplus_as_donor.find_by_acceptor_id(water).id,
+                      atom2.hbplus_as_donor.find_by_acceptor_id(water).id]
+                  elsif atom1.na? && atom2.aa?
+                    values << [atom2.id, atom1.id, water.id,
+                      atom2.hbplus_as_donor.find_by_acceptor_id(water).id,
+                      atom1.hbplus_as_donor.find_by_acceptor_id(water).id]
+                  end
+                end
+
+                water.hbplus_acceptors.combination(2).each do |atom1, atom2|
+                  if atom1.aa? && atom2.na?
+                    values << [atom1.id, atom2.id, water.id,
+                      atom1.hbplus_as_acceptor.find_by_donor_id(water).id,
                       atom2.hbplus_as_acceptor.find_by_donor_id(water).id]
                   elsif atom1.na? && atom2.aa?
                     values << [atom2.id, atom1.id, water.id,
                       atom2.hbplus_as_acceptor.find_by_donor_id(water).id,
-                      atom1.hbplus_as_donor.find_by_acceptor_id(water).id]
+                      atom1.hbplus_as_acceptor.find_by_donor_id(water).id]
+                  end
+                end
+
+                water.hbplus_donors.each do |atom1|
+                  water.hbplus_acceptors.each do |atom2|
+                    if atom1.aa? && atom2.na?
+                      values << [atom1.id, atom2.id, water.id,
+                        atom1.hbplus_as_donor.find_by_acceptor_id(water).id,
+                        atom2.hbplus_as_acceptor.find_by_donor_id(water).id]
+                    elsif atom1.na? && atom2.aa?
+                      values << [atom2.id, atom1.id, water.id,
+                        atom2.hbplus_as_acceptor.find_by_donor_id(water).id,
+                        atom1.hbplus_as_donor.find_by_acceptor_id(water).id]
+                    end
                   end
                 end
               end
-            end
 
-            Whbond.import_with_load_data_infile(columns, values) unless values.empty?
-            ActiveRecord::Base.remove_connection
+              Whbond.import_with_load_data_infile(columns, values) unless values.empty?
+              ActiveRecord::Base.remove_connection
 
-            $logger.info ">>> Importing #{values.size} water-mediated hbonds in #{pdb_code} to 'whbonds' table: done (#{i + 1}/#{pdb_codes.size})"
-          end # fmanager.fork
-        end # pdb_codes.each_with_index
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end
+              $logger.info ">>> Importing #{values.size} water-mediated hbonds in #{pdb_code} to 'whbonds' table: done (#{i + 1}/#{pdb_codes.size})"
+            end # fmanager.fork
+          end # pdb_codes.each_with_index
+          ActiveRecord::Base.establish_connection(config)
+        end # fmanager.manage
+      end
 
 
-    desc "Import Domain Interfaces"
-    task :domain_interfaces => [:environment] do
+      desc "Import Domain Interfaces"
+      task :domain_interfaces => [:environment] do
 
-      pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+        pdb_codes = Structure.untainted.map(&:pdb_code)
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        pdb_codes.each_with_index do |pdb_code, i|
+          pdb_codes.each_with_index do |pdb_code, i|
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-            domains = ScopDomain.find_all_by_pdb_code(pdb_code)
-            domains.each do |domain|
-              iface_found = false
+              domains = ScopDomain.find_all_by_pdb_code(pdb_code)
+              domains.each do |domain|
+                iface_found = false
 
               %w[dna rna].each do |na|
                 if domain.send("#{na}_interfaces").size > 0
@@ -663,204 +680,131 @@ namespace :bipa do
                   anc.save!
                 end
               end
-            end # domains.each
+              end # domains.each
 
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Extracting domain interfaces from #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
-          end # fmanager.fork
-        end # pdb_codes.each_with_index
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end
-
-
-    desc "Import Chain Interfaces"
-    task :chain_interfaces => [:environment] do
-
-      pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            structure = Structure.find_by_pdb_code(pdb_code)
-
-            structure.chains.each do |chain|
-              dna_residues = chain.dna_binding_interface_residues
-              rna_residues = chain.rna_binding_interface_residues
-
-              if dna_residues.length > 0
-                (chain.dna_interface = ChainDnaInterface.new).residues << dna_residues
-                chain.save!
-                puts "#{pdb_code}: #{chain.chain_code} has an dna interface"
-              end
-
-              if rna_residues.length > 0
-                (chain.rna_interface = ChainRnaInterface.new).residues << rna_residues
-                chain.save!
-                puts "#{pdb_code}: #{chain.chain_code} has an rna interface"
-              end
-
-              if dna_residues.length == 0 && rna_residues.length == 0
-                puts "#{pdb_code}: #{chain.chain_code} has no interface"
-              end
-            end
-
-            puts "Importing 'Chain Interfaces' from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
-            ActiveRecord::Base.remove_connection
-          end
-        end
-        ActiveRecord::Base.establish_connection(config)
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Extracting domain interfaces from #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+            end # fmanager.fork
+          end # pdb_codes.each_with_index
+          ActiveRecord::Base.establish_connection(config)
+        end # fmanager.manage
       end
-    end
 
 
-    desc "Import Subfamilies for each SCOP family"
-    task :subfamilies => [:environment] do
+      desc "Import Chain Interfaces"
+      task :chain_interfaces => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
+        pdb_codes = Structure.untainted.map(&:pdb_code)
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        sunids.each_with_index do |sunid, i|
+          pdb_codes.each_with_index do |pdb_code, i|
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-            family      = ScopFamily.find_by_sunid(sunid)
-            family_dir  = File.join(BLASTCLUST_DIR, "#{sunid}")
+              structure = Structure.find_by_pdb_code(pdb_code)
 
-            (10..100).step(10) do |si|
-              subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
+              structure.chains.each do |chain|
+                dna_residues = chain.dna_binding_interface_residues
+                rna_residues = chain.rna_binding_interface_residues
 
-              IO.readlines(subfamily_file).each do |line|
-                subfamily = "Rep#{si}Subfamily".constantize.new
-
-                members = line.split(/\s+/)
-                members.each do |member|
-                  domain = ScopDomain.find_by_sunid(member)
-                  subfamily.domains << domain
+                if dna_residues.length > 0
+                  (chain.dna_interface = ChainDnaInterface.new).residues << dna_residues
+                  chain.save!
+                  puts "#{pdb_code}: #{chain.chain_code} has an dna interface"
                 end
 
-                subfamily.family = family
-                subfamily.save!
+                if rna_residues.length > 0
+                  (chain.rna_interface = ChainRnaInterface.new).residues << rna_residues
+                  chain.save!
+                  puts "#{pdb_code}: #{chain.chain_code} has an rna interface"
+                end
 
-                $logger.info("Rep#{si}Subfamily (#{subfamily.id}): created")
+                if dna_residues.length == 0 && rna_residues.length == 0
+                  puts "#{pdb_code}: #{chain.chain_code} has no interface"
+                end
               end
+
+              puts "Importing 'Chain Interfaces' from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
+              ActiveRecord::Base.remove_connection
             end
-            ActiveRecord::Base.remove_connection
-            $logger.info("Importing subfamilies for #{sunid} : done (#{i + 1}/#{sunids.size})")
           end
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
-    end
 
 
-    desc "Import Full & Representative Alignments for each SCOP Family"
-    task :full_alignments => [:environment] do
+      desc "Import Subfamilies for each SCOP family"
+      task :subfamilies => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
+        sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        sunids.each_with_index do |sunid, i|
+          sunids.each_with_index do |sunid, i|
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-            family    = ScopFamily.find_by_sunid(sunid)
-            fam_dir   = File.join(FAMILY_DIR, "full", sunid.to_s)
-            ali_file  = File.join(fam_dir, "baton.ali")
+              family      = ScopFamily.find_by_sunid(sunid)
+              family_dir  = File.join(BLASTCLUST_DIR, "#{sunid}")
 
-            unless File.exists?(ali_file)
-              $logger.warn("Cannot find #{ali_file}")
-              next
-            end
+              (10..100).step(10) do |si|
+                subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
 
-            alignment = family.send("create_full_alignment")
-            flat_file = Bio::FlatFile.auto(ali_file)
+                IO.readlines(subfamily_file).each do |line|
+                  subfamily = "Rep#{si}Subfamily".constantize.new
 
-            flat_file.each_entry do |entry|
-              next unless entry.seq_type == "P1"
-
-              domain          = ScopDomain.find_by_sunid(entry.entry_id)
-              db_residues     = domain.residues
-              ff_residues     = entry.data.split("")
-              sequence        = alignment.sequences.build
-              sequence.domain = domain
-
-              pos = 0
-
-              ff_residues.each_with_index do |res, fi|
-                column    = alignment.columns.find_or_create_by_number(fi + 1)
-                position  = sequence.positions.build
-
-                if (res == "-")
-                  position.residue_name = res
-                  position.number       = fi + 1
-                  position.column       = column
-                  position.save!
-                else
-                  if (db_residues[pos].one_letter_code == res)
-                    position.residue      = db_residues[pos]
-                    position.residue_name = res
-                    position.number       = fi + 1
-                    position.column       = column
-                    position.save!
-                    pos += 1
-                  else
-                    raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
+                  members = line.split(/\s+/)
+                  members.each do |member|
+                    domain = ScopDomain.find_by_sunid(member)
+                    subfamily.domains << domain
                   end
+
+                  subfamily.family = family
+                  subfamily.save!
+
+                  $logger.info("Rep#{si}Subfamily (#{subfamily.id}): created")
                 end
-              end # ff_residues.each_with_index
-              sequence.save!
-            end # flat_file.each_entry
-            alignment.save!
-            ActiveRecord::Base.remove_connection
-            $logger.info("Importing full alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
-          end # fmanger.fork
-        end # sunids.each
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end # task :full_alignments
+              end
+              ActiveRecord::Base.remove_connection
+              $logger.info("Importing subfamilies for #{sunid} : done (#{i + 1}/#{sunids.size})")
+            end
+          end
+          ActiveRecord::Base.establish_connection(config)
+        end
+      end
 
 
-    desc "Import representative alignments for each SCOP Family"
-    task :rep_alignments => [:environment] do
+      desc "Import Full & Representative Alignments for each SCOP Family"
+      task :full_alignments => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
+        sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        sunids.each_with_index do |sunid, i|
+          sunids.each_with_index do |sunid, i|
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-            family = ScopFamily.find_by_sunid(sunid)
-
-            (10..100).step(10) do |si|
-              family_dir  = File.join(FAMILY_DIR, "rep#{si}", "#{family.sunid}")
-              ali_file    = File.join(family_dir, "baton.ali")
+              family    = ScopFamily.find_by_sunid(sunid)
+              fam_dir   = File.join(FAMILY_DIR, "full", sunid.to_s)
+              ali_file  = File.join(fam_dir, "baton.ali")
 
               unless File.exists?(ali_file)
                 $logger.warn("Cannot find #{ali_file}")
                 next
               end
 
-              alignment = family.send("create_rep#{si}_alignment")
+              alignment = family.send("create_full_alignment")
               flat_file = Bio::FlatFile.auto(ali_file)
 
               flat_file.each_entry do |entry|
@@ -883,7 +827,6 @@ namespace :bipa do
                     position.number       = fi + 1
                     position.column       = column
                     position.save!
-                    column.save!
                   else
                     if (db_residues[pos].one_letter_code == res)
                       position.residue      = db_residues[pos]
@@ -891,7 +834,6 @@ namespace :bipa do
                       position.number       = fi + 1
                       position.column       = column
                       position.save!
-                      column.save!
                       pos += 1
                     else
                       raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
@@ -901,43 +843,41 @@ namespace :bipa do
                 sequence.save!
               end # flat_file.each_entry
               alignment.save!
-            end # (10..100).step(10)
-            ActiveRecord::Base.remove_connection
-            $logger.info("Importing representative alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
-          end # fmanger.fork
-        end # sunids.each
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end # task :alignments
+              ActiveRecord::Base.remove_connection
+              $logger.info("Importing full alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+            end # fmanger.fork
+          end # sunids.each
+          ActiveRecord::Base.establish_connection(config)
+        end # fmanager.manage
+      end # task :full_alignments
 
 
-    desc "Import subfamily alignments for each SCOP Family"
-    task :sub_alignments => [:environment] do
+      desc "Import representative alignments for each SCOP Family"
+      task :rep_alignments => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
+        sunids    = ScopFamily.repall.find(:all).map(&:sunid)
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        sunids.each_with_index do |sunid, i|
+          sunids.each_with_index do |sunid, i|
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-            (10..100).step(10) do |si|
-              rep_dir     = File.join(FAMILY_DIR, "sub", sunid.to_s, "rep#{si}")
-              subfam_ids  = Dir[rep_dir + "/*"].map { |d| d.match(/(\d+)$/)[1] }
+              family = ScopFamily.find_by_sunid(sunid)
 
-              subfam_ids.each do |subfam_id|
-                ali_file = File.join(rep_dir, subfam_id, "baton.ali")
+              (10..100).step(10) do |si|
+                family_dir  = File.join(FAMILY_DIR, "rep#{si}", "#{family.sunid}")
+                ali_file    = File.join(family_dir, "baton.ali")
 
                 unless File.exists?(ali_file)
                   $logger.warn("Cannot find #{ali_file}")
                   next
                 end
 
-                alignment = Subfamily.find(subfam_id).create_alignment
+                alignment = family.send("create_rep#{si}_alignment")
                 flat_file = Bio::FlatFile.auto(ali_file)
 
                 flat_file.each_entry do |entry|
@@ -978,570 +918,648 @@ namespace :bipa do
                   sequence.save!
                 end # flat_file.each_entry
                 alignment.save!
-              end # subfam_ids.each
-            end # (10..100).step(10)
-            ActiveRecord::Base.remove_connection
-            $logger.info("Importing subfamily alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
-          end # fmanager.fork
-        end # sunids.each
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end # task :sub_alignments
+              end # (10..100).step(10)
+              ActiveRecord::Base.remove_connection
+              $logger.info("Importing representative alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+            end # fmanger.fork
+          end # sunids.each
+          ActiveRecord::Base.establish_connection(config)
+        end # fmanager.manage
+      end # task :alignments
 
 
-    desc "Import GO data into 'go_terms' and 'go_relationships' tables"
-    task :go_terms => [:environment] do
+      desc "Import subfamily alignments for each SCOP Family"
+      task :sub_alignments => [:environment] do
 
-      obo_file  = File.join(GO_DIR, "gene_ontology_edit.obo")
-      obo_obj   = Bipa::Obo.new(IO.read(obo_file))
+        sunids    = ScopFamily.repall.find(:all).map(&:sunid)
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      obo_obj.terms.each do |go_id, term|
-        term_ar = GoTerm.find_by_go_id(go_id)
-        if term_ar.nil?
-          GoTerm.create!(term.to_hash)
-          $logger.info ">>> Importing #{go_id} to 'go_terms': done"
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+
+          sunids.each_with_index do |sunid, i|
+
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
+
+              (10..100).step(10) do |si|
+                rep_dir     = File.join(FAMILY_DIR, "sub", sunid.to_s, "rep#{si}")
+                subfam_ids  = Dir[rep_dir + "/*"].map { |d| d.match(/(\d+)$/)[1] }
+
+                subfam_ids.each do |subfam_id|
+                  ali_file = File.join(rep_dir, subfam_id, "baton.ali")
+
+                  unless File.exists?(ali_file)
+                    $logger.warn("Cannot find #{ali_file}")
+                    next
+                  end
+
+                  alignment = Subfamily.find(subfam_id).create_alignment
+                  flat_file = Bio::FlatFile.auto(ali_file)
+
+                  flat_file.each_entry do |entry|
+                    next unless entry.seq_type == "P1"
+
+                    domain          = ScopDomain.find_by_sunid(entry.entry_id)
+                    db_residues     = domain.residues
+                    ff_residues     = entry.data.split("")
+                    sequence        = alignment.sequences.build
+                    sequence.domain = domain
+
+                    pos = 0
+
+                    ff_residues.each_with_index do |res, fi|
+                      column    = alignment.columns.find_or_create_by_number(fi + 1)
+                      position  = sequence.positions.build
+
+                      if (res == "-")
+                        position.residue_name = res
+                        position.number       = fi + 1
+                        position.column       = column
+                        position.save!
+                        column.save!
+                      else
+                        if (db_residues[pos].one_letter_code == res)
+                          position.residue      = db_residues[pos]
+                          position.residue_name = res
+                          position.number       = fi + 1
+                          position.column       = column
+                          position.save!
+                          column.save!
+                          pos += 1
+                        else
+                          raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
+                        end
+                      end
+                    end # ff_residues.each_with_index
+                    sequence.save!
+                  end # flat_file.each_entry
+                  alignment.save!
+                end # subfam_ids.each
+              end # (10..100).step(10)
+              ActiveRecord::Base.remove_connection
+              $logger.info("Importing subfamily alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+            end # fmanager.fork
+          end # sunids.each
+          ActiveRecord::Base.establish_connection(config)
+        end # fmanager.manage
+      end # task :sub_alignments
+
+
+      desc "Import GO data into 'go_terms' and 'go_relationships' tables"
+      task :go_terms => [:environment] do
+
+        obo_file  = File.join(GO_DIR, "gene_ontology_edit.obo")
+        obo_obj   = Bipa::Obo.new(IO.read(obo_file))
+
+        obo_obj.terms.each do |go_id, term|
+          term_ar = GoTerm.find_by_go_id(go_id)
+          if term_ar.nil?
+            GoTerm.create!(term.to_hash)
+            $logger.info ">>> Importing #{go_id} to 'go_terms': done"
+          end
         end
-      end
 
-      obo_obj.relationships.each do |go_id, relationships|
-        source = GoTerm.find_by_go_id(go_id)
+        obo_obj.relationships.each do |go_id, relationships|
+          source = GoTerm.find_by_go_id(go_id)
 
-        relationships.each do |relationship|
-          target = GoTerm.find_by_go_id(relationship.target_id)
+          relationships.each do |relationship|
+            target = GoTerm.find_by_go_id(relationship.target_id)
 
-          if relationship.type == "is_a"
-            GoIsA.create!(:source_id => source.id, :target_id => target.id)
-            $logger.info ">>> Importing #{go_id} 'is_a' #{relationship.target_id} into 'go_relationships': done"
-          elsif relationship.type == "part_of"
-            GoPartOf.create!(:source_id => source.id, :target_id => target.id)
-            $logger.info ">>> Importing #{go_id} 'part_of' #{relationship.target_id} into 'go_relationships': done"
-          elsif relationship.type == "regulates"
-            GoRegulates.create!(:source_id => source.id, :target_id => target.id)
-            $logger.info ">>> Importing #{go_id} 'regulates' #{relationship.target_id} into 'go_relationships': done"
-          elsif relationship.type == "positively_regulates"
-            GoPositivelyRegulates.create!(:source_id => source.id, :target_id => target.id)
-            $logger.info ">>> Importing #{go_id} 'positively regulates' #{relationship.target_id} into 'go_relationships': done"
-          elsif relationship.type == "negatively_regulates"
-            GoNegativelyRegulates.create!(:source_id => source.id, :target_id => target.id)
-            $logger.info ">>> Importing #{go_id} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done"
-          else
-            raise "!!! Unknown type of relationship: #{relationship.type}"
+            if relationship.type == "is_a"
+              GoIsA.create!(:source_id => source.id, :target_id => target.id)
+              $logger.info ">>> Importing #{go_id} 'is_a' #{relationship.target_id} into 'go_relationships': done"
+            elsif relationship.type == "part_of"
+              GoPartOf.create!(:source_id => source.id, :target_id => target.id)
+              $logger.info ">>> Importing #{go_id} 'part_of' #{relationship.target_id} into 'go_relationships': done"
+            elsif relationship.type == "regulates"
+              GoRegulates.create!(:source_id => source.id, :target_id => target.id)
+              $logger.info ">>> Importing #{go_id} 'regulates' #{relationship.target_id} into 'go_relationships': done"
+            elsif relationship.type == "positively_regulates"
+              GoPositivelyRegulates.create!(:source_id => source.id, :target_id => target.id)
+              $logger.info ">>> Importing #{go_id} 'positively regulates' #{relationship.target_id} into 'go_relationships': done"
+            elsif relationship.type == "negatively_regulates"
+              GoNegativelyRegulates.create!(:source_id => source.id, :target_id => target.id)
+              $logger.info ">>> Importing #{go_id} 'negatively regulates' #{relationship.target_id} into 'go_relationships': done"
+            else
+              raise "!!! Unknown type of relationship: #{relationship.type}"
+            end
           end
         end
       end
-    end
 
 
-    desc "Import GOA-PDB data into 'goa_pdbs' table"
-    task :goa => [:environment] do
+      desc "Import GOA-PDB data into 'goa_pdbs' table"
+      task :goa => [:environment] do
 
-      goa_pdb_file = File.join(GO_DIR, "gene_association.goa_pdb")
+        goa_pdb_file = File.join(GO_DIR, "gene_association.goa_pdb")
 
-      IO.foreach(goa_pdb_file) do |line|
-        line_arr = line.chomp.split(/\t/)
-        line_hsh = {
-          :db               => line_arr[0],
-          :db_object_id     => line_arr[1],
-          :db_object_symbol => line_arr[2],
-          :qualifier        => line_arr[3].nil_if_blank,
-          :go_id            => line_arr[4],
-          :db_reference     => line_arr[5],
-          :evidence         => line_arr[6],
-          :with             => line_arr[7],
-          :aspect           => line_arr[8],
-          :db_object_name   => line_arr[9].nil_if_blank,
-          :synonym          => line_arr[10].nil_if_blank,
-          :db_object_type   => line_arr[11],
-          :taxon_id         => line_arr[12].gsub(/taxon:/, ''),
-          :date             => line_arr[13],
-          :assigned_by      => line_arr[14]
-        }
+        IO.foreach(goa_pdb_file) do |line|
+          line_arr = line.chomp.split(/\t/)
+          line_hsh = {
+            :db               => line_arr[0],
+            :db_object_id     => line_arr[1],
+            :db_object_symbol => line_arr[2],
+            :qualifier        => line_arr[3].nil_if_blank,
+            :go_id            => line_arr[4],
+            :db_reference     => line_arr[5],
+            :evidence         => line_arr[6],
+            :with             => line_arr[7],
+            :aspect           => line_arr[8],
+            :db_object_name   => line_arr[9].nil_if_blank,
+            :synonym          => line_arr[10].nil_if_blank,
+            :db_object_type   => line_arr[11],
+            :taxon_id         => line_arr[12].gsub(/taxon:/, ''),
+            :date             => line_arr[13],
+            :assigned_by      => line_arr[14]
+          }
 
-        pdb_code    = line_hsh[:db_object_id].match(/\S{4}/)[0]
-        chain_code  = line_hsh[:db_object_id].match(/\S{4}_(\S{1})/)[1]
-        structure   = Structure.find_by_pdb_code(pdb_code)
+          pdb_code    = line_hsh[:db_object_id].match(/\S{4}/)[0]
+          chain_code  = line_hsh[:db_object_id].match(/\S{4}_(\S{1})/)[1]
+          structure   = Structure.find_by_pdb_code(pdb_code)
 
-        next if structure.nil?
+          next if structure.nil?
 
-        chain   = structure.chains.find_by_chain_code(chain_code)
-        go_term = GoTerm.find_by_go_id(line_hsh[:go_id])
+          chain   = structure.chains.find_by_chain_code(chain_code)
+          go_term = GoTerm.find_by_go_id(line_hsh[:go_id])
 
-        GoaPdb.create!(
-          {
+          GoaPdb.create!(
+            {
             :chain_id   => chain.id,
             :go_term_id => go_term.id
           }.merge!(line_hsh)
-        )
+          )
 
-        $logger.info ">>> Importing #{pdb_code}, #{chain_code}, #{line_hsh[:go_id]} into 'goa_pdbs' table: done"
+          $logger.info ">>> Importing #{pdb_code}, #{chain_code}, #{line_hsh[:go_id]} into 'goa_pdbs' table: done"
+        end
       end
-    end
 
 
-    desc "Import NCBI Taxonomy 'nodes.dmp' file into 'taxonomic_nodes' table"
-    task :taxonomic_nodes => [:environment] do
-      ActiveRecord::Base.connection.execute(
-        <<-SQL
+      desc "Import NCBI Taxonomy 'nodes.dmp' file into 'taxonomic_nodes' table"
+      task :taxonomic_nodes => [:environment] do
+        ActiveRecord::Base.connection.execute(
+          <<-SQL
           LOAD DATA LOCAL INFILE "./public/taxonomy/nodes.dmp"
           IGNORE INTO TABLE taxonomic_nodes
           FIELDS TERMINATED BY '\t|\t'
           LINES  TERMINATED BY '\t|\n';
         SQL
-      )
+        )
 
-      $logger.info ">>> Importing nodes.dmp into 'taxonomic_nodes' table: done"
+        $logger.info ">>> Importing nodes.dmp into 'taxonomic_nodes' table: done"
 
-#      nodes_file = File.join(TAXONOMY_DIR, "nodes.dmp")
-#
-#      Node = Struct.new(
-#        :id,
-#        :parent_id,
-#        :rank,
-#        :embl_code,
-#        :division_id,
-#        :inherited_div_flag,
-#        :genetic_code_id,
-#        :inherited_gc_flag,
-#        :mitochondrial_genetic_code_id,
-#        :inherited_mgc_flag,
-#        :genbank_hidden_flag,
-#        :hidden_subtree_root,
-#        :comments
-#      )
+        #      nodes_file = File.join(TAXONOMY_DIR, "nodes.dmp")
+        #
+        #      Node = Struct.new(
+        #        :id,
+        #        :parent_id,
+        #        :rank,
+        #        :embl_code,
+        #        :division_id,
+        #        :inherited_div_flag,
+        #        :genetic_code_id,
+        #        :inherited_gc_flag,
+        #        :mitochondrial_genetic_code_id,
+        #        :inherited_mgc_flag,
+        #        :genbank_hidden_flag,
+        #        :hidden_subtree_root,
+        #        :comments
+        #      )
 
-#      IO.foreach(nodes_file) do |line|
-#        next if line =~ /^#/ || line.blank?
-#        node_struct = Node.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
-#        TaxonomicNode.create!(node_struct.to_hash)
-#      end
+        #      IO.foreach(nodes_file) do |line|
+        #        next if line =~ /^#/ || line.blank?
+        #        node_struct = Node.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
+        #        TaxonomicNode.create!(node_struct.to_hash)
+        #      end
 
-#      nodes = TaxonomicNode.find(:all, :select => "id, parent_id, lft, rgt, tax_id, parent_tax_id")
-#      nodes.each_with_index do |node, i|
-#        next if node.tax_id == 1;
-#        parent = TaxonomicNode.find_by_tax_id(node.parent_tax_id)
-#        node.move_to_child_of(parent)
-#        $logger.info("Importing #{node.id} into 'nodes' table: done (#{i + 1}/#{nodes.size})")
-#      end
-    end
+        #      nodes = TaxonomicNode.find(:all, :select => "id, parent_id, lft, rgt, tax_id, parent_tax_id")
+        #      nodes.each_with_index do |node, i|
+        #        next if node.tax_id == 1;
+        #        parent = TaxonomicNode.find_by_tax_id(node.parent_tax_id)
+        #        node.move_to_child_of(parent)
+        #        $logger.info("Importing #{node.id} into 'nodes' table: done (#{i + 1}/#{nodes.size})")
+        #      end
+      end
 
 
-    desc "Import NCBI Taxonomy 'names.dmp' file into 'taxonomic_names' table"
-    task :taxonomic_names => [:environment] do
-      ActiveRecord::Base.connection.execute(
-        <<-SQL
+      desc "Import NCBI Taxonomy 'names.dmp' file into 'taxonomic_names' table"
+      task :taxonomic_names => [:environment] do
+        ActiveRecord::Base.connection.execute(
+          <<-SQL
           LOAD DATA LOCAL INFILE "./public/taxonomy/names.dmp"
           IGNORE INTO TABLE taxonomic_names
           FIELDS TERMINATED BY '\t|\t'
           LINES  TERMINATED BY '\t|\n'
           (taxonomic_node_id, name_txt, unique_name, name_class);
         SQL
-      )
+        )
 
-      $logger.info ">>> Importing names.dmp into 'taxonomic_names' table: done"
+        $logger.info ">>> Importing names.dmp into 'taxonomic_names' table: done"
 
-#      name_file = File.join(TAXONOMY_DIR, "names.dmp")
-#
-#      Name = Struct.new(
-#        :tax_id,
-#        :name_txt,
-#        :unique_name,
-#        :name_class
-#      )
-#
-#      IO.foreach(names_file) do |line|
-#        next if line =~ /^#/ || line.blank?
-#        name = Name.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
-#        node = TaxonomicNode.find_by_tax_id(name.tax_id)
-#        node.names.create!(name.to_hash)
-#      end
-    end
-
-
-    desc "Import ESSTs"
-    task :essts => [:environment] do
-
-      (10..100).step(10) do |si|
-        next unless si == 90
-
-        rep_dir       = File.join(ESST_DIR, "rep#{si}")
-        na_esst_dir   = File.join(rep_dir, "na")
-        std_esst_dir  = File.join(rep_dir, "std")
-
-        [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
-          tag = false
-          esst = nil
-          colnames = nil
-          esst_class = (i == 0 ? NaEsst : StdEsst)
-
-          prob_mat = File.join(esst_dir, "allmat.dat.prob")
-
-          IO.foreach(prob_mat) do |line|
-            case line
-            when /^#/
-              colnames = line.gsub(/#/, '').strip.split(/\s+/) if tag
-              next
-            when /^>(\w+)\s+(\d+)$/
-              tag = true
-              env, num = $1, $2
-              $logger.info "Importing Probability ESST, #{num} under #{env} ..."
-              if (env == "total")
-                esst = esst_class.create!(:redundancy => 90,
-                                          :number => num,
-                                          :environment => env)
-              else
-                esst = esst_class.create!(:redundancy => 90,
-                                          :number => num,
-                                          :environment => env,
-                                          :secondary_structure => env[0].chr,
-                                          :solvent_accessibility => env[1].chr,
-                                          :hbond_to_sidechain => env[2].chr,
-                                          :hbond_to_mainchain_carbonyl => env[3].chr,
-                                          :hbond_to_mainchain_amide => env[4].chr,
-                                          :dna_rna_interface => (i == 0 ? env[5].chr : nil))
-              end
-            when /^(\w)\s+(.*)$/
-              rowname, cells = $1, $2.strip.split(/\s+/)
-              cells.each_with_index do |cell, j|
-                esst.substitutions << Substitution.create!(:aa1 => rowname,
-                                                           :aa2 => colnames[j],
-                                                           :prob => cell.to_f)
-              end
-            end # case line
-          end # IO.foreach(prob_mat)
-
-          log_mat = File.join(esst_dir, "allmat.dat.log")
-
-          IO.foreach(log_mat) do |line|
-            case line
-            when /^#/
-              colnames = line.gsub(/#/, '').strip.split(/\s+/) if tag
-              next
-            when /^>(\w+)\s+(\d+)$/
-              tag = true
-              env, num = $1, $2
-              $logger.info "Importing Log Odds Ratio ESST, #{num} under #{env} ..."
-              esst = esst_class.find_by_redundancy_and_number(90, num)
-            when /^(\w)\s+(.*)$/
-              rowname, cells = $1, $2.strip.split(/\s+/)
-              cells.each_with_index do |cell, j|
-                if sub = esst.substitutions.find_by_aa1_and_aa2(rowname, colnames[j])
-                  sub.log = cell.to_i
-                  sub.save!
-                end
-              end
-            end # case line
-          end # IO.foreach(log_mat)
-
-          raw_cnts  = Dir[esst_dir + "/rawc*"]
-
-          raw_cnts.each do |raw_cnt|
-            num   = raw_cnt.match(/rawc(\d+)/)[1].to_i - 1
-            esst  = esst_class.find_by_redundancy_and_number(90, num)
-            cnts  = []
-
-            $logger.info "Importing Count ESST, #{num} ..."
-
-            IO.foreach(raw_cnt) { |l| cnts.concat(l.strip.gsub(/\./,'').split(/\s+/)) }
-            esst.substitutions.each_with_index { |s, k| s.cnt = cnts[k].to_i; s.save! }
-          end
-        end # [na_esst_dir, std_esst_dir].each
+        #      name_file = File.join(TAXONOMY_DIR, "names.dmp")
+        #
+        #      Name = Struct.new(
+        #        :tax_id,
+        #        :name_txt,
+        #        :unique_name,
+        #        :name_class
+        #      )
+        #
+        #      IO.foreach(names_file) do |line|
+        #        next if line =~ /^#/ || line.blank?
+        #        name = Name.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
+        #        node = TaxonomicNode.find_by_tax_id(name.tax_id)
+        #        node.names.create!(name.to_hash)
+        #      end
       end
-    end
 
 
-    desc "Import Fugue profiles"
-    task :profiles => [:environment] do
-      (10..100).step(10) do |si|
-        rep_dir       = File.join(ESST_DIR, "rep#{si}")
-        na_esst_dir   = File.join(rep_dir, "na")
-        std_esst_dir  = File.join(rep_dir, "std")
+      desc "Import ESSTs"
+      task :essts => [:environment] do
 
-        [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
-          prfs = FileList[esst_dir + "/*.fug"]
-          prfs.each do |prf|
-            name                      = File.basename(prf, ".fug")
-            alignment                 = Scop.find_by_sunid(name).send(:"rep#{si}_alignment")
-            command                   = nil #Command:                       melody -list TEMLIST -c classdef.dat -s allmat.dat.log.pid100
-            length                    = nil #Profile_length:                120   alignment positions
-            no_sequences              = nil #Sequence_in_profile:           3     sequences
-            no_structures             = nil #Real_Structure:                3     structures
-            enhance_num               = nil #Enhance_Num:                   3     sequences
-            enhance_div               = nil #Enhance_Div:                   0.549
-            weighting                 = nil #Weighting:                     1  BlosumWeight -- weighting scheme based on single linkage clustering
-            weighting_threshold       = nil #Weighting_threshold:           0
-            weighting_seed            = nil #Weighting_seed:                -488943
-            multiple_factor           = nil #Multiple_factor:               10.0
-            format                    = nil #Profile_format:                0      FUGUE
-            similarity_matrix         = nil #Similarity_matrix:             OFF
-            similarity_matrix_offset  = nil #Similarity_matrix_offset:      NONE
-            ignore_gap_weight         = nil #Ignore_gap_weight:             ON
-            symbol_in_row             = nil #Symbol_in_row(sequence):       ACDEFGHIKLMNPQRSTVWYJU
-            symbol_in_column          = nil #Symbol_in_column(structure):   ACDEFGHIKLMNPQRSTVWYJ
-            symbol_structural_feature = nil #Symbol_structural_feature:     HEPCAaSsOoNnDRN
-            gap_ins_open_terminal     = nil #GapInsOpenTerminal             100
-            gap_del_open_terminal     = nil #GapDelOpenTerminal             100
-            gap_ins_ext_terminal      = nil #GapInsExtTerminal              100
-            gap_del_ext_terminal      = nil #GapDelExtTerminal              100
-            evd                       = nil #EVD                            0
-            start                     = false #START
-            theend                    = false #THEEND
-            profile_class             = (i == 0 ? NaProfile : StdProfile)
-            profile_column_class      = (i == 0 ? NaProfileColumn : StdProfileColumn)
-            profile                   = nil
-            cnt                       = 0
+        (10..100).step(10) do |si|
+          next unless si == 90
 
-            IO.foreach(prf) do |line|
-              case line.chomp!
-              when /^Command:\s+(.*)/                         then command = $1
-              when /^Profile_length:\s+(\d+)/                 then length = $1
-              when /^Sequence_in_profile:\s+(\d+)/            then no_sequences = $1
-              when /^Real_Structure:\s+(\d+)/                 then no_structures = $1
-              when /^Enhance_Num:\s+(\d+)/                    then enhance_num = $1
-              when /^Enhance_Div:\s+(\S+)/                    then enhance_div = $1
-              when /^Weighting:\s+(\d+)/                      then weighting = $1
-              when /^Weighting_threshold:\s+(\d+)/            then weighting_threshold = $1
-              when /^Weighting_seed:\s+(\S+)/                 then weighting_seed = $1
-              when /^Multiple_factor:\s+(\S+)/                then multiple_factor = $1
-              when /^Profile_format:\s+(\d+)/                 then format = $1
-              when /^Similarity_matrix:\s+(\S+)/             then similarity_matrix = $1
-              when /^Similarity_matrix_offset:\s+(\S+)/       then similarity_matrix_offset = $1
-              when /^Ignore_gap_weight:\s+(\S+)/              then ignore_gap_weight = $1
-              when /^Symbol_in_row\(sequence\):\s+(\S+)/      then symbol_in_row =  $1
-              when /^Symbol_in_column\(structure\):\s+(\S+)/  then symbol_in_column = $1
-              when /^Symbol_structural_feature:\s+(\S+)/      then symbol_structural_feature = $1
-              when /^GapInsOpenTerminal\s+(\d+)/              then gap_ins_open_terminal = $1
-              when /^GapDelOpenTerminal\s+(\d+)/              then gap_del_open_terminal = $1
-              when /^GapInsExtTerminal\s+(\d+)/               then gap_ins_ext_terminal = $1
-              when /^GapDelExtTerminal\s+(\d+)/               then gap_del_ext_terminal = $1
-              when /^EVD\s+(\d+)/                             then evd = $1
-              when /^START/                                   then start = true
-              when /^THEEND/                                  then theend = true
-              when /^(\S+)\s+(.*)$/
-                if start and !theend
-                  cnt += 1
-                  seq, values = $1, $2.chomp.split(/\s+/)
+          rep_dir       = File.join(ESST_DIR, "rep#{si}")
+          na_esst_dir   = File.join(rep_dir, "na")
+          std_esst_dir  = File.join(rep_dir, "std")
 
-                  if profile
-                    profile.profile_columns << profile_column_class.create!(
-                      :column_id => alignment.columns[cnt - 1].id, :seq => seq,
-                      :aa_A => values[0], :aa_C => values[1], :aa_D => values[2], :aa_E => values[3],
-                      :aa_F => values[4], :aa_G => values[5], :aa_H => values[6], :aa_I => values[7],
-                      :aa_K => values[8], :aa_L => values[9], :aa_M => values[10],:aa_N => values[11],
-                      :aa_P => values[12],:aa_Q => values[13],:aa_R => values[14],:aa_S => values[15],
-                      :aa_T => values[16],:aa_V => values[17],:aa_W => values[18],:aa_Y => values[19],
-                      :aa_J => values[20],:aa_U => values[21],
-                      :InsO => values[22],:InsE => values[23],:DelO => values[24],:DelE => values[25],
-                      :COIL => values[26],:HNcp => values[27],:HCcp => values[28],:HIn => values[29],
-                      :SNcp => values[30],:SCcp => values[31],:SInt => values[32],:NRes => values[33],
-                      :Ooi  => values[34], :Acc => values[35],
-                      :H    => values[36],   :E => values[37],   :P => values[38],   :C => values[39],
-                      :At   => values[40],  :Af => values[41],  :St => values[42],  :Sf => values[43],
-                      :Ot   => values[44],  :Of => values[45],  :Nt => values[46],  :Nf => values[47],
-                      :D    => (i == 0 ? values[48] : nil),
-                      :R    => (i == 0 ? values[49] : nil),
-                      :N    => (i == 0 ? values[50] : nil))
-                  else
-                    profile = profile_class.create!(:name                       => name,
-                                                    :command                    => command,
-                                                    :length                     => length,
-                                                    :no_sequences               => no_sequences,
-                                                    :no_structures              => no_structures,
-                                                    :enhance_num                => enhance_num,
-                                                    :enhance_div                => enhance_div,
-                                                    :weighting                  => weighting,
-                                                    :weighting_threshold        => weighting_threshold,
-                                                    :weighting_seed             => weighting_seed,
-                                                    :multiple_factor            => multiple_factor,
-                                                    :format                     => format,
-                                                    :similarity_matrix          => similarity_matrix,
-                                                    :similarity_matrix_offset   => similarity_matrix_offset,
-                                                    :ignore_gap_weight          => ignore_gap_weight,
-                                                    :symbol_in_row              => symbol_in_row,
-                                                    :symbol_in_column           => symbol_in_column,
-                                                    :symbol_structural_feature  => symbol_structural_feature,
-                                                    :gap_ins_open_terminal      => gap_ins_open_terminal,
-                                                    :gap_del_open_terminal      => gap_del_open_terminal,
-                                                    :gap_ins_ext_terminal       => gap_ins_ext_terminal,
-                                                    :gap_del_ext_terminal       => gap_del_ext_terminal,
-                                                    :evd                        => evd)
-                    $logger.info("Importing Fugue profile, #{profile.name}: done")
+          [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
+            tag = false
+            esst = nil
+            colnames = nil
+            esst_class = (i == 0 ? NaEsst : StdEsst)
+
+            prob_mat = File.join(esst_dir, "allmat.dat.prob")
+
+            IO.foreach(prob_mat) do |line|
+              case line
+              when /^#/
+                colnames = line.gsub(/#/, '').strip.split(/\s+/) if tag
+                next
+              when /^>(\w+)\s+(\d+)$/
+                tag = true
+                env, num = $1, $2
+                $logger.info "Importing Probability ESST, #{num} under #{env} ..."
+                if (env == "total")
+                  esst = esst_class.create!(:redundancy => 90,
+                                            :number => num,
+                                            :environment => env)
+                else
+                  esst = esst_class.create!(:redundancy => 90,
+                                            :number => num,
+                                            :environment => env,
+                                            :secondary_structure => env[0].chr,
+                                            :solvent_accessibility => env[1].chr,
+                                            :hbond_to_sidechain => env[2].chr,
+                                            :hbond_to_mainchain_carbonyl => env[3].chr,
+                                            :hbond_to_mainchain_amide => env[4].chr,
+                                            :dna_rna_interface => (i == 0 ? env[5].chr : nil))
+                end
+              when /^(\w)\s+(.*)$/
+                rowname, cells = $1, $2.strip.split(/\s+/)
+                cells.each_with_index do |cell, j|
+                  esst.substitutions << Substitution.create!(:aa1 => rowname,
+                                                             :aa2 => colnames[j],
+                                                             :prob => cell.to_f)
+                end
+              end # case line
+            end # IO.foreach(prob_mat)
+
+            log_mat = File.join(esst_dir, "allmat.dat.log")
+
+            IO.foreach(log_mat) do |line|
+              case line
+              when /^#/
+                colnames = line.gsub(/#/, '').strip.split(/\s+/) if tag
+                next
+              when /^>(\w+)\s+(\d+)$/
+                tag = true
+                env, num = $1, $2
+                $logger.info "Importing Log Odds Ratio ESST, #{num} under #{env} ..."
+                esst = esst_class.find_by_redundancy_and_number(90, num)
+              when /^(\w)\s+(.*)$/
+                rowname, cells = $1, $2.strip.split(/\s+/)
+                cells.each_with_index do |cell, j|
+                  if sub = esst.substitutions.find_by_aa1_and_aa2(rowname, colnames[j])
+                    sub.log = cell.to_i
+                    sub.save!
                   end
+                end
+              end # case line
+            end # IO.foreach(log_mat)
 
+            raw_cnts  = Dir[esst_dir + "/rawc*"]
+
+            raw_cnts.each do |raw_cnt|
+              num   = raw_cnt.match(/rawc(\d+)/)[1].to_i - 1
+              esst  = esst_class.find_by_redundancy_and_number(90, num)
+              cnts  = []
+
+              $logger.info "Importing Count ESST, #{num} ..."
+
+              IO.foreach(raw_cnt) { |l| cnts.concat(l.strip.gsub(/\./,'').split(/\s+/)) }
+              esst.substitutions.each_with_index { |s, k| s.cnt = cnts[k].to_i; s.save! }
+            end
+          end # [na_esst_dir, std_esst_dir].each
+        end
+      end
+
+
+      desc "Import Fugue profiles"
+      task :profiles => [:environment] do
+        (10..100).step(10) do |si|
+          rep_dir       = File.join(ESST_DIR, "rep#{si}")
+          na_esst_dir   = File.join(rep_dir, "na")
+          std_esst_dir  = File.join(rep_dir, "std")
+
+          [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
+            prfs = FileList[esst_dir + "/*.fug"]
+            prfs.each do |prf|
+              name                      = File.basename(prf, ".fug")
+              alignment                 = Scop.find_by_sunid(name).send(:"rep#{si}_alignment")
+              command                   = nil #Command:                       melody -list TEMLIST -c classdef.dat -s allmat.dat.log.pid100
+              length                    = nil #Profile_length:                120   alignment positions
+              no_sequences              = nil #Sequence_in_profile:           3     sequences
+              no_structures             = nil #Real_Structure:                3     structures
+              enhance_num               = nil #Enhance_Num:                   3     sequences
+              enhance_div               = nil #Enhance_Div:                   0.549
+              weighting                 = nil #Weighting:                     1  BlosumWeight -- weighting scheme based on single linkage clustering
+              weighting_threshold       = nil #Weighting_threshold:           0
+              weighting_seed            = nil #Weighting_seed:                -488943
+              multiple_factor           = nil #Multiple_factor:               10.0
+              format                    = nil #Profile_format:                0      FUGUE
+              similarity_matrix         = nil #Similarity_matrix:             OFF
+              similarity_matrix_offset  = nil #Similarity_matrix_offset:      NONE
+              ignore_gap_weight         = nil #Ignore_gap_weight:             ON
+              symbol_in_row             = nil #Symbol_in_row(sequence):       ACDEFGHIKLMNPQRSTVWYJU
+              symbol_in_column          = nil #Symbol_in_column(structure):   ACDEFGHIKLMNPQRSTVWYJ
+              symbol_structural_feature = nil #Symbol_structural_feature:     HEPCAaSsOoNnDRN
+              gap_ins_open_terminal     = nil #GapInsOpenTerminal             100
+              gap_del_open_terminal     = nil #GapDelOpenTerminal             100
+              gap_ins_ext_terminal      = nil #GapInsExtTerminal              100
+              gap_del_ext_terminal      = nil #GapDelExtTerminal              100
+              evd                       = nil #EVD                            0
+              start                     = false #START
+              theend                    = false #THEEND
+              profile_class             = (i == 0 ? NaProfile : StdProfile)
+              profile_column_class      = (i == 0 ? NaProfileColumn : StdProfileColumn)
+              profile                   = nil
+              cnt                       = 0
+
+              IO.foreach(prf) do |line|
+                case line.chomp!
+                when /^Command:\s+(.*)/                         then command = $1
+                when /^Profile_length:\s+(\d+)/                 then length = $1
+                when /^Sequence_in_profile:\s+(\d+)/            then no_sequences = $1
+                when /^Real_Structure:\s+(\d+)/                 then no_structures = $1
+                when /^Enhance_Num:\s+(\d+)/                    then enhance_num = $1
+                when /^Enhance_Div:\s+(\S+)/                    then enhance_div = $1
+                when /^Weighting:\s+(\d+)/                      then weighting = $1
+                when /^Weighting_threshold:\s+(\d+)/            then weighting_threshold = $1
+                when /^Weighting_seed:\s+(\S+)/                 then weighting_seed = $1
+                when /^Multiple_factor:\s+(\S+)/                then multiple_factor = $1
+                when /^Profile_format:\s+(\d+)/                 then format = $1
+                when /^Similarity_matrix:\s+(\S+)/             then similarity_matrix = $1
+                when /^Similarity_matrix_offset:\s+(\S+)/       then similarity_matrix_offset = $1
+                when /^Ignore_gap_weight:\s+(\S+)/              then ignore_gap_weight = $1
+                when /^Symbol_in_row\(sequence\):\s+(\S+)/      then symbol_in_row =  $1
+                when /^Symbol_in_column\(structure\):\s+(\S+)/  then symbol_in_column = $1
+                when /^Symbol_structural_feature:\s+(\S+)/      then symbol_structural_feature = $1
+                when /^GapInsOpenTerminal\s+(\d+)/              then gap_ins_open_terminal = $1
+                when /^GapDelOpenTerminal\s+(\d+)/              then gap_del_open_terminal = $1
+                when /^GapInsExtTerminal\s+(\d+)/               then gap_ins_ext_terminal = $1
+                when /^GapDelExtTerminal\s+(\d+)/               then gap_del_ext_terminal = $1
+                when /^EVD\s+(\d+)/                             then evd = $1
+                when /^START/                                   then start = true
+                when /^THEEND/                                  then theend = true
+                when /^(\S+)\s+(.*)$/
+                  if start and !theend
+                    cnt += 1
+                    seq, values = $1, $2.chomp.split(/\s+/)
+
+                    if profile
+                      profile.profile_columns << profile_column_class.create!(
+                        :column_id => alignment.columns[cnt - 1].id, :seq => seq,
+                        :aa_A => values[0], :aa_C => values[1], :aa_D => values[2], :aa_E => values[3],
+                        :aa_F => values[4], :aa_G => values[5], :aa_H => values[6], :aa_I => values[7],
+                        :aa_K => values[8], :aa_L => values[9], :aa_M => values[10],:aa_N => values[11],
+                        :aa_P => values[12],:aa_Q => values[13],:aa_R => values[14],:aa_S => values[15],
+                        :aa_T => values[16],:aa_V => values[17],:aa_W => values[18],:aa_Y => values[19],
+                        :aa_J => values[20],:aa_U => values[21],
+                        :InsO => values[22],:InsE => values[23],:DelO => values[24],:DelE => values[25],
+                        :COIL => values[26],:HNcp => values[27],:HCcp => values[28],:HIn => values[29],
+                        :SNcp => values[30],:SCcp => values[31],:SInt => values[32],:NRes => values[33],
+                        :Ooi  => values[34], :Acc => values[35],
+                        :H    => values[36],   :E => values[37],   :P => values[38],   :C => values[39],
+                        :At   => values[40],  :Af => values[41],  :St => values[42],  :Sf => values[43],
+                        :Ot   => values[44],  :Of => values[45],  :Nt => values[46],  :Nf => values[47],
+                        :D    => (i == 0 ? values[48] : nil),
+                        :R    => (i == 0 ? values[49] : nil),
+                        :N    => (i == 0 ? values[50] : nil))
+                    else
+                      profile = profile_class.create!(:name                       => name,
+                                                      :command                    => command,
+                                                      :length                     => length,
+                                                      :no_sequences               => no_sequences,
+                                                      :no_structures              => no_structures,
+                                                      :enhance_num                => enhance_num,
+                                                      :enhance_div                => enhance_div,
+                                                      :weighting                  => weighting,
+                                                      :weighting_threshold        => weighting_threshold,
+                                                      :weighting_seed             => weighting_seed,
+                                                      :multiple_factor            => multiple_factor,
+                                                      :format                     => format,
+                                                      :similarity_matrix          => similarity_matrix,
+                                                      :similarity_matrix_offset   => similarity_matrix_offset,
+                                                      :ignore_gap_weight          => ignore_gap_weight,
+                                                      :symbol_in_row              => symbol_in_row,
+                                                      :symbol_in_column           => symbol_in_column,
+                                                      :symbol_structural_feature  => symbol_structural_feature,
+                                                      :gap_ins_open_terminal      => gap_ins_open_terminal,
+                                                      :gap_del_open_terminal      => gap_del_open_terminal,
+                                                      :gap_ins_ext_terminal       => gap_ins_ext_terminal,
+                                                      :gap_del_ext_terminal       => gap_del_ext_terminal,
+                                                      :evd                        => evd)
+                      $logger.info("Importing Fugue profile, #{profile.name}: done")
+                    end
+
+                  end
                 end
               end
             end
           end
         end
       end
-    end
 
 
-    desc "Import Fugue hits"
-    task :fugue_hits => [:environment] do
+      desc "Import Fugue hits"
+      task :fugue_hits => [:environment] do
 
-      (10..100).step(10) do |si|
-        rep_dir       = File.join(ESST_DIR, "rep#{si}")
-        na_esst_dir   = File.join(rep_dir, "na")
-        std_esst_dir  = File.join(rep_dir, "std")
+        (10..100).step(10) do |si|
+          rep_dir       = File.join(ESST_DIR, "rep#{si}")
+          na_esst_dir   = File.join(rep_dir, "na")
+          std_esst_dir  = File.join(rep_dir, "std")
 
-        [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
-          frts = FileList[esst_dir + "/*.frt"]
-          frts.each do |frt|
-            sunid           = File.basename(frt, ".frt")
-            profile_class   = (i == 0 ? NaProfile : StdProfile)
-            fugue_hit_class = (i == 0 ? NaFugueHit : StdFugueHit)
-            profile         = profile_class.find_by_name(sunid)
-            scop            = Scop.find_by_sunid(sunid)
+          [na_esst_dir, std_esst_dir].each_with_index do |esst_dir, i|
+            frts = FileList[esst_dir + "/*.frt"]
+            frts.each do |frt|
+              sunid           = File.basename(frt, ".frt")
+              profile_class   = (i == 0 ? NaProfile : StdProfile)
+              fugue_hit_class = (i == 0 ? NaFugueHit : StdFugueHit)
+              profile         = profile_class.find_by_name(sunid)
+              scop            = Scop.find_by_sunid(sunid)
 
-            IO.foreach(frt) do |line|
-              case line.chomp!
-              when /^\s*$/ then next
-              when /^#/ then next
-              when /\s+(.{19})\s+(\S+.*)$/ # d2dpia1 d.240.1....  115   419 448   34.24 1.0E+03   35.19 1.0E+03 1.0E+03 0
-                name = $1.strip[0..6]
-                slen, raws, rvn, zscore, pvz, zori, evp, evf, al = $2.strip.split(/\s+/)
-                name[0]   = 'd' if name =~ /^g/
-                zscore    = zscore.to_f
-                scop_dom  = ScopDomain.find_by_sid(name)
-                profile.fugue_hits << fugue_hit_class.create!(:scop_id => scop_dom.id,
-                                                              :name => name,
-                                                              :raws => raws,
-                                                              :rvn => rvn,
-                                                              :zscore => zscore,
-                                                              :zori => zori,
-                                                              :fam_tp => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore >= 6.0 ? true : false),
-                                                              :fam_fp => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore >= 6.0 ? true : false),
-                                                              :fam_tn => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore <  6.0 ? true : false),
-                                                              :fam_fn => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore <  6.0 ? true : false),
-                                                              :supfam_tp => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore >= 6.0 ? true : false),
-                                                              :supfam_fp => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore >= 6.0 ? true : false),
-                                                              :supfam_tn => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore <  6.0 ? true : false),
-                                                              :supfam_fn => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore <  6.0 ? true : false))
+              IO.foreach(frt) do |line|
+                case line.chomp!
+                when /^\s*$/ then next
+                when /^#/ then next
+                when /\s+(.{19})\s+(\S+.*)$/ # d2dpia1 d.240.1....  115   419 448   34.24 1.0E+03   35.19 1.0E+03 1.0E+03 0
+                  name = $1.strip[0..6]
+                  slen, raws, rvn, zscore, pvz, zori, evp, evf, al = $2.strip.split(/\s+/)
+                  name[0]   = 'd' if name =~ /^g/
+                    zscore    = zscore.to_f
+                  scop_dom  = ScopDomain.find_by_sid(name)
+                  profile.fugue_hits << fugue_hit_class.create!(:scop_id => scop_dom.id,
+                                                                :name => name,
+                                                                :raws => raws,
+                                                                :rvn => rvn,
+                                                                :zscore => zscore,
+                                                                :zori => zori,
+                                                                :fam_tp => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore >= 6.0 ? true : false),
+                                                                :fam_fp => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore >= 6.0 ? true : false),
+                                                                :fam_tn => (scop_dom.parent.parent.parent.sunid != scop.sunid and zscore <  6.0 ? true : false),
+                                                                :fam_fn => (scop_dom.parent.parent.parent.sunid == scop.sunid and zscore <  6.0 ? true : false),
+                                                                :supfam_tp => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore >= 6.0 ? true : false),
+                                                                :supfam_fp => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore >= 6.0 ? true : false),
+                                                                :supfam_tn => (scop_dom.parent.parent.parent.parent.sunid != scop.parent.sunid and zscore <  6.0 ? true : false),
+                                                                :supfam_fn => (scop_dom.parent.parent.parent.parent.sunid == scop.parent.sunid and zscore <  6.0 ? true : false))
 
-                $logger.debug "Importing #{fugue_hit_class}, #{name} with zscore: #{zscore}: done"
+                  $logger.debug "Importing #{fugue_hit_class}, #{name} with zscore: #{zscore}: done"
+                end
+              end
+
+              $logger.info "Importing #{fugue_hit_class} for #{sunid}: done"
+            end
+          end
+        end
+      end
+
+
+      desc "Import Refernce Alignments"
+      task :reference_alignments => [:environment] do
+
+        rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+
+        Dir.new(rep_dir).each do |fam_dir|
+          next if fam_dir =~ /^\./
+
+            FileList[File.join(rep_dir, fam_dir, "*.ref.ali")].each do |f|
+            next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
+
+            $logger.info "Importing #{f} ..."
+
+            tem_sunid, tgt_sunid = File.basename(f, ".ref.ali").split(/-/)
+            ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
+            ident, align, intgp, count = 0, 0, 0, 0
+
+            ref_ali.each_site do |site|
+              if (site[0] != "-") && (site[1] != "-")
+                align += 1
+                if site[0] == site[1]
+                  ident += 1
+                end
+              elsif ((count != 0) && (count != (ref_ali.alignment_length-1)) && ((site[0] == "-") || (site[1] == "-")))
+                intgp += 1
+              end
+              count += 1
+            end
+
+            minl = nil
+            ref_ali.each_seq do |s|
+              l = s.gsub(/-/, '').length
+              if minl.nil?
+                minl = l
+              else
+                minl = l if l < minl
               end
             end
 
-            $logger.info "Importing #{fugue_hit_class} for #{sunid}: done"
-          end
-        end
-      end
-    end
-
-
-    desc "Import Refernce Alignments"
-    task :reference_alignments => [:environment] do
-
-      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
-
-      Dir.new(rep_dir).each do |fam_dir|
-        next if fam_dir =~ /^\./
-
-        FileList[File.join(rep_dir, fam_dir, "*.ref.ali")].each do |f|
-          next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
-
-          $logger.info "Importing #{f} ..."
-
-          tem_sunid, tgt_sunid = File.basename(f, ".ref.ali").split(/-/)
-          ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
-          ident, align, intgp, count = 0, 0, 0, 0
-
-          ref_ali.each_site do |site|
-            if (site[0] != "-") && (site[1] != "-")
-              align += 1
-              if site[0] == site[1]
-                ident += 1
+            mingl = nil
+            ref_ali.each_seq do |s|
+              gl = s.gsub(/^-+/, '').gsub(/-+$/,'').length
+              if mingl.nil?
+                mingl = gl
+              else
+                mingl = gl if gl < mingl
               end
-            elsif ((count != 0) && (count != (ref_ali.alignment_length-1)) && ((site[0] == "-") || (site[1] == "-")))
-              intgp += 1
             end
-            count += 1
-          end
 
-          minl = nil
-          ref_ali.each_seq do |s|
-            l = s.gsub(/-/, '').length
-            if minl.nil?
-              minl = l
+            pid1 = 100 * ident.to_f / (align + intgp)
+            pid2 = 100 * ident.to_f / align
+            pid3 = 100 * ident.to_f / minl
+            pid4 = 100 * ident.to_f / mingl
+
+            family    = Scop.find_by_sunid(fam_dir)
+            alignment = Rep90Alignment.find_by_scop_id(family.id)
+            tem  = Scop.find_by_sunid(tem_sunid)
+            tgt    = Scop.find_by_sunid(tgt_sunid)
+
+            if alignment
+              alignment.reference_alignments << ReferenceAlignment.create!(:template_id => tem.id,
+                                                                           :target_id   => tgt.id,
+                                                                           :pid1        => pid1,
+                                                                           :pid2        => pid2,
+                                                                           :pid3        => pid3,
+                                                                           :pid4        => pid4)
             else
-              minl = l if l < minl
+              raise "Cannot find alignment AR object for SCOP family, #{fam_dir}"
             end
-          end
-
-          mingl = nil
-          ref_ali.each_seq do |s|
-            gl = s.gsub(/^-+/, '').gsub(/-+$/,'').length
-            if mingl.nil?
-              mingl = gl
-            else
-              mingl = gl if gl < mingl
             end
-          end
-
-          pid1 = 100 * ident.to_f / (align + intgp)
-          pid2 = 100 * ident.to_f / align
-          pid3 = 100 * ident.to_f / minl
-          pid4 = 100 * ident.to_f / mingl
-
-          family    = Scop.find_by_sunid(fam_dir)
-          alignment = Rep90Alignment.find_by_scop_id(family.id)
-          tem  = Scop.find_by_sunid(tem_sunid)
-          tgt    = Scop.find_by_sunid(tgt_sunid)
-
-          if alignment
-            alignment.reference_alignments << ReferenceAlignment.create!(:template_id => tem.id,
-                                                                         :target_id   => tgt.id,
-                                                                         :pid1        => pid1,
-                                                                         :pid2        => pid2,
-                                                                         :pid3        => pid3,
-                                                                         :pid4        => pid4)
-          else
-            raise "Cannot find alignment AR object for SCOP family, #{fam_dir}"
-          end
         end
       end
-    end
 
 
-    desc "Import Test Alignments"
-    task :test_alignments => [:environment] do
+      desc "Import Test Alignments"
+      task :test_alignments => [:environment] do
 
-      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+        rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
 
-      Dir.new(rep_dir).each do |fam_dir|
-        next if fam_dir =~ /^\./
+        Dir.new(rep_dir).each do |fam_dir|
+          next if fam_dir =~ /^\./
 
-        FileList[File.join(rep_dir, fam_dir, "*.bb")].each do |f|
-          next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
+            FileList[File.join(rep_dir, fam_dir, "*.bb")].each do |f|
+            next unless File.size? f # CAUTION!!! Some alingments are size 0. Don't know why yet!
 
-          $logger.info "Importing #{f} ..."
+            $logger.info "Importing #{f} ..."
 
-          stem = File.basename(f, ".bb")
-          tem_sunid, tgt_sunid = stem.match(/(\d+)-(\d+)/)[1..2].to_a
-          tem = Scop.find_by_sunid(tem_sunid)
-          tgt = Scop.find_by_sunid(tgt_sunid)
-          ref_ali = ReferenceAlignment.find_by_template_id_and_target_id(tem.id, tgt.id)
-          ali_class = nil
-          sp_score = nil
-          tc_score = nil
+            stem = File.basename(f, ".bb")
+            tem_sunid, tgt_sunid = stem.match(/(\d+)-(\d+)/)[1..2].to_a
+            tem = Scop.find_by_sunid(tem_sunid)
+            tgt = Scop.find_by_sunid(tgt_sunid)
+            ref_ali = ReferenceAlignment.find_by_template_id_and_target_id(tem.id, tgt.id)
+            ali_class = nil
+            sp_score = nil
+            tc_score = nil
 
-          IO.foreach(f) do |l|
-            if l =~ /SP\sscore=\s(\S+)/ then sp_score = $1 end
-            if l =~ /TC\sscore=\s(\S+)/ then tc_score = $1 end
-          end
+            IO.foreach(f) do |l|
+              if l =~ /SP\sscore=\s(\S+)/ then sp_score = $1 end
+              if l =~ /TC\sscore=\s(\S+)/ then tc_score = $1 end
+            end
 
-          case stem
-          when /ndl/  then ali_class = TestNeedleAlignment
-          when /clt/  then ali_class = TestClustalwAlignment
-          when /std/  then ali_class = TestStdFugueAlignment
-          when /na/   then ali_class = TestNaFugueAlignment
-          else raise "Unknown TestAlignment class!: #{stem}"
-          end
+            case stem
+            when /ndl/  then ali_class = TestNeedleAlignment
+            when /clt/  then ali_class = TestClustalwAlignment
+            when /std/  then ali_class = TestStdFugueAlignment
+            when /na/   then ali_class = TestNaFugueAlignment
+            else raise "Unknown TestAlignment class!: #{stem}"
+            end
 
-          ref_ali.test_alignments << ali_class.create!(:sp => sp_score, :tc => tc_score)
+            ref_ali.test_alignments << ali_class.create!(:sp => sp_score, :tc => tc_score)
+            end
         end
       end
-    end
 
+    end
   end
 end
