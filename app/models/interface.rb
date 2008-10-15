@@ -22,10 +22,10 @@ class DomainInterface < Interface
   has_many  :atoms,
             :through      => :residues
 
-  before_save :update_asa,
-              :update_polarity,
-              :update_singlet_propensities,
-              :update_sse_propensities
+#  before_save :update_asa,
+#              :update_polarity,
+#              :update_singlet_propensities,
+#              :update_sse_propensities
 
   delegate  :pdb_code, :r_value, :r_free, :sunid, :sccs, :sid, :description, :resolution,
             :to => :domain
