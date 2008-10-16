@@ -469,11 +469,11 @@ namespace :bipa do
         vdw_contact2 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.acceptor, hbond.donor)
         if vdw_contact1
           VdwContact.destroy(vdw_contact1)
-          $logger.info ">>> Destroyed contact, #{vdw_contact1.id} (#{i += 1})"
+          $logger.info ">>> Destroyed vdw contact, #{vdw_contact1.id} (#{i += 1})"
         end
         if vdw_contact2
           VdwContact.destroy(vdw_contact2)
-          $logger.info ">>> Destroyed contact, #{vdw_contact2.id} (#{i += 1})"
+          $logger.info ">>> Destroyed vdw contact, #{vdw_contact2.id} (#{i += 1})"
         end
       end
     end

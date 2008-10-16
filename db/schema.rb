@@ -133,7 +133,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean     :whbond_rna_sugar,      :default => false
     t.boolean     :whbond_rna_phosphate,  :default => false
     t.boolean     :vdw_rna_base,          :default => false
-    t.boolean     :vdw_rna_sugar,         :default => false
+    t.boolean     :vdw_rna_sugar,         :default => fals:Re
     t.boolean     :vdw_rna_phophate,      :default => false
   end
 
@@ -173,8 +173,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :hbonds_as_acceptor_count,  :default => 0
   end
 
-  add_index :atoms, [:residue_id, :type, :atom_code], :unique => true, :name => :residue_id_and_type_and_atom_code
-  add_index :atoms, [:residue_id, :type, :atom_name], :unique => true, :name => :residue_id_and_type_and_atom_name
+  add_index :atoms, [:residue_id, :type, :atom_code], :unique => true, :name => :residue_type_atom_code
+  add_index :atoms, [:residue_id, :type, :atom_name], :unique => true, :name => :residue_type_atom_name
 
   # 'dssp' table
   create_table :dssp, :force => true do |t|
