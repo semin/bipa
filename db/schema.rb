@@ -173,8 +173,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :hbonds_as_acceptor_count,  :default => 0
   end
 
-  add_index :atoms, [:residue_id, :type, :atom_code]
-  add_index :atoms, [:residue_id, :type, :atom_name]
+  add_index :atoms, [:residue_id, :type, :atom_code], :name => :residue_id_and_type_and_atom_code
+  add_index :atoms, [:residue_id, :type, :atom_name], :name => :residue_id_and_type_and_atom_name
 
   # 'dssp' table
   create_table :dssp, :force => true do |t|
