@@ -133,7 +133,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean     :whbond_rna_sugar,      :default => false
     t.boolean     :whbond_rna_phosphate,  :default => false
     t.boolean     :vdw_rna_base,          :default => false
-    t.boolean     :vdw_rna_sugar,         :default => fals:Re
+    t.boolean     :vdw_rna_sugar,         :default => false
     t.boolean     :vdw_rna_phophate,      :default => false
   end
 
