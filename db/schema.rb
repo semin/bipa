@@ -13,8 +13,8 @@ include Bipa::Constants
 
 ActiveRecord::Schema.define(:version => 1) do
 
-  # 'scops' table
-  create_table :scops, :force => true do |t|
+  # 'scop' table
+  create_table :scop, :force => true do |t|
     t.belongs_to  :parent
     t.integer     :lft
     t.integer     :rgt
@@ -32,10 +32,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean     :resall,      :default => false
   end
 
-  add_index :scops, :sunid
-  add_index :scops, :parent_id
-  add_index :scops, :lft
-  add_index :scops, :rgt
+  add_index :scop, :sunid
+  add_index :scop, :parent_id
+  add_index :scop, :lft
+  add_index :scop, :rgt
+  add_index :scop, [:id, :type]
 
 
   # 'structures' table
@@ -173,8 +174,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :hbonds_as_acceptor_count,  :default => 0
   end
 
-  add_index :atoms, [:residue_id, :type, :atom_code], :unique => true, :name => :residue_type_atom_code
-  add_index :atoms, [:residue_id, :type, :atom_name], :unique => true, :name => :residue_type_atom_name
+  add_index :atoms, [:residue_id, :type, :atom_code]
+  add_index :atoms, [:residue_id, :type, :atom_name]
+
 
   # 'dssp' table
   create_table :dssp, :force => true do |t|

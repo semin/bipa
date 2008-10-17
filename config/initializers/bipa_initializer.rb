@@ -1,8 +1,11 @@
 require "matrix"
 require "bio_extensions"
+require "math_extensions"
 require "array_extensions"
 require "vector_extensions"
-require "math_extensions"
+require "kernel_extentions"
+require "string_extensions"
+require "struct_extensions"
 require "active_record_extensions"
 require "bipa"
 

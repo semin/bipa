@@ -1,5 +1,7 @@
 class Scop < ActiveRecord::Base
 
+  set_table_name :scop
+
   include Bipa::Constants
 
   acts_as_nested_set

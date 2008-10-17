@@ -2,7 +2,7 @@ namespace :bipa do
   namespace :import do
 
     desc "Import SCOP datasets"
-    task :scops => [:environment] do
+    task :scop => [:environment] do
 
       hie_file = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
       des_file = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
@@ -56,7 +56,7 @@ namespace :bipa do
         end
         $logger.info ">>> Importing SCOP, #{self_sunid}: done (#{i + 1})"
       end
-    end # task :scops
+    end # task :scop
 
 
     desc "Import protein-nucleic acid complex PDB files to BIPA tables"
@@ -1084,13 +1084,7 @@ namespace :bipa do
         chain   = structure.chains.find_by_chain_code(chain_code)
         go_term = GoTerm.find_by_go_id(line_hsh[:go_id])
 
-        GoaPdb.create!(
-          {
-          :chain_id   => chain.id,
-          :go_term_id => go_term.id
-        }.merge!(line_hsh)
-        )
-
+        GoaPdb.create!({:chain_id => chain.id, :go_term_id => go_term.id }.merge!(line_hsh))
         $logger.info ">>> Importing #{pdb_code}, #{chain_code}, #{line_hsh[:go_id]} into 'goa_pdbs' table: done"
       end
     end
@@ -1100,7 +1094,7 @@ namespace :bipa do
     task :taxonomic_nodes => [:environment] do
       ActiveRecord::Base.connection.execute(
         <<-SQL
-          LOAD DATA LOCAL INFILE "./public/taxonomy/nodes.dmp"
+          LOAD DATA INFILE "#{File.join(RAILS_ROOT, './public/taxonomy/nodes.dmp')}"
           IGNORE INTO TABLE taxonomic_nodes
           FIELDS TERMINATED BY '\t|\t'
           LINES  TERMINATED BY '\t|\n';
@@ -1147,7 +1141,7 @@ namespace :bipa do
     task :taxonomic_names => [:environment] do
       ActiveRecord::Base.connection.execute(
         <<-SQL
-          LOAD DATA LOCAL INFILE "./public/taxonomy/names.dmp"
+          LOAD DATA INFILE "#{File.join(RAILS_ROOT, './public/taxonomy/names.dmp')}"
           IGNORE INTO TABLE taxonomic_names
           FIELDS TERMINATED BY '\t|\t'
           LINES  TERMINATED BY '\t|\n'
