@@ -383,7 +383,7 @@ namespace :bipa do
               pdb_file = File.join(NACCESS_DIR, pdb_stem + '.pdb')
 
               if File.size? zap_file
-                $logger.info("Skip #{pdb_code}, ZAP results files are already there!")
+                $logger.warn "!!! Skipped, #{pdb_code}: ZAP results files are already there!"
                 next
               end
 
