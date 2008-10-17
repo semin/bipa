@@ -370,7 +370,7 @@ namespace :bipa do
 
       refresh_dir(ZAP_DIR) unless RESUME
 
-      pdb_codes = Dir[NACCESS_DIR + "/*_aa.asa"].map { |f| f.match(/(\S{4})_aa/)[1] }.sort
+      pdb_codes = FileList[NACCESS_DIR + "/*_aa.asa"].map { |f| f.match(/(\S{4})_aa/)[1] }.sort
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -391,9 +391,9 @@ namespace :bipa do
               end
 
               #sh "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
-              sh "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
+              system "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
-            $logger.info("ZAP: #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done")
+            $logger.info ">>> Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
       end
