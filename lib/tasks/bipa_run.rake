@@ -374,11 +374,8 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
-
             [pdb_code + "_aa", pdb_code + "_na"].each do |pdb_stem|
               zap_file = File.join(ZAP_DIR, pdb_stem + '.zap')
               grd_file = File.join(ZAP_DIR, pdb_stem + '.grd')
