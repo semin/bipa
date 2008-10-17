@@ -259,7 +259,7 @@ namespace :bipa do
               end
             end
 
-            Naccess.import_with_load_data_infile(columns, values)
+            Naccess.import_with_load_data_infile(columns, values, :local => false)
             ActiveRecord::Base.remove_connection
 
             $logger.info ">>> Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
@@ -425,7 +425,7 @@ namespace :bipa do
               end
             end
 
-            VdwContact.import_with_load_data_infile(columns, values)
+            VdwContact.import_with_load_data_infile(columns, values, :local => false)
             ActiveRecord::Base.remove_connection
 
             $logger.info ">>> Importing #{values.size} van der Waals contacts in #{pdb_code} to 'vdw_contacts' table: done (#{i + 1}/#{pdb_codes.size})"
@@ -521,7 +521,7 @@ namespace :bipa do
               end
             end
 
-            Hbplus.import_with_load_data_infile(columns, values)
+            Hbplus.import_with_load_data_infile(columns, values, :local => false)
             ActiveRecord::Base.remove_connection
             $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code.downcase}.hb2 to 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork

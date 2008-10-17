@@ -101,24 +101,6 @@ namespace :bipa do
 
       refresh_dir GO_DIR
 
-      # Download GO-PDB mapping file from EBI
-      require "net/ftp"
-
-      Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
-        ftp.login "anonymous"
-        ftp.chdir "/pub/databases/GO/goa/PDB/"
-        ftp.getbinaryfile("./gene_association.goa_pdb.gz", File.join(GO_DIR, "gene_association.goa_pdb.gz"))
-
-        $logger.info ">>> Downloading gene_association.goa_pdb.gz: done"
-      end
-
-      cwd = pwd
-      chdir GO_DIR
-      system "gzip -d *.gz"
-      chdir cwd
-
-      $logger.info ">>> Uncompressing gene_association.goa_pdb.gz: done"
-
       # Download GO.obo file from GO Web
       require "open-uri"
 
@@ -126,6 +108,26 @@ namespace :bipa do
         f.puts open(GO_OBO_URI).read
         $logger.info ">>> Downloading #{GO_OBO_URI}: done"
       end
+
+      # Download GO-PDB mapping file from EBI
+#      require "net/ftp"
+#
+#      Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
+#        ftp.login "anonymous"
+#        ftp.chdir "/pub/databases/GO/goa/PDB/"
+#        ftp.getbinaryfile("./gene_association.goa_pdb.gz", File.join(GO_DIR, "gene_association.goa_pdb.gz"))
+#
+#        $logger.info ">>> Downloading gene_association.goa_pdb.gz: done"
+#      end
+      system "wget ftp://ftp.ebi.ac.uk/pub/databases/GO/goa/PDB/gene_association.goa_pdb.gz -P#{GO_DIR}"
+      $logger.info ">>> Downloading gene_association.goa_pdb.gz: done"
+
+      cwd = pwd
+      chdir GO_DIR
+      system "gzip -d *.gz"
+      chdir cwd
+
+      $logger.info ">>> Uncompressing gene_association.goa_pdb.gz: done"
     end
 
 
