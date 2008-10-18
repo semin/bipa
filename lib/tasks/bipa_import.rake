@@ -556,7 +556,7 @@ namespace :bipa do
               end
             end
 
-            Hbond.import_with_load_data_infile(columns, values) unless values.empty?
+            Hbond.import_with_load_data_infile(columns, values, :local => false) unless values.empty?
             ActiveRecord::Base.remove_connection
 
             $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code} into 'hbonds' table: done (#{i + 1}/#{pdb_codes.size})"
@@ -627,7 +627,7 @@ namespace :bipa do
               end
             end
 
-            Whbond.import_with_load_data_infile(columns, values) unless values.empty?
+            Whbond.import_with_load_data_infile(columns, values, :local => false) unless values.empty?
             ActiveRecord::Base.remove_connection
 
             $logger.info ">>> Importing #{values.size} water-mediated hbonds in #{pdb_code} to 'whbonds' table: done (#{i + 1}/#{pdb_codes.size})"
