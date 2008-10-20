@@ -215,43 +215,43 @@ class DomainInterface < Interface
     end
   end
 
-  %w(hbond whbond vdw_contact).each do |intact|
-
-    AminoAcids::Residues::STANDARD.each do |aa|
-      class_eval <<-END
-        before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
-
-        def update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
-          self.frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids =
-          frequency_of_#{intact}_between_nucleic_acids_and_("#{aa}")
-        end
-      END
-    end
-
-    %w(sugar phosphate).each do |moiety|
-      class_eval <<-END
-        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
-
-        def update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
-          self.frequency_of_#{intact}_between_amino_acids_and_#{moiety} =
-            AminoAcids::Residues::STANDARD.inject(0) { |sum, aa|
-              sum + frequency_of_#{intact}_between_#{moiety}_and_(aa)
-            }
-        end
-      END
-
-      AminoAcids::Residues::STANDARD.each do |aa|
-        class_eval <<-END
-          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-
-          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
-            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
-            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
-          end
-        END
-      end
-    end
-  end
+#  %w(hbond whbond vdw_contact).each do |intact|
+#
+#    AminoAcids::Residues::STANDARD.each do |aa|
+#      class_eval <<-END
+#        before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
+#
+#        def update_frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids
+#          self.frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids =
+#          frequency_of_#{intact}_between_nucleic_acids_and_("#{aa}")
+#        end
+#      END
+#    end
+#
+#    %w(sugar phosphate).each do |moiety|
+#      class_eval <<-END
+#        before_save :update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
+#
+#        def update_frequency_of_#{intact}_between_amino_acids_and_#{moiety}
+#          self.frequency_of_#{intact}_between_amino_acids_and_#{moiety} =
+#            AminoAcids::Residues::STANDARD.inject(0) { |sum, aa|
+#              sum + frequency_of_#{intact}_between_#{moiety}_and_(aa)
+#            }
+#        end
+#      END
+#
+#      AminoAcids::Residues::STANDARD.each do |aa|
+#        class_eval <<-END
+#          before_save :update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+#
+#          def update_frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}
+#            self.frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety} =
+#            frequency_of_#{intact}_between_#{moiety}_and_("#{aa}")
+#          end
+#        END
+#      end
+#    end
+#  end
 end # class DomainInterface
 
 

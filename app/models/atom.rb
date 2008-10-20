@@ -59,6 +59,8 @@ class Atom < ActiveRecord::Base
 
   delegate :aa?, :dna?, :rna?, :na?, :het?, :water?, :to => :residue
 
+  delegate :unbound_asa, :bound_asa, :delta_asa, :radius, :to => :naccess
+
   named_scope :surface, lambda { |*args|
     { :conditions => ["unbound_asa > ?", (args.first || MIN_SURFACE_ATOM_ASA)] }
   }
