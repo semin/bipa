@@ -25,11 +25,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :sid
     t.string      :description
     t.float       :resolution
-    (10..100).step(10)  { |i| t.belongs_to :"rep#{i}_subfamily" }
-    (10..100).step(10)  { |i| t.boolean :"rep#{i}", :default => false }
-    (1..10).step(1)     { |i| t.boolean :"res#{i}", :default => false }
-    t.boolean     :repall,      :default => false
-    t.boolean     :resall,      :default => false
+    (10..100).step(10)  { |i| t.belongs_to :"nr#{i}_subfamily" }
+    (10..100).step(10)  { |i| t.boolean :"nr#{i}", :default => false }
+    (1..10).step(1)     { |i| t.boolean :"rs#{i}", :default => false }
+    t.boolean     :nrall, :default => false
+    t.boolean     :rsall, :default => false
   end
 
   add_index :scop, :sunid

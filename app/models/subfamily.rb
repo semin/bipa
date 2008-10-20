@@ -26,7 +26,7 @@ end
 
 (10..100).step(10) do |si|
   eval <<-END
-    class Rep#{si}Subfamily < Subfamily
+    class Nr#{si}Subfamily < Subfamily
 
       has_one :alignment,
               :class_name   => "SubfamilyAlignment",
@@ -34,7 +34,7 @@ end
 
       has_many  :domains,
                 :class_name   => "ScopDomain",
-                :foreign_key  => "rep#{si}_subfamily_id"
+                :foreign_key  => "nr#{si}_subfamily_id"
     end
   END
 end

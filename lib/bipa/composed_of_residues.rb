@@ -59,7 +59,7 @@ module Bipa
     end
     memoize :has_unks?
 
-    %w(unbound bound delta).each do |stat|
+    %w[unbound bound delta].each do |stat|
       class_eval <<-END
         def #{stat}_asa_of_residue(res)
           residues.inject(0) { |s, r| r.residue_name == res.upcase ? s + r.#{stat}_asa : s }

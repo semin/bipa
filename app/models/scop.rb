@@ -7,11 +7,11 @@ class Scop < ActiveRecord::Base
   acts_as_nested_set
 
   ((10..100).step(10).to_a << "all").each do |identity|
-    named_scope :"rep#{identity}", :conditions => { :"rep#{identity}" => true }
+    named_scope :"nr#{identity}", :conditions => { :"nr#{identity}" => true }
   end
 
   ((1..10).step(1).to_a << "all").each do |resolution|
-    named_scope :"res#{resolution}", :conditions => { :"res#{resolution}" => true }
+    named_scope :"rs#{resolution}", :conditions => { :"rs#{resolution}" => true }
   end
 
   define_index do
@@ -60,7 +60,7 @@ class Scop < ActiveRecord::Base
   %w(dna rna).each do |na|
     class_eval <<-END
       def #{na}_interfaces(redundancy, resolution)
-        leaves.send(:"rep\#{redundancy}").send(:"res\#{resolution}").map(&:#{na}_interfaces).flatten.compact
+        leaves.send(:"nr\#{redundancy}").send(:"rs\#{resolution}").map(&:#{na}_interfaces).flatten.compact
       end
       memoize :#{na}_interfaces
     END
@@ -233,12 +233,12 @@ class ScopFamily < Scop
             :class_name   => "FullAlignment",
             :foreign_key  => "scop_id"
 
-    has_one :"rep#{identity}_alignment",
-            :class_name   => "Rep#{identity}Alignment",
+    has_one :"nr#{identity}_alignment",
+            :class_name   => "Nr#{identity}Alignment",
             :foreign_key  => "scop_id"
 
-    has_many  :"rep#{identity}_subfamilies",
-              :class_name   => "Rep#{identity}Subfamily",
+    has_many  :"nr#{identity}_subfamilies",
+              :class_name   => "Nr#{identity}Subfamily",
               :foreign_key  => "scop_id"
   end
 end
@@ -257,9 +257,9 @@ class ScopDomain < Scop
   include Bipa::ComposedOfResidues
 
   (10..100).step(10) do |identity|
-    belongs_to  :"rep#{identity}_subfamily",
-                :class_name   => "Rep#{identity}Subfamily",
-                :foreign_key  => "rep#{identity}_subfamily#{identity}_id"
+    belongs_to  :"nr#{identity}_subfamily",
+                :class_name   => "Nr#{identity}Subfamily",
+                :foreign_key  => "nr#{identity}_subfamily#{identity}_id"
   end
 
   has_many  :dna_interfaces,

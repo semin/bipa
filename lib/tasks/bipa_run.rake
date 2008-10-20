@@ -177,7 +177,7 @@ namespace :bipa do
 
       refresh_dir(BLASTCLUST_DIR) unless RESUME
 
-      sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
+      sunids    = ScopFamily.repall.map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -194,11 +194,10 @@ namespace :bipa do
 
             mkdir(fam_dir)
 
-            domains = family.all_registered_leaf_children
-
+            domains = family.leaves.select(&:repall)
             domains.each do |domain|
               if domain.to_sequence.include?("X")
-                puts "Skip: SCOP domain, #{domain.sunid} has some unknown residues!"
+                $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
                 next
               end
               File.open(fam_fasta, "a") do |file|
@@ -222,7 +221,7 @@ namespace :bipa do
             end
 
             ActiveRecord::Base.remove_connection
-            $logger.info("Creating cluster files for SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})")
+            $logger.info ">>> Creating cluster files for SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)

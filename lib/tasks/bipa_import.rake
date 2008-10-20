@@ -674,10 +674,10 @@ namespace :bipa do
               end
 
               if iface_found == true
-                domain.repall = true
+                domain.nrall = true
                 domain.save!
                 domain.ancestors.each do |anc|
-                  anc.repall = true
+                  anc.nrall = true
                   anc.save!
                 end
               end
@@ -741,7 +741,7 @@ namespace :bipa do
     desc "Import Subfamilies for each SCOP family"
     task :subfamilies => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
+      sunids    = ScopFamily.nrall.map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -755,11 +755,11 @@ namespace :bipa do
             family      = ScopFamily.find_by_sunid(sunid)
             family_dir  = File.join(BLASTCLUST_DIR, "#{sunid}")
 
-            (10..100).step(10) do |si|
+            (40..100).step(20) do |si|
               subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
 
               IO.readlines(subfamily_file).each do |line|
-                subfamily = "Rep#{si}Subfamily".constantize.new
+                subfamily = "Nr#{si}Subfamily".constantize.new
 
                 members = line.split(/\s+/)
                 members.each do |member|
@@ -769,12 +769,11 @@ namespace :bipa do
 
                 subfamily.family = family
                 subfamily.save!
-
-                $logger.info("Rep#{si}Subfamily (#{subfamily.id}): created")
+                $logger.debug ">>> Creating Nr#{si}Subfamily, #{subfamily.id}: done"
               end
             end
             ActiveRecord::Base.remove_connection
-            $logger.info("Importing subfamilies for #{sunid} : done (#{i + 1}/#{sunids.size})")
+            $logger.info ">>> Importing subfamilies for SCOP family, #{sunid} : done (#{i + 1}/#{sunids.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -785,7 +784,7 @@ namespace :bipa do
     desc "Import Full & Representative Alignments for each SCOP Family"
     task :full_alignments => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all, :select => "sunid").map(&:sunid)
+      sunids    = ScopFamily.nrall.find(:all, :select => "sunid").map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -856,7 +855,7 @@ namespace :bipa do
     desc "Import representative alignments for each SCOP Family"
     task :rep_alignments => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
+      sunids    = ScopFamily.nrall.find(:all).map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -932,7 +931,7 @@ namespace :bipa do
     desc "Import subfamily alignments for each SCOP Family"
     task :sub_alignments => [:environment] do
 
-      sunids    = ScopFamily.repall.find(:all).map(&:sunid)
+      sunids    = ScopFamily.nrall.find(:all).map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
