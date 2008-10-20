@@ -33,7 +33,7 @@ class Scop < ActiveRecord::Base
     when "dm"   then ScopProtein.create!(opts)
     when "sp"   then ScopSpecies.create!(opts)
     when "px"   then ScopDomain.create!(opts)
-    else; raise "Unknown SCOP hierarchy: #{opts[:stype]}"
+    else raise "Unknown SCOP hierarchy: #{opts[:stype]}"
     end
   end
 
