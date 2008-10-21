@@ -25,9 +25,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :sid
     t.string      :description
     t.float       :resolution
-    (10..100).step(10)  { |i| t.belongs_to :"nr#{i}_subfamily" }
-    (10..100).step(10)  { |i| t.boolean :"nr#{i}", :default => false }
-    (1..10).step(1)     { |i| t.boolean :"rs#{i}", :default => false }
+    (20..100).step(20)  { |i| t.belongs_to :"nr#{i}_subfamily" }
+    (20..100).step(20)  { |i| t.boolean :"nr#{i}", :default => false }
+    (2..10).step(2)     { |i| t.boolean :"rs#{i}", :default => false }
     t.boolean     :nrall, :default => false
     t.boolean     :rsall, :default => false
   end
@@ -174,6 +174,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :hbonds_as_acceptor_count,  :default => 0
   end
 
+  add_index :atoms, :residue_id
   add_index :atoms, [:residue_id, :type, :atom_code]
   add_index :atoms, [:residue_id, :type, :atom_name]
 

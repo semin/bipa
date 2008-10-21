@@ -73,6 +73,7 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         sunids.each_with_index do |sunid, i|
+
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
@@ -112,7 +113,7 @@ namespace :bipa do
     desc "Generate PDB files for each Subfamily of each SCOP Family"
     task :sub_scop_pdb_files => [:environment] do
 
-      sunids    = ScopFamily.registered.find(:all, :select => "sunid").map(&:sunid)
+      sunids    = ScopFamily.nrall.map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
       sub_dir   = File.join(FAMILY_DIR, "sub")
       full_dir  = File.join(FAMILY_DIR, "full")
@@ -132,31 +133,29 @@ namespace :bipa do
 
             mkdir_p(family_dir)
 
-            (10..100).step(10) do |si|
-              rep_dir = File.join(family_dir, "rep#{si}")
-              mkdir_p(rep_dir)
+            (20..100).step(20) do |si|
+              nr_dir = File.join(family_dir, "nr#{si}")
+              mkdir_p nr_dir
 
-              subfamilies = family.send("rep#{si}_subfamilies")
+              subfamilies = family.send("nr#{si}_subfamilies")
               subfamilies.each do |subfamily|
-                subfamily_dir = File.join(rep_dir, subfamily.id.to_s)
-                mkdir_p(subfamily_dir)
+                subfamily_dir = File.join(nr_dir, subfamily.id.to_s)
+                mkdir_p subfamily_dir
 
                 domains = subfamily.domains
-
                 domains.each do |domain|
                   domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
 
                   if !File.exists?(domain_pdb_file)
-                    $logger.warn("Scop Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues")
+                    $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
                     next
                   end
-
-                  system("cp #{domain_pdb_file} #{subfamily_dir}")
+                  cp domain_pdb_file, subfamily_dir
                 end # domains.each
               end # subfamilies.each
-            end # (10..100).step(10)
+            end # (20..100).step(20)
 
-            $logger.info("Generating PDB files for subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+            $logger.info ">>> Generating PDB files for subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             ActiveRecord::Base.remove_connection
           end
         end
