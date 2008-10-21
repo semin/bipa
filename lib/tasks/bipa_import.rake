@@ -764,7 +764,11 @@ namespace :bipa do
                 members = line.split(/\s+/)
                 members.each do |member|
                   domain = ScopDomain.find_by_sunid(member)
-                  subfamily.domains << domain
+                  if domain
+                    subfamily.domains << domain
+                  else
+                    raise "!!! Cannot find SCOP domain, #{member}"
+                  end
                 end
 
                 subfamily.family = family

@@ -47,7 +47,7 @@ class Scop < ActiveRecord::Base
     when "dm"   then "Protein"
     when "sp"   then "Species"
     when "px"   then "Domain"
-    else; "Unknown"
+    else "Unknown"
     end
   end
 
