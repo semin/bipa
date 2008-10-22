@@ -307,31 +307,31 @@ class ScopDomain < Scop
     result = false
     ranges_on_chains.each do |range|
       raise "Empty description!" if range =~ /^\s*$/
-        case range.strip
-        when /^(\S):$/ # F:
-          chain_code = $1
-          if residue.chain[:chain_code] == chain_code
-            result = true
-          end
-        when /^-$/ # -
-          true
-        when /^(-?\d+)-(-?\d+)$/ # 496-581
-          res_from  = $1.to_i
-          res_to    = $2.to_i
-          if ((res_from..res_to).include?(residue[:residue_code]))
-            result = true
-          end
-        when /^(\S):(-?\d+)-(-?\d+)$/ # A:104-157
-          chain_code  = $1
-          res_from    = $2.to_i
-          res_to      = $3.to_i
-          if ((residue.chain[:chain_code] == chain_code) &&
-              (res_from..res_to).include?(residue[:residue_code]))
-            result = true
-          end
-        else
-          raise "#{self.description} should be added to Scop class!"
-        end # case
+      case range.strip
+      when /^(\S):$/ # F:
+        chain_code = $1
+        if residue.chain[:chain_code] == chain_code
+          result = true
+        end
+      when /^-$/ # -
+        true
+      when /^(-?\d+)-(-?\d+)$/ # 496-581
+        res_from  = $1.to_i
+        res_to    = $2.to_i
+        if ((res_from..res_to).include?(residue[:residue_code]))
+          result = true
+        end
+      when /^(\S):(-?\d+)-(-?\d+)$/ # A:104-157
+        chain_code  = $1
+        res_from    = $2.to_i
+        res_to      = $3.to_i
+        if ((residue.chain[:chain_code] == chain_code) &&
+            (res_from..res_to).include?(residue[:residue_code]))
+          result = true
+        end
+      else
+        raise "#{self.description} should be added to Scop class!"
+      end # case
     end # each
     result
   end

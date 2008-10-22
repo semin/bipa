@@ -192,7 +192,7 @@ namespace :bipa do
             fam_dir   = File.join(BLASTCLUST_DIR, "#{sunid}")
             fam_fasta = File.join(fam_dir, "#{sunid}.fa")
 
-            mkdir(fam_dir)
+            mkdir fam_dir
 
             domains = family.leaves.select(&:repall)
             domains.each do |domain|
