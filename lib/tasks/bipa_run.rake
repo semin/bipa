@@ -177,7 +177,7 @@ namespace :bipa do
 
       refresh_dir(BLASTCLUST_DIR) unless RESUME
 
-      sunids    = ScopFamily.repall.map(&:sunid)
+      sunids    = ScopFamily.nrall.map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -188,35 +188,49 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            family    = ScopFamily.find_by_sunid(sunid)
-            fam_dir   = File.join(BLASTCLUST_DIR, "#{sunid}")
-            fam_fasta = File.join(fam_dir, "#{sunid}.fa")
+            family  = ScopFamily.find_by_sunid(sunid)
+            fam_dir = File.join(BLASTCLUST_DIR, "#{sunid}")
 
             mkdir fam_dir
 
-            domains = family.leaves.select(&:repall)
+            domains = family.leaves.select(&:nrall)
             domains.each do |domain|
               if domain.to_sequence.include?("X")
                 $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
                 next
               end
-              File.open(fam_fasta, "a") do |file|
-                file.puts ">#{domain.sunid}"
-                file.puts domain.to_sequence
+              %w[dna rna].each do |na|
+                if domain.send(:"binding_#{na}?")
+                  na_dir    = File.join(fam_dir, na)
+                  fam_fasta = File.join(na_dir, "#{sunid}.fa")
+                  mkdir(na_dir) if !File.exists? na_dir
+
+                  File.open(fam_fasta, "a") do |f|
+                    f.puts ">#{domain.sunid}"
+                    f.puts domain.to_sequence
+                  end
+
+                  $logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
+                end
               end
             end
 
-            if File.size?(fam_fasta)
-              (10..100).step(10) do |si|
-                blastclust_cmd =
-                  "blastclust " +
-                  "-i #{fam_fasta} "+
-                  "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
-                  "-L .9 " +
-                  "-S #{si} " +
-                  "-a 2 " +
-                  "-p T"
-                  sh blastclust_cmd
+            %w[dna rna].each do |na|
+              na_dir    = File.join(fam_dir, na)
+              fam_fasta = File.join(na_dir, "#{sunid}.fa")
+
+              if File.size?(fam_fasta)
+                (20..100).step(20) do |si|
+                  blastclust_cmd =
+                    "blastclust " +
+                    "-i #{fam_fasta} "+
+                    "-o #{File.join(na_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
+                    "-L .9 " +
+                    "-S #{si} " +
+                    "-a 2 " +
+                    "-p T"
+                    sh blastclust_cmd
+                end
               end
             end
 
