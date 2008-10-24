@@ -755,7 +755,7 @@ namespace :bipa do
             family      = ScopFamily.find_by_sunid(sunid)
             family_dir  = File.join(BLASTCLUST_DIR, "#{sunid}")
 
-            (40..100).step(20) do |si|
+            (20..100).step(20) do |si|
               subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
 
               IO.readlines(subfamily_file).each do |line|
