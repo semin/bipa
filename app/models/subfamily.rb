@@ -24,17 +24,19 @@ class Subfamily < ActiveRecord::Base
 end
 
 
-(10..100).step(10) do |si|
-  eval <<-END
-    class Nr#{si}Subfamily < Subfamily
+%w[dna rna].each do |na|
+  (10..100).step(10) do |si|
+    eval <<-END
+      class Nr#{si}#{na.capitalize}Subfamily < Subfamily
 
-      has_one :alignment,
-              :class_name   => "SubfamilyAlignment",
-              :foreign_key  => "subfamily_id"
+        has_one :alignment,
+                :class_name   => "SubfamilyAlignment",
+                :foreign_key  => "subfamily_id"
 
-      has_many  :domains,
-                :class_name   => "ScopDomain",
-                :foreign_key  => "nr#{si}_subfamily_id"
-    end
-  END
+        has_many  :domains,
+                  :class_name   => "ScopDomain",
+                  :foreign_key  => "nr#{si}_#{na}_subfamily_id"
+      end
+    END
+  end
 end

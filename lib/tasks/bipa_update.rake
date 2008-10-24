@@ -303,22 +303,24 @@ namespace :bipa do
     end
 
 
-    desc "Update 'repXXX' columns of 'scops' table"
-    task :scops_reps => [:environment] do
-      (10..100).step(10).each do |si|
-        klass = "Rep#{si}Subfamily".constantize
-        klass.find(:all).each do |subfamily|
-          rep = subfamily.representative
-          unless rep.nil?
-            rep.send("rep#{si}=", true)
-            rep.save!
-            rep.ancestors.each do |anc|
-              anc.send("rep#{si}=", true)
-              anc.save!
+    desc "Update 'rpXXX' columns of 'scop' table"
+    task :scops_rps => [:environment] do
+      %w[dna rna].each do |na|
+        (20..100).step(20).each do |si|
+          klass = "Nr#{si}#{na.capitalize}Subfamily".constantize
+          klass.all.each do |subfamily|
+            rep = subfamily.representative
+            unless rep.nil?
+              rep.send("rp#{si}_#{na}=", true)
+              rep.save!
+              rep.ancestors.each do |anc|
+                anc.send("rp#{si}_#{na}=", true)
+                anc.save!
+              end
+              $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done"
+            else
+              $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id}"
             end
-            $logger.info("Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done")
-          else
-            $logger.info("No representative structure for Rep#{si}Subfamily, #{subfamily.id}")
           end
         end
       end
@@ -330,30 +332,20 @@ namespace :bipa do
       domains = ScopDomain.repall.find(:all)
 
       domains.each_with_index do |domain, i|
-        domain.res1    = true if domain.resolution < 1
         domain.res2    = true if domain.resolution < 2
-        domain.res3    = true if domain.resolution < 3
         domain.res4    = true if domain.resolution < 4
-        domain.res5    = true if domain.resolution < 5
         domain.res6    = true if domain.resolution < 6
-        domain.res7    = true if domain.resolution < 7
         domain.res8    = true if domain.resolution < 8
-        domain.res9    = true if domain.resolution < 9
         domain.res10   = true if domain.resolution < 10
         domain.resall  = true if domain.resolution < 1000
 
         domain.save!
 
         domain.ancestors.each do |ancestor|
-          ancestor.res1    = true if domain.res1    == true
           ancestor.res2    = true if domain.res2    == true
-          ancestor.res3    = true if domain.res3    == true
           ancestor.res4    = true if domain.res4    == true
-          ancestor.res5    = true if domain.res5    == true
           ancestor.res6    = true if domain.res6    == true
-          ancestor.res7    = true if domain.res7    == true
           ancestor.res8    = true if domain.res8    == true
-          ancestor.res9    = true if domain.res9    == true
           ancestor.res10   = true if domain.res10   == true
           ancestor.resall  = true if domain.resall  == true
 
@@ -384,7 +376,7 @@ namespace :bipa do
     desc "Update JOY templates to include atomic interaction information"
     task :joy_templates => [:environment] do
 
-      Dir["./public/families/rep90/*"].grep(/\d+/).each_with_index do |dir, i|
+      FileList["./public/families/nr90/*"].grep(/\d+/).each_with_index do |dir, i|
         sunid = dir.match(/rep\d+\/(\d+)/)[1]
         tem_file = File.join(dir, "baton.tem")
 

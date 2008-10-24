@@ -256,10 +256,12 @@ class ScopDomain < Scop
 
   include Bipa::ComposedOfResidues
 
-  (10..100).step(10) do |identity|
-    belongs_to  :"nr#{identity}_subfamily",
-                :class_name   => "Nr#{identity}Subfamily",
-                :foreign_key  => "nr#{identity}_subfamily#{identity}_id"
+  %w[dna rna].each do |na|
+    (10..100).step(10) do |identity|
+      belongs_to  :"nr#{identity}_#{na}_subfamily",
+                  :class_name   => "Nr#{identity}#{na.capitalize}Subfamily",
+                  :foreign_key  => "nr#{identity}_#{na}_subfamily_id"
+    end
   end
 
   has_many  :dna_interfaces,

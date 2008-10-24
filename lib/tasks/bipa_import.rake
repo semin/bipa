@@ -755,27 +755,37 @@ namespace :bipa do
             family      = ScopFamily.find_by_sunid(sunid)
             family_dir  = File.join(BLASTCLUST_DIR, "#{sunid}")
 
-            (20..100).step(20) do |si|
-              subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
+            %w[dna rna].each do |na|
+              na_dir = File.join(family_dir, na)
 
-              IO.readlines(subfamily_file).each do |line|
-                subfamily = "Nr#{si}Subfamily".constantize.new
+              if !File.exists?(na_dir)
+                $logger.warn "!!! SCOP family, #{sunid} doesn't have any #{na} binding subfamilies"
+                next
+              end
 
-                members = line.split(/\s+/)
-                members.each do |member|
-                  domain = ScopDomain.find_by_sunid(member)
-                  if domain
-                    subfamily.domains << domain
-                  else
-                    raise "!!! Cannot find SCOP domain, #{member}"
+              (20..100).step(20) do |si|
+                subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
+
+                IO.readlines(subfamily_file).each do |line|
+                  subfamily = "Nr#{si}#{na.capitalize}Subfamily".constantize.new
+
+                  members = line.split(/\s+/)
+                  members.each do |member|
+                    domain = ScopDomain.find_by_sunid(member)
+                    if domain
+                      subfamily.domains << domain
+                    else
+                      raise "!!! Cannot find SCOP domain, #{member}"
+                    end
                   end
-                end
 
-                subfamily.family = family
-                subfamily.save!
-                $logger.debug ">>> Creating Nr#{si}Subfamily, #{subfamily.id}: done"
+                  subfamily.family = family
+                  subfamily.save!
+                  $logger.debug ">>> Creating Nr#{si}Subfamily, #{subfamily.id}: done"
+                end
               end
             end
+
             ActiveRecord::Base.remove_connection
             $logger.info ">>> Importing subfamilies for SCOP family, #{sunid} : done (#{i + 1}/#{sunids.size})"
           end
@@ -788,7 +798,7 @@ namespace :bipa do
     desc "Import Full & Representative Alignments for each SCOP Family"
     task :full_alignments => [:environment] do
 
-      sunids    = ScopFamily.nrall.find(:all, :select => "sunid").map(&:sunid)
+      sunids    = ScopFamily.nrall.map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
