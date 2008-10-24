@@ -318,7 +318,7 @@ namespace :bipa do
     desc "Import OpenEYE ZAP results to BIPA"
     task :zap => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
+      pdb_codes = Structure.all.map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -329,7 +329,7 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure   = Structure.find_by_pdb_code(pdb_code)
+            structure   = Structure.find_by_pdb_code(pdb_code.upcase)
             ZapAtom     = Struct.new(:radius, :formal_charge, :partial_charge, :potential)
             aa_zap_file = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
             na_zap_file = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
