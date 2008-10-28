@@ -78,7 +78,7 @@ namespace :bipa do
             ZapAtom   = Struct.new(:index, :serial, :symbol, :radius,
                                    :formal_charge, :partial_charge, :potential)
 
-            %w(aa na).each do |mol|
+            %w[aa na].each do |mol|
               eval <<-END
                 #{mol}_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_#{mol}.zap")
                 #{mol}_zap_atoms  = Hash.new
@@ -472,37 +472,38 @@ namespace :bipa do
 
 
     desc "Update DNA/RNA interactibility for all residues"
-    task :na_interactibility => [:environment] do
+    task :residues_na_interactibility => [:environment] do
 
-      itfs = DomainInterface.all
-      tot = itfs.count
+      intfs     = DomainInterface.all
+      total     = intfs.count
+      fmanager  = ForkManager.new(MAX_FORK)
 
-      itfs.each_with_index do |itf, i|
-        $logger.debug "Checking DNA/RNA interactibility for residues in interface, #{itf.id} (#{i+1}/#{tot})"
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
 
-        itf.residues.each do |aa|
-          aa.hbond_dna_base       = true if aa.hbonding_dna_as_donor? || aa.hbonding_dna_as_acceptor?
-          aa.hbond_dna_sugar      = true if aa.hbonding_dna_sugar_as_donor? || aa.hbonding_rna_sugar_as_acceptor?
-          aa.hbond_dna_phosphate  = true if aa.hbonding_dna_phosphate_as_donor? || aa.hbonding_dna_phosphate_as_acceptor?
-          aa.whbond_dna_base      = true if aa.whbond_dna_base?
-          aa.whbond_dna_sugar     = true if aa.whbond_dna_sugar?
-          aa.whbond_dna_phosphate = true if aa.whbond_dna_phosphate?
-          aa.vdw_dna_base         = true if aa.vdw_contacting_dna_base?
-          aa.vdw_dna_sugar        = true if aa.vdw_contacting_dna_sugar?
-          aa.vdw_dna_phophate     = true if aa.vdw_contacting_dna_phosphate?
+        intfs.each_with_index do |intf, i|
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
 
-          aa.hbond_rna_base       = true if aa.hbonding_rna_as_donor? || aa.hbonding_rna_as_acceptor?
-          aa.hbond_rna_sugar      = true if aa.hbonding_rna_sugar_as_donor? || aa.hbonding_rna_sugar_as_acceptor?
-          aa.hbond_rna_phosphate  = true if aa.hbonding_rna_phosphate_as_donor? || aa.hbonding_rna_phosphate_as_acceptor?
-          aa.whbond_rna_base      = true if aa.whbond_rna_base?
-          aa.whbond_rna_sugar     = true if aa.whbond_rna_sugar?
-          aa.whbond_rna_phosphate = true if aa.whbond_rna_phosphate?
-          aa.vdw_rna_base         = true if aa.vdw_contacting_rna_base?
-          aa.vdw_rna_sugar        = true if aa.vdw_contacting_rna_sugar?
-          aa.vdw_rna_phophate     = true if aa.vdw_contacting_rna_phosphate?
-
-          aa.save!
+            %w[dna rna].each do |na|
+              intf.residues.each do |aa|
+                aa.send(:"hbond_#{na}_base=",       true) if aa.send(:"hbonding_#{na}_base_as_donor?") || aa.send(:"hbonding_#{na}_base_as_acceptor?")
+                aa.send(:"hbond_#{na}_sugar=",      true) if aa.send(:"hbonding_#{na}_sugar_as_donor?") || aa.send(:"hbonding_#{na}_sugar_as_acceptor?")
+                aa.send(:"hbond_#{na}_phosphate=",  true) if aa.send(:"hbonding_#{na}_phosphate_as_donor?") || aa.send(:"hbonding_#{na}_phosphate_as_acceptor?")
+                aa.send(:"whbond_#{na}_base=",      true) if aa.send(:"whbond_#{na}_base?")
+                aa.send(:"whbond_#{na}_sugar=",     true) if aa.send(:"whbond_#{na}_sugar?")
+                aa.send(:"whbond_#{na}_phosphate=", true) if aa.send(:"whbond_#{na}_phosphate?")
+                aa.send(:"vdw_#{na}_base=",         true) if aa.send(:"vdw_contacting_#{na}_base?")
+                aa.send(:"vdw_#{na}_sugar=",        true) if aa.send(:"vdw_contacting_#{na}_sugar?")
+                aa.send(:"vdw_#{na}_phophate=",     true) if aa.send(:"vdw_contacting_#{na}_phosphate?")
+                aa.save!
+              end
+            end
+            $logger.debug ">>> Updating DNA/RNA interactibility for residues in interface, #{intf.id}: done (#{i+1}/#{total})"
+            ActiveRecord::Base.remove_connection
+          end
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 
