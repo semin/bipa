@@ -764,7 +764,7 @@ namespace :bipa do
               end
 
               (20..100).step(20) do |si|
-                subfamily_file = File.join(family_dir, sunid.to_s + '.cluster' + si.to_s)
+                subfamily_file = File.join(na_dir, sunid.to_s + '.cluster' + si.to_s)
 
                 IO.readlines(subfamily_file).each do |line|
                   subfamily = "Nr#{si}#{na.capitalize}Subfamily".constantize.new
@@ -781,7 +781,7 @@ namespace :bipa do
 
                   subfamily.family = family
                   subfamily.save!
-                  $logger.debug ">>> Creating Nr#{si}Subfamily, #{subfamily.id}: done"
+                  $logger.debug ">>> Importing Nr#{si}#{na.capitalize}Subfamily, #{subfamily.id}: done"
                 end
               end
             end

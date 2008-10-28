@@ -304,7 +304,7 @@ namespace :bipa do
 
 
     desc "Update 'rpXXX' columns of 'scop' table"
-    task :scops_rps => [:environment] do
+    task :scop_rp => [:environment] do
       %w[dna rna].each do |na|
         (20..100).step(20).each do |si|
           klass = "Nr#{si}#{na.capitalize}Subfamily".constantize
@@ -327,8 +327,8 @@ namespace :bipa do
     end
 
 
-    desc "Update 'resXXX' columns of 'scops' table"
-    task :scops_reses => [:environment] do
+    desc "Update 'rsXXX' columns of 'scops' table"
+    task :scop_rs => [:environment] do
       domains = ScopDomain.repall.find(:all)
 
       domains.each_with_index do |domain, i|
@@ -338,7 +338,6 @@ namespace :bipa do
         domain.res8    = true if domain.resolution < 8
         domain.res10   = true if domain.resolution < 10
         domain.resall  = true if domain.resolution < 1000
-
         domain.save!
 
         domain.ancestors.each do |ancestor|
@@ -348,27 +347,10 @@ namespace :bipa do
           ancestor.res8    = true if domain.res8    == true
           ancestor.res10   = true if domain.res10   == true
           ancestor.resall  = true if domain.resall  == true
-
           ancestor.save!
         end
 
         $logger.info("Processing #{domain.id} : done (#{i+1}/#{domains.size})")
-      end
-    end
-
-
-    desc "Update 'resolution' column of 'scop' table"
-    task :scops_resolution => [:environment] do
-      domains = ScopDomain.repall.find(:all)
-      domains.each_with_index do |domain, i|
-        resolution = domain.chains.first.model.structure.resolution
-        if resolution.nil?
-          domain.update_attribute(:resolution, 999.0)
-        else
-          domain.update_attribute(:resolution, resolution)
-        end
-        domain.save!
-        $logger.info("Updating resolution, #{domain.resolution} of domain, #{domain.id}: done (#{i+1}/#{domains.size})")
       end
     end
 

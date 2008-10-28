@@ -184,7 +184,6 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         sunids.each_with_index do |sunid, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
@@ -200,7 +199,8 @@ namespace :bipa do
                 next
               end
               %w[dna rna].each do |na|
-                if domain.send(:"binding_#{na}?")
+                #if domain.send(:"binding_#{na}?")
+                if domain.send(:"#{na}_interfaces").size > 0
                   na_dir    = File.join(fam_dir, na)
                   fam_fasta = File.join(na_dir, "#{sunid}.fa")
                   mkdir(na_dir) if !File.exists? na_dir
