@@ -266,11 +266,12 @@ namespace :bipa do
                 clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
                 list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
 
-                chdir(fam_dir)
+                chdir fam_dir
                 ENV["PDB_EXT"] = ".pdb"
                 File.open("PDBLIST", "w") { |f| f.puts list.join("\n") }
-                sh "Baton.new -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
-                chdir(cwd)
+                #sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
+                system "Baton -list PDBLIST 1>baton.log 2>&1"
+                chdir cwd
 
                 $logger.info ">>> Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
               end
