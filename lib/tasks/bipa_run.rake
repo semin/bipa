@@ -248,32 +248,32 @@ namespace :bipa do
       desc "Run Baton for each SCOP family"
       task :full_scop_pdb_files => [:environment] do
 
-        sunids    = ScopFamily.nrall.map(&:sunid).sort
-        full_dir  = File.join(FAMILY_DIR, "full")
-        fmanager  = ForkManager.new(MAX_FORK)
+        %w[dna rna].each do |na|
+          fmanager  = ForkManager.new(MAX_FORK)
+          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          full_dir  = File.join(FAMILY_DIR, "full", na)
 
-        fmanager.manage do
+          fmanager.manage do
+            sunids.each_with_index do |sunid, i|
+              fmanager.fork do
+                cwd       = pwd
+                fam_dir   = File.join(full_dir, sunid.to_s)
+                pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
-          sunids.each_with_index do |sunid, i|
+                next unless pdb_list.size > 0
 
-            fmanager.fork do
-              cwd       = pwd
-              fam_dir   = File.join(full_dir, sunid.to_s)
-              pdb_list  = Dir[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
+                clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, na, "#{sunid}.cluster80")
+                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
+                list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
 
-              next unless pdb_list.size > 0
+                chdir(fam_dir)
+                ENV["PDB_EXT"] = ".pdb"
+                File.open("PDBLIST", "w") { |f| f.puts list.join("\n") }
+                sh "Baton.new -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
+                chdir(cwd)
 
-              clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, "#{sunid}.cluster90")
-              clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
-              list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
-
-              chdir(fam_dir)
-              ENV["PDB_EXT"] = ".pdb"
-              File.open("LIST", "w") { |f| f.puts list.join("\n") }
-              sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1"
-              chdir(cwd)
-
-              $logger.info ">>> Baton with full set of SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info ">>> Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              end
             end
           end
         end

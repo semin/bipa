@@ -6,11 +6,17 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  ((10..100).step(10).to_a << "all").each do |identity|
-    named_scope :"nr#{identity}", :conditions => { :"nr#{identity}" => true }
+  named_scope :"rpall", :conditions => { :"rpall" => true }
+
+  %w[dna rna].each do |na|
+    named_scope :"rpall_#{na}", :conditions => { :"rpall_#{na}" => true }
+
+    ((20..100).step(20).to_a << "all").each do |identity|
+      named_scope :"rp#{identity}_#{na}", :conditions => { :"rp#{identity}_#{na}" => true }
+    end
   end
 
-  ((1..10).step(1).to_a << "all").each do |resolution|
+  ((2..10).step(2).to_a << "all").each do |resolution|
     named_scope :"rs#{resolution}", :conditions => { :"rs#{resolution}" => true }
   end
 
@@ -228,18 +234,21 @@ end
 
 class ScopFamily < Scop
 
-  (10..100).step(10) do |identity|
-    has_one :"full_alignment",
-            :class_name   => "FullAlignment",
+  %w[dna rna].each do |na|
+
+    has_one :"full_#{na}_alignment",
+            :class_name   => "Full#{na.capitalize}Alignment",
             :foreign_key  => "scop_id"
 
-    has_one :"nr#{identity}_alignment",
-            :class_name   => "Nr#{identity}Alignment",
-            :foreign_key  => "scop_id"
-
-    has_many  :"nr#{identity}_subfamilies",
-              :class_name   => "Nr#{identity}Subfamily",
+    (20..100).step(20) do |si|
+      has_one :"nr#{si}_#{na}_alignment",
+              :class_name   => "Nr#{si}#{na.capitalize}Alignment",
               :foreign_key  => "scop_id"
+
+      has_many  :"nr#{si}_#{na}_subfamilies",
+                :class_name   => "Nr#{si}#{na.capitalize}Subfamily",
+                :foreign_key  => "scop_id"
+    end
   end
 end
 
@@ -299,11 +308,23 @@ class ScopDomain < Scop
   def pdb_code
     sid[1..4].upcase
   end
+  memoize :pdb_code
+
+  def resolution
+    res = residues.first.chain.model.structure.resolution
+    if res
+      res
+    else
+      999
+    end
+  end
+  memoize :resolution
 
   def ranges_on_chains
     # "2hz1 A:2-124, B:1-50" => [A:2-124, B:1-50]
     description.gsub(/^\S{4}\s+/, '').split(',')
   end
+  memoize :ranges_on_chains
 
   def include?(residue)
     result = false
@@ -337,6 +358,7 @@ class ScopDomain < Scop
     end # each
     result
   end
+  memoize :include?
 
   def to_pdb
     atoms.sort_by(&:atom_code).inject("") { |p, a| p + (a.to_pdb + "\n") }

@@ -97,13 +97,15 @@ class SubfamilyAlignment < Alignment
 end
 
 
-(10..100).step(10) do |si|
-  eval <<-EVAL
-    class Rep#{si}Alignment < Alignment
+%w[dna rna].each do |na|
+  (20..100).step(20) do |si|
+    eval <<-EVAL
+      class Nr#{si}#{na.capitalize}Alignment < Alignment
 
-      belongs_to  :family,
-                  :class_name   => "ScopFamily",
-                  :foreign_key  => "scop_id"
-    end
-  EVAL
+        belongs_to  :family,
+                    :class_name   => "ScopFamily",
+                    :foreign_key  => "scop_id"
+      end
+    EVAL
+  end
 end

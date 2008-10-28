@@ -648,7 +648,6 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
@@ -674,10 +673,12 @@ namespace :bipa do
               end
 
               if iface_found == true
-                domain.nrall = true
+                domain.rpall = true
+                domain.send("rpall_#{na}=", true)
                 domain.save!
                 domain.ancestors.each do |anc|
-                  anc.nrall = true
+                  anc.rpall = true
+                  anc.send("rpall_#{na}=", true)
                   anc.save!
                 end
               end
@@ -741,7 +742,7 @@ namespace :bipa do
     desc "Import Subfamilies for each SCOP family"
     task :subfamilies => [:environment] do
 
-      sunids    = ScopFamily.nrall.map(&:sunid)
+      sunids    = ScopFamily.rpall.map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -798,7 +799,7 @@ namespace :bipa do
     desc "Import Full & Representative Alignments for each SCOP Family"
     task :full_alignments => [:environment] do
 
-      sunids    = ScopFamily.nrall.map(&:sunid)
+      sunids    = ScopFamily.rpall.map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -869,7 +870,7 @@ namespace :bipa do
     desc "Import representative alignments for each SCOP Family"
     task :rep_alignments => [:environment] do
 
-      sunids    = ScopFamily.nrall.find(:all).map(&:sunid)
+      sunids    = ScopFamily.rpall.find(:all).map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -945,7 +946,7 @@ namespace :bipa do
     desc "Import subfamily alignments for each SCOP Family"
     task :sub_alignments => [:environment] do
 
-      sunids    = ScopFamily.nrall.find(:all).map(&:sunid)
+      sunids    = ScopFamily.rpall.find(:all).map(&:sunid)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do

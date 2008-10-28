@@ -4,60 +4,45 @@ namespace :bipa do
     desc "Generate full set of PDB files for each SCOP family"
     task :full_scop_pdb_files => [:environment] do
 
-      sunids    = ScopFamily.nrall.map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
-      full_dir  = File.join(FAMILY_DIR, "full")
+      %w[dna rna].each do |na|
+        fmanager  = ForkManager.new(MAX_FORK)
+        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        full_dir  = File.join(FAMILY_DIR, "full", na)
 
-      refresh_dir(full_dir) unless RESUME
+        refresh_dir(full_dir) unless RESUME
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        sunids.each_with_index do |sunid, i|
+          sunids.each_with_index do |sunid, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+              family      = ScopFamily.find_by_sunid(sunid)
+              family_dir  = File.join(full_dir, "#{sunid}")
 
-            family      = ScopFamily.find_by_sunid(sunid)
-            family_dir  = File.join(full_dir, "#{sunid}")
+              mkdir_p(family_dir) unless File.exists? family_dir
 
-            mkdir_p(family_dir) unless File.exists? family_dir
+              domains = family.leaves.select(&:"rpall_#{na}")
+              domains.each do |domain|
+                dom_sid   = domain.sid.gsub(/^g/, "d")
+                dom_sunid = domain.sunid
+                dom_pdb   = File.join(SCOP_PDB_DIR, dom_sid[2..3], "#{dom_sid}.ent")
 
-            domains = family.leaves.select(&:nrall)
-            domains.each do |domain|
-              dom_sid   = domain.sid.gsub(/^g/, "d")
-              dom_sunid = domain.sunid
-              dom_pdb   = File.join(SCOP_PDB_DIR, dom_sid[2..3], "#{dom_sid}.ent")
+                if !File.size? dom_pdb
+                  $logger.warn "!!! Cannot find #{dom_pdb} file"
+                  next
+                end
 
-              if !File.size? dom_pdb
-                $logger.warn "!!! Cannot find #{dom_pdb} file"
-                next
+                cp dom_pdb, File.join(family_dir, "#{domain.sunid}.pdb")
               end
 
-              cp dom_pdb, File.join(family_dir, "#{domain.sunid}.pdb")
-
-#              domain_pdb_file = File.join(family_dir, "#{domain.sunid}.pdb")
-#
-#              if File.size?(domain_pdb_file)
-#                $logger.warn "!!! Skipped: #{domain_pdb_file} already exists!"
-#                next
-#              end
-#
-#              if domain.has_unks? || domain.calpha_only?
-#                $logger.warn "!!! Skipped: #{domain.sid} is C-alpha only or having some unknown residues"
-#                next
-#              end
-#
-#              File.open(domain_pdb_file, "w") do |file|
-#                file.puts(domain.to_pdb + "END\n")
-#              end
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Generating full set of PDB files for #{na.capitalize} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             end
-
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Generating full set of PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
           end
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -65,46 +50,47 @@ namespace :bipa do
     desc "Generate non-redundant set of PDB files for each SCOP Family"
     task :nr_scop_pdb_files => [:environment] do
 
-      sunids    = ScopFamily.nrall.map(&:sunid)
-      full_dir  = File.join(FAMILY_DIR, "full")
-      fmanager  = ForkManager.new(MAX_FORK)
+      %w[dna rna].each do |na|
+        fmanager  = ForkManager.new(MAX_FORK)
+        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        full_dir  = File.join(FAMILY_DIR, "full", na)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        sunids.each_with_index do |sunid, i|
+          sunids.each_with_index do |sunid, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+              family = ScopFamily.find_by_sunid(sunid)
 
-            family = ScopFamily.find_by_sunid(sunid)
+              (20..100).step(20) do |si|
+                nr_dir      = File.join(FAMILY_DIR, "nr#{si}", na)
+                family_dir  = File.join(nr_dir, "#{sunid}")
 
-            (40..100).step(20) do |si|
-              nr_dir      = File.join(FAMILY_DIR, "nr#{si}")
-              family_dir  = File.join(nr_dir, "#{sunid}")
+                mkdir_p family_dir
 
-              mkdir_p family_dir
+                subfamilies = family.send("nr#{si}_#{na}_subfamilies")
+                subfamilies.each do |subfamily|
+                  domain = subfamily.representative
+                  next if domain.nil?
 
-              subfamilies = family.send("nr#{si}_subfamilies")
-              subfamilies.each do |subfamily|
-                domain = subfamily.representative
-                next if domain.nil?
+                  domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
 
-                domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
+                  if !File.size? domain_pdb_file
+                    $logger.warn "!!! Cannot find #{domain_pdb_file}"
+                    exit 1
+                  end
 
-                if !File.size?(domain_pdb_file)
-                  $logger.warn "!!! Cannot find #{domain_pdb_file}"
-                  exit 1
+                  cp domain_pdb_file, family_dir
                 end
-
-                cp domain_pdb_file, family_dir
               end
+              ActiveRecord::Base.remove_connection
             end
-            ActiveRecord::Base.remove_connection
-          end
 
-          $logger.info ">>> Generating non-redundant PDB files for #{sunid}: done (#{i + 1}/#{sunids.size})"
-          ActiveRecord::Base.establish_connection(config)
+            $logger.info ">>> Generating non-redundant PDB files for #{na.upcase} binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+            ActiveRecord::Base.establish_connection(config)
+          end
         end
       end
     end
@@ -113,53 +99,54 @@ namespace :bipa do
     desc "Generate PDB files for each Subfamily of each SCOP Family"
     task :sub_scop_pdb_files => [:environment] do
 
-      sunids    = ScopFamily.nrall.map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
-      sub_dir   = File.join(FAMILY_DIR, "sub")
-      full_dir  = File.join(FAMILY_DIR, "full")
+      %w[dna rna].each do |na|
+        fmanager  = ForkManager.new(MAX_FORK)
+        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        sub_dir   = File.join(FAMILY_DIR, "sub", na)
+        full_dir  = File.join(FAMILY_DIR, "full", na)
 
-      refresh_dir(sub_dir)
+        refresh_dir(sub_dir) unless RESUME
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        sunids.each_with_index do |sunid, i|
+          sunids.each_with_index do |sunid, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+              family      = ScopFamily.find_by_sunid(sunid)
+              family_dir  = File.join(sub_dir, "#{sunid}")
 
-            family      = ScopFamily.find_by_sunid(sunid)
-            family_dir  = File.join(sub_dir, "#{sunid}")
+              mkdir_p(family_dir)
 
-            mkdir_p(family_dir)
+              (20..100).step(20) do |si|
+                nr_dir = File.join(family_dir, "nr#{si}")
+                mkdir_p nr_dir
 
-            (20..100).step(20) do |si|
-              nr_dir = File.join(family_dir, "nr#{si}")
-              mkdir_p nr_dir
+                subfamilies = family.send("nr#{si}_#{na}_subfamilies")
+                subfamilies.each do |subfamily|
+                  subfamily_dir = File.join(nr_dir, subfamily.id.to_s)
+                  mkdir_p subfamily_dir
 
-              subfamilies = family.send("nr#{si}_subfamilies")
-              subfamilies.each do |subfamily|
-                subfamily_dir = File.join(nr_dir, subfamily.id.to_s)
-                mkdir_p subfamily_dir
+                  domains = subfamily.domains
+                  domains.each do |domain|
+                    domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
 
-                domains = subfamily.domains
-                domains.each do |domain|
-                  domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
+                    if !File.exists?(domain_pdb_file)
+                      $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
+                      next
+                    end
+                    cp domain_pdb_file, subfamily_dir
+                  end # domains.each
+                end # subfamilies.each
+              end # (20..100).step(20)
 
-                  if !File.exists?(domain_pdb_file)
-                    $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
-                    next
-                  end
-                  cp domain_pdb_file, subfamily_dir
-                end # domains.each
-              end # subfamilies.each
-            end # (20..100).step(20)
-
-            $logger.info ">>> Generating PDB files for subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-            ActiveRecord::Base.remove_connection
+              $logger.info ">>> Generating PDB files for #{na.upcase} binding subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              ActiveRecord::Base.remove_connection
+            end
           end
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 

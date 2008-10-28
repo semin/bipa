@@ -329,28 +329,28 @@ namespace :bipa do
 
     desc "Update 'rsXXX' columns of 'scops' table"
     task :scop_rs => [:environment] do
-      domains = ScopDomain.repall.find(:all)
 
+      domains = ScopDomain.nrall
       domains.each_with_index do |domain, i|
-        domain.res2    = true if domain.resolution < 2
-        domain.res4    = true if domain.resolution < 4
-        domain.res6    = true if domain.resolution < 6
-        domain.res8    = true if domain.resolution < 8
-        domain.res10   = true if domain.resolution < 10
-        domain.resall  = true if domain.resolution < 1000
+        domain.rs2    = true if domain.resolution < 2
+        domain.rs4    = true if domain.resolution < 4
+        domain.rs6    = true if domain.resolution < 6
+        domain.rs8    = true if domain.resolution < 8
+        domain.rs10   = true if domain.resolution < 10
+        domain.rsall  = true if domain.resolution < 1000
         domain.save!
 
         domain.ancestors.each do |ancestor|
-          ancestor.res2    = true if domain.res2    == true
-          ancestor.res4    = true if domain.res4    == true
-          ancestor.res6    = true if domain.res6    == true
-          ancestor.res8    = true if domain.res8    == true
-          ancestor.res10   = true if domain.res10   == true
-          ancestor.resall  = true if domain.resall  == true
+          ancestor.rs2    = true if domain.rs2    == true
+          ancestor.rs4    = true if domain.rs4    == true
+          ancestor.rs6    = true if domain.rs6    == true
+          ancestor.rs8    = true if domain.rs8    == true
+          ancestor.rs10   = true if domain.rs10   == true
+          ancestor.rsall  = true if domain.rsall  == true
           ancestor.save!
         end
 
-        $logger.info("Processing #{domain.id} : done (#{i+1}/#{domains.size})")
+        $logger.info ">>> Updating resolution info of #{domain.id} : done (#{i+1}/#{domains.size})"
       end
     end
 
@@ -469,15 +469,15 @@ namespace :bipa do
 
             %w[dna rna].each do |na|
               intf.residues.each do |aa|
-                aa.send(:"hbond_#{na}_base=",       true) if aa.send(:"hbonding_#{na}_base_as_donor?") || aa.send(:"hbonding_#{na}_base_as_acceptor?")
-                aa.send(:"hbond_#{na}_sugar=",      true) if aa.send(:"hbonding_#{na}_sugar_as_donor?") || aa.send(:"hbonding_#{na}_sugar_as_acceptor?")
-                aa.send(:"hbond_#{na}_phosphate=",  true) if aa.send(:"hbonding_#{na}_phosphate_as_donor?") || aa.send(:"hbonding_#{na}_phosphate_as_acceptor?")
-                aa.send(:"whbond_#{na}_base=",      true) if aa.send(:"whbond_#{na}_base?")
-                aa.send(:"whbond_#{na}_sugar=",     true) if aa.send(:"whbond_#{na}_sugar?")
-                aa.send(:"whbond_#{na}_phosphate=", true) if aa.send(:"whbond_#{na}_phosphate?")
-                aa.send(:"vdw_#{na}_base=",         true) if aa.send(:"vdw_contacting_#{na}_base?")
-                aa.send(:"vdw_#{na}_sugar=",        true) if aa.send(:"vdw_contacting_#{na}_sugar?")
-                aa.send(:"vdw_#{na}_phophate=",     true) if aa.send(:"vdw_contacting_#{na}_phosphate?")
+                aa.send("hbond_#{na}_base=",       true) if aa.send("hbonding_#{na}_base_as_donor?") || aa.send("hbonding_#{na}_base_as_acceptor?")
+                aa.send("hbond_#{na}_sugar=",      true) if aa.send("hbonding_#{na}_sugar_as_donor?") || aa.send("hbonding_#{na}_sugar_as_acceptor?")
+                aa.send("hbond_#{na}_phosphate=",  true) if aa.send("hbonding_#{na}_phosphate_as_donor?") || aa.send("hbonding_#{na}_phosphate_as_acceptor?")
+                aa.send("whbond_#{na}_base=",      true) if aa.send("whbond_#{na}_base?")
+                aa.send("whbond_#{na}_sugar=",     true) if aa.send("whbond_#{na}_sugar?")
+                aa.send("whbond_#{na}_phosphate=", true) if aa.send("whbond_#{na}_phosphate?")
+                aa.send("vdw_#{na}_base=",         true) if aa.send("vdw_contacting_#{na}_base?")
+                aa.send("vdw_#{na}_sugar=",        true) if aa.send("vdw_contacting_#{na}_sugar?")
+                aa.send("vdw_#{na}_phophate=",     true) if aa.send("vdw_contacting_#{na}_phosphate?")
                 aa.save!
               end
             end
@@ -486,6 +486,27 @@ namespace :bipa do
           end
         end
         ActiveRecord::Base.establish_connection(config)
+      end
+    end
+
+
+    desc "Update rpall_dna, rpall_rna of 'scop' table"
+    task :scop_rpall_na => [:environment] do
+
+      domains = ScopDomain.rpall
+      domains.each do |domain|
+        %w[dna rna].each do |na|
+          if domain.send("#{na}_interfaces").size > 0
+            domain.send("rpall_#{na}=", true)
+            domain.save!
+            domain.ancestors.each do |anc|
+              anc.rpall = true
+              anc.send("rpall_#{na}=", true)
+              anc.save!
+            end
+          end
+        end
+        $logger.info ">>> Updating SCOP domain's rpall_dna, rpall_rna: done (#{i + 1}/#{domains.count})"
       end
     end
 

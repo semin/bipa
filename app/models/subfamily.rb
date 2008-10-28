@@ -25,7 +25,7 @@ end
 
 
 %w[dna rna].each do |na|
-  (10..100).step(10) do |si|
+  (20..100).step(20) do |si|
     eval <<-END
       class Nr#{si}#{na.capitalize}Subfamily < Subfamily
 
