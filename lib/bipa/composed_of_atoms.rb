@@ -129,7 +129,7 @@ module Bipa
       #atoms.map(&:atom_name).uniq == ["CA"]
       atoms.find(:all,
                  :select  => "atom_name",
-                 :group   => "atom_name").uniq == ["CA"]
+                 :group   => "atom_name").map(&:atom_name).uniq == ["CA"]
     end
     memoize :calpha_only?
 

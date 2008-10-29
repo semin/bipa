@@ -25,13 +25,23 @@ namespace :bipa do
 
               domains = family.leaves.select(&:"rpall_#{na}")
               domains.each do |domain|
+                if domain.calpha_only?
+                  $logger.warn "!!! SCOP domain, #{domain.sunid} is C-alpha only structure"
+                  next
+                end
+
+                if domain.has_unks?
+                  $logger.warn "!!! SCOP domain, #{domain.sunid} has UNKs"
+                  next
+                end
+
                 dom_sid   = domain.sid.gsub(/^g/, "d")
                 dom_sunid = domain.sunid
                 dom_pdb   = File.join(SCOP_PDB_DIR, dom_sid[2..3], "#{dom_sid}.ent")
 
                 if !File.size? dom_pdb
                   $logger.warn "!!! Cannot find #{dom_pdb} file"
-                  next
+                  exit 1
                 end
 
                 # Generate PDB file only for the first model in NMR structure using Bio::PDB
@@ -43,7 +53,7 @@ namespace :bipa do
               end
 
               ActiveRecord::Base.remove_connection
-              $logger.info ">>> Generating full set of PDB files for #{na.capitalize} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              $logger.info ">>> Generating full set of PDB files for #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             end
           end
           ActiveRecord::Base.establish_connection(config)

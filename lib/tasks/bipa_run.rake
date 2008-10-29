@@ -177,54 +177,41 @@ namespace :bipa do
 
       refresh_dir(BLASTCLUST_DIR) unless RESUME
 
-      sunids    = ScopFamily.nrall.map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
+      %w[dna rna].each do |na|
+        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+          sunids.each_with_index do |sunid, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-        sunids.each_with_index do |sunid, i|
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+              family    = ScopFamily.find_by_sunid(sunid)
+              fam_dir   = File.join(BLASTCLUST_DIR, na, "#{sunid}")
+              fam_fasta = File.join(fam_dir, "#{sunid}.fa")
+              mkdir_p fam_dir
 
-            family  = ScopFamily.find_by_sunid(sunid)
-            fam_dir = File.join(BLASTCLUST_DIR, "#{sunid}")
-
-            mkdir fam_dir
-
-            domains = family.leaves.select(&:nrall)
-            domains.each do |domain|
-              if domain.to_sequence.include?("X")
-                $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
-                next
-              end
-              %w[dna rna].each do |na|
-                #if domain.send(:"binding_#{na}?")
-                if domain.send(:"#{na}_interfaces").size > 0
-                  na_dir    = File.join(fam_dir, na)
-                  fam_fasta = File.join(na_dir, "#{sunid}.fa")
-                  mkdir(na_dir) if !File.exists? na_dir
-
-                  File.open(fam_fasta, "a") do |f|
-                    f.puts ">#{domain.sunid}"
-                    f.puts domain.to_sequence
-                  end
-
-                  $logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
+              domains = family.leaves.select(&:"rpall_#{na}")
+              domains.each do |domain|
+                if domain.to_sequence.include?("X")
+                  $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
+                  next
                 end
+
+                File.open(fam_fasta, "a") do |f|
+                  f.puts ">#{domain.sunid}"
+                  f.puts domain.to_sequence
+                end
+                $logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
               end
-            end
 
-            %w[dna rna].each do |na|
-              na_dir    = File.join(fam_dir, na)
-              fam_fasta = File.join(na_dir, "#{sunid}.fa")
-
-              if File.size?(fam_fasta)
+              if File.size? fam_fasta
                 (20..100).step(20) do |si|
                   blastclust_cmd =
                     "blastclust " +
                     "-i #{fam_fasta} "+
-                    "-o #{File.join(na_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
+                    "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
                     "-L .9 " +
                     "-S #{si} " +
                     "-a 2 " +
@@ -232,13 +219,12 @@ namespace :bipa do
                     sh blastclust_cmd
                 end
               end
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Creating cluster files for #{na.upcase} binding SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
             end
-
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Creating cluster files for SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
           end
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -248,21 +234,23 @@ namespace :bipa do
       desc "Run Baton for each SCOP family"
       task :full_scop_pdb_files => [:environment] do
 
-        fmanager = ForkManager.new(MAX_FORK)
-        fmanager.manage do
-          %w[dna rna].each do |na|
-            sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-            full_dir  = File.join(FAMILY_DIR, "full", na)
+        %w[dna rna].each do |na|
+          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          full_dir  = File.join(FAMILY_DIR, "full", na)
+          fmanager  = ForkManager.new(MAX_FORK)
+          fmanager.manage do
+            config = ActiveRecord::Base.remove_connection
 
             sunids.each_with_index do |sunid, i|
               fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
                 cwd       = pwd
                 fam_dir   = File.join(full_dir, sunid.to_s)
                 pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                 next unless pdb_list.size > 0
 
-                clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, na, "#{sunid}.cluster80")
+                clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster80")
                 clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
                 list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
 
@@ -273,8 +261,10 @@ namespace :bipa do
                 chdir cwd
 
                 $logger.info ">>> Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                ActiveRecord::Base.remove_connection
               end
             end
+            ActiveRecord::Base.establish_connection(config)
           end
         end
       end
@@ -283,33 +273,38 @@ namespace :bipa do
       desc "Run Baton for representative PDB files for each SCOP Family"
       task :nr_scop_pdb_files => [:environment] do
 
-        fmanager = ForkManager.new(MAX_FORK)
-        fmanager.manage do
-          %w[dna rna].each do |na|
-            sunids = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        %w[dna rna].each do |na|
+          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          fmanager  = ForkManager.new(MAX_FORK)
+
+          fmanager.manage do
+            config = ActiveRecord::Base.remove_connection
             sunids.each_with_index do |sunid, i|
               fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
                 (20..100).step(20) do |si|
                   cwd       = pwd
-                  pre_si    = si > 10 ? si - 10 : si
+                  pre_si    = si > 20 ? si - 20 : si
                   rep_dir   = File.join(FAMILY_DIR, "nr#{si}", na, "#{sunid}")
                   pdb_list  = FileList[rep_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                   next unless pdb_list.size > 0
 
-                  clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, na, "#{sunid}.cluster#{pre_si}")
+                  clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{pre_si}")
                   clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
                   list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
 
                   chdir(rep_dir)
                   ENV["PDB_EXT"] = ".pdb"
-                  File.open("LIST", "w") { |f| f.puts list.join("\n") }
-                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1"
+                  File.open("PDBLIST", "w") { |f| f.puts list.join("\n") }
+                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
                   chdir(cwd)
                 end
                 $logger.info ">>> BATON with representative PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                ActiveRecord::Base.remove_connection
               end
             end
+            ActiveRecord::Base.establish_connection(config)
           end
         end
       end
@@ -318,29 +313,33 @@ namespace :bipa do
       desc "Run Baton for each subfamilies of SCOP families"
       task :sub_scop_pdb_files => [:environment] do
 
-        fmanager = ForkManager.new(MAX_FORK)
-        fmanager.manage do
-          %w[dna rna].each do |na|
-            sunids  = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-            sub_dir = File.join(FAMILY_DIR, "sub", na)
+        %w[dna rna].each do |na|
+          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          sub_dir   = File.join(FAMILY_DIR, "sub", na)
+          fmanager  = ForkManager.new(MAX_FORK)
 
+          fmanager.manage do
+            config = ActiveRecord::Base.remove_connection
             sunids.each_with_index do |sunid, i|
               fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
                 cwd     = pwd
                 fam_dir = File.join(sub_dir, sunid.to_s)
 
                 (20..100).step(20) do |si|
                   rep_dir = File.join(fam_dir, "nr#{si}")
 
-                  Dir[rep_dir + "/*"].each do |subfam_dir|
+                  FileList[rep_dir + "/*"].each do |subfam_dir|
                     chdir subfam_dir
                     sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
                     chdir cwd
                   end
                 end
-                $logger.info("BATON with subfamily PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+                $logger.info ">>> BATON with subfamily PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                ActiveRecord::Base.remove_connection
               end
             end
+            ActiveRecord::Base.establish_connection(config)
           end
         end
       end

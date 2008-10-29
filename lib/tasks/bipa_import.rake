@@ -742,30 +742,21 @@ namespace :bipa do
     desc "Import Subfamilies for each SCOP family"
     task :subfamilies => [:environment] do
 
-      sunids    = ScopFamily.rpall.map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
+      %w[dna rna].each do |na|
+        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+          sunids.each_with_index do |sunid, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-        sunids.each_with_index do |sunid, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            family      = ScopFamily.find_by_sunid(sunid)
-            family_dir  = File.join(BLASTCLUST_DIR, "#{sunid}")
-
-            %w[dna rna].each do |na|
-              na_dir = File.join(family_dir, na)
-
-              if !File.exists?(na_dir)
-                $logger.warn "!!! SCOP family, #{sunid} doesn't have any #{na} binding subfamilies"
-                next
-              end
+              family  = ScopFamily.find_by_sunid(sunid)
+              fam_dir = File.join(BLASTCLUST_DIR, na, "#{sunid}")
 
               (20..100).step(20) do |si|
-                subfamily_file = File.join(na_dir, sunid.to_s + '.cluster' + si.to_s)
+                subfamily_file = File.join(fam_dir, sunid.to_s + '.cluster' + si.to_s)
 
                 IO.readlines(subfamily_file).each do |line|
                   subfamily = "Nr#{si}#{na.capitalize}Subfamily".constantize.new
@@ -777,6 +768,7 @@ namespace :bipa do
                       subfamily.domains << domain
                     else
                       raise "!!! Cannot find SCOP domain, #{member}"
+                      exit 1
                     end
                   end
 
@@ -785,13 +777,13 @@ namespace :bipa do
                   $logger.debug ">>> Importing Nr#{si}#{na.capitalize}Subfamily, #{subfamily.id}: done"
                 end
               end
-            end
 
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Importing subfamilies for SCOP family, #{sunid} : done (#{i + 1}/#{sunids.size})"
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Importing subfamilies for SCOP family, #{sunid} : done (#{i + 1}/#{sunids.size})"
+            end
           end
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
