@@ -248,12 +248,12 @@ namespace :bipa do
       desc "Run Baton for each SCOP family"
       task :full_scop_pdb_files => [:environment] do
 
-        %w[dna rna].each do |na|
-          fmanager  = ForkManager.new(MAX_FORK)
-          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-          full_dir  = File.join(FAMILY_DIR, "full", na)
+        fmanager = ForkManager.new(MAX_FORK)
+        fmanager.manage do
+          %w[dna rna].each do |na|
+            sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+            full_dir  = File.join(FAMILY_DIR, "full", na)
 
-          fmanager.manage do
             sunids.each_with_index do |sunid, i|
               fmanager.fork do
                 cwd       = pwd
@@ -283,35 +283,32 @@ namespace :bipa do
       desc "Run Baton for representative PDB files for each SCOP Family"
       task :nr_scop_pdb_files => [:environment] do
 
-        sunids    = ScopFamily.nrall.map(&:sunid).sort
-        fmanager  = ForkManager.new(MAX_FORK)
-
+        fmanager = ForkManager.new(MAX_FORK)
         fmanager.manage do
+          %w[dna rna].each do |na|
+            sunids = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+            sunids.each_with_index do |sunid, i|
+              fmanager.fork do
+                (20..100).step(20) do |si|
+                  cwd       = pwd
+                  pre_si    = si > 10 ? si - 10 : si
+                  rep_dir   = File.join(FAMILY_DIR, "nr#{si}", na, "#{sunid}")
+                  pdb_list  = FileList[rep_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
-          sunids.each_with_index do |sunid, i|
+                  next unless pdb_list.size > 0
 
-            fmanager.fork do
+                  clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, na, "#{sunid}.cluster#{pre_si}")
+                  clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
+                  list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
 
-              (20..100).step(20) do |si|
-                cwd       = pwd
-                pre_si    = si > 10 ? si - 10 : si
-                rep_dir   = File.join(FAMILY_DIR, "nr#{si}", "#{sunid}")
-                pdb_list  = Dir[rep_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
-
-                next unless pdb_list.size > 0
-
-                clst_file = File.join(BLASTCLUST_DIR, sunid.to_s, "#{sunid}.cluster#{pre_si}")
-                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
-                list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
-
-                chdir(rep_dir)
-                ENV["PDB_EXT"] = ".pdb"
-                File.open("LIST", "w") { |f| f.puts list.join("\n") }
-                sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1"
-                chdir(cwd)
+                  chdir(rep_dir)
+                  ENV["PDB_EXT"] = ".pdb"
+                  File.open("LIST", "w") { |f| f.puts list.join("\n") }
+                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list LIST 1>baton.log 2>&1"
+                  chdir(cwd)
+                end
+                $logger.info ">>> BATON with representative PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
               end
-
-              $logger.info ">>> BATON with representative PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             end
           end
         end
@@ -321,29 +318,28 @@ namespace :bipa do
       desc "Run Baton for each subfamilies of SCOP families"
       task :sub_scop_pdb_files => [:environment] do
 
-        sunids    = ScopFamily.nrall.map(&:sunid).sort
-        sub_dir   = File.join(FAMILY_DIR, "sub")
-        fmanager  = ForkManager.new(MAX_FORK)
-
+        fmanager = ForkManager.new(MAX_FORK)
         fmanager.manage do
+          %w[dna rna].each do |na|
+            sunids  = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+            sub_dir = File.join(FAMILY_DIR, "sub", na)
 
-          sunids.each_with_index do |sunid, i|
+            sunids.each_with_index do |sunid, i|
+              fmanager.fork do
+                cwd     = pwd
+                fam_dir = File.join(sub_dir, sunid.to_s)
 
-            fmanager.fork do
-              cwd     = pwd
-              fam_dir = File.join(sub_dir, sunid.to_s)
+                (20..100).step(20) do |si|
+                  rep_dir = File.join(fam_dir, "nr#{si}")
 
-              (20..100).step(20) do |si|
-                rep_dir = File.join(fam_dir, "nr#{si}")
-
-                Dir[rep_dir + "/*"].each do |subfam_dir|
-                  chdir(subfam_dir)
-                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
-                  chdir(cwd)
+                  Dir[rep_dir + "/*"].each do |subfam_dir|
+                    chdir subfam_dir
+                    sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
+                    chdir cwd
+                  end
                 end
+                $logger.info("BATON with subfamily PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
               end
-
-              $logger.info("BATON with subfamily PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})")
             end
           end
         end
