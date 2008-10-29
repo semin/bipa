@@ -269,8 +269,8 @@ namespace :bipa do
                 chdir fam_dir
                 ENV["PDB_EXT"] = ".pdb"
                 File.open("PDBLIST", "w") { |f| f.puts list.join("\n") }
-                #sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
-                system "Baton -list PDBLIST 1>baton.log 2>&1"
+                sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
+                #system "Baton -list PDBLIST 1>baton.log 2>&1"
                 chdir cwd
 
                 $logger.info ">>> Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
