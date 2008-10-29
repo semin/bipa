@@ -34,7 +34,12 @@ namespace :bipa do
                   next
                 end
 
-                cp dom_pdb, File.join(family_dir, "#{domain.sunid}.pdb")
+                # Generate PDB file only for the first model in NMR structure using Bio::PDB
+                File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |f|
+                  f.puts Bio::PDB.new(IO.read(dom_pdb)).models.first
+                end
+
+                #cp dom_pdb, File.join(family_dir, "#{domain.sunid}.pdb")
               end
 
               ActiveRecord::Base.remove_connection
