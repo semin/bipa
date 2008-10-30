@@ -817,7 +817,7 @@ namespace :bipa do
                 next unless entry.seq_type == "P1"
 
                 domain          = ScopDomain.find_by_sunid(entry.entry_id)
-                db_residues     = domain.sorted_residues
+                db_residues     = domain.residues
                 ff_residues     = entry.data.split("")
                 sequence        = alignment.sequences.build
                 sequence.domain = domain
@@ -889,7 +889,7 @@ namespace :bipa do
                   next unless entry.seq_type == "P1"
 
                   domain          = ScopDomain.find_by_sunid(entry.entry_id)
-                  db_residues     = domain.sorted_residues
+                  db_residues     = domain.residues
                   ff_residues     = entry.data.split("")
                   sequence        = alignment.sequences.build
                   sequence.domain = domain

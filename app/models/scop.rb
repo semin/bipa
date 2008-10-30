@@ -283,8 +283,7 @@ class ScopDomain < Scop
 
   has_many  :residues,
             :class_name   => "Residue",
-            :foreign_key  => "scop_id",
-            :order        => "residue_code"
+            :foreign_key  => "scop_id"
 
   has_many  :chains,
             :through      => :residues,

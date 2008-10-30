@@ -20,7 +20,7 @@ module Bipa
     memoize :sorted_residues
 
     def to_sequence
-      sorted_residues.map(&:one_letter_code).join
+      residues.map(&:one_letter_code).join
     end
     memoize :to_sequence
 
