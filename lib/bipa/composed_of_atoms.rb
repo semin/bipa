@@ -152,5 +152,10 @@ module Bipa
       END
     end
 
+    def to_pdb
+      atoms.sort_by(&:atom_code).inject("") { |p, a| p + (a.to_pdb + "\n") }
+    end
+    memoize :to_pdb
+
   end
 end

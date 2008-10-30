@@ -322,18 +322,17 @@ class ScopDomain < Scop
 
   def ranges_on_chains
     # "2hz1 A:2-124, B:1-50" => [A:2-124, B:1-50]
-    description.gsub(/^\S{4}\s+/, '').split(',')
+    description.gsub(/^\S{4}\s+/, '').gsub(/\s+/, '').split(',')
   end
-  memoize :ranges_on_chains
 
   def include?(residue)
     result = false
     ranges_on_chains.each do |range|
       raise "Empty description!" if range =~ /^\s*$/
-      case range.strip
+      case range
       when /^(\S):$/ # F:
         chain_code = $1
-        if residue.chain[:chain_code] == chain_code
+        if residue.chain.chain_code == chain_code
           result = true
         end
       when /^-$/ # -
@@ -358,16 +357,5 @@ class ScopDomain < Scop
     end # each
     result
   end
-  memoize :include?
-
-  def to_pdb
-    atoms.sort_by(&:atom_code).inject("") { |p, a| p + (a.to_pdb + "\n") }
-  end
-  memoize :to_pdb
-
-  def to_sequence
-    residues.sort_by(&:residue_code).map(&:one_letter_code).join
-  end
-  memoize :to_sequence
 
 end

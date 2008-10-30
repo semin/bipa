@@ -791,113 +791,38 @@ namespace :bipa do
     desc "Import Full & Representative Alignments for each SCOP Family"
     task :full_alignments => [:environment] do
 
-      sunids    = ScopFamily.rpall.map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
+      %w[dna rna].each do |na|
+        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        fmanager  = ForkManager.new(MAX_FORK)
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+          sunids.each_with_index do |sunid, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-        sunids.each_with_index do |sunid, i|
+              family    = ScopFamily.find_by_sunid(sunid)
+              fam_dir   = File.join(FAMILY_DIR, "full", na, sunid.to_s)
+              ali_file  = File.join(fam_dir, "baton.ali")
 
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            family    = ScopFamily.find_by_sunid(sunid)
-            fam_dir   = File.join(FAMILY_DIR, "full", sunid.to_s)
-            ali_file  = File.join(fam_dir, "baton.ali")
-
-            unless File.exists?(ali_file)
-              $logger.warn("Cannot find #{ali_file}")
-              next
-            end
-
-            alignment = family.send("create_full_alignment")
-            flat_file = Bio::FlatFile.auto(ali_file)
-
-            flat_file.each_entry do |entry|
-              next unless entry.seq_type == "P1"
-
-              domain          = ScopDomain.find_by_sunid(entry.entry_id)
-              db_residues     = domain.residues
-              ff_residues     = entry.data.split("")
-              sequence        = alignment.sequences.build
-              sequence.domain = domain
-
-              pos = 0
-
-              ff_residues.each_with_index do |res, fi|
-                column    = alignment.columns.find_or_create_by_number(fi + 1)
-                position  = sequence.positions.build
-
-                if (res == "-")
-                  position.residue_name = res
-                  position.number       = fi + 1
-                  position.column       = column
-                  position.save!
-                else
-                  if (db_residues[pos].one_letter_code == res)
-                    position.residue      = db_residues[pos]
-                    position.residue_name = res
-                    position.number       = fi + 1
-                    position.column       = column
-                    position.save!
-                    pos += 1
-                  else
-                    raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
-                  end
-                end
-              end # ff_residues.each_with_index
-              sequence.save!
-            end # flat_file.each_entry
-            alignment.save!
-            ActiveRecord::Base.remove_connection
-            $logger.info("Importing full alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
-          end # fmanger.fork
-        end # sunids.each
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end # task :full_alignments
-
-
-    desc "Import representative alignments for each SCOP Family"
-    task :rep_alignments => [:environment] do
-
-      sunids    = ScopFamily.rpall.find(:all).map(&:sunid)
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        sunids.each_with_index do |sunid, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            family = ScopFamily.find_by_sunid(sunid)
-
-            (10..100).step(10) do |si|
-              family_dir  = File.join(FAMILY_DIR, "rep#{si}", "#{family.sunid}")
-              ali_file    = File.join(family_dir, "baton.ali")
-
-              unless File.exists?(ali_file)
-                $logger.warn("Cannot find #{ali_file}")
+              unless File.size? ali_file
+                $logger.warn "!!! Cannot find #{ali_file} or its size is zero"
                 next
               end
 
-              alignment = family.send("create_rep#{si}_alignment")
+              alignment = family.send("create_full_#{na}_alignment")
               flat_file = Bio::FlatFile.auto(ali_file)
 
               flat_file.each_entry do |entry|
                 next unless entry.seq_type == "P1"
 
                 domain          = ScopDomain.find_by_sunid(entry.entry_id)
-                db_residues     = domain.residues
+                db_residues     = domain.sorted_residues
                 ff_residues     = entry.data.split("")
                 sequence        = alignment.sequences.build
                 sequence.domain = domain
 
                 pos = 0
-
                 ff_residues.each_with_index do |res, fi|
                   column    = alignment.columns.find_or_create_by_number(fi + 1)
                   position  = sequence.positions.build
@@ -907,7 +832,6 @@ namespace :bipa do
                     position.number       = fi + 1
                     position.column       = column
                     position.save!
-                    column.save!
                   else
                     if (db_residues[pos].one_letter_code == res)
                       position.residue      = db_residues[pos]
@@ -915,19 +839,93 @@ namespace :bipa do
                       position.number       = fi + 1
                       position.column       = column
                       position.save!
-                      column.save!
                       pos += 1
                     else
-                      raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
+                      raise "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
                     end
                   end
                 end # ff_residues.each_with_index
                 sequence.save!
               end # flat_file.each_entry
               alignment.save!
-            end # (10..100).step(10)
-            ActiveRecord::Base.remove_connection
-            $logger.info("Importing representative alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Importing full alignments of SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+            end # fmanger.fork
+          end
+        end # sunids.each
+        ActiveRecord::Base.establish_connection(config)
+      end # fmanager.manage
+    end # task :full_alignments
+
+
+    desc "Import representative alignments for each SCOP Family"
+    task :nr_alignments => [:environment] do
+
+      %w[dna rna].each do |na|
+        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        fmanager  = ForkManager.new(MAX_FORK)
+
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+          sunids.each_with_index do |sunid, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
+
+              family = ScopFamily.find_by_sunid(sunid)
+
+              (20..100).step(20) do |si|
+                family_dir  = File.join(FAMILY_DIR, "nr#{si}", na, "#{family.sunid}")
+                ali_file    = File.join(family_dir, "baton.ali")
+
+                unless File.exists?(ali_file)
+                  $logger.warn "!!! Cannot find #{ali_file}"
+                  next
+                end
+
+                alignment = family.send("create_nr#{si}_#{na}_alignment")
+                flat_file = Bio::FlatFile.auto(ali_file)
+
+                flat_file.each_entry do |entry|
+                  next unless entry.seq_type == "P1"
+
+                  domain          = ScopDomain.find_by_sunid(entry.entry_id)
+                  db_residues     = domain.sorted_residues
+                  ff_residues     = entry.data.split("")
+                  sequence        = alignment.sequences.build
+                  sequence.domain = domain
+
+                  pos = 0
+                  ff_residues.each_with_index do |res, fi|
+                    column    = alignment.columns.find_or_create_by_number(fi + 1)
+                    position  = sequence.positions.build
+
+                    if (res == "-")
+                      position.residue_name = res
+                      position.number       = fi + 1
+                      position.column       = column
+                      position.save!
+                      column.save!
+                    else
+                      if (db_residues[pos].one_letter_code == res)
+                        position.residue      = db_residues[pos]
+                        position.residue_name = res
+                        position.number       = fi + 1
+                        position.column       = column
+                        position.save!
+                        column.save!
+                        pos += 1
+                      else
+                        raise "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
+                      end
+                    end
+                  end # ff_residues.each_with_index
+                  sequence.save!
+                end # flat_file.each_entry
+                alignment.save!
+              end # (20..100).step(20)
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Importing non-redundant alignments for SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+            end
           end # fmanger.fork
         end # sunids.each
         ActiveRecord::Base.establish_connection(config)

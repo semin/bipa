@@ -81,23 +81,24 @@ class Alignment < ActiveRecord::Base
 end
 
 
-class FullAlignment < Alignment
-
-  belongs_to  :family,
-              :class_name   => "ScopFamily",
-              :foreign_key  => "scop_id"
-end
-
-
 class SubfamilyAlignment < Alignment
 
   belongs_to  :subfamily,
-              :class_name   => "Subfamily",
-              :foreign_key  => "subfamily_id"
+    :class_name   => "Subfamily",
+    :foreign_key  => "subfamily_id"
 end
 
 
 %w[dna rna].each do |na|
+  eval <<-EVAL
+  class Full#{na.capitalize}Alignment < Alignment
+
+    belongs_to  :family,
+                :class_name   => "ScopFamily",
+                :foreign_key  => "scop_id"
+  end
+  EVAL
+
   (20..100).step(20) do |si|
     eval <<-EVAL
       class Nr#{si}#{na.capitalize}Alignment < Alignment

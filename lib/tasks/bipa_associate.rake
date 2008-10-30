@@ -2,16 +2,14 @@ namespace :bipa do
   namespace :associate do
 
     desc "Associate Residue with SCOP"
-    task :residues_scops => [:environment] do
+    task :residues_scop => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
-
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 

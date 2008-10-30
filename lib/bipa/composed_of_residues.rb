@@ -8,6 +8,22 @@ module Bipa
     end
     memoize :residues
 
+    def sorted_residues
+      residues.sort_by { |r|
+        if r.icode.blank?
+          10000 * r.residue_code + " ".ord
+        else
+          10000 * r.residue_code + r.icode.ord
+        end
+      }
+    end
+    memoize :sorted_residues
+
+    def to_sequence
+      sorted_residues.map(&:one_letter_code).join
+    end
+    memoize :to_sequence
+
     def atoms
       residues.inject([]) { |s, r| s.concat(r.atoms) }
     end
