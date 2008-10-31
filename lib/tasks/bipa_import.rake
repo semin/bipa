@@ -745,7 +745,6 @@ namespace :bipa do
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
         fmanager  = ForkManager.new(MAX_FORK)
-
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
           sunids.each_with_index do |sunid, i|
@@ -760,26 +759,23 @@ namespace :bipa do
 
                 IO.readlines(subfamily_file).each do |line|
                   subfamily = "Nr#{si}#{na.capitalize}Subfamily".constantize.new
-
-                  members = line.split(/\s+/)
+                  members   = line.split(/\s+/)
                   members.each do |member|
                     domain = ScopDomain.find_by_sunid(member)
                     if domain
                       subfamily.domains << domain
                     else
-                      raise "!!! Cannot find SCOP domain, #{member}"
+                      $logger.warn "!!! Cannot find SCOP domain, #{member}"
                       exit 1
                     end
                   end
-
                   subfamily.family = family
                   subfamily.save!
                   $logger.debug ">>> Importing Nr#{si}#{na.capitalize}Subfamily, #{subfamily.id}: done"
                 end
               end
-
               ActiveRecord::Base.remove_connection
-              $logger.info ">>> Importing subfamilies for SCOP family, #{sunid} : done (#{i + 1}/#{sunids.size})"
+              $logger.info ">>> Importing subfamilies for #{na.upcase} binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             end
           end
           ActiveRecord::Base.establish_connection(config)

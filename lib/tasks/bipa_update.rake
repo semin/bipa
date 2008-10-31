@@ -358,78 +358,111 @@ namespace :bipa do
     desc "Update JOY templates to include atomic interaction information"
     task :joy_templates => [:environment] do
 
-      FileList["./public/families/nr90/*"].grep(/\d+/).each_with_index do |dir, i|
-        sunid = dir.match(/rep\d+\/(\d+)/)[1]
-        tem_file = File.join(dir, "baton.tem")
+      %w[dna rna].each do |na|
+        fmanager = ForkManager.new(MAX_FORK)
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
 
-        if File.size? tem_file
-          new_tem_file = File.join(dir, "#{sunid}.tem")
+          (20..100).step(20) do |si|
+            if si != 80
+              $logger.warn "!!! Sorry, skipped #{na}#{si} for the moment"
+              next
+            end
 
-          cp tem_file, new_tem_file
+            FileList["./public/families/nr#{si}/#{na}/*"].each do |fam_dir|
+              fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
 
-          flat_file = Bio::FlatFile.auto(tem_file)
-          flat_file.each_entry do |entry|
-
-            if entry.seq_type == "P1" && entry.definition == "sequence"
-              domain = ScopDomain.find_by_sunid(entry.entry_id)
-
-              if domain.nil?
-                warn "Cannot find #{entry.entry_id} from BIPA"
-                exit
-              end
-
-              hbond_tem   = []
-              whbond_tem  = []
-              vdw_contact_tem = []
-              db_residues = domain.residues
-              ff_residues = entry.data.gsub(/\n/, "").split("")
-
-              pos = 0
-
-              ff_residues.each_with_index do |res, fi|
-                if fi % 75 == 0
-                  hbond_tem << "\n"
-                  whbond_tem << "\n"
-                  vdw_contact_tem << "\n"
+                if fam_dir =~ /#{na}\/(\d+)/
+                  sunid = $1
+                else
+                  $logger.warn "!!! #{fam_dir} is not matched to a certain SCOP sunid"
+                  next
                 end
 
-                if res == "-"
-                  hbond_tem << "-"
-                  whbond_tem << "-"
-                  vdw_contact_tem << "-"
+                tem_file = File.join(fam_dir, "baton.tem")
+
+                if !File.size? tem_file
+                  $logger.warn "!!! Cannot find 'baton.tem' for SCOP family, #{sunid} or it's empty"
                   next
-                else
-                  if res == db_residues[pos].one_letter_code
-                    db_residues[pos].hbonding_na? ? hbond_tem << "T" : hbond_tem << "F"
-                    db_residues[pos].whbonding_na? ? whbond_tem << "T" : whbond_tem << "F"
-                    db_residues[pos].vdw_contacting_na? ? vdw_contact_tem << "T" : vdw_contact_tem << "F"
-                    pos += 1
-                  else
-                    warn "Unmatched residues at #{pos} of #{entry.entry_id}, #{res} <=> #{db_residues[pos].one_letter_code}"
-                    exit
+                end
+
+                new_tem_file = File.join(fam_dir, "#{sunid}.tem")
+                cp tem_file, new_tem_file
+
+                flat_file = Bio::FlatFile.auto(tem_file)
+                flat_file.each_entry do |entry|
+                  if entry.seq_type == "P1" && entry.definition == "sequence"
+                    domain = ScopDomain.find_by_sunid(entry.entry_id)
+
+                    if domain.nil?
+                      $logger.warn "!!! Cannot find #{entry.entry_id} from BIPA"
+                      exit
+                    end
+
+                    bind_tem        = []
+                    hbond_tem       = []
+                    whbond_tem      = []
+                    vdw_contact_tem = []
+                    db_residues     = domain.residues
+                    ff_residues     = entry.data.gsub(/\n/, "").split("")
+
+                    pos = 0
+
+                    ff_residues.each_with_index do |res, fi|
+                      if fi % 75 == 0
+                        bind_tem        << "\n"
+                        hbond_tem       << "\n"
+                        whbond_tem      << "\n"
+                        vdw_contact_tem << "\n"
+                      end
+
+                      if res == "-"
+                        bind_tem        << "-"
+                        hbond_tem       << "-"
+                        whbond_tem      << "-"
+                        vdw_contact_tem << "-"
+                        next
+                      else
+                        if res == db_residues[pos].one_letter_code
+                          db_residues[pos].send("binding_#{na}?")         ? bind_tem        << "T" : bind_tem         << "F"
+                          db_residues[pos].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
+                          db_residues[pos].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
+                          db_residues[pos].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
+                          pos += 1
+                        else
+                          $logger.warn "!!! Unmatched residues at #{pos} of #{entry.entry_id}, #{res} <=> #{db_residues[pos].one_letter_code}"
+                          exit 1
+                        end
+                      end
+                    end
+
+                    File.open(new_tem_file, "a") do |file|
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "#{na.upcase} interface"
+                      file.puts bind_tem.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "hydrogen bond to #{na.upcase}"
+                      file.puts hbond_tem.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "water-mediated hydrogen bond to #{na.upcase}"
+                      file.puts whbond_tem.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "van der Waals vdw_contact to #{na.upcase}"
+                      file.puts vdw_contact_tem.join + "*"
+                    end
                   end
                 end
-              end
-
-              File.open(new_tem_file, "a") do |file|
-                file.puts ">P1;#{entry.entry_id}"
-                file.puts "hydrogen bond to nucleic acid"
-                file.puts hbond_tem.join + "*"
-
-                file.puts ">P1;#{entry.entry_id}"
-                file.puts "water-mediated hydrogen bond to nucleic acid"
-                file.puts whbond_tem.join + "*"
-
-                file.puts ">P1;#{entry.entry_id}"
-                file.puts "van der Waals vdw_contact to nucleic acid"
-                file.puts vdw_contact_tem.join + "*"
+                ActiveRecord::Base.remove_connection
+                $logger.info ">>> Updateing JOY template for #{na.upcase} binding NR#{si} SCOP family, #{sunid}: done"
               end
             end
           end
-          $logger.info "Updateing JOY template of SCOP family, #{sunid}: done"
-        else
-          $logger.warn "Cannot find 'baton.tem' of SCOP family, #{sunid}"
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 

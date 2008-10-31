@@ -347,32 +347,6 @@ namespace :bipa do
     end # namespace :baton
 
 
-    desc "Run JOY for each SCOP family alignment"
-    task :joy => [:environment] do
-
-      fmanager  = ForkManager.new(MAX_FORK)
-      fmanager.manage do
-        (10..100).step(10) do |si|
-          rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
-
-          fmanager.fork do
-            Dir.new(rep_dir).each do |dir|
-              if dir =~ /^\./ then next end # skip if . or ..
-              cwd = pwd
-              fam_dir = File.join(rep_dir, dir)
-              chdir(fam_dir)
-              sh "joy baton.ali 1> joy.log 2>&1"
-              chdir(cwd)
-
-              $logger.info "JOY with non-redundant set (#{si} pid) of SCOP Family, #{dir}: done"
-            end
-          end # fmanager.fork
-
-        end
-      end
-    end
-
-
     desc "Run ZAP for each SCOP Domain PDB file"
     task :zap => [:environment] do
 
@@ -405,11 +379,43 @@ namespace :bipa do
     end
 
 
+    desc "Run JOY for each SCOP family alignment"
+    task :joy => [:environment] do
+
+      %w[dna rna].each do |na|
+        fmanager = ForkManager.new(MAX_FORK)
+        fmanager.manage do
+          (20..100).step(20) do |si|
+            nr_dir = File.join(FAMILY_DIR, "nr#{si}", na)
+            fmanager.fork do
+              Dir.new(nr_dir).each do |dir|
+                if dir =~ /^\./
+                  next
+                elsif dir =~ /^\d+$/
+                  cwd = pwd
+                  fam_dir = File.join(nr_dir, dir)
+                  chdir fam_dir
+                  if File.exists? "./baton.ali"
+                    system "joy baton.ali 1> joy.log 2>&1"
+                  else
+                    $logger.warn "!!! Cannot find baton.ali at #{fam_dir}"
+                  end
+                  chdir cwd
+                  $logger.info ">>> JOY with non-redundant set (#{si} pid) of SCOP Family, #{dir}: done"
+                end
+              end
+            end # fmanager.fork
+          end
+        end
+      end
+    end
+
+
     desc "Run fugueprf for each profiles of all non-redundant sets of SCOP families"
     task :fugueprf => [:environment] do
 
-      (10..100).step(10) do |si|
-        next if si != 90
+      (20..100).step(20) do |si|
+        next if si != 80
 
         %w[dna rna].each do |na|
           %w[16 32 std].each do |env|
@@ -433,8 +439,8 @@ namespace :bipa do
     desc "Run fugueali for a selected set of hits from fugueprf"
     task :fugueali => [:environment] do
 
-      (10..100).step(10) do |si|
-        next if si != 90
+      (20..100).step(20) do |si|
+        next if si != 80
 
         %w[dna rna].each do |na|
           %w[16 32 std].each do |env|

@@ -167,194 +167,196 @@ namespace :bipa do
     desc "Generate DNA/RNA TEM file for each alignments"
     task :tem_files => [:environment] do
 
-      (10..100).step(10) do |si|
-        next unless si == 90 # temporary skipping!!!
+      %w[dna rna].each do |na|
+        (10..100).step(10) do |si|
+          next unless si == 90 # temporary skipping!!!
 
-        rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
+          rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
 
-        Dir.new(rep_dir).each do |dir|
-          next if dir =~ /^\./
+          Dir.new(rep_dir).each do |dir|
+            next if dir =~ /^\./
 
-          family    = Scop.find_by_sunid(dir)
-          alignment = family.send(:"rep#{si}_alignment")
+            family    = Scop.find_by_sunid(dir)
+            alignment = family.send(:"rep#{si}_alignment")
 
-          next unless alignment
+            next unless alignment
 
-          family_dir  = File.join(rep_dir, dir)
-          tem_file    = File.join(family_dir, "baton.tem")
+            family_dir  = File.join(rep_dir, dir)
+            tem_file    = File.join(family_dir, "baton.tem")
 
-          next unless File.size? tem_file
+            next unless File.size? tem_file
 
-          new_tem_file = File.join(family_dir, "baton_na.tem")
-#          cp tem_file, new_tem_file
+            new_tem_file = File.join(family_dir, "baton_na.tem")
+  #          cp tem_file, new_tem_file
 
-          File.open(new_tem_file, "w") do |file|
+            File.open(new_tem_file, "w") do |file|
 
-            $logger.info "Working on SCOP family, #{dir} ..."
+              $logger.info "Working on SCOP family, #{dir} ..."
 
-            alignment.sequences.each do |sequence|
-              sunid = sequence.domain.sunid
+              alignment.sequences.each do |sequence|
+                sunid = sequence.domain.sunid
 
-              $logger.info "Adding DNA/RNA interface environment for #{sunid} ..."
+                $logger.info "Adding DNA/RNA interface environment for #{sunid} ..."
 
-              res_tem = []
-              sec_tem = []
-              acc_tem = []
+                res_tem = []
+                sec_tem = []
+                acc_tem = []
 
-              dna_tem = []
-              rna_tem = []
+                dna_tem = []
+                rna_tem = []
 
-              hbond_dna_tem   = []
-              whbond_dna_tem  = []
-              vdw_dna_tem     = []
+                hbond_dna_tem   = []
+                whbond_dna_tem  = []
+                vdw_dna_tem     = []
 
-              hbond_rna_tem   = []
-              whbond_rna_tem  = []
-              vdw_rna_tem     = []
+                hbond_rna_tem   = []
+                whbond_rna_tem  = []
+                vdw_rna_tem     = []
 
-              sequence.positions.each_with_index do |position, pi|
-                if pi != 0 and pi % 75 == 0
-                  res_tem << "\n"
-                  sec_tem << "\n"
-                  acc_tem << "\n"
+                sequence.positions.each_with_index do |position, pi|
+                  if pi != 0 and pi % 75 == 0
+                    res_tem << "\n"
+                    sec_tem << "\n"
+                    acc_tem << "\n"
 
-                  dna_tem << "\n"
-                  rna_tem << "\n"
+                    dna_tem << "\n"
+                    rna_tem << "\n"
 
-                  hbond_dna_tem   << "\n"
-                  whbond_dna_tem  << "\n"
-                  vdw_dna_tem     << "\n"
+                    hbond_dna_tem   << "\n"
+                    whbond_dna_tem  << "\n"
+                    vdw_dna_tem     << "\n"
 
-                  hbond_rna_tem   << "\n"
-                  whbond_rna_tem  << "\n"
-                  vdw_rna_tem     << "\n"
+                    hbond_rna_tem   << "\n"
+                    whbond_rna_tem  << "\n"
+                    vdw_rna_tem     << "\n"
+                  end
+
+                  if position.gap?
+                    res_tem << "-"
+                    sec_tem << "-"
+                    acc_tem << "-"
+
+                    dna_tem << "-"
+                    rna_tem << "-"
+
+                    hbond_dna_tem   << "-"
+                    whbond_dna_tem  << "-"
+                    vdw_dna_tem     << "-"
+
+                    hbond_rna_tem   << "-"
+                    whbond_rna_tem  << "-"
+                    vdw_rna_tem     << "-"
+
+                    next
+                  end
+
+                  res = position.residue
+
+                  res_tem << position.residue_name
+                  sec_tem << case
+                          when res.alpha_helix? || res.three10_helix? then  "H"
+                          when res.beta_sheet? then  "E"
+                          when res.positive_phi? then  "P"
+                          else "C"
+                          end
+                  acc_tem << case
+                          when res.on_surface? then  "T"
+                          else "F"
+                          end
+
+                  if res.hbonding_dna?
+                    hbond_dna_tem << "T"
+                  else
+                    hbond_dna_tem << "F"
+                  end
+
+                  if res.whbonding_dna?
+                    whbond_dna_tem << "T"
+                  else
+                    whbond_dna_tem << "F"
+                  end
+
+                  if res.vdw_contacting_dna?
+                    vdw_dna_tem << "T"
+                  else
+                    vdw_dna_tem << "F"
+                  end
+
+                  if res.binding_dna?
+                    dna_tem << "T"
+                  else
+                    dna_tem << "F"
+                  end
+
+                  if res.hbonding_rna?
+                    hbond_rna_tem << "T"
+                  else
+                    hbond_rna_tem << "F"
+                  end
+
+                  if res.whbonding_rna?
+                    whbond_rna_tem << "T"
+                  else
+                    whbond_rna_tem << "F"
+                  end
+
+                  if res.vdw_contacting_rna?
+                    vdw_rna_tem << "T"
+                  else
+                    vdw_rna_tem << "F"
+                  end
+
+                  if res.binding_rna?
+                    rna_tem << "T"
+                  else
+                    rna_tem << "F"
+                  end
                 end
 
-                if position.gap?
-                  res_tem << "-"
-                  sec_tem << "-"
-                  acc_tem << "-"
+                file.puts ">P1;#{sunid}"
+                file.puts "sequence"
+                file.puts res_tem.join + "*"
 
-                  dna_tem << "-"
-                  rna_tem << "-"
+                file.puts ">P1;#{sunid}"
+                file.puts "secondary structure and phi angle"
+                file.puts sec_tem.join + "*"
 
-                  hbond_dna_tem   << "-"
-                  whbond_dna_tem  << "-"
-                  vdw_dna_tem     << "-"
+                file.puts ">P1;#{sunid}"
+                file.puts "solvent accessibility"
+                file.puts acc_tem.join + "*"
 
-                  hbond_rna_tem   << "-"
-                  whbond_rna_tem  << "-"
-                  vdw_rna_tem     << "-"
+                file.puts ">P1;#{sunid}"
+                file.puts "hydrogen bond to DNA"
+                file.puts hbond_dna_tem.join + "*"
 
-                  next
-                end
+                file.puts ">P1;#{sunid}"
+                file.puts "water-mediated hydrogen bond to DNA"
+                file.puts whbond_dna_tem.join + "*"
 
-                res = position.residue
+                file.puts ">P1;#{sunid}"
+                file.puts "vdw contact to DNA"
+                file.puts vdw_dna_tem.join + "*"
 
-                res_tem << position.residue_name
-                sec_tem << case
-                        when res.alpha_helix? || res.three10_helix? then  "H"
-                        when res.beta_sheet? then  "E"
-                        when res.positive_phi? then  "P"
-                        else "C"
-                        end
-                acc_tem << case
-                        when res.on_surface? then  "T"
-                        else "F"
-                        end
+                file.puts ">P1;#{sunid}"
+                file.puts "DNA interface"
+                file.puts dna_tem.join + "*"
 
-                if res.hbonding_dna?
-                  hbond_dna_tem << "T"
-                else
-                  hbond_dna_tem << "F"
-                end
+                file.puts ">P1;#{sunid}"
+                file.puts "hydrogen bond to RNA"
+                file.puts hbond_rna_tem.join + "*"
 
-                if res.whbonding_dna?
-                  whbond_dna_tem << "T"
-                else
-                  whbond_dna_tem << "F"
-                end
+                file.puts ">P1;#{sunid}"
+                file.puts "water-mediated hydrogen bond to RNA"
+                file.puts whbond_rna_tem.join + "*"
 
-                if res.vdw_contacting_dna?
-                  vdw_dna_tem << "T"
-                else
-                  vdw_dna_tem << "F"
-                end
+                file.puts ">P1;#{sunid}"
+                file.puts "vdw contact to RNA"
+                file.puts vdw_rna_tem.join + "*"
 
-                if res.binding_dna?
-                  dna_tem << "T"
-                else
-                  dna_tem << "F"
-                end
-
-                if res.hbonding_rna?
-                  hbond_rna_tem << "T"
-                else
-                  hbond_rna_tem << "F"
-                end
-
-                if res.whbonding_rna?
-                  whbond_rna_tem << "T"
-                else
-                  whbond_rna_tem << "F"
-                end
-
-                if res.vdw_contacting_rna?
-                  vdw_rna_tem << "T"
-                else
-                  vdw_rna_tem << "F"
-                end
-
-                if res.binding_rna?
-                  rna_tem << "T"
-                else
-                  rna_tem << "F"
-                end
+                file.puts ">P1;#{sunid}"
+                file.puts "RNA interface"
+                file.puts rna_tem.join + "*"
               end
-
-              file.puts ">P1;#{sunid}"
-              file.puts "sequence"
-              file.puts res_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "secondary structure and phi angle"
-              file.puts sec_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "solvent accessibility"
-              file.puts acc_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "hydrogen bond to DNA"
-              file.puts hbond_dna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "water-mediated hydrogen bond to DNA"
-              file.puts whbond_dna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "vdw contact to DNA"
-              file.puts vdw_dna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "DNA interface"
-              file.puts dna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "hydrogen bond to RNA"
-              file.puts hbond_rna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "water-mediated hydrogen bond to RNA"
-              file.puts whbond_rna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "vdw contact to RNA"
-              file.puts vdw_rna_tem.join + "*"
-
-              file.puts ">P1;#{sunid}"
-              file.puts "RNA interface"
-              file.puts rna_tem.join + "*"
             end
           end
         end
@@ -365,32 +367,31 @@ namespace :bipa do
     desc "Generate ESSTs for each representative set of SCOP families"
     task :essts => [:environment] do
 
-      refresh_dir ESST_DIR
+      refresh_dir(ESST_DIR) unless RESUME
 
-      (10..100).step(10) do |si|
-        next if si != 90
+      %w[dna rna].each do |na|
+        (20..100).step(20) do |si|
+          next if si != 80
+          nr_dir = File.join(FAMILY_DIR, "nr#{si}", na)
 
-        ali_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
-
-        %w[dna rna].each do |na|
           %w[16 64 std].each do |env|
-            est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
+            est_dir = File.join(ESST_DIR, "nr#{si}", na, env)
             mkdir_p est_dir
 
-            Dir.new(ali_dir).each do |dir|
+            Dir.new(nr_dir).each do |dir|
               next if dir =~ /^\./
 
-              tem     = File.join(ali_dir, dir, "baton_na.tem")
+              tem     = File.join(nr_dir, dir, "baton_na.tem")
               new_tem = File.join(est_dir, "#{dir}.tem")
               fam     = Scop.find_by_sunid(dir)
-              ali90   = fam.rep90_alignment
+              ali     = fam.send(:"nr#{si}_#{na}_alignment")
 
-              if ali90 && ali90.sequences.map(&:domain).sum { |d| d.send(:"#{na}_interfaces").size } > 0
-                cp tem, new_tem if File.exist?(tem)
+              if ali && ali.sequences.map(&:domain).sum { |d| d.send(:"#{na}_interfaces").size } > 0
+                cp(tem, new_tem) if File.exist?(tem)
               end
             end
 
-            cp "#{na.upcase}#{env.upcase}_CLASSDEF".constantize, est_dir
+            cp("#{na.upcase}#{env.upcase}_CLASSDEF".constantize, est_dir)
 
             cwd = pwd
             chdir est_dir
@@ -401,15 +402,15 @@ namespace :bipa do
             system "subst --tem-list templates.lst --weight 100 --output 2 --outfile allmat.#{na}#{env}.log.dat"
             chdir cwd
           end
-        end
-      end # (10..100).step(10)
+        end # (20..100).step(20)
+      end
     end # task :essts
 
 
     desc "Generate Fugue profile for each representative set of SCOP families"
     task :profiles => [:environment] do
 
-      (10..100).step(10) do |si|
+      (20..100).step(20) do |si|
         next if si != 90
 
         %w[dna rna].each do |na|
