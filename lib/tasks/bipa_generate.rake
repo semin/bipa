@@ -371,7 +371,6 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         (20..100).step(20) do |si|
-          next if si != 80
           nr_dir = File.join(FAMILY_DIR, "nr#{si}", na)
 
           %w[16 64 std].each do |env|
@@ -379,9 +378,9 @@ namespace :bipa do
             mkdir_p est_dir
 
             Dir.new(nr_dir).each do |dir|
-              next if dir =~ /^\./
+              next if dir =~ /^\./ or dir !~ /^\d+$/
 
-              tem     = File.join(nr_dir, dir, "baton_na.tem")
+              tem     = File.join(nr_dir, dir, "#{dir}.tem")
               new_tem = File.join(est_dir, "#{dir}.tem")
               fam     = Scop.find_by_sunid(dir)
               ali     = fam.send(:"nr#{si}_#{na}_alignment")

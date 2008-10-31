@@ -364,7 +364,7 @@ namespace :bipa do
           config = ActiveRecord::Base.remove_connection
 
           (20..100).step(20) do |si|
-            if si != 80
+            if si == 100 or si == 80
               $logger.warn "!!! Sorry, skipped #{na}#{si} for the moment"
               next
             end
@@ -461,8 +461,8 @@ namespace :bipa do
               end
             end
           end
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
