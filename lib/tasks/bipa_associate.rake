@@ -20,7 +20,7 @@ namespace :bipa do
               $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
             else
               domains.each do |domain|
-                structure.models.first.residues.each do |residue|
+                structure.models.first.aa_residues.each do |residue|
                   if domain.include? residue
                     residue.domain = domain
                     residue.save!

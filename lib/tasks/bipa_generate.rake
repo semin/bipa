@@ -72,7 +72,6 @@ namespace :bipa do
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
-
           sunids.each_with_index do |sunid, i|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
@@ -121,7 +120,6 @@ namespace :bipa do
         full_dir  = File.join(FAMILY_DIR, "full", na)
 
         refresh_dir(sub_dir) unless RESUME
-
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
 

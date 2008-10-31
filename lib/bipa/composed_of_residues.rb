@@ -11,9 +11,9 @@ module Bipa
     def sorted_residues
       residues.sort_by { |r|
         if r.icode.blank?
-          10000 * r.residue_code + " ".ord
+          100000 * r.residue_code + " ".ord
         else
-          10000 * r.residue_code + r.icode.ord
+          100000 * r.residue_code + r.icode.ord
         end
       }
     end
