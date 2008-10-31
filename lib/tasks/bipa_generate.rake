@@ -392,14 +392,14 @@ namespace :bipa do
 
             cp("#{na.upcase}#{env.upcase}_CLASSDEF".constantize, est_dir)
 
-            cwd = pwd
-            chdir est_dir
-            cp "classdef.#{na}#{env}.dat", "classdef.dat"
-            system "ls *.tem -1 > templates.lst"
-            system "subst --tem-list templates.lst --weight 100 --output 0"
-            system "subst --tem-list templates.lst --weight 100 --output 1 --outfile allmat.#{na}#{env}.prob.dat"
-            system "subst --tem-list templates.lst --weight 100 --output 2 --outfile allmat.#{na}#{env}.log.dat"
-            chdir cwd
+#            cwd = pwd
+#            chdir est_dir
+#            cp "classdef.#{na}#{env}.dat", "classdef.dat"
+#            system "ls *.tem -1 > templates.lst"
+#            system "subst --tem-list templates.lst --weight 100 --output 0"
+#            system "subst --tem-list templates.lst --weight 100 --output 1 --outfile allmat.#{na}#{env}.prob.dat"
+#            system "subst --tem-list templates.lst --weight 100 --output 2 --outfile allmat.#{na}#{env}.log.dat"
+#            chdir cwd
           end
         end # (20..100).step(20)
       end
