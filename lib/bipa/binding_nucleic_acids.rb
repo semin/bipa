@@ -65,6 +65,7 @@ module Bipa
       binding_dna? || binding_rna?
     end
 
+    # dna
     def hbonding_dna_base_as_donor?
       hbonding_acceptors.any? { |a| a.dna? && a.base? }
     end
@@ -74,7 +75,11 @@ module Bipa
     end
 
     def hbonding_dna_base?
-      hbonding_dna_base_as_donor? || hbonding_dna_base_as_acceptor?
+      if self.respond_to? :hbond_dna_base
+        self.hbond_dna_base
+      else
+        hbonding_dna_base_as_donor? || hbonding_dna_base_as_acceptor?
+      end
     end
 
     def hbonding_dna_sugar_as_donor?
@@ -86,7 +91,11 @@ module Bipa
     end
 
     def hbonding_dna_sugar?
-      hbonding_dna_sugar_as_donor? || hbonding_dna_sugar_as_acceptor?
+      if self.respond_to? :hbond_dna_sugar
+        self.hbond_dna_sugar
+      else
+        hbonding_dna_sugar_as_donor? || hbonding_dna_sugar_as_acceptor?
+      end
     end
 
     def hbonding_dna_phosphate_as_donor?
@@ -98,33 +107,63 @@ module Bipa
     end
 
     def hbonding_dna_phosphate?
-      hbonding_dna_phosphate_as_donor? || hbonding_dna_phosphate_as_acceptor?
+      if self.respond_to? :hbond_dna_phosphate?
+        self.hbond_dna_phosphate
+      else
+        hbonding_dna_phosphate_as_donor? || hbonding_dna_phosphate_as_acceptor?
+      end
     end
 
     def whbonding_dna_base?
-      whbonding_atoms.any? { |a| a.dna? && a.base? }
+      if self.respond_to? :whbond_dna_base
+        self.whbond_dna_base
+      else
+        whbonding_atoms.any? { |a| a.dna? && a.base? }
+      end
     end
 
     def whbonding_dna_sugar?
-      whbonding_atoms.any? { |a| a.dna? && a.sugar? }
+      if self.respond_to? :whbond_dna_sugar
+        self.whbond_dna_sugar
+      else
+        whbonding_atoms.any? { |a| a.dna? && a.sugar? }
+      end
     end
 
     def whbonding_dna_phosphate?
-      whbonding_atoms.any? { |a| a.dna? && a.phosphate? }
+      if self.respond_to? :whbond_dna_phosphate
+        self.whbond_dna_phosphate
+      else
+        whbonding_atoms.any? { |a| a.dna? && a.phosphate? }
+      end
     end
 
     def vdw_contacting_dna_base?
-      vdw_contacting_atoms.any? { |a| a.dna? && a.base? }
+      if self.respond_to? :vdw_dna_base
+        self.vdw_dna_base
+      else
+        vdw_contacting_atoms.any? { |a| a.dna? && a.base? }
+      end
     end
 
     def vdw_contacting_dna_sugar?
-      vdw_contacting_atoms.any? { |a| a.dna? && a.sugar? }
+      if self.respond_to? :vdw_dna_sugar
+        self.vdw_dna_sugar
+      else
+        vdw_contacting_atoms.any? { |a| a.dna? && a.sugar? }
+      end
     end
 
     def vdw_contacting_dna_phosphate?
-      vdw_contacting_atoms.any? { |a| a.dna? && a.phosphate? }
+      if self.respond_to? :vdw_dna_phosphate
+        self.vdw_dna_phosphate
+      else
+        vdw_contacting_atoms.any? { |a| a.dna? && a.phosphate? }
+      end
     end
 
+
+    # rna
     def hbonding_rna_base_as_donor?
       hbonding_acceptors.any? { |a| a.rna? && a.base? }
     end
@@ -134,7 +173,11 @@ module Bipa
     end
 
     def hbonding_rna_base?
-      hbonding_rna_base_as_donor? || hbonding_rna_base_as_acceptor?
+      if self.respond_to? :hbond_rna_base
+        self.hbond_rna_base
+      else
+        hbonding_rna_base_as_donor? || hbonding_rna_base_as_acceptor?
+      end
     end
 
     def hbonding_rna_sugar_as_donor?
@@ -146,8 +189,11 @@ module Bipa
     end
 
     def hbonding_rna_sugar?
-      hbonding_rna_sugar_as_donor? or
-      hbonding_rna_sugar_as_acceptor?
+      if self.respond_to? :hbond_rna_sugar
+        self.hbond_rna_sugar
+      else
+        hbonding_rna_sugar_as_donor? || hbonding_rna_sugar_as_acceptor?
+      end
     end
 
     def hbonding_rna_phosphate_as_donor?
@@ -159,31 +205,60 @@ module Bipa
     end
 
     def hbonding_rna_phosphate?
-      hbonding_rna_phosphate_as_donor? || hbonding_rna_phosphate_as_acceptor?
+      if self.respond_to? :hbond_rna_phosphate?
+        self.hbond_rna_phosphate
+      else
+        hbonding_rna_phosphate_as_donor? || hbonding_rna_phosphate_as_acceptor?
+      end
     end
 
     def whbonding_rna_base?
-      whbonding_atoms.any? { |a| a.rna? && a.base? }
+      if self.respond_to? :whbond_rna_base
+        self.whbond_rna_base
+      else
+        whbonding_atoms.any? { |a| a.rna? && a.base? }
+      end
     end
 
     def whbonding_rna_sugar?
-      whbonding_atoms.any? { |a| a.rna? && a.sugar? }
+      if self.respond_to? :whbond_rna_sugar
+        self.whbond_rna_sugar
+      else
+        whbonding_atoms.any? { |a| a.rna? && a.sugar? }
+      end
     end
 
     def whbonding_rna_phosphate?
-      whbonding_atoms.any? { |a| a.rna? && a.phosphate? }
+      if self.respond_to? :whbond_rna_phosphate
+        self.whbond_rna_phosphate
+      else
+        whbonding_atoms.any? { |a| a.rna? && a.phosphate? }
+      end
     end
 
     def vdw_contacting_rna_base?
-      vdw_contacting_atoms.any? { |a| a.rna? && a.base? }
+      if self.respond_to? :vdw_rna_base
+        self.vdw_rna_base
+      else
+        vdw_contacting_atoms.any? { |a| a.rna? && a.base? }
+      end
     end
 
     def vdw_contacting_rna_sugar?
-      vdw_contacting_atoms.any? { |a| a.rna? && a.sugar? }
+      if self.respond_to? :vdw_rna_sugar
+        self.vdw_rna_sugar
+      else
+        vdw_contacting_atoms.any? { |a| a.rna? && a.sugar? }
+      end
     end
 
     def vdw_contacting_rna_phosphate?
-      vdw_contacting_atoms.any? { |a| a.rna? && a.phosphate? }
+      if self.respond_to? :vdw_rna_phosphate
+        self.vdw_rna_phosphate
+      else
+        vdw_contacting_atoms.any? { |a| a.rna? && a.phosphate? }
+      end
     end
+
   end
 end
