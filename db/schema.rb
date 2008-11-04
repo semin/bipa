@@ -120,25 +120,25 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :icode
     t.integer     :residue_code
     t.string      :residue_name
-    t.boolean     :ss,                    :default => false
-    t.boolean     :hbond_dna_base,        :default => false
-    t.boolean     :hbond_dna_sugar,       :default => false
-    t.boolean     :hbond_dna_phosphate,   :default => false
-    t.boolean     :whbond_dna_base,       :default => false
-    t.boolean     :whbond_dna_sugar,      :default => false
-    t.boolean     :whbond_dna_phosphate,  :default => false
-    t.boolean     :vdw_dna_base,          :default => false
-    t.boolean     :vdw_dna_sugar,         :default => false
-    t.boolean     :vdw_dna_phophate,      :default => false
-    t.boolean     :hbond_rna_base,        :default => false
-    t.boolean     :hbond_rna_sugar,       :default => false
-    t.boolean     :hbond_rna_phosphate,   :default => false
-    t.boolean     :whbond_rna_base,       :default => false
-    t.boolean     :whbond_rna_sugar,      :default => false
-    t.boolean     :whbond_rna_phosphate,  :default => false
-    t.boolean     :vdw_rna_base,          :default => false
-    t.boolean     :vdw_rna_sugar,         :default => false
-    t.boolean     :vdw_rna_phophate,      :default => false
+    t.boolean     :ss,                    :default => nil
+    t.boolean     :hbond_dna_base,        :default => nil
+    t.boolean     :hbond_dna_sugar,       :default => nil
+    t.boolean     :hbond_dna_phosphate,   :default => nil
+    t.boolean     :whbond_dna_base,       :default => nil
+    t.boolean     :whbond_dna_sugar,      :default => nil
+    t.boolean     :whbond_dna_phosphate,  :default => nil
+    t.boolean     :vdw_dna_base,          :default => nil
+    t.boolean     :vdw_dna_sugar,         :default => nil
+    t.boolean     :vdw_dna_phophate,      :default => nil
+    t.boolean     :hbond_rna_base,        :default => nil
+    t.boolean     :hbond_rna_sugar,       :default => nil
+    t.boolean     :hbond_rna_phosphate,   :default => nil
+    t.boolean     :whbond_rna_base,       :default => nil
+    t.boolean     :whbond_rna_sugar,      :default => nil
+    t.boolean     :whbond_rna_phosphate,  :default => nil
+    t.boolean     :vdw_rna_base,          :default => nil
+    t.boolean     :vdw_rna_sugar,         :default => nil
+    t.boolean     :vdw_rna_phophate,      :default => nil
   end
 
   add_index :residues, :chain_id
