@@ -371,6 +371,12 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         (20..100).step(20) do |si|
+          # CAUTION!!!
+          if si != 80
+            $logger.warn "!!! Sorry, skipped #{na}#{si} for the moment"
+            next
+          end
+
           nr_dir = File.join(FAMILY_DIR, "nr#{si}", na)
 
           %w[16 64 std].each do |env|

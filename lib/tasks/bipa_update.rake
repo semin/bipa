@@ -364,7 +364,8 @@ namespace :bipa do
           config = ActiveRecord::Base.remove_connection
 
           (20..100).step(20) do |si|
-            if si == 100 or si == 80
+            # CAUTION!!!
+            if si != 80
               $logger.warn "!!! Sorry, skipped #{na}#{si} for the moment"
               next
             end
@@ -405,12 +406,12 @@ namespace :bipa do
                     whbond_tem      = []
                     vdw_contact_tem = []
                     db_residues     = domain.residues
-                    ff_residues     = entry.data.gsub(/\n/, "").split("")
+                    ff_residues     = entry.data.gsub("\n", "").split("")
 
                     pos = 0
 
                     ff_residues.each_with_index do |res, fi|
-                      if fi % 75 == 0
+                      if fi != 0 and fi % 75 == 0
                         bind_tem        << "\n"
                         hbond_tem       << "\n"
                         whbond_tem      << "\n"
@@ -457,7 +458,7 @@ namespace :bipa do
                   end
                 end
                 ActiveRecord::Base.remove_connection
-                $logger.info ">>> Updateing JOY template for #{na.upcase} binding NR#{si} SCOP family, #{sunid}: done"
+                $logger.info ">>> Updating JOY template for #{na.upcase} binding NR#{si} SCOP family, #{sunid}: done"
               end
             end
           end
