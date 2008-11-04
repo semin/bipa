@@ -452,7 +452,7 @@ namespace :bipa do
                       file.puts whbond_tem.join + "*"
 
                       file.puts ">P1;#{entry.entry_id}"
-                      file.puts "van der Waals vdw_contact to #{na.upcase}"
+                      file.puts "van der Waals contact to #{na.upcase}"
                       file.puts vdw_contact_tem.join + "*"
                     end
                   end

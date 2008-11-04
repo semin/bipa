@@ -13,4 +13,4 @@ secondary structure and phi angle;HEPC;HEPC;F;F
 solvent accessibility;TF;Aa;F;F
 hydrogen bond to RNA;TF;Hh;F;F
 water-mediated hydrogen bond to RNA;TF;Ww;F;F
-vdw contact to RNA;TF;Vv;F;F
+van der Waals contact to RNA;TF;Vv;F;F

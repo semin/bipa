@@ -13,4 +13,4 @@ secondary structure and phi angle;HEPC;HEPC;F;F
 solvent accessibility;TF;Aa;F;F
 hydrogen bond to DNA;TF;Hh;F;F
 water-mediated hydrogen bond to DNA;TF;Ww;F;F
-vdw contact to DNA;TF;Vv;F;F
+van der Waals contact to DNA;TF;Vv;F;F
