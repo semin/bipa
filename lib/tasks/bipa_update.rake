@@ -496,11 +496,9 @@ namespace :bipa do
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
-
         intfs.each_with_index do |intf, i|
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
-
             %w[dna rna].each do |na|
               intf.residues.each do |aa|
                 aa.send("hbond_#{na}_base=",       true) if aa.send("hbonding_#{na}_base_as_donor?") || aa.send("hbonding_#{na}_base_as_acceptor?")

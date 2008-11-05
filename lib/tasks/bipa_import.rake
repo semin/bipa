@@ -1470,7 +1470,7 @@ namespace :bipa do
               if site[0] == site[1]
                 ident += 1
               end
-            elsif ((count != 0) && (count != (ref_ali.alignment_length-1)) && ((site[0] == "-") || (site[1] == "-")))
+            elsif ((site[0] == "-") && (site[1] != "-")) || ((site[0] != "-") && (site[1] == "-"))
               intgp += 1
             end
             count += 1
