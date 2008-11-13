@@ -1,4 +1,4 @@
-class GoController < ApplicationController
+class GosController < ApplicationController
 
   def index
     order = case params[:sort]
