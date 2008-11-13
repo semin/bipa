@@ -1,4 +1,4 @@
-class ScopsController < ApplicationController
+class ScopController < ApplicationController
 
   def index
     @scops = Scop.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}").paginate(:per_page => session[:per_page] || 10, :page => params[:page] || 1)
