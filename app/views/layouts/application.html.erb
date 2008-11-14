@@ -36,13 +36,13 @@
       <div id="header_menu">
         <%= link_to "Home", "/" %>
         |
-        <%= link_to "Browse", scop_path %>
+        <%= link_to "Browse", scops_path %>
         |
         <div id="settings">
           <% form_tag({ :action => "set_redundancy_and_resolution" }, { :id => "settings_form" }) do %>
-            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{ all 100 90 80 70 60 50 40 30 20 10 }, session[:redundancy])) -%>
+            Redundancy: <%= select_tag(:redundancy, options_for_select(%w{ all 100 80 60 40 20 }, session[:redundancy])) -%>
             ,
-            Resolution &lt; <%= select_tag(:resolution, options_for_select(%w{ all 10 9 8 7 6 5 4 3 2 1 }, session[:resolution])) -%> &Aring;
+            Resolution &lt; <%= select_tag(:resolution, options_for_select(%w{ all 10 8 6 4 2 }, session[:resolution])) -%> &Aring;
             <%= submit_tag("Apply") -%>
           <% end %>
         </div>
