@@ -1,14 +1,6 @@
 <% content_for :main_title do %>
-
   <div class="title">
     Browse: SCOP
-  </div>
-
-  <div class="per_page_form">
-    <% form_tag(:action => "set_per_page", :method => "get", :class => "per_page_form") do %>
-      <%= select_tag :per_page, options_for_select(%w{100 70 50 30 20 15 10}, session[:per_page]) %> per page
-      <%= submit_tag("Apply", :name => nil) %>
-    <% end %>
   </div>
 <% end %>
 
@@ -20,8 +12,6 @@
       <th> SCCS </th>
       <th> SID </th>
       <th> Description </th>
-      <th> No. of <br />Protein-DNA<br />Interfaces </th>
-      <th> No. of <br />Protein-RNA<br />Interfaces </th>
     </tr>
   </thead>
   <tbody id="table_body">

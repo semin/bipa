@@ -27,24 +27,24 @@ class ApplicationController < ActionController::Base
   # Semin: disable forgery protection
   self.allow_forgery_protection = false
 
-  def set_redundancy_and_resolution
-    session[:redundancy] = params[:redundancy]
-    session[:resolution] = params[:resolution]
-
-    flash[:notice] = "Maximum seqeunce identity has been set to #{session[:redundancy]}"
-    flash[:notice] += " %" if session[:redundancy].to_i > 0
-    flash[:notice] += "<br/>" if flash[:notice]
-    flash[:notice] += "Maximum resolution has been set to #{session[:resolution]}"
-    flash[:notice] += " &Aring" if session[:resolution].to_f > 0.0
-
-    redirect_to :back
-  end
-
-  def set_per_page
-    session[:per_page] = params[:per_page]
-    flash[:notice] = "Entries per page has been set to #{params[:per_page]}"
-    redirect_to :back
-  end
+#  def set_redundancy_and_resolution
+#    session[:redundancy] = params[:redundancy]
+#    session[:resolution] = params[:resolution]
+#
+#    flash[:notice] = "Maximum seqeunce identity has been set to #{session[:redundancy]}"
+#    flash[:notice] += " %" if session[:redundancy].to_i > 0
+#    flash[:notice] += "<br/>" if flash[:notice]
+#    flash[:notice] += "Maximum resolution has been set to #{session[:resolution]}"
+#    flash[:notice] += " &Aring" if session[:resolution].to_f > 0.0
+#
+#    redirect_to :back
+#  end
+#
+#  def set_per_page
+#    session[:per_page] = params[:per_page]
+#    flash[:notice] = "Entries per page has been set to #{params[:per_page]}"
+#    redirect_to :back
+#  end
 
 
   private

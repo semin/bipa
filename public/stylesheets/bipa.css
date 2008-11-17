@@ -7,31 +7,29 @@ html, body {
   margin: 0px;
   padding: 0px;
   height: 100%;
-  width: 100%;
+  width: 1000px;
 }
 
 body {
   color: #000;
-  background: #C5C2B8;
+  background: #FFF;
   font-family: Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
   font-size: 1em;
 }
 
 h4 {
-  color: #000;
-  background: #FFF;
   padding: 5px;
 }
 
 #header {
   position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100%;
+  top: 10px;
+  left: 10px;
+  right: 10px;
   height: 100px;
-  border-bottom: 2px black dotted;
   padding: 0px;
   overflow: hidden;
+  border-bottom: 2px black dotted;
 }
 
 #main_banner {
@@ -135,10 +133,12 @@ form.per_page_form {
 }
 
 #middler {
+  background: #C5C2B8;
   position: fixed;
-  top: 100px;
+  top: 112px;
   bottom: 30px;
-  width: 100%;
+  left: 10px;
+  right: 10px;
 }
 
 #main_container {
@@ -198,10 +198,12 @@ form.per_page_form {
 }
 
 #footer {
-  position: absolute;
-  bottom: 0px;
+  background: #C5C2B8;
+  position: fixed;
+  bottom: 10px;
   height: 30px;
-  width: 100%;
+  left: 10px;
+  right: 10px;
   border-top: 2px black dotted;
   font-size: 0.8em;
   text-align: center;
