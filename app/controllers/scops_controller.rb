@@ -1,7 +1,10 @@
 class ScopsController < ApplicationController
 
+  cattr_reader :per_page
+  @@per_page = 20
+
   def index
-    @scops = Scop.rpall.paginate(:page => params[:page] || 1)
+    @scops = ScopFamily.rpall.paginate(:page => params[:page] || 1)
 
     respond_to do |format|
       format.html

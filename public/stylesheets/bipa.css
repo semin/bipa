@@ -7,13 +7,13 @@ html, body {
   margin: 0px;
   padding: 0px;
   height: 100%;
-  width: 1000px;
+  width: 100%;
 }
 
 body {
   color: #000;
   background: #FFF;
-  font-family: Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
+  font-family: Optima, Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
   font-size: 1em;
 }
 
@@ -21,49 +21,29 @@ h4 {
   padding: 5px;
 }
 
+#body_container {
+  position: static;
+  top: 0px;
+  width: 1024px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow: auto;
+}
+
 #header {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  height: 100px;
-  padding: 0px;
+  position: relative;
+  top: 0px;
+  height: 65px;
+  left: 0px;
+  right: 0px;
+  padding: 10px;
   overflow: hidden;
   border-bottom: 2px black dotted;
 }
 
-#main_banner {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-family: Georgia, serif;
-  font-size: 1.5em;
-  font-weight: bold;
-  text-align: left;
-  display: inline;
-}
-
-#sub_banner {
-  position: absolute;
-  top: 40px;
-  left: 10px;
-  font-family: Georgia, serif;
-  font-size: 1.1em;
-  text-align: left;
-}
-
-#cambridge_logo {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
 #header_menu {
-  position: absolute;
-  top: 75px;
-  bottom: 0px;
-  left: 10px;
-  right: 20px;
+  position: static
+  right: 0px;
   font-size: 0.85em;
 }
 
@@ -79,6 +59,28 @@ h4 {
 #header_menu a:hover, a:active {
   color: #000;
   text-decoration: underline;
+}
+
+#main_banner {
+  position: relative;
+  font-family: Optima, Georgia, serif;
+  font-size: 1.5em;
+  font-weight: bold;
+  text-align: left;
+  display: inline;
+}
+
+#sub_banner {
+  position: relative;
+  font-family: Optima, Georgia, serif;
+  font-size: 1.1em;
+  text-align: left;
+}
+
+#cambridge_logo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
 
 #browse {
@@ -133,12 +135,10 @@ form.per_page_form {
 }
 
 #middler {
-  background: #C5C2B8;
-  position: fixed;
-  top: 112px;
-  bottom: 30px;
-  left: 10px;
-  right: 10px;
+  position: absolute;
+  top: 65px;
+  width: 100%;
+  overflow: hidden;
 }
 
 #main_container {
@@ -149,14 +149,13 @@ form.per_page_form {
   right: 0px;
   margin: 10px;
   color: #000;
-  background: #FFF;
   overflow: hidden;
 }
 
 #main_title {
   position: absolute;
   top: 0px;
-  height: 40px;
+  height: 30px;
   left: 0px;
   right: 0px;
   margin: 0px;
@@ -167,15 +166,15 @@ form.per_page_form {
 
 #main_title div.title {
   position: absolute;
-  padding-top: 7px;
+  padding-top: 5px;
   padding-left: 10px;
   padding-left: 10px;
-  font-size: 1.2em;
+  font-size: 1.0em;
 }
 
 #main_content {
   position: absolute;
-  top: 40px;
+  top: 30px;
   left: 0px;
   right: 0px;
   bottom: 0px;
@@ -198,12 +197,12 @@ form.per_page_form {
 }
 
 #footer {
-  background: #C5C2B8;
   position: fixed;
-  bottom: 10px;
-  height: 30px;
+  bottom: 0px;
+  height: 20px;
   left: 10px;
   right: 10px;
+  padding-top: 2px;
   border-top: 2px black dotted;
   font-size: 0.8em;
   text-align: center;
