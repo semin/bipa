@@ -20,7 +20,7 @@
   </head>
 
   <body>
-    <div id="body_container">
+    <div id="wrapper">
       <%= content_tag("div", flash[:notice], :class => "notice", :id => "notice") if flash[:notice] %>
       <div id="header"> 
         <div id="header_menu">
@@ -41,21 +41,17 @@
         <div id="main_banner">
           BIPA
         </div>
-
         <div id="sub_banner">
           : <u>B</u>iological database for <u>I</u>nteraction between <u>P</u>rotein and nucleic <u>A</u>cid
         </div>
-
       </div>
 
       <div id="middler">
-        <div id="main_container">
-          <div id="main_title">
-            <%= yield :main_title %>
-          </div>
-          <div id="main_content">
-            <%= yield :layout %>
-          </div>
+        <div id="main_title">
+          <%= yield :main_title %>
+        </div>
+        <div id="main_content">
+          <%= yield :layout %>
         </div>
       </div>
 
