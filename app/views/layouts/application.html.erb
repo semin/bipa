@@ -20,8 +20,9 @@
   </head>
 
   <body>
+    <%= content_tag("div", flash[:notice], :class => "notice", :id => "notice") if flash[:notice] %>
     <div id="wrapper">
-      <%= content_tag("div", flash[:notice], :class => "notice", :id => "notice") if flash[:notice] %>
+
       <div id="header"> 
         <div id="header_menu">
           <%= link_to "Home", "/" %>
@@ -58,6 +59,7 @@
       <div id="footer">
         &copy; 2008 <%= link_to "Semin Lee", "/contact" %>, <%= link_to "Blundell Group", "http://www-cryst.bioc.cam.ac.uk" %>, <%= link_to "Department of Biochemistry", "http://www.bioc.cam.ac.uk" %>, <%= link_to "University of Cambridge", "http://www.cam.ac.uk" %>, UK
       </div>
+
     </div>
   </body>
 </html>
