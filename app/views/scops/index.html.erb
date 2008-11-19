@@ -1,9 +1,10 @@
-<% content_for :main_title do %>
-  <div class="title">
-    Browse: SCOP
-  </div>
-<% end %>
+<div class="main_title">
+  Browse: <%= @scops.first.class %>
+</div>
 
+<%= render :partial => "structure", :collection => @structures, :spacer_template => "/shared/list_spacer" %>
+
+<!--
 <table class="stats">
   <thead>
     <tr>
@@ -20,3 +21,6 @@
 </table>
 
 <%= will_paginate @scops %>
+--!>
+
+

@@ -1,8 +1,6 @@
-<% content_for :main_title do %>
-  <div class="title">
-    Search: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @hits.size %></font>
-  </div>
-<% end %>
+<div class="main_title">
+  Search: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @hits.size %></font>
+</div>
 
 <% if @hits && @hits.size > 0 %>
   <%= render :partial => "hit", :collection => @hits, :spacer_template => "/shared/list_spacer" %>

@@ -38,6 +38,8 @@ class Structure < ActiveRecord::Base
   has_many  :het_chains,
             :through    => :models
 
+  named_scope :latest, { :order => 'deposited_at DESC' }
+
   named_scope :untainted, :conditions => {
     :no_zap     => false,
     :no_dssp    => false,
@@ -58,5 +60,9 @@ class Structure < ActiveRecord::Base
     aa_chains.inject([]) { |s, a| s.concat(a.domains) }
   end
   memoize :domains
+
+  def rcsb_image_link
+    "http://www.rcsb.org/pdb/images/#{pdb_code.downcase}_bio_r_80.jpg"
+  end
 
 end

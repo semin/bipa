@@ -1,12 +1,8 @@
 class MainController < ApplicationController
 
   def home
-    @newses = News.find(:all)
-
-    session[:classification]  = "SCOP"  unless session[:classification]
-    session[:redundancy]      = "90"    unless session[:redundancy]
-    session[:resolution]      = "3"     unless session[:resolution]
-    session[:per_page]        = "15"    unless session[:per_page]
+    #@structure = Structure.latest.first
+    @structure = Structure.find_by_pdb_code("1A36")
 
     respond_to do |format|
       format.html
@@ -14,17 +10,15 @@ class MainController < ApplicationController
   end
 
   def browse
-    session[:classification] = params[:classification]
-
     case params[:classification]
+    when "PDB"
+      redirect_to structures_url
     when "SCOP"
       redirect_to scops_url
     when "GO"
       redirect_to gos_url
     when "TAXONOMY"
       redirect_to taxa_url
-    when "INTERFACES"
-      redirect_to interfaces_url
     end
   end
 
@@ -33,5 +27,4 @@ class MainController < ApplicationController
       format.html
     end
   end
-
 end
