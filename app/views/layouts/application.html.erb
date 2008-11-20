@@ -59,7 +59,7 @@
             <%= link_to "FAQ", "/" %>
           </li>
         </ul>
-        <div id="header_search" class="search_form">
+        <div id="header_search">
           <% form_tag(search_scops_path, :method => "get", :class => "search_form") do %>
             <%= select_tag(:search_model, options_for_select(%w{ PDB SCOP GO TAXONOMY })) %>
             <%= text_field_tag :query, nil, :size => 20 %>
