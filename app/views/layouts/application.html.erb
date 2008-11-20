@@ -9,6 +9,7 @@
     <%= javascript_include_tag "jquery-1.2.6.min" %>
     <%= javascript_include_tag "jquery.corner" %>
     <%= javascript_include_tag "superfish" %>
+    <%= javascript_include_tag "jmol/Jmol.js" %>
 
     <%= stylesheet_link_tag "bipa" %>
     <%= stylesheet_link_tag "will_paginate" %>
@@ -78,7 +79,7 @@
         <%= yield :layout %>
       </div>
 
-      <div id="footer">
+      <div id="footer" class="black_link">
         &copy; 2008 <%= link_to "Semin Lee", "/contact" %>, <%= link_to "Blundell Group", "http://www-cryst.bioc.cam.ac.uk" %>, <%= link_to "Department of Biochemistry", "http://www.bioc.cam.ac.uk" %>, <%= link_to "University of Cambridge", "http://www.cam.ac.uk" %>, UK
       </div>
     </div>

@@ -20,6 +20,14 @@ class StructuresController < ApplicationController
     end
   end
 
+  def jmol
+    @structure = Structure.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.rhtml
+    end
+  end
+
 #  # GET /structures/new
 #  def new
 #    @structure = Structure.new

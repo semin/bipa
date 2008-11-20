@@ -55,6 +55,16 @@ class Chain < ActiveRecord::Base
   def fasta_header
     "#{model.structure.pdb_code}:#{chain_code}"
   end
+
+  def go_terms_for_html(namespace = :molecular_function)
+    gos = go_terms.send(namespace)
+    if gos.size > 0
+      gos.map { |g| g.name }.uniq.join("<br />")
+    else
+      "None"
+    end
+  end
+
 end
 
 
@@ -74,6 +84,60 @@ class AaChain < Chain
   has_many  :domains,
             :through      => :residues,
             :uniq         => true
+
+  def ruler_with_margin(margin = 0)
+    "&nbsp;" * margin + (1..residues.size).map do |i|
+      case
+      when i <= 10
+        i % 10 == 0 ? i : "&nbsp;"
+      when i > 10 && i < 100
+        if i % 10 == 0 then i
+        elsif i % 10 == 1 then ""
+        else; "&nbsp;"; end
+      when i >= 100 && i < 1000
+        if i % 10 == 0 then i
+        elsif i % 10 == 1 || i % 10 == 2 then ""
+        else; "&nbsp;"; end
+      end
+    end.join
+  end
+
+  def res_seq
+    aa_residues.map(&:one_letter_code).join
+  end
+
+  def sse_seq
+    aa_residues.map(&:sse).join
+  end
+
+  def asa_seq
+    aa_residues.map(&:on_surface?).join.gsub!("true", "T").gsub!("false", ".")
+  end
+
+  def hbd_dna_seq
+    aa_residues.map(&:hbonding_dna?).join.gsub!("true", "T").gsub!("false", ".")
+  end
+
+  def whb_dna_seq
+    aa_residues.map(&:whbonding_dna?).join.gsub!("true", "T").gsub!("false", ".")
+  end
+
+  def vdw_dna_seq
+    aa_residues.map(&:vdw_contacting_dna?).join.gsub!("true", "T").gsub!("false", ".")
+  end
+
+  def hbd_rna_seq
+    aa_residues.map(&:hbonding_rna?).join.gsub!("true", "T").gsub!("false", ".")
+  end
+
+  def whb_rna_seq
+    aa_residues.map(&:whbonding_rna?).join.gsub!("true", "T").gsub!("false", ".")
+  end
+
+  def vdw_rna_seq
+    aa_residues.map(&:vdw_contacting_rna?).join.gsub!("true", "T").gsub!("false", ".")
+  end
+
 end
 
 

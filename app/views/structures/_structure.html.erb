@@ -1,15 +1,15 @@
 <div class="list">
   <div class="list_figure" style="float:left">
-    <%= image_tag structure.rcsb_image_link %>
+    <%= image_tag structure.rcsb_image_link_80 %>
   </div>
-  <div class="list_title" style="margin-left: 90px">
-    <%= link_to "#{structure.title}" %>
+  <div class="list_title black_link" style="margin-left: 90px">
+    <%= link_to "#{structure.title}", structure_path(structure) %>
   </div>
   <div class="list_content" style="margin-left: 90px">
     PDB Code: <%= structure.pdb_code %><br />
     Classification: <%= structure.classification %><br />
     Experiment method: <%= structure.exp_method %><br />
-    Resolution: <%= structure.resolution %><br />
+    Resolution: <%= structure.resolution_for_html %><br />
     Release date: <%= structure.deposited_at %><br />
   </div>
 </div>

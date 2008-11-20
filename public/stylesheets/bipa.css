@@ -24,6 +24,34 @@ ul {
   margin-top: 0px;
 }
 
+div.black_link a {
+  color: #000;
+}
+
+div.black_link a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+div.black_link a:hover, a:active {
+  color: #000;
+  text-decoration: underline;
+}
+
+div.blue_link a {
+  color: #00F;
+}
+
+div.blue_link a:link, a:visited {
+  color: #00F;
+  text-decoration: none;
+}
+
+div.blue_link a:hover, a:active {
+  color: #00F;
+  text-decoration: underline;
+}
+
 #wrapper {
   position: static;
   width: 1020px;
@@ -41,20 +69,6 @@ ul {
   position: absolute;
   top: 2px;
   right: 0px;
-}
-
-#header_menu a {
-  color: #000;
-}
-
-#header_menu a:link, a:visited {
-  color: #000;
-  text-decoration: none;
-}
-
-#header_menu a:hover, a:active {
-  color: #000;
-  text-decoration: underline;
 }
 
 #main_banner {
@@ -149,20 +163,6 @@ form.search_form {
   text-indent: 20pt;
 }
 
-#home_intro a {
-  color: #00F;
-}
-
-#home_intro a:link, a:visited {
-  color: #00F;
-  text-decoration: none;
-}
-
-#home_intro a:hover, a:active {
-  color: #00F;
-  text-decoration: underline;
-}
-
 #home_news {
   padding-left: 10px;
   padding-right: 10px;
@@ -192,18 +192,8 @@ form.search_form {
   text-align: center;
 }
 
-#footer a {
-  color: #000;
-}
-
-#footer a:link, a:visited {
-  color: #000;
-  text-decoration: none;
-}
-
-#footer a:hover, a:active {
-  color: #000;
-  text-decoration: underline;
+div#jmol {
+  width: 100%;
 }
 
 div.relative {
@@ -257,20 +247,6 @@ div.current_hierarchy a:hover, a:active {
   background: #FFF;
 }
 
-.list a {
-  color: #000;
-}
-
-.list a:link, a:visited {
-  color: #000;
-  text-decoration: none;
-}
-
-.list a:hover, a:active {
-  color: #000;
-  text-decoration: underline;
-}
-
 .list_title {
   font-weight: bold;
 }
@@ -314,56 +290,39 @@ ul li div.contact_affiliation {}
 
 ul li div.contact_email {}
 
-table.stats {
+table {
   width: 1000px;
-  border: 1px #FFF solid;
-  border-collapse: collapse;
-  border-spacing: 0px;
-  border-bottom: 1px #000 solid;
-  margin-top: 10px;
-  margin-left: 10px;
-  text-align: center;
+  margin-bottom: 10px;
 }
 
-table.stats th {
-  background-color: #666;
-  color: #FFF;
-  padding: 4px;
+table th {
   text-align: center;
-  border: 1px #000 dotted;
   font-weight: bold;
 }
 
-table.stats tr {
-  background-color: #FFF;
-}
-
-table.stats tr:hover {
-  background-color: #CCC;
-}
-
-table.stats td {
-  color: #000;
-  padding: 4px;
-  border: 1px #000 dotted;
+table td {
   font-family: Optima, Lucida Console, Monaco, Lucida Console, Courier New, Courier, monospace;
-  font-size: 80%;
-  text-align: right;
+  font-size: 90%;
 }
 
-table.stats a {
-  color: #000;
+table a {
+  color: #00F;
 }
 
-table.stats a:link, a:visited {
-  color: #000;
+table a:link, a:visited {
+  color: #00F;
   text-decoration: none;
 }
 
-table.stats a:hover, a:active {
-  color: #000;
+table a:hover, a:active {
+  color: #00F;
   text-decoration: underline;
 }
+
+table tr.title, td.title {
+  font-weight: bold;
+}
+
 
 #tab_menu_container {
   position: absolute;

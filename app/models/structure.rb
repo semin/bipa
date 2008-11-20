@@ -8,8 +8,6 @@ class Structure < ActiveRecord::Base
     indexes title,          :sortable => true
     indexes exp_method,     :sortable => true
     indexes resolution,     :sortable => true
-    indexes r_value,        :sortable => true
-    indexes r_free,         :sortable => true
 
     has deposited_at
   end
@@ -61,8 +59,35 @@ class Structure < ActiveRecord::Base
   end
   memoize :domains
 
-  def rcsb_image_link
+  def rcsb_image_link_80
     "http://www.rcsb.org/pdb/images/#{pdb_code.downcase}_bio_r_80.jpg"
   end
 
+  def rcsb_image_link_250
+    "http://www.rcsb.org/pdb/images/#{pdb_code.downcase}_asym_r_250.jpg"
+  end
+
+  def rcsb_image_link_500
+    "http://www.rcsb.org/pdb/images/#{pdb_code.downcase}_asym_r_500.jpg"
+  end
+
+  def authors
+    "Semin Lee et al."
+  end
+
+  def citation
+    "Semin Lee et al."
+  end
+
+  def released_at
+    "12 Nov 2008"
+  end
+
+  def source
+    "Homo sapiens"
+  end
+
+  def resolution_for_html
+    resolution ? resolution : "N/A"
+  end
 end

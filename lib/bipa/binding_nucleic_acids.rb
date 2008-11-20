@@ -10,7 +10,8 @@ module Bipa
     end
 
     def hbonding_dna?
-      hbonding_dna_as_donor? || hbonding_dna_as_acceptor?
+      (hbonding_dna_base? || hbonding_dna_sugar? || hbonding_dna_phosphate?) or
+      (hbonding_dna_as_donor? || hbonding_dna_as_acceptor?)
     end
 
     def hbonding_rna_as_donor?
@@ -22,7 +23,8 @@ module Bipa
     end
 
     def hbonding_rna?
-      hbonding_rna_as_donor? || hbonding_rna_as_acceptor?
+      (hbonding_dna_base? || hbonding_dna_sugar? || hbonding_dna_phosphate?) or
+      (hbonding_rna_as_donor? || hbonding_rna_as_acceptor?)
     end
 
     def hbonding_na?
@@ -30,10 +32,12 @@ module Bipa
     end
 
     def whbonding_dna?
-      whbonding_atoms.any? { |a| a.dna? }
+      (whbonding_dna_base? || whbonding_dna_sugar? || whbonding_dna_phosphate?) or
+      (whbonding_atoms.any? { |a| a.dna? })
     end
 
     def whbonding_rna?
+      (whbonding_rna_base? || whbonding_rna_sugar? || whbonding_rna_phosphate?) or
       whbonding_atoms.any? { |a| a.rna? }
     end
 
@@ -42,10 +46,12 @@ module Bipa
     end
 
     def vdw_contacting_dna?
-      vdw_contacting_atoms.any? { |a| a.dna? }
+      (vdw_contacting_dna_base? || vdw_contacting_dna_sugar? || vdw_contacting_dna_phosphate?) or
+      (vdw_contacting_atoms.any? { |a| a.dna? })
     end
 
     def vdw_contacting_rna?
+      (vdw_contacting_rna_base? || vdw_contacting_rna_sugar? || vdw_contacting_rna_phosphate?) or
       vdw_contacting_atoms.any? { |a| a.rna? }
     end
 
@@ -161,7 +167,6 @@ module Bipa
         vdw_contacting_atoms.any? { |a| a.dna? && a.phosphate? }
       end
     end
-
 
     # rna
     def hbonding_rna_base_as_donor?

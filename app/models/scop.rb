@@ -359,4 +359,28 @@ class ScopDomain < Scop
     result
   end
 
+  def scop_class
+    parent.parent.parent.parent.parent.parent
+  end
+
+  def scop_fold
+    parent.parent.parent.parent.parent
+  end
+
+  def scop_superfamily
+    parent.parent.parent.parent
+  end
+
+  def scop_family
+    parent.parent.parent
+  end
+
+  def scop_protein
+    parent.parent
+  end
+
+  def scop_species
+    parent
+  end
+
 end

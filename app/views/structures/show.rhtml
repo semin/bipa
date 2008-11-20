@@ -1,22 +1,126 @@
-<h1>Structure Details</h1>
+<div class="main_title">
+  Structure: <%= @structure.pdb_code %>
+</div>
 
-<table>
+<table id="structure_table">
   <tr>
-    <th>PDB Code</th>
-    <th>Classification</th>
-    <th>Title</th>
-    <th>Experimental Method</th>
-    <th>Resolution</th>
-    <th>Deposition Date</th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th></th>
+    <th colspan=2 rowspan=8 style="width:280px">
+      <%= image_tag @structure.rcsb_image_link_250, :border => 1 %><br />
+      3D View: <%= link_to "Jmol", jmol_structure_path %>
+    </th>
   </tr>
   <tr>
-    <td><%=h @structure.pdb_code %></td>
-    <td><%=h @structure.classification %></td>
-    <td><%=h @structure.title %></td>
-    <td><%=h @structure.exp_method %></td>
-    <td><%=h @structure.resolution %></td>
-    <td><%=h @structure.deposited_at %></td>
+    <td class="title">Title</td>
+    <td colspan=5><%=h @structure.title %></td>
   </tr>
+  <tr>
+    <td class="title">Authors</td>
+    <td colspan=5><%=h @structure.authors %></td>
+  </tr>
+  <tr>
+    <td class="title">Citation</td>
+    <td colspan=5><%=h @structure.citation %></td>
+  </tr>
+  <tr>
+    <td class="title">History</td>
+    <td colspan=5>
+      Deposition: <%=h @structure.deposited_at %><br />
+      Release: <%=h @structure.released_at %>
+    </td>
+  </tr>
+  <tr>
+    <td class="title">Experimental Method</td>
+    <td colspan=5><%=h @structure.exp_method %>
+    <% if @structure.resolution %>
+      , Resolution: <%= @structure.resolution %> &Aring;
+    <% end %>
+  </td>
+  </tr>
+  <tr>
+    <td class="title">Classification</td>
+    <td colspan=5><%=h @structure.classification %></td>
+  </tr>
+  <tr>
+    <td class="title">Source</td>
+    <td colspan=5><%=h @structure.source %></td>
+  </tr>
+  <tr class="title">
+    <td>SCOP<br />Classification</td>
+    <% if @structure.domains.size > 0 %>
+        <td>Domain</td>
+        <td>Class</td>
+        <td>Fold</td>
+        <td>Superfamily</td>
+        <td>Family</td>
+        <td>Protein<br />Domain</td>
+        <td>Species</td>
+      </tr>
+      <% @structure.domains.each do |domain| %>
+        <tr>
+          <td></td>
+          <td><%= domain.sid %></td>
+          <td><%= domain.scop_class.description %></td>
+          <td><%= domain.scop_fold.description %></td>
+          <td><%= domain.scop_superfamily.description %></td>
+          <td><%= domain.scop_family.description %></td>
+          <td><%= domain.scop_protein.description %></td>
+          <td><%= domain.scop_species.description %></td>
+        </tr>
+      <% end %>
+    <% else %>
+      <tr>
+        <td></td>
+        <td colspan=7>None</td>
+      </tr>
+    <% end %>
+  <tr class="title">
+    <td>GO Terms</td>
+    <td colspan=4>Polymer</td>
+    <td>Molecular Function</td>
+    <td>Biological Process</td>
+    <td>Cellular Component</td>
+  <tr>
+  <% @structure.chains.each do |chain| %>
+    <% next if chain.chain_code.nil? %>
+    <tr>
+      <td></td>
+      <td colspan=4><%= chain.chain_code %>: <%= chain.molecule %></td>
+      <td><%= chain.go_terms_for_html(:molecular_function) %></td>
+      <td><%= chain.go_terms_for_html(:biological_process) %></td>
+      <td><%= chain.go_terms_for_html(:cellular_component) %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <td class="title">Structural and Functional Restraints</td>
+    <td>Polymer</td>
+    <td colspan=6>Sequence</td>
+  </tr>
+  <% @structure.aa_chains.each do |chain| %>
+    <tr>
+      <td></td>
+      <td><%= chain.chain_code %></td> 
+      <td colspan=6 class="alignment ruller">
+        <div style="width:850px;overflow:auto;">
+          RULE:<%= chain.ruler_with_margin %><br />
+          SEQE:<%= chain.res_seq %><br />
+          SCSE:<%= chain.sse_seq %><br />
+          SASA:<%= chain.asa_seq %><br />
+          HBDD:<%= chain.hbd_dna_seq %><br />
+          WHBD:<%= chain.whb_dna_seq %><br />
+          VDWD:<%= chain.vdw_dna_seq %><br />
+          HBDR:<%= chain.hbd_rna_seq %><br />
+          WHBR:<%= chain.whb_rna_seq %><br />
+          VDWR:<%= chain.vdw_rna_seq %><br />
+        <div>
+      </td>
+    </tr>
+  <% end %>
 </table>
 
-<%= link_to 'Back', structures_path %>
+<%= link_to "Back to the structure list", structures_path %>
