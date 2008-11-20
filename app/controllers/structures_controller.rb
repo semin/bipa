@@ -1,7 +1,7 @@
 class StructuresController < ApplicationController
 
   def index
-    @structures = Structure.paginate(:page => params[:page] || 1, :per_page => 10)
+    @structures = Structure.untainted.paginate(:page => params[:page] || 1, :per_page => 10)
 
     respond_to do |format|
       format.html # index.rhtml

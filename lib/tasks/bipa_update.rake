@@ -545,5 +545,31 @@ namespace :bipa do
       end
     end
 
+    desc "Update ASA related fields for 'residues' tabl"
+    task :residues_asa => [:environment] do
+
+      pdb_codes = Structure.all.map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+        pdb_codes.each_with_index do |pdb_code, i|
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+            structure = Structure.find_by_pdb_code(pdb_code)
+            structure.models.first.std_residues.each do |residue|
+              %w[unbound bound delta].each do |state|
+                residue.send("#{state}_asa=", residue.send("calculate_#{state}_asa"))
+                residue.save!
+              end
+            end
+            $logger.info ">>> Updating Residue ASA fileds for #{structure.pdb_code}: done (#{i + 1}/#{pdb_codes.count})"
+            ActiveRecord::Base.remove_connection
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end
+
   end
 end

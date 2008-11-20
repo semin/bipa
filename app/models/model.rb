@@ -22,6 +22,9 @@ class Model < ActiveRecord::Base
   has_many  :residues,
             :through    => :chains
 
+  has_many  :std_residues,
+            :through    => :chains
+
   has_many  :aa_residues,
             :through    => :chains
 

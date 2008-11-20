@@ -118,6 +118,14 @@ class Residue < ActiveRecord::Base
   def justified_residue_code
     residue_code.to_s.rjust(4, '0')
   end
+
+  %w(unbound bound delta).each do |state|
+    class_eval <<-END
+      def calculate_#{state}_asa
+        atoms.inject(0) { |s, a| !a.#{state}_asa.nil? ? s + a.#{state}_asa : s } rescue 0
+      end
+    END
+  end
 end # class Residue
 
 
@@ -172,13 +180,11 @@ class AaResidue < StdResidue
     class_eval <<-END
       def relative_#{state}_asa
         if AminoAcids::Residues::STANDARD.include?(residue_name)
-          atoms.inject(0) { |s, a| a.#{state}_asa ? s + a.#{state}_asa : s } /
-            AminoAcids::Residues::STANDARD_ASA[residue_name]
+            #{state}_asa / AminoAcids::Residues::STANDARD_ASA[residue_name]
         else
           raise "Unknown residue type: \#{id}, \#{residue_name}"
         end
       end
-      memoize :relative_#{state}_asa
     END
   end
 end

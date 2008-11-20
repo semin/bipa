@@ -120,6 +120,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :icode
     t.integer     :residue_code
     t.string      :residue_name
+    t.float       :unbound_asa
+    t.float       :bound_asa
+    t.float       :delta_asa
     t.boolean     :ss,                    :default => nil
     t.boolean     :hbond_dna_base,        :default => nil
     t.boolean     :hbond_dna_sugar,       :default => nil
