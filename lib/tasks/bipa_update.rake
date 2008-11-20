@@ -563,7 +563,7 @@ namespace :bipa do
                 residue.save!
               end
             end
-            $logger.info ">>> Updating Residue ASA fileds for #{structure.pdb_code}: done (#{i + 1}/#{pdb_codes.count})"
+            $logger.info ">>> Updating Residue ASA fields for #{structure.pdb_code}: done (#{i + 1}/#{pdb_codes.count})"
             ActiveRecord::Base.remove_connection
           end
         end
