@@ -69,7 +69,6 @@ class Chain < ActiveRecord::Base
       "None"
     end
   end
-
 end
 
 
@@ -141,6 +140,10 @@ class AaChain < Chain
 
   def vdw_rna_seq
     aa_residues.map { |r| r.vdw_contacting_rna? ? "T" : "." }.join
+  end
+
+  def formatted_sequence
+    aa_residues.map { |r| r.formatted_residue_name }.join
   end
 end
 

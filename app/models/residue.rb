@@ -18,59 +18,6 @@ class Residue < ActiveRecord::Base
 
   has_many  :positions
 
-  has_one :dssp,
-          :class_name   => "Dssp",
-          :foreign_key  => "residue_id"
-
-  delegate :sse, :to => :dssp
-
-  def positive_phi?
-    if dssp then dssp.phi > 0 && dssp.phi != 360
-    else; false; end
-  end
-
-  def alpha_helix?
-    if dssp then sse == "H" || sse == "I"
-    else; false; end
-  end
-
-  def three10_helix?
-    if dssp then sse == "G"
-    else; false; end
-  end
-
-  def beta_sheet?
-    if dssp then sse == "E" || sse == "B"
-    else; false; end
-  end
-
-  def html_residue_name
-    css_class = []
-
-    case
-    when positive_phi? then css_class << "positive_phi"
-    end
-
-    case
-    when alpha_helix?   then css_class << "alpha_helix"
-    when three10_helix? then css_class << "three10_helix"
-    when beta_sheet?    then css_class << "beta_sheet"
-    end
-
-    case
-    when on_surface?  then css_class << "on_surface"
-    when buried?      then css_class << "buried"
-    end
-
-    case
-    when hbonding_na?       then css_class << "hbonding_na"
-    when whbonding_na?      then css_class << "whbonding_na"
-    when vdw_contacting_na? then css_class << "vdw_contacting_na"
-    end
-
-    "<span class='#{css_class.join(' ')}'>#{one_letter_code}</span>"
-  end
-
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?
@@ -163,8 +110,34 @@ class AaResidue < StdResidue
               :class_name   => "ResidueMap",
               :foreign_key  => "residue_map_id"
 
+  has_one :dssp,
+          :class_name   => "Dssp",
+          :foreign_key  => "residue_id"
+
+  delegate :sse, :to => :dssp
+
+  def positive_phi?
+    (dssp.phi > 0 and dssp.phi != 360.0) rescue false
+  end
+
+  def helix?
+    (sse == "H" or sse == "I" or sse == "G") rescue false
+  end
+
+  def beta_sheet?
+    (sse == "E" or sse == "B") rescue false
+  end
+
+  def coil?
+    (sse == "C") rescue false
+  end
+
   def on_surface?
     relative_unbound_asa >= MIN_SURFACE_RESIDUE_RELATIVE_ASA
+  end
+
+  def buried?
+    !on_surface?
   end
 
   def on_interface?
@@ -180,12 +153,35 @@ class AaResidue < StdResidue
     class_eval <<-END
       def relative_#{state}_asa
         if AminoAcids::Residues::STANDARD.include?(residue_name)
-            #{state}_asa / AminoAcids::Residues::STANDARD_ASA[residue_name]
+            self[:#{state}_asa] / AminoAcids::Residues::STANDARD_ASA[residue_name]
         else
           raise "Unknown residue type: \#{id}, \#{residue_name}"
         end
       end
     END
+  end
+
+  def formatted_residue_name
+    css_class = []
+
+    case
+    when positive_phi?  then css_class << "positive_phi"
+    when coil?          then css_class << "coil"
+    when helix?         then css_class << "helix"
+    when beta_sheet?    then css_class << "beta_sheet"
+    end
+
+    css_class << (on_surface? ? "on_surface" : "buried")
+
+    css_class << "hbonding_dna"       if hbonding_dna?
+    css_class << "whbonding_dna"      if whbonding_dna?
+    css_class << "vdw_contacting_dna" if vdw_contacting_dna?
+
+    css_class << "hbonding_rna"       if hbonding_rna?
+    css_class << "whbonding_rna"      if whbonding_rna?
+    css_class << "vdw_contacting_rna" if vdw_contacting_rna?
+
+    "<span class='#{css_class.join(' ')}'>#{one_letter_code}</span>"
   end
 end
 

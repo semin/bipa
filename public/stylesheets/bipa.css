@@ -301,7 +301,6 @@ table th {
 }
 
 table td {
-  font-family: Optima, Lucida Console, Monaco, Lucida Console, Courier New, Courier, monospace;
   font-size: 90%;
 }
 
@@ -323,6 +322,18 @@ table tr.title, td.title {
   font-weight: bold;
 }
 
+table td.title_center {
+  text-align: center;
+}
+
+table#structure_table {
+  table-layout: fixed;
+}
+
+table.joy_annotation {
+  font-family: courier new, courier, monospace;
+  width: 550px;
+}
 
 #tab_menu_container {
   position: absolute;
@@ -407,38 +418,60 @@ table tr.title, td.title {
 #tab_menu_container ul#tab_menu li a.current{color:#FFF; background:#3C3C3C; font-weight: bold;}
 
 /* Environments */
-.alpha_helix {
-  color: red;
+.helix {
+  /* red */
+  color: #F00;
 }
 
 .beta_sheet {
-  color: blue;
+  /* blue */
+  color: #00F;
 }
 
-.three10_helix {
-  color: maroon;
+.coil {
+  /* yellow */
+  color: #FDD017;
 }
 
-.postive_phi {
-  font-style: italic;
+.positive_phi {
+  /* green */
+  color: #348017;
 }
 
 .on_surface {
-  text-transform: lowercase;
-}
-
-.buried {
   text-transform: uppercase;
 }
 
-.hbonding_na {
-  text-decoration: line-through;
+.buried {
+  text-transform: lowercase;
 }
 
-.whbonding_na {
+.hbonding_dna {
+  background: #FF8040;
+  font-weight: bold;
+}
+
+.whbonding_dna {
+  background: #FF8040;
+  font-style: italic;
+}
+
+.vdw_contacting_dna {
+  background: #FF8040;
   text-decoration: underline;
 }
 
-.contacting_na {
-  text-decoration: overline;
+.hbonding_rna {
+  background: #46C7C7;
+  font-weight: bold;
+}
+
+.whbonding_rna {
+  background: #46C7C7;
+  font-style: italic;
+}
+
+.vdw_contacting_rna {
+  background: #46C7C7;
+  text-decoration: underline;
 }
