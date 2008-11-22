@@ -25,7 +25,10 @@
   </tr>
   <tr>
     <td class="title">Citation</td>
-    <td colspan=5><%=h @structure.citation %></td>
+    <td colspan=5>
+      <%=h @structure.citation %>
+      [<a href="#abstract" id="abstract_link">Abstract</a>]
+    </td>
   </tr>
   <tr>
     <td class="title">History</td>
@@ -106,7 +109,7 @@
       <td></td>
       <td><%= chain.chain_code %></td> 
       <td colspan=6 class="alignment ruller">
-        <div style="width:750;min-height:50px;overflow-x:scroll;overflow-y:hidden;">
+        <div style="width:750;min-height:50px;overflow-x:auto;overflow-y:hidden;">
           <%= chain.ruler_with_margin %><br />
           <%= chain.formatted_sequence %>
         <div>
@@ -118,6 +121,11 @@
     <td></td>
     <td colspan=6>
       <table class="joy_annotation">
+        <tr>
+          <td><b>Key for HTML output</b></td>
+          <td></td>
+          <td></td>
+        </tr>
         <tr>
           <td>alpha helix</td>
           <td><span class="helix">red</span></td>
@@ -182,5 +190,9 @@
     </td>
   </tr>
 </table>
+
+<div id="abstract">
+  <%=h @structure.abstract %>
+</div>
 
 <%= link_to "Back to the structure list", structures_path %>

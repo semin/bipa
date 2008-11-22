@@ -95,7 +95,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :type
     t.string      :chain_code
     t.integer     :mol_code
-    t.string      :molecule
+    t.string      :molecule,  :default => ""
     t.boolean     :tainted
   end
 

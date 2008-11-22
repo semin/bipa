@@ -107,43 +107,43 @@ class AaChain < Chain
   end
 
   def res_seq
-    aa_residues.map(&:one_letter_code).join
+    std_residues.map(&:one_letter_code).join
   end
 
   def sse_seq
-    aa_residues.map(&:sse).join
+    std_residues.map(&:sse).join
   end
 
   def asa_seq
-    aa_residues.map { |r| r.on_surface? ? "A" : "a" }.join
+    std_residues.map { |r| r.on_surface? ? "A" : "a" }.join
   end
 
   def hbd_dna_seq
-    aa_residues.map { |r| r.hbonding_dna? ? "T" : "." }.join
+    std_residues.map { |r| r.hbonding_dna? ? "T" : "." }.join
   end
 
   def whb_dna_seq
-    aa_residues.map { |r| r.whbonding_dna? ? "T" : "." }.join
+    std_residues.map { |r| r.whbonding_dna? ? "T" : "." }.join
   end
 
   def vdw_dna_seq
-    aa_residues.map { |r| r.vdw_contacting_dna? ? "T" : "." }.join
+    std_residues.map { |r| r.vdw_contacting_dna? ? "T" : "." }.join
   end
 
   def hbd_rna_seq
-    aa_residues.map { |r| r.hbonding_rna? ? "T" : "." }.join
+    std_residues.map { |r| r.hbonding_rna? ? "T" : "." }.join
   end
 
   def whb_rna_seq
-    aa_residues.map { |r| r.whbonding_rna? ? "T" : "." }.join
+    std_residues.map { |r| r.whbonding_rna? ? "T" : "." }.join
   end
 
   def vdw_rna_seq
-    aa_residues.map { |r| r.vdw_contacting_rna? ? "T" : "." }.join
+    std_residues.map { |r| r.vdw_contacting_rna? ? "T" : "." }.join
   end
 
   def formatted_sequence
-    aa_residues.map { |r| r.formatted_residue_name }.join
+    std_residues.map { |r| r.formatted_residue_name }.join
   end
 end
 

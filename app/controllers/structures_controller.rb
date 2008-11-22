@@ -12,7 +12,7 @@ class StructuresController < ApplicationController
   # GET /structures/1
   # GET /structures/1.xml
   def show
-    @structure = Structure.find(params[:id])
+    @structure  = Structure.find(params[:id])
 
     respond_to do |format|
       format.html # show.rhtml

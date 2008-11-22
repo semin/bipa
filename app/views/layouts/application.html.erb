@@ -9,7 +9,8 @@
     <%= javascript_include_tag "jquery-1.2.6.min" %>
     <%= javascript_include_tag "jquery.corner" %>
     <%= javascript_include_tag "superfish" %>
-    <%= javascript_include_tag "jmol/Jmol.js" %>
+    <%= javascript_include_tag "fancyzoom" %>
+    <%= javascript_include_tag "jmol/Jmol" %>
 
     <%= stylesheet_link_tag "bipa" %>
     <%= stylesheet_link_tag "will_paginate" %>
@@ -24,6 +25,11 @@
         $j("#home_news").corner("round");
         $j("#home_reference").corner("round");
         $j("#mol_month2").corner("round");
+      });
+    
+      FancyZoomBox.directory = '/images';
+      $(document).observe('dom:loaded', function() {
+        new FancyZoom('abstract_link', {width:400, height:300});
       });
     </script>
   </head>
@@ -55,6 +61,12 @@
           </li>
           <li>
             <%= link_to "Statistics", "/" %>
+          </li>
+          <li>
+            <%= link_to "FUGUE Search", "/" %>
+          </li>
+          <li>
+            <%= link_to "NA-ESSTs", "/" %>
           </li>
           <li>
             <%= link_to "FAQ", "/" %>

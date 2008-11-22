@@ -327,6 +327,7 @@ table td.title_center {
 }
 
 table#structure_table {
+  word-wrap: break-word;
   table-layout: fixed;
 }
 

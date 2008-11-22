@@ -72,19 +72,29 @@ class Structure < ActiveRecord::Base
   end
 
   def authors
-    "Semin Lee et al."
+    @authors = AuditAuthor.find_all_by_Structure_ID(pdb_code).map(&:name).to_sentence
+    @authors.nil? ? "N/A" : @authors
   end
 
   def citation
-    "Semin Lee et al."
+    citation = Citation.find_by_Structure_ID(pdb_code)
+    "#{authors} (#{citation.year}), #{citation.title}. #{citation.journal_abbrev} #{citation.journal_volume}:#{citation.page_first}-#{citation.page_last}"
   end
 
   def released_at
-    "12 Nov 2008"
+    dbstatus = PdbxDatabaseStatus.find([pdb_code, pdb_code])
+    dbstatus.date_of_PDB_release
   end
 
   def source
-    "Homo sapiens"
+    "N/A"
+  end
+
+  def abstract
+    citation   = Citation.find_by_Structure_ID(pdb_code)
+    pubmed     = Bio::PubMed.efetch(citation.pdbx_database_id_PubMed)
+    medline    = Bio::MEDLINE.new(pubmed.first)
+    medline.abstract.empty? ? "N/A" : medline.abstract
   end
 
   def resolution_for_html
