@@ -1,0 +1,14 @@
+<div class="main_title">
+  <%= @interface.class.to_s.match(/DNA/i) ? "DNA" : "RNA" %> Interface of <%= link_to @interface.domain.sid, scop_path(@interface.domain) %>
+</div>
+
+<table id="interface_table">
+  <tr>
+    <th></th>
+    <th></th>
+  </tr>
+  <tr>
+    <td class="title">ASA</td>
+    <td><%=h @interface.asa %>
+  </tr>
+</table>
