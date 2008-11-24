@@ -3,7 +3,7 @@ class InterfacesController < ApplicationController
   before_filter :find_scop, :only => :index
 
   def index
-    @interfaces = @scop.interfaces(session[:redundancy], session[:resolution])
+    @interfaces = DomainInterface.all.paginate(:page => params[:page] || 1, :per_page => 10)
 
     respond_to do |format|
       format.html
@@ -11,7 +11,7 @@ class InterfacesController < ApplicationController
   end
 
   def show
-    @interface = Interface.find(params[:id])
+    @interface = DomainInterface.find(params[:id])
 
     redirect_to :back unless @interface
     respond_to do |format|

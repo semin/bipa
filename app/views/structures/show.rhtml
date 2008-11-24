@@ -67,7 +67,15 @@
       <% @structure.domains.each do |domain| %>
         <tr>
           <td></td>
-          <td><%= domain.sid %></td>
+          <td>
+            <%= domain.sid %>
+            <% if domain.dna_interfaces.size > 0 %>
+              <br />[<%= link_to "DNA interface", interface_path(domain.dna_interfaces.first) %>]
+            <% end %>
+            <% if domain.rna_interfaces.size > 0 %>
+              <br />[<%= link_to "RNA interface", interface_path(domain.rna_interfaces.first) %>]
+            <% end %>
+          </td>
           <td><%= domain.scop_class.description %></td>
           <td><%= domain.scop_fold.description %></td>
           <td><%= domain.scop_superfamily.description %></td>

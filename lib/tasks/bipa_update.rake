@@ -247,61 +247,6 @@ namespace :bipa do
     end
 
 
-    desc "Update 'residues_count' column of 'interfaces' table"
-    task :interfaces_residues_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, residues_count") do |interface|
-        interface.update_attribute :residues_count, interface.residues.length
-      end
-    end
-
-
-    desc "Update 'atoms_count' column of 'interfaces' table"
-    task :interfaces_atoms_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, atoms_count") do |interface|
-        interface.update_attribute :atoms_count, interface.atoms.length
-      end
-    end
-
-
-    desc "Update 'vdw_contacts_count' column of 'interfaces' table"
-    task :interfaces_vdw_contacts_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, vdw_contacts_count") do |interface|
-        interface.update_attribute :vdw_contacts_count, interface.vdw_contacts.length
-      end
-    end
-
-
-    desc "Update 'whbonds_count' column of 'interfaces' table"
-    task :interfaces_whbonds_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, whbonds_count") do |interface|
-        interface.update_attribute :whbonds_count, interface.whbonds.length
-      end
-    end
-
-
-    desc "Update 'hbonds_as_donor_count' column of 'interfaces' table"
-    task :interfaces_hbonds_as_donor_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, hbonds_as_donor_count") do |interface|
-        interface.update_attribute :hbonds_as_donor_count, interface.hbonds_as_donor.length
-      end
-    end
-
-
-    desc "Update 'hbonds_as_acceptor_count' column of 'interfaces' table"
-    task :interfaces_hbonds_as_acceptor_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, hbonds_as_acceptor_count") do |interface|
-        interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
-      end
-    end
-
-
-    desc "Update 'hbonds_count' column of 'interfaces' table"
-    task :interfaces_hbonds_count => [:environment] do
-      DomainInterface.find_all_in_chunks(:select => "id, hbonds_count") do |interface|
-        interface.update_attribute :hbonds_count, interface.hbonds_as_donor.length + interface.hbonds_as_acceptor.length
-      end
-    end
-
 
     desc "Update 'rpXXX' columns of 'scop' table"
     task :scop_rp => [:environment] do
@@ -545,6 +490,7 @@ namespace :bipa do
       end
     end
 
+
     desc "Update ASA related fields for 'residues' tabl"
     task :residues_asa => [:environment] do
 
@@ -568,6 +514,75 @@ namespace :bipa do
           end
         end
         ActiveRecord::Base.establish_connection(config)
+      end
+    end
+
+
+    desc "Update secondary fields for interfaces table"
+    task :interfaces_secondary_fields => [:environment] do
+
+      include Bipa::Constants
+
+      %w[dna rna].each do |na|
+        na_residues = (na.match(/dna/i) ? "NucleicAcids::Dna::Residues::STANDARD" : "NucleicAcids::Rna::Residues::STANDARD").constantize
+        interfaces  = "Domain#{na.capitalize}Interface".constantize.all
+        fmanager    = ForkManager.new(MAX_FORK)
+
+        fmanager.manage do
+          config = ActiveRecord::Base.remove_connection
+          interfaces.each_with_index do |interface, i|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
+
+              interface.update_attribute :asa, interface.delta_asa
+              interface.update_attribute :polarity, interface.calculate_polarity
+              interface.update_attribute :atoms_count, interface.atoms.length
+              interface.update_attribute :residues_count, interface.residues.length
+              interface.update_attribute :vdw_contacts_count, interface.vdw_contacts.length
+              interface.update_attribute :whbonds_count, interface.whbonds.length
+              interface.update_attribute :hbonds_as_donor_count, interface.hbonds_as_donor.length
+              interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
+              interface.update_attribute :hbonds_count, interface.hbonds_as_donor.length + interface.hbonds_as_acceptor.length
+
+              AminoAcids::Residues::STANDARD.each do |aa|
+                interface.update_attribute :"singlet_propensity_of_#{aa.downcase}", interface.calculate_singlet_propensity_of(aa)
+              end
+              Sses::ALL.each do |sse|
+                interface.update_attribute :"sse_propensity_of_#{sse.downcase}", interface.calculate_sse_propensity_of(sse)
+              end
+              %w[hbond whbond vdw_contact].each do |intact|
+                AminoAcids::Residues::STANDARD.each do |aa|
+                  interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids=",
+                                interface.send("calculate_frequency_of_#{intact}_between_nucleic_acids_and_", aa))
+                end
+
+                na_residues.each do |na_residue|
+                  interface.send("frequency_of_#{intact}_between_amino_acids_and_#{na_residue.downcase}=",
+                                interface.send("calculate_frequency_of_#{intact}_between_amino_acids_and_", na_residue))
+
+                  AminoAcids::Residues::STANDARD.each do |aa|
+                    interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{na_residue.downcase}=",
+                                  interface.send("calculate_frequency_of_#{intact}_between", aa, na_residue))
+                  end
+                end
+
+                %w[sugar phosphate].each do |moiety|
+                  interface.send("frequency_of_#{intact}_between_amino_acids_and_#{moiety}=",
+                    AminoAcids::Residues::STANDARD.inject(0) { |sum, aa| sum + interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa) })
+
+                  AminoAcids::Residues::STANDARD.each do |aa|
+                    interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}=",
+                                  interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa))
+                  end
+                end
+              end
+              interface.save!
+              $logger.info ">>> Updating seondary fields of 'interfaces' table for #{interfaces.class}, #{interface.id}: done (#{i+1}/#{interfaces.size})"
+              ActiveRecord::Base.remove_connection
+            end
+          end
+          ActiveRecord::Base.establish_connection(config)
+        end
       end
     end
 
