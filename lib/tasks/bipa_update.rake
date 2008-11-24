@@ -467,11 +467,10 @@ namespace :bipa do
     end
 
 
-    #
-    # supposed to be updated when importing domain_interfaces!!!
-    #
     desc "Update rpall_dna, rpall_rna of 'scop' table"
     task :scop_rpall_na => [:environment] do
+
+      # supposed to be updated when importing domain_interfaces!!!
 
       domains = ScopDomain.rpall
       domains.each_with_index do |domain, i|
