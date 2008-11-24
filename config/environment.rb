@@ -13,6 +13,7 @@ require File.join(File.dirname(__FILE__), 'boot')
 Rails::Initializer.run do |config|
   config.gem "bio"
   config.gem "narray"
+  config.gem "googlecharts", :lib => "gchart"
   config.gem "simple_memoize"
   config.gem "fork_manager"
   config.gem "ar-extensions"

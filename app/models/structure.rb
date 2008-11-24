@@ -71,6 +71,10 @@ class Structure < ActiveRecord::Base
     "http://www.rcsb.org/pdb/images/#{pdb_code.downcase}_asym_r_500.jpg"
   end
 
+  def local_image_link
+    "/pdb/#{pdb_code.downcase}.png"
+  end
+
   def authors
     @authors = AuditAuthor.find_all_by_Structure_ID(pdb_code).map(&:name).to_sentence
     @authors.nil? ? "N/A" : @authors

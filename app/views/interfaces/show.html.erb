@@ -1,14 +1,76 @@
 <div class="main_title">
-  <%= @interface.class.to_s.match(/DNA/i) ? "DNA" : "RNA" %> Interface of <%= link_to @interface.domain.sid, scop_path(@interface.domain) %>
+  <%= @interface.class.to_s.match(/DNA/i) ? "DNA" : "RNA" %> Interface of SCOP domain, <%= link_to @interface.domain.sid, scop_path(@interface.domain) %>
 </div>
 
 <table id="interface_table">
   <tr>
-    <th></th>
-    <th></th>
+    <td class="title" width="200px">No. of Atoms</td>
+    <td colspan=6><%=h @interface.atoms.count %>
+  </tr>
+  <tr>
+    <td class="title">No. of Residues</td>
+    <td colspan=6><%=h @interface.residues.count %></td>
   </tr>
   <tr>
     <td class="title">ASA</td>
-    <td><%=h @interface.asa %>
+    <td colspan=6><%=h @interface.asa %> &Aring;</td>
+  </tr>
+  <tr>
+    <td class="title">Polarity</td>
+    <td colspan=6><%=h @interface.polarity %></td>
+  </tr>
+  <tr>
+    <td class="title">Residue Composition</td>
+    <td colspan=6>
+      <%= image_tag @interface.residue_percentage_google_chart_url %><br />
+      <%= image_tag @interface.residue_propensity_google_chart_url %>
+    </td>
+  </tr>
+  <tr>
+    <td class="title">SSE Composition</td>
+    <td colspan=3>
+      <%= image_tag @interface.sse_percentage_google_chart_url %>
+    </td>
+    <td colspan=3>
+      <%= image_tag @interface.sse_propensity_google_chart_url %>
+    </td>
+  </tr>
+  <tr>
+    <td class="title">SCOP classification</td>
+    <td class="title">Class</td>
+    <td class="title">Fold</td>
+    <td class="title">Superfamily</td>
+    <td class="title">Family</td>
+    <td class="title">Protein</td>
+    <td class="title">Species</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><%= @interface.domain.scop_class.description %></td>
+    <td><%= @interface.domain.scop_fold.description %></td>
+    <td><%= @interface.domain.scop_superfamily.description %></td>
+    <td><%= @interface.domain.scop_family.description %></td>
+    <td><%= @interface.domain.scop_protein.description %></td>
+    <td><%= @interface.domain.scop_species.description %></td>
+  </tr>
+  <tr class="title">
+    <td>GO Terms</td>
+    <td class="title_center" colspan=3>Polymer</td>
+    <td class="title_center">Molecular Function</td>
+    <td class="title_center">Biological Process</td>
+    <td class="title_center">Cellular Component</td>
+  <tr>
+  <% @interface.chains.each do |chain| %>
+    <% next if chain.chain_code.nil? %>
+    <tr>
+      <td></td>
+      <td colspan=3><%= chain.chain_code %>: <%= chain.molecule.html_word_wrap(55) %></td>
+      <td><%= chain.go_terms_for_html(:molecular_function) %></td>
+      <td><%= chain.go_terms_for_html(:biological_process) %></td>
+      <td><%= chain.go_terms_for_html(:cellular_component) %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <td class="title">Atomic Interactions</td>
   </tr>
 </table>

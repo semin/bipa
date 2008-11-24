@@ -4,16 +4,11 @@
 
 <table id="structure_table">
   <tr>
-    <th></th>
-    <th></th>
-    <th></th>
-    <th></th>
-    <th></th>
-    <th></th>
-    <th colspan=2 rowspan=8 style="width:280px">
-      <%= image_tag @structure.rcsb_image_link_250, :border => 1 %><br />
+    <td colspan=6></td>
+    <td colspan=2 rowspan=8 style="width:320px" align="center">
+      <%= image_tag @structure.local_image_link, :width => 300, :border => 1 %><br />
       3D View: <%= link_to "Jmol", jmol_structure_path %>
-    </th>
+    </td>
   </tr>
   <tr>
     <td class="title">Title</td>

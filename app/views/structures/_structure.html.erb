@@ -1,6 +1,6 @@
 <div class="list">
   <div class="list_figure" style="float:left">
-    <%= image_tag structure.rcsb_image_link_80 %>
+    <%= image_tag structure.local_image_link, :width => 100 %>
   </div>
   <div class="list_title black_link" style="margin-left: 90px">
     <%= link_to "#{structure.title}", structure_path(structure) %>

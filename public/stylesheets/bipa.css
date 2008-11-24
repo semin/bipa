@@ -7,7 +7,7 @@ html, body {
 body {
   color: #000;
   background: #FFF;
-  font-family: Optima, Lucida Grande, Lucida Sans Unicode, Lucida, Verdana, Arial, sans-serif;
+  font-family: Optima, Lucida Grande, Georgia, Verdana, sans-serif;
   font-size: 100%;
 }
 
@@ -63,6 +63,7 @@ div.blue_link a:hover, a:active {
   height: 80px;
   width: 100%;
   border-bottom: 2px black dotted;
+  z-index: 1;
 }
 
 #header_menu {
@@ -74,7 +75,7 @@ div.blue_link a:hover, a:active {
 #main_banner {
   position: absolute;
   top: 20px;
-  font-family: Optima, Georgia, serif;
+  font-family: Optima, Lucida Grande, Georgia, Arial, serif;
   font-size: 170%;
   font-weight: bold;
   text-align: left;
@@ -84,7 +85,7 @@ div.blue_link a:hover, a:active {
 #sub_banner {
   position: absolute;
   top: 50px;
-  font-family: Optima, Georgia, serif;
+  font-family: Optima, Lucida Grande, Georgia, Arial, serif;
   font-size: 110%;
   text-align: left;
 }
@@ -149,6 +150,7 @@ form.search_form {
   padding-left: 10px;
   padding-right: 10px;
   overflow: hide;
+  z-index: 0;
 }
 
 .main_title {

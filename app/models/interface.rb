@@ -47,12 +47,22 @@ class DomainInterface < Interface
     end
   end
 
+  def calculate_singlet_percentage_of(res)
+    result = 100.0 * delta_asa_of_residue(res) / delta_asa rescue 0
+  end
+  #memoize :calculate_singlet_frequency_of
+
   def calculate_singlet_propensity_of(res)
     result = ((delta_asa_of_residue(res) / delta_asa) /
               (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
   #memoize :calculate_singlet_propensity_of
+
+  def calculate_sse_percentage_of(sse)
+    result = 100.0 * delta_asa_of_sse(sse) / delta_asa rescue 0
+  end
+  #memoize :calculate_sse_percentage_of
 
   def calculate_sse_propensity_of(sse)
     result = ((delta_asa_of_sse(sse) / delta_asa) /
@@ -198,6 +208,42 @@ class DomainInterface < Interface
     result
   end
   #memoize :calculate_polarity
+
+  def residue_percentage_google_chart_url
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_singlet_percentage_of(r) }
+    Gchart.bar(:size              => '700x100',
+               :title             => 'Residue Percentage (%)',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
+  end
+
+  def residue_propensity_google_chart_url
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_singlet_propensity_of(r) }
+    Gchart.bar(:size              => '700x100',
+               :title             => 'Residue Propensity',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
+  end
+
+  def sse_percentage_google_chart_url
+    data = Sses::ALL.map { |s| calculate_sse_percentage_of(s) }
+    Gchart.bar(:size              => '250x100',
+               :title             => 'SSE Percentage (%)',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
+  end
+
+  def sse_propensity_google_chart_url
+    data = Sses::ALL.map { |s| calculate_sse_propensity_of(s) }
+    Gchart.bar(:size              => '250x100',
+               :title             => 'SSE Propensity',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
+  end
 end # class DomainInterface
 
 

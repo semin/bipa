@@ -35,7 +35,7 @@
       Title: <%= @structure.title %><br />
       PDB Code: <%= @structure.pdb_code %><br />
       Deposited at: <%= @structure.deposited_at %><br />
-      <%= image_tag("1a36.gif", :size => "300x400", :style => "margin-left:100px") %><br />
+      <%= image_tag(@structure.local_image_link, :width => 400, :style => "margin-left:30px") %><br />
     </p>
   </div>
 </div>
