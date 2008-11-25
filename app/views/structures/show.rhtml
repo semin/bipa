@@ -82,7 +82,10 @@
   <% else %>
     <tr>
       <td></td>
-      <td colspan=7>None</td>
+      <td colspan=7>N/A [<%= link_to "?", "#scop_na_box", :id => "scop_na_box_link" %>]</td>
+      <div id="scop_na_box">
+        Current SCOP release, <%= Scop.version %> presumably does NOT classify the structure, <%= @structure.pdb_code %> at the moment. Otherwise, there might be an error in the relation between SCOP entity and PDB structure entity, please <%= link_to "report", "/contact" %> if you think this is a case.
+      </div>
     </tr>
   <% end %>
   <tr class="title">

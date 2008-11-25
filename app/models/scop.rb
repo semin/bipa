@@ -1,5 +1,9 @@
 class Scop < ActiveRecord::Base
 
+  cattr_reader :version
+
+  @@version = "1.73"
+
   set_table_name :scop
 
   include Bipa::Constants
