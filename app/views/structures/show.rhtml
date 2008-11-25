@@ -96,7 +96,7 @@
     <% next if chain.chain_code.nil? %>
     <tr>
       <td></td>
-      <td colspan=4><%= chain.chain_code %>: <%= chain.molecule.html_word_wrap(55) %></td>
+      <td colspan=4><%= chain.chain_code %>: <%= chain.molecule.html_word_wrap(50) %></td>
       <td><%= chain.go_terms_for_html(:molecular_function) %></td>
       <td><%= chain.go_terms_for_html(:biological_process) %></td>
       <td><%= chain.go_terms_for_html(:cellular_component) %></td>

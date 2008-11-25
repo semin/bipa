@@ -90,7 +90,7 @@ class AaChain < Chain
             :uniq         => true
 
   def ruler_with_margin(margin = 0)
-    "&nbsp;" * margin + (1..residues.size).map do |i|
+    "&nbsp;" * margin + (1..std_residues.size).map { |i|
       case
       when i <= 10
         i % 10 == 0 ? i : "&nbsp;"
@@ -103,7 +103,7 @@ class AaChain < Chain
         elsif i % 10 == 1 || i % 10 == 2 then ""
         else; "&nbsp;"; end
       end
-    end.join
+    }.join
   end
 
   def res_seq

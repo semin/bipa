@@ -1,6 +1,6 @@
-<div>
+<div class="black_link">
   <% css_class = [] %>
   <% css_class << "self" if myself == sequence.domain.sid %>
   <% css_class << "representative" if representative == sequence.domain.sid %>
-  <span class="<%= css_class.join(" ") %>"><%= sequence.domain.sid %></span>: <%= sequence.formatted_sequence %>
+  <span class="<%= css_class.join(" ") %>"><%= link_to sequence.domain.sid, scop_path(sequence.domain) %></span>: <%= sequence.formatted_sequence %>
 </div>
