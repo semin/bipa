@@ -2,25 +2,8 @@
   Browse: <%= @scops.first.class %>
 </div>
 
-<%= render :partial => "structure", :collection => @structures, :spacer_template => "/shared/list_spacer" %>
+<%= will_paginate @scops %>
 
-<!--
-<table class="stats">
-  <thead>
-    <tr>
-      <th> SUNID </th>
-      <th> Type </th>
-      <th> SCCS </th>
-      <th> SID </th>
-      <th> Description </th>
-    </tr>
-  </thead>
-  <tbody id="table_body">
-    <%= render :partial => "scop", :collection => @scops %>
-  </tbody>
-</table>
+<%= render :partial => "scop", :collection => @scops, :spacer_template => "/shared/list_spacer" %>
 
 <%= will_paginate @scops %>
---!>
-
-

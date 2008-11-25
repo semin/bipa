@@ -111,8 +111,8 @@
     <tr>
       <td></td>
       <td><%= chain.chain_code %></td> 
-      <td colspan=6 class="alignment ruller">
-        <div style="width:750;min-height:50px;overflow-x:auto;overflow-y:hidden;">
+      <td colspan=6 class="alignment">
+        <div style="width:750;height:50px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;">
           <%= chain.ruler_with_margin %><br />
           <%= chain.formatted_sequence %>
         <div>
@@ -140,13 +140,8 @@
           <td><span class="beta_sheet">x</span></td>
         </tr>
         <tr>
-          <td>coil (or loop)</td>
-          <td><span class="coil">yellow</span></td>
-          <td><span class="coil">x</span></td>
-        </tr>
-        <tr>
           <td>positive phi</td>
-          <td><span class="positive_phi">green</span></td>
+          <td><span class="positive_phi">italic</span></td>
           <td><span class="positive_phi">x</span></td>
         </tr>
         <tr>
@@ -158,6 +153,11 @@
           <td>solvent inaccessible</td>
           <td><span class="buried">lower case</span></td>
           <td><span class="buried">x</span></td>
+        </tr>
+        <tr>
+          <td>disulfide bond</td>
+          <td><span class="disulfide">cedilla</span></td>
+          <td><span class="disulfide">&ccedil;</span></td>
         </tr>
         <tr>
           <td>hydrogen bond to DNA</td>

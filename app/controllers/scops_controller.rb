@@ -1,7 +1,8 @@
 class ScopsController < ApplicationController
 
   def index
-    @scops = ScopFamily.rpall.paginate(:page => params[:page] || 1, :per_page => 10)
+    @scops = ScopDomain.rpall.paginate(:page => params[:page] || 1,
+                                       :per_page => 20)
 
     respond_to do |format|
       format.html
@@ -10,7 +11,14 @@ class ScopsController < ApplicationController
 
   def show
     @scop = Scop.find(params[:id])
-    redirect_to hierarchy_scop_path(@scop)
+
+    if @scop.is_a? ScopDomain
+      respond_to do |format|
+        format.html
+      end
+    else
+      redirect_to hierarchy_scop_path(@scop)
+    end
   end
 
   def search

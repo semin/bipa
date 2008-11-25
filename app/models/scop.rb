@@ -383,4 +383,7 @@ class ScopDomain < Scop
     parent
   end
 
+  def local_image_link
+    "/scop/#{sunid}.png"
+  end
 end

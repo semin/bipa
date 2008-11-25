@@ -5,19 +5,19 @@
 <table id="interface_table">
   <tr>
     <td class="title" width="200px">No. of Atoms</td>
-    <td colspan=6><%=h @interface.atoms.count %>
+    <td colspan=6><%=h @interface[:atoms_count] %>
   </tr>
   <tr>
     <td class="title">No. of Residues</td>
-    <td colspan=6><%=h @interface.residues.count %></td>
+    <td colspan=6><%=h @interface[:residues_count] %></td>
   </tr>
   <tr>
     <td class="title">ASA</td>
-    <td colspan=6><%=h @interface.asa %> &Aring;</td>
+    <td colspan=6><%=h @interface[:asa] %> &Aring;</td>
   </tr>
   <tr>
     <td class="title">Polarity</td>
-    <td colspan=6><%=h @interface.polarity %></td>
+    <td colspan=6><%=h @interface[:polarity] %></td>
   </tr>
   <tr>
     <td class="title">Residue Composition</td>
@@ -71,6 +71,27 @@
     </tr>
   <% end %>
   <tr>
-    <td class="title">Atomic Interactions</td>
+    <td class="title">Similar Interfaces in</td>
+    <th colspan=2 class="title">Shape</th>
+    <th colspan=2 class="title">ASA</th>
+    <th colspan=2 class="title">Polarity</th>
+  </tr>
+  <tr>
+    <td></td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
+  </tr>
+  <tr>
+    <td></td>
+    <th colspan=2>Residue Composition</th>
+    <th colspan=2>SSE Composition</th>  
+    <th colspan=2>All Aspects</th>
+  </tr>
+  <tr>
+    <td></td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
   </tr>
 </table>

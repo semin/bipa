@@ -144,6 +144,10 @@ class AaResidue < StdResidue
     delta_asa >= MIN_INTERFACE_RESIDUE_DELTA_ASA
   end
 
+  def disulfide_bond?
+    ss ? true : false
+  end
+
   def one_letter_code
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
     raise "No one letter code for residue: #{residue_name}"
@@ -181,7 +185,16 @@ class AaResidue < StdResidue
     css_class << "whbonding_rna"      if whbonding_rna?
     css_class << "vdw_contacting_rna" if vdw_contacting_rna?
 
-    "<span class='#{css_class.join(' ')}'>#{one_letter_code}</span>"
+    res_code = if disulfide_bond?
+                 if on_surface?
+                   "&Ccedil;"
+                 else
+                   "&ccedil;"
+                 end
+               else
+                 one_letter_code
+               end
+    "<span class='#{css_class.join(' ')}'>#{res_code}</span>"
   end
 end
 

@@ -49,24 +49,18 @@
                 <%= link_to "PDB", structures_path %>
               </li>
               <li>
-                <%= link_to "SCOP", scops_path %>
-              </li>
-              <li>
-                <%= link_to "GO", gos_path %>
-              </li>
-              <li>
-                <%= link_to "TAXONOMY", taxa_path %>
+                <%= link_to "SCOP", hierarchy_scop_path(Scop.root) %>
               </li>
             </ul>
           </li>
           <li>
-            <%= link_to "Statistics", "/" %>
+            <%= link_to "Statistics", "/statistics" %>
           </li>
           <li>
             <%= link_to "FUGUE", "/" %>
           </li>
           <li>
-            <%= link_to "FAQ", "/" %>
+            <%= link_to "Help", "/help" %>
           </li>
         </ul>
         <div id="header_search">

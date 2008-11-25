@@ -1,23 +1,10 @@
-<% content_for :main_title do %>
-  <div class="title">
-    <%= @scop.hierarchy %>: <%= @scop.description %>
-  </div>
-<% end %>
-
-<div id="tab_menu_container">
-  <ul id="tab_menu">
-    <li><%= link_to "Hierarchy", hierarchy_scop_path(@scop), :class => "current" %></li>
-    <li><%= link_to "Distributions", distributions_scop_path(@scop) %></li>
-    <li><%= link_to "Propensites", propensities_scop_path(@scop) %></li>
-    <li><%= link_to "Chi-square Test", chisquare_test_scop_path(@scop) %></li>
-    <li><%= link_to "Alignments", scop_alignments_path(@scop) %></li>
-    <li><%= link_to "Interfaces", scop_interfaces_path(@scop) %></li>
-  </ul>
+<div class="main_title">
+  <%= @scop.hierarchy %>: <%= @scop.description %>
 </div>
 
 <div id="below_tab_menu">
-  <% if @scop.ancestors.size > 0 %>
-    <%= render :partial => "/scops/relative", :collection => @scop.ancestors.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}") %>
+  <% if @scop.ancestors.rpall.size > 0 %>
+    <%= render :partial => "/scops/relative", :collection => @scop.ancestors.rpall %>
   <% end %>
 
   <div class="current_hierarchy">
@@ -25,14 +12,14 @@
       &nbsp;&nbsp; 
     <% end %>
 
-    &#45; <b><%= @scop.hierarchy %></b>: <%= link_to "#{@scop.description}", hierarchy_scop_path(@scop) %>
+    &#45; <b><%= @scop.hierarchy %></b>: <%= link_to "#{@scop.description}", scop_path(@scop) %>
   </div>
 
-  <% if @scop.level < 4 && @scop.children.size > 0 %>
-    <%= render :partial => "/scops/relative", :collection => @scop.children.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}") %>
+  <% if @scop.level < 7 && @scop.children.rpall.size > 0 %>
+    <%= render :partial => "/scops/relative", :collection => @scop.children.rpall %>
   <% end %>
 
   <% if @scop.siblings.size > 0 %>
-    <%= render :partial => "/scops/relative", :collection => @scop.siblings.send("rep#{session[:redundancy]}").send("res#{session[:resolution]}") %>
+    <%= render :partial => "/scops/relative", :collection => @scop.siblings.rpall %>
   <% end %>
 </div>

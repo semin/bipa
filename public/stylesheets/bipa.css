@@ -300,6 +300,7 @@ table {
 table th {
   text-align: center;
   font-weight: bold;
+  font-size: 90%;
 }
 
 table td {
@@ -349,13 +350,6 @@ table.joy_annotation {
 }
 
 #below_tab_menu {
-  position: absolute;
-  padding-top: 10px;
-  top: 42px;
-  bottom: 0px;
-  left: 10px;
-  right: 10px;
-  overflow: auto;
 }
 
 .alignment {
@@ -365,7 +359,6 @@ table.joy_annotation {
   font-size: 80%;
   background: #FFF;
   color: #000;
-  overflow: auto;
 }
 
 .sequence {
@@ -422,23 +415,15 @@ table.joy_annotation {
 
 /* Environments */
 .helix {
-  /* red */
   color: #F00;
 }
 
 .beta_sheet {
-  /* blue */
   color: #00F;
 }
 
-.coil {
-  /* yellow */
-  color: #FDD017;
-}
-
 .positive_phi {
-  /* green */
-  color: #348017;
+  font-style: italic;
 }
 
 .on_surface {
@@ -451,12 +436,12 @@ table.joy_annotation {
 
 .hbonding_dna {
   background: #FF8040;
-  font-weight: bold;
+  text-decoration: overline;
 }
 
 .whbonding_dna {
   background: #FF8040;
-  font-style: italic;
+  text-decoration: line-through;
 }
 
 .vdw_contacting_dna {
@@ -466,12 +451,12 @@ table.joy_annotation {
 
 .hbonding_rna {
   background: #46C7C7;
-  font-weight: bold;
+  text-decoration: overline;
 }
 
 .whbonding_rna {
   background: #46C7C7;
-  font-style: italic;
+  text-decoration: line-through;
 }
 
 .vdw_contacting_rna {

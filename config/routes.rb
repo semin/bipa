@@ -1,10 +1,11 @@
 ActionController::Routing::Routes.draw do |map|
   # The priority is based upon order of creation: first created -> highest priority.
 
-  map.connect "",         :controller => "main", :action => "home"
-  map.connect "home",     :controller => "main", :action => "home"
-  map.connect "help",     :controller => "main", :action => "help"
-  map.connect "contact",  :controller => "main", :action => "contact"
+  map.connect "",           :controller => "main", :action => "home"
+  map.connect "home",       :controller => "main", :action => "home"
+  map.connect "help",       :controller => "main", :action => "help"
+  map.connect "contact",    :controller => "main", :action => "contact"
+  map.connect "statistics", :controller => "main", :action => "statistics"
 
   map.resources :structures,
                 :member     => { :jmol => :get },

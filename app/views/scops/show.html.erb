@@ -1,0 +1,55 @@
+<div class="main_title">
+  SCOP Domain: <%= @scop.sid %>
+</div>
+
+<table id="@scop_table">
+  <tr>
+    <td colspan=3></td>
+    <td rowspan=8 style="width:320px" align="center">
+      <%= image_tag @scop.local_image_link, :width => 300, :border => 1 %><br />
+      3D View: <%= link_to "Jmol", jmol_structure_path %>
+    </td>
+  </tr>
+  <tr class="title">
+    <td>SCOP<br />Classification</td>
+    <td class="title">Class</td>
+    <td><%= @scop.scop_class.description %></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td class="title">Fold</td>
+    <td><%= @scop.scop_fold.description %></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td class="title">Superfamily</td>
+    <td><%= @scop.scop_superfamily.description %></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td class="title">Family</td>
+    <td><%= @scop.scop_family.description %></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td class="title">Protein<br />Domain</td>
+    <td><%= @scop.scop_protein.description %></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td class="title">Species</td>
+    <td><%= @scop.scop_species.description %></td>
+  </tr>
+  <tr>
+    <td class="title">Interface</td>
+    <td colspan=2>
+      <% if @scop.dna_interfaces.size > 0 %>
+        [<%= link_to "DNA interface", interface_path(@scop.dna_interfaces.first) %>]
+      <% end %>
+      <% if @scop.rna_interfaces.size > 0 %>
+        [<%= link_to "RNA interface", interface_path(@scop.rna_interfaces.first) %>]
+      <% end %>
+    </td>
+  </tr>
+</table>
+
