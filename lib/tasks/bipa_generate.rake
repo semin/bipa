@@ -433,8 +433,8 @@ namespace :bipa do
     end
 
 
-    desc "Generate PNG figure for each PDB files"
-    task :structures_png => [:environment] do
+    desc "Generate PNG figure for each PDB file"
+    task :structure_figures => [:environment] do
 
       cwd = pwd
       chdir PDB_DIR
@@ -451,5 +451,23 @@ namespace :bipa do
       chdir cwd
     end
 
+
+    desc "Generate PNG figure for each SCOP domain file"
+    task :domain_figures => [:environment] do
+
+      cwd = pwd
+      chdir SCOP_DIR
+
+      Dir.new(SCOP_DIR).each do |file|
+        next if file =~ /^\./ or file !~ /\.pdb$/
+        stem = file.match(/(\S+)\.pdb/)[1]
+        system  "molauto -notitle -nice #{stem}.pdb | " +
+                "molscript -r | " +
+                "perl -pi -e 's/^0 0 0\s+background.*$/1 1 1      background colour\n/g' | " +
+                "render -png #{stem}.png"
+      end
+
+      chdir cwd
+    end
   end
 end
