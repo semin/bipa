@@ -66,7 +66,7 @@ class Chain < ActiveRecord::Base
     if gos.size > 0
       gos.map { |g| g.name }.uniq.join("<br />")
     else
-      "None"
+      "N/A"
     end
   end
 end

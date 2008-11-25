@@ -1,8 +1,8 @@
 <div class="main_title">
-  <%= @scop.hierarchy %>: <%= @scop.description %>
+  Browse SCOP: <%= @scop.hierarchy %>, <%= @scop.description %>
 </div>
 
-<div id="below_tab_menu">
+<div id="scop_tree">
   <% if @scop.ancestors.rpall.size > 0 %>
     <%= render :partial => "/scops/relative", :collection => @scop.ancestors.rpall %>
   <% end %>

@@ -1,5 +1,9 @@
 class GoTerm < ActiveRecord::Base
 
+  cattr_reader :version
+
+  @@version = "10 Oct 2008"
+
   # abstract source <-> target relationship
   has_many  :relationships_as_source,
             :class_name   => "GoRelationship",

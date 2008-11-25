@@ -387,6 +387,10 @@ class ScopDomain < Scop
     parent
   end
 
+  def structure
+    residues.first.chain.model.structure
+  end
+
   def local_image_link
     "/scop/#{sunid}.png"
   end

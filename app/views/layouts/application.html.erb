@@ -31,6 +31,10 @@
       $(document).observe('dom:loaded', function() {
         new FancyZoom('abstract_link', {width:400, height:300});
         new FancyZoom('scop_na_box_link', {width:400, height:150});
+        new FancyZoom('dna_rep_alignment_na_box_link', {width:400, height:150});
+        new FancyZoom('rna_rep_alignment_na_box_link', {width:400, height:150});
+        new FancyZoom('dna_sub_alignment_na_box_link', {width:400, height:150});
+        new FancyZoom('rna_sub_alignment_na_box_link', {width:400, height:150});
       });
     </script>
   </head>
@@ -58,10 +62,13 @@
             <%= link_to "Statistics", "/statistics" %>
           </li>
           <li>
-            <%= link_to "FUGUE", "/" %>
+            <%= link_to "FUGUE-na", "/fugue" %>
           </li>
           <li>
             <%= link_to "Help", "/help" %>
+          </li>
+          <li>
+            <%= link_to "Contact", "/contact" %>
           </li>
         </ul>
         <div id="header_search">

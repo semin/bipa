@@ -1,22 +1,18 @@
-<div class="main_title">
-  Structure: <%= @structure.pdb_code %>
+<div class="main_title blue_link">
+  Structure: <%= link_to @structure.pdb_code, @structure.rcsb_html_link, :popup => true %>
 </div>
 
 <table id="structure_table">
   <tr>
     <td colspan=6></td>
-    <td colspan=2 rowspan=8 style="width:320px" align="center">
-      <%= image_tag @structure.local_image_link, :width => 300, :border => 1 %><br />
+    <td colspan=2 rowspan=7 style="width:280px" align="center">
+      <%= image_tag @structure.local_image_link, :width => 250, :border => 1 %><br />
       3D View: <%= link_to "Jmol", jmol_structure_path %>
     </td>
   </tr>
   <tr>
     <td class="title">Title</td>
     <td colspan=5><%=h @structure.title %></td>
-  </tr>
-  <tr>
-    <td class="title">Authors</td>
-    <td colspan=5><%=h @structure.authors %></td>
   </tr>
   <tr>
     <td class="title">Citation</td>
@@ -71,38 +67,40 @@
             <br />[<%= link_to "RNA interface", interface_path(domain.rna_interfaces.first) %>]
           <% end %>
         </td>
-        <td><%= link_to domain.scop_class.description,       scop_path(domain.scop_class)       %></td>
-        <td><%= link_to domain.scop_fold.description,        scop_path(domain.scop_fold)        %></td>
-        <td><%= link_to domain.scop_superfamily.description, scop_path(domain.scop_superfamily) %></td>
-        <td><%= link_to domain.scop_family.description,      scop_path(domain.scop_family)      %></td>
-        <td><%= link_to domain.scop_protein.description,     scop_path(domain.scop_protein)     %></td>
-        <td><%= link_to domain.scop_species.description,     scop_path(domain.scop_species)     %></td>
+        <td align="center"><%= link_to domain.scop_class.description,       scop_path(domain.scop_class)       %></td>
+        <td align="center"><%= link_to domain.scop_fold.description,        scop_path(domain.scop_fold)        %></td>
+        <td align="center"><%= link_to domain.scop_superfamily.description, scop_path(domain.scop_superfamily) %></td>
+        <td align="center"><%= link_to domain.scop_family.description,      scop_path(domain.scop_family)      %></td>
+        <td align="center"><%= link_to domain.scop_protein.description,     scop_path(domain.scop_protein)     %></td>
+        <td align="center"><%= link_to domain.scop_species.description,     scop_path(domain.scop_species)     %></td>
       </tr>
     <% end %>
   <% else %>
     <tr>
       <td></td>
-      <td colspan=7>N/A [<%= link_to "?", "#scop_na_box", :id => "scop_na_box_link" %>]</td>
-      <div id="scop_na_box">
-        Current SCOP release, <%= Scop.version %> presumably does NOT classify the structure, <%= @structure.pdb_code %> at the moment. Otherwise, there might be an error in the relation between SCOP entity and PDB structure entity, please <%= link_to "report", "/contact" %> if you think this is a case.
-      </div>
+      <td colspan=7 align="center">
+        N/A [<%= link_to "?", "#scop_na_box", :id => "scop_na_box_link" %>]<br />
+        <div id="scop_na_box">
+          Current SCOP release, <%= Scop.version %> presumably does NOT classify the structure, <%= @structure.pdb_code %> at the moment. Otherwise, there might be an error in the relation between SCOP entity and PDB structure entity of BIPA, please <%= link_to "report us", "/contact" %> if you think this is a case.
+        </div>
+      </td>
     </tr>
   <% end %>
   <tr class="title">
     <td>GO Terms</td>
     <td class="title_center" colspan=4>Polymer</td>
-    <td class="title_center">Molecular Function</td>
-    <td class="title_center">Biological Process</td>
-    <td class="title_center">Cellular Component</td>
+    <td class="title_center">Molecular<br />Function</td>
+    <td class="title_center">Biological<br />Process</td>
+    <td class="title_center">Cellular<br />Component</td>
   <tr>
   <% @structure.chains.each do |chain| %>
     <% next if chain.chain_code.nil? %>
     <tr>
       <td></td>
       <td colspan=4><%= chain.chain_code %>: <%= chain.molecule.html_word_wrap(50) %></td>
-      <td><%= chain.go_terms_for_html(:molecular_function) %></td>
-      <td><%= chain.go_terms_for_html(:biological_process) %></td>
-      <td><%= chain.go_terms_for_html(:cellular_component) %></td>
+      <td align="center"><%= chain.go_terms_for_html(:molecular_function) %></td>
+      <td align="center"><%= chain.go_terms_for_html(:biological_process) %></td>
+      <td align="center"><%= chain.go_terms_for_html(:cellular_component) %></td>
     </tr>
   <% end %>
   <tr class="title">

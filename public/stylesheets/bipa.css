@@ -62,7 +62,7 @@ span.representative {
 
 #wrapper {
   position: static;
-  width: 1020px;
+  width: 950px;
   margin: 0 auto;
 }
 
@@ -166,29 +166,46 @@ form.search_form {
   font-weight: bold;
 }
 
-#home_intro {
+div#home {
+  float: left;
+  width: 450px;
+}
+
+div#home_intro {
   background: #EAF2F5;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 10px 10px 0px 10px;
   text-indent: 20pt;
+  margin-bottom: 10px;
 }
 
-#home_news {
-  padding-left: 10px;
-  padding-right: 10px;
+div#home_news {
+  padding: 10px 10px 0px 10px;
+  background: #EAF2F5;
+  margin-bottom: 10px;
+}
+
+div#home_reference {
+  padding: 10px 10px 0px 10px;
+  background: #EAF2F5;
+  margin-bottom: 10px;
+}
+
+div#mol_month1 {
+  float: right;
+  width: 470px;
+  margin-left:10px;
+  margin-bottom: 10px;
+}
+
+div#mol_month2 {
+  width: 430px;
+  padding: 10px 10px 0px 10px;
   background: #EAF2F5;
 }
 
-#home_reference {
-  padding-left: 10px;
-  padding-right: 10px;
-  background: #EAF2F5;
-}
-
-#mol_month2 {
-  padding-left: 10px;
-  padding-right: 10px;
-  background: #EAF2F5;
+img#mol_month_img {
+  width: 400px;
+  margin-left: 15px;
 }
 
 #footer {
@@ -221,7 +238,7 @@ div.relative a:link, a:visited {
 
 div.relative a:hover, a:active {
   color: #000;
-  background: #CCC;
+  background: #AAA;
   text-decoration: underline;
 }
 
@@ -231,7 +248,7 @@ div.current_hierarchy {
 
 div.current_hierarchy a {
   color: #000;
-  background: #CCC;
+  background: #DDD;
 }
 
 div.current_hierarchy a:link, a:visited {
@@ -241,7 +258,7 @@ div.current_hierarchy a:link, a:visited {
 
 div.current_hierarchy a:hover, a:active {
   color: #000;
-  background: #CCC;
+  background: #AAA;
   text-decoration: underline;
 }
 
@@ -301,7 +318,7 @@ ul li div.contact_affiliation {}
 ul li div.contact_email {}
 
 table {
-  width: 1000px;
+  width: 930px;
   margin-bottom: 10px;
 }
 
@@ -347,17 +364,8 @@ table.joy_annotation {
   width: 700px;
 }
 
-#tab_menu_container {
-  position: absolute;
-  margin-top: 10px;
-  top: 0px;
-  height: 30px;
-  left: 10px;
-  right: 10px;
-  border-bottom: 2px #3C3C3C solid;
-}
-
-#below_tab_menu {
+#scop_tree {
+  margin-bottom: 10px;
 }
 
 .alignment {
@@ -370,6 +378,7 @@ table.joy_annotation {
 }
 
 .sequence {
+  width: 700px;
   margin-bottom: 10px;
   white-space: nowrap;
   overflow-x: auto;
@@ -386,42 +395,6 @@ table.joy_annotation {
   text-align: right;
   font-size: 80%;
 }
-
-#tab_menu_container ul#tab_menu {
-  list-style-type:none;
-  position:absolute;
-  width: 100%;
-  height: 27px;
-  bottom: 0px;
-  margin: 0px; 
-  padding: 0px;
-}
-
-#tab_menu_container ul#tab_menu li {
-  display:block;
-  float:left;
-  margin:0 0 0 4px;
-  height:27px;
-}
-
-#tab_menu_container ul#tab_menu li.left {
-  margin:0;
-}
-
-#tab_menu_container ul#tab_menu li a {
-  display:block;
-  float:left;
-  color:#EEE;
-  background:#888;
-  line-height:27px;
-  text-decoration:none;
-  padding:0 17px 0 18px;
-  height:27px;
-}
-
-#tab_menu_container ul#tab_menu li a.right{padding-right:19px;}
-#tab_menu_container ul#tab_menu li a:hover{ background: #3C3C3C;}
-#tab_menu_container ul#tab_menu li a.current{color:#FFF; background:#3C3C3C; font-weight: bold;}
 
 /* Environments */
 .helix {
