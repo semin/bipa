@@ -1,0 +1,21 @@
+<div class="main_title">
+  Jmol view: <%= @scop.sid %>
+</div>
+
+<div id="jmol">
+  <applet code="/javascripts/jmol/JmolAppletSigned0.jar" width=500 height=500 align=center>
+    <PARAM name="load" value="../../scop/<%= @scop.sunid %>.pdb">
+    <PARAM name="java_code" value="JmolApplet">
+    <PARAM name="java_archive" value="/javascripts/jmol/JmolAppletSigned0.jar">
+    <PARAM name="type" value="application/x-java-applet;version=1.1">
+    <PARAM name="script" value="select all;spacefill off; wireframe off;cartoon;color cartoon chain;select ligand;wireframe 40;spacefill 120;">
+    <PARAM name="progressbar" value="true">
+    <PARAM name="progresscolor" value="blue">
+    <PARAM name="boxmessage" value="Jmol applet is loading the selected PDB structure">
+    <PARAM name="boxbgcolor" value="black">
+    <PARAM name="boxfgcolor" value="white">
+  </applet>
+</div>
+
+<%= link_to "Back to the domain", scop_path(@scop) %>
+

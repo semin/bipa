@@ -52,6 +52,14 @@ div.blue_link a:hover, a:active {
   text-decoration: underline;
 }
 
+span.self {
+  font-weight: bold;
+}
+
+span.representative {
+  background: yellow;
+}
+
 #wrapper {
   position: static;
   width: 1020px;
@@ -364,11 +372,13 @@ table.joy_annotation {
 .sequence {
   margin-bottom: 10px;
   white-space: nowrap;
+  overflow-x: auto;
 }
 
 .ruler {
   margin-top: 5px;
   white-space: nowrap;
+  overflow-x: auto;
 }
 
 .button {

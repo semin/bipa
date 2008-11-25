@@ -14,7 +14,7 @@ class Alignment < ActiveRecord::Base
 
   has_one   :profile
 
-  def ruler_with_margin(margin)
+  def ruler_with_margin(margin = 9)
     "&nbsp;" * margin + (1..columns.size).map do |i|
       case
       when i <= 10

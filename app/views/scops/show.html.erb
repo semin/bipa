@@ -7,48 +7,211 @@
     <td colspan=3></td>
     <td rowspan=8 style="width:280px" align="center">
       <%= image_tag @scop.local_image_link, :width => 250, :border => 1 %><br />
-      3D View: <%= link_to "Jmol", jmol_structure_path %>
+      3D View: <%= link_to "Jmol", jmol_scop_path %>
     </td>
   </tr>
-  <tr class="title">
-    <td>SCOP<br />Classification</td>
+  <tr>
+    <td class="title">SCOP<br />Classification</td>
     <td class="title">Class</td>
-    <td><%= @scop.scop_class.description %></td>
+    <td><%= link_to @scop.scop_class.description, scop_path(@scop.scop_class) %></td>
   </tr>
   <tr>
     <td></td>
     <td class="title">Fold</td>
-    <td><%= @scop.scop_fold.description %></td>
+    <td><%= link_to @scop.scop_fold.description, scop_path(@scop.scop_fold) %></td>
   </tr>
   <tr>
     <td></td>
     <td class="title">Superfamily</td>
-    <td><%= @scop.scop_superfamily.description %></td>
+    <td><%= link_to @scop.scop_superfamily.description, scop_path(@scop.scop_superfamily) %></td>
   </tr>
   <tr>
     <td></td>
     <td class="title">Family</td>
-    <td><%= @scop.scop_family.description %></td>
+    <td><%= link_to @scop.scop_family.description, scop_path(@scop.scop_family) %></td>
   </tr>
   <tr>
     <td></td>
     <td class="title">Protein<br />Domain</td>
-    <td><%= @scop.scop_protein.description %></td>
+    <td><%= link_to @scop.scop_protein.description, scop_path(@scop.scop_protein) %></td>
   </tr>
   <tr>
     <td></td>
     <td class="title">Species</td>
-    <td><%= @scop.scop_species.description %></td>
+    <td><%= link_to @scop.scop_species.description, scop_path(@scop.scop_species) %></td>
   </tr>
   <tr>
-    <td class="title">Interface</td>
+    <td class="title">Interfaces</td>
     <td colspan=2>
       <% if @scop.dna_interfaces.size > 0 %>
-        [<%= link_to "DNA interface", interface_path(@scop.dna_interfaces.first) %>]
+        <%= link_to "DNA interface", interface_path(@scop.dna_interfaces.first) %><br />
       <% end %>
       <% if @scop.rna_interfaces.size > 0 %>
-        [<%= link_to "RNA interface", interface_path(@scop.rna_interfaces.first) %>]
+        <%= link_to "RNA interface", interface_path(@scop.rna_interfaces.first) %>
       <% end %>
+    </td>
+  </tr>
+  <tr>
+    <td class="title">Structural Alignments</td>
+    <th colspan=3>Subfamily Alignment (PID &gt; 80)</th>
+  </tr>
+  <% if @scop.dna_interfaces.size > 0 %>
+    <tr>
+      <td></td>
+      <td class="title">DNA<br />Binding</th> 
+      <td colspan=4 class="alignment">
+        <% if @scop.nr80_dna_subfamily && @scop.nr80_dna_subfamily.alignment %>
+          <div class="sequence" style="width:800px;">
+            <%= @scop.nr80_dna_subfamily.alignment.ruler_with_margin %>
+            <%= render :partial => "/alignments/sequence",
+              :collection => @scop.nr80_dna_subfamily.alignment.sequences,
+              :locals => { :myself => @scop.sid, :representative => @scop.nr80_dna_subfamily.representative.sid } %>
+          </div>
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  <% if @scop.rna_interfaces.size > 0 %>
+    <tr>
+      <td></td>
+      <td>RNA<br />Binding</td> 
+      <td colspan=4 class="alignment">
+        <% if @scop.nr80_rna_subfamily && @scop.nr80_rna_subfamily.alignment %>
+          <div class="sequence" style="width:800px;">
+            <%= @scop.nr80_rna_subfamily.alignment.ruler_with_margin %>
+            <%= render :partial => "/alignments/sequence",
+              :collection => @scop.nr80_rna_subfamily.alignment.sequences,
+              :locals => { :myself => @scop.sid, :representative => @scop.nr80_rna_subfamily.representative.sid } %>
+          </div>
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  <tr>
+    <td></td>
+    <th colspan=3>Representative Family Alignment (PID &lt; 80)</th>
+  </tr>
+  <% if @scop.dna_interfaces.size > 0 %>
+    <tr>
+      <td></td>
+      <td class="title">DNA<br />Binding</td> 
+      <td colspan=4 class="alignment">
+        <% if @scop.scop_family.nr80_dna_alignment %>
+          <div class="sequence" style="width:800px;">
+            <%= @scop.scop_family.nr80_dna_alignment.ruler_with_margin %>
+            <%= render  :partial => "/alignments/sequence",
+              :collection => @scop.scop_family.nr80_dna_alignment.sequences,
+              :locals => { :myself => @scop.sid, :representative => @scop.nr80_dna_subfamily.representative.sid } %>
+          </div>
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  <% if @scop.rna_interfaces.size > 0 %>
+    <tr>
+      <td></td>
+      <td class="title">RNA<br />Binding</td> 
+      <td colspan=4 class="alignment">
+        <% if @scop.scop_family.nr80_rna_alignment %>
+          <div class="sequence" style="width:800px;">
+            <%= @scop.scop_family.nr80_rna_alignment.ruler_with_margin %>
+            <%= render  :partial => "/alignments/sequence",
+              :collection => @scop.scop_family.nr80_rna_alignment.sequences,
+              :locals => { :myself => @scop.sid, :representative => @scop.nr80_rna_subfamily.representative.sid } %>
+          </div>
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  <tr>
+    <td></td>
+    <td></td>
+    <td colspan=4>
+      <table class="joy_annotation">
+        <tr>
+          <td><b>Key for HTML output</b></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>self</td>
+          <td><span class="self">bold</span></td>
+          <td><span class="self">self</span></td>
+        </tr>
+        <tr>
+          <td>representative</td>
+          <td><span class="representative">yellow background</span></td>
+          <td><span class="representative">representative</span></td>
+        </tr>
+        <tr>
+          <td>alpha helix</td>
+          <td><span class="helix">red</span></td>
+          <td><span class="helix">x</span></td>
+        </tr>
+        <tr>
+          <td>beta sheet</td>
+          <td><span class="beta_sheet">blue</span></td>
+          <td><span class="beta_sheet">x</span></td>
+        </tr>
+        <tr>
+          <td>positive phi</td>
+          <td><span class="positive_phi">italic</span></td>
+          <td><span class="positive_phi">x</span></td>
+        </tr>
+        <tr>
+          <td>solvent accessible</td>
+          <td><span class="on_surface">upper case</span></td>
+          <td><span class="on_surface">x</span></td>
+        </tr>
+        <tr>
+          <td>solvent inaccessible</td>
+          <td><span class="buried">lower case</span></td>
+          <td><span class="buried">x</span></td>
+        </tr>
+        <tr>
+          <td>disulfide bond</td>
+          <td><span class="disulfide">cedilla</span></td>
+          <td><span class="disulfide">&ccedil;</span></td>
+        </tr>
+        <tr>
+          <td>hydrogen bond to DNA</td>
+          <td><span class="hbonding_dna">orange background &amp; overline</span></td>
+          <td><span class="hbonding_dna">x</span></td>
+        </tr>
+        <tr>
+          <td>water-mediated hydrogen bond to DNA</td>
+          <td><span class="whbonding_dna">orange background &amp; line-through</span></td>
+          <td><span class="whbonding_dna">x</span></td>
+        </tr>
+        <tr>
+          <td>van der Waals contact to DNA</td>
+          <td><span class="vdw_contacting_dna">orange background &amp; underline</span></td>
+          <td><span class="vdw_contacting_dna">x</span></td>
+        </tr>
+        <tr>
+          <td>hydrogen bond to RNA</td>
+          <td><span class="hbonding_rna">cyan background &amp; overline</span></td>
+          <td><span class="hbonding_rna">x</span></td>
+        </tr>
+        <tr>
+          <td>water-mediated hydrogen bond to RNA</td>
+          <td><span class="whbonding_rna">cyan background &amp; line-through</span></td>
+          <td><span class="whbonding_rna">x</span></td>
+        </tr>
+        <tr>
+          <td>van der Waals contact to RNA</td>
+          <td><span class="vdw_contacting_rna">cyan background &amp; underline</span></td>
+          <td><span class="vdw_contacting_rna">x</span></td>
+        </tr>
+      </table>
     </td>
   </tr>
 </table>

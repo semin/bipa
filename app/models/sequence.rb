@@ -17,7 +17,7 @@ class Sequence < ActiveRecord::Base
     positions.map(&:residue_name).join
   end
 
-  def html_sequence
-    positions.map(&:html_residue_name).join
+  def formatted_sequence
+    positions.map(&:formatted_residue_name).join
   end
 end

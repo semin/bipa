@@ -62,4 +62,12 @@ class ScopsController < ApplicationController
     end
   end
 
+  def jmol
+    @scop = Scop.find(params[:id])
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
 end

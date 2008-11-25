@@ -6,9 +6,9 @@ class Position < ActiveRecord::Base
 
   belongs_to :residue
 
-  def html_residue_name
+  def formatted_residue_name
     if residue
-      residue.html_residue_name
+      residue.formatted_residue_name
     else
       residue_name
     end
@@ -17,5 +17,4 @@ class Position < ActiveRecord::Base
   def gap?
     residue_name == "-"
   end
-
 end

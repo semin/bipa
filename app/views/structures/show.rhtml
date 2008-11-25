@@ -50,41 +50,41 @@
   </tr>
   <tr class="title">
     <td>SCOP<br />Classification</td>
-    <% if @structure.domains.size > 0 %>
-        <td class="title_center">Domain</td>
-        <td class="title_center">Class</td>
-        <td class="title_center">Fold</td>
-        <td class="title_center">Superfamily</td>
-        <td class="title_center">Family</td>
-        <td class="title_center">Protein<br />Domain</td>
-        <td class="title_center">Species</td>
-      </tr>
-      <% @structure.domains.each do |domain| %>
-        <tr>
-          <td></td>
-          <td>
-            <%= domain.sid %>
-            <% if domain.dna_interfaces.size > 0 %>
-              <br />[<%= link_to "DNA interface", interface_path(domain.dna_interfaces.first) %>]
-            <% end %>
-            <% if domain.rna_interfaces.size > 0 %>
-              <br />[<%= link_to "RNA interface", interface_path(domain.rna_interfaces.first) %>]
-            <% end %>
-          </td>
-          <td><%= domain.scop_class.description %></td>
-          <td><%= domain.scop_fold.description %></td>
-          <td><%= domain.scop_superfamily.description %></td>
-          <td><%= domain.scop_family.description %></td>
-          <td><%= domain.scop_protein.description %></td>
-          <td><%= domain.scop_species.description %></td>
-        </tr>
-      <% end %>
-    <% else %>
+    <td class="title_center">Domain</td>
+    <td class="title_center">Class</td>
+    <td class="title_center">Fold</td>
+    <td class="title_center">Superfamily</td>
+    <td class="title_center">Family</td>
+    <td class="title_center">Protein<br />Domain</td>
+    <td class="title_center">Species</td>
+  </tr>
+  <% if @structure.domains.size > 0 %>
+    <% @structure.domains.each do |domain| %>
       <tr>
         <td></td>
-        <td colspan=7>None</td>
+        <td>
+          <%= link_to domain.sid, scop_path(domain) %>
+          <% if domain.dna_interfaces.size > 0 %>
+            <br />[<%= link_to "DNA interface", interface_path(domain.dna_interfaces.first) %>]
+          <% end %>
+          <% if domain.rna_interfaces.size > 0 %>
+            <br />[<%= link_to "RNA interface", interface_path(domain.rna_interfaces.first) %>]
+          <% end %>
+        </td>
+        <td><%= link_to domain.scop_class.description,       scop_path(domain.scop_class)       %></td>
+        <td><%= link_to domain.scop_fold.description,        scop_path(domain.scop_fold)        %></td>
+        <td><%= link_to domain.scop_superfamily.description, scop_path(domain.scop_superfamily) %></td>
+        <td><%= link_to domain.scop_family.description,      scop_path(domain.scop_family)      %></td>
+        <td><%= link_to domain.scop_protein.description,     scop_path(domain.scop_protein)     %></td>
+        <td><%= link_to domain.scop_species.description,     scop_path(domain.scop_species)     %></td>
       </tr>
     <% end %>
+  <% else %>
+    <tr>
+      <td></td>
+      <td colspan=7>None</td>
+    </tr>
+  <% end %>
   <tr class="title">
     <td>GO Terms</td>
     <td class="title_center" colspan=4>Polymer</td>
@@ -112,7 +112,7 @@
       <td></td>
       <td><%= chain.chain_code %></td> 
       <td colspan=6 class="alignment">
-        <div style="width:750;height:50px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;">
+        <div class="sequence" style="width:750;height:50px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;">
           <%= chain.ruler_with_margin %><br />
           <%= chain.formatted_sequence %>
         <div>
