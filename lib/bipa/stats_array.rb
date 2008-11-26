@@ -1,5 +1,6 @@
 module Bipa
   class StatsArray < Array
+
     def count
       size
     end
@@ -162,5 +163,6 @@ module Bipa
       s = sum.to_f
       sort.inject([0.0]) { |c,d| c << c[-1] + normalised*d.to_f/s }
     end
+
   end
 end

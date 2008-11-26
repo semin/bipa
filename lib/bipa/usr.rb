@@ -115,17 +115,11 @@ module Bipa
       ]
     end
 
-    def Usr.append_features(klass)
-      def klass.shape_similarity_between(a, b)
-        sa = a.shape_descriptors
-        sb = b.shape_descriptors
-        1.0 / (1 + (sa.manhattan_distance_to(sb) / 12.0))
-      end
-      super
+    def shape_similarity_with(other)
+      sa = self.shape_descriptors
+      sb = other.shape_descriptors
+      1.0 / (1 + (sa.manhattan_distance_to(sb) / 12.0))
     end
 
-    def shape_similarity_with(other)
-      self.class.shape_similarity_between(self, other)
-    end
   end
 end
