@@ -668,4 +668,20 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index :interface_similarities, [:interface_id, :similar_interface_id], :unique => true, :name => "by_int_id_and_sim_int_id"
   add_index :interface_similarities, [:similar_interface_id, :interface_id], :unique => true, :name => "by_sim_int_id_and_int_id"
+
+
+  # For RudeQ
+  #
+  # http://github.com/matthewrudy/rudeq/tree/master
+  #
+  create_table :rude_queues, :force => true do |t|
+    t.string  :queue_name
+    t.text    :data
+    t.string  :token, :default => nil
+    t.boolean :processed, :default => false, :null => false
+    t.timestamps
+  end
+  add_index :rude_queues, :processed
+  add_index :rude_queues, [:queue_name, :processed]
+
 end
