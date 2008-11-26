@@ -1,11 +1,9 @@
 <div class="list">
-  <div class="list_figure" style="float:left">
-    <%= image_tag structure.local_image_link, :width => 100 %>
-  </div>
-  <div class="list_title black_link" style="margin-left: 90px">
+  <%= image_tag structure.local_image_link, :id => "list_figure" %>
+  <div class="list_title black_link">
     <%= link_to "#{structure.title}", structure_path(structure) %>
   </div>
-  <div class="list_content" style="margin-left: 90px">
+  <div class="list_content">
     PDB Code: <%= structure.pdb_code %><br />
     Classification: <%= structure.classification %><br />
     Experiment method: <%= structure.exp_method %><br />

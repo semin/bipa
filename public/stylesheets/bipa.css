@@ -84,7 +84,7 @@ span.representative {
   position: absolute;
   top: 20px;
   font-family: Optima, Lucida Grande, Georgia, Arial, serif;
-  font-size: 170%;
+  font-size: 160%;
   font-weight: bold;
   text-align: left;
   display: inline;
@@ -278,9 +278,15 @@ div.current_hierarchy a:hover, a:active {
   font-weight: bold;
 }
 
+img#list_figure {
+  float: left;
+  width: 80px;
+}
+
 .list_content {
   font-size: 90%;
   padding-left: 15px;
+  margin-left: 80px;
 }
 
 .list_score {
