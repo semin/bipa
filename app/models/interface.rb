@@ -252,19 +252,19 @@ class DomainInterface < Interface
   end
 
   def residue_percentage_vector
-    NVector[AminoAcids::Residues::STANDARD.map { |r| self[:"residue_percentage_of_#{r.downcase}"] }]
+    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_percentage_of_#{r.downcase}"] }]
   end
 
   def residue_propensity_vector
-    NVector[AminoAcids::Residues::STANDARD.map { |r| self[:"residue_propensity_of_#{r.downcase}"] }]
+    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_propensity_of_#{r.downcase}"] }]
   end
 
   def sse_percentage_vector
-    NVector[Sses::ALL.map { |s| self[:"sse_percentage_of_#{s.downcase}"] }]
+    NVector[*Sses::ALL.map { |s| self[:"sse_percentage_of_#{s.downcase}"] }]
   end
 
-  def sse_percentage_vector
-    NVector[Sses::ALL.map { |s| self[:"sse_propensity_of_#{s.downcase}"] }]
+  def sse_propensity_vector
+    NVector[*Sses::ALL.map { |s| self[:"sse_propensity_of_#{s.downcase}"] }]
   end
 end # class DomainInterface
 

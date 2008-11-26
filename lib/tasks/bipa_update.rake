@@ -590,32 +590,31 @@ namespace :bipa do
 
     desc "Update interface_distances table"
     task :interface_similarities => [:environment] do
-      @interfaces = Interface.all
-      total       = (@interfaces.count ** 2 - @interfaces.count) / 2
-      index       = 0
-      fmanager    = ForkManager.new(MAX_FORK)
+      interfaces = Interface.all
+      total      = (interfaces.count ** 2 - interfaces.count) / 2
+      index      = 0
+      fmanager   = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
 
-        0.upto(@interfaces.count - 2) do |i|
-          (i+1).upto(@interfaces.count - 1) do |j|
-
+        0.upto(interfaces.count - 2) do |i|
+          (i + 1).upto(interfaces.count - 1) do |j|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
+              is                                = InterfaceSimilarity.new
+              is.interface                      = interfaces[i]
+              is.similar_interface              = interfaces[j]
+              is.similarity_in_usr              = interfaces[i].shape_similarity_with(interfaces[j])
+              is.similarity_in_asa              = (interfaces[i][:asa] - interfaces[j][:asa]).abs.to_similarity
+              is.similarity_in_polarity         = (interfaces[i][:polarity] - interfaces[j][:polarity]).abs.to_similarity
+              is.similarity_in_res_composition  = NMath::sqrt((interfaces[i].residue_propensity_vector - interfaces[j].residue_propensity_vector)**2).to_similarity
+              is.similarity_in_sse_composition  = NMath::sqrt((interfaces[i].sse_propensity_vector - interfaces[j].sse_propensity_vector)**2).to_similarity
+              is.similarity_in_all              = [is.similarity_in_usr, is.similarity_in_asa, is.similarity_in_polarity, is.similarity_in_res_composition, is.similarity_in_sse_composition].to_stats_array.mean
+              is.save!
+              index += 1
 
-              interface_similarity                                = InterfaceSimilarity.new
-              interface_similarity.interface                      = @interfaces[i]
-              interface_similarity.similar_interface              = @interfaces[j]
-              interface_similarity.similarity_in_usr              = @interfaces[i].shape_similarity_with(@interfaces[j])
-              interface_similarity.similarity_in_asa              = (@interfaces[i].asa - @interfaces[j].asa).to_similarity
-              interface_similarity.similarity_in_polarity         = (@interfaces[i].polarity - @interfaces[j].polarity).to_similarity
-              interface_similarity.similarity_in_res_composition  = Math::sqrt((@interfaces[i].residue_propensity_vector - @interfaces[j].residue_propensity_vector)**2).to_similarity
-              interface_similarity.similarity_in_sse_composition  = Math::sqrt((@interfaces[i].sse_propensity_vector - @interfaces[j].sse_propensity_vector)**2).to_similarity
-              interface_similarity.similarity_in_all              = [shape_similarity, asa_similarity, polarity_similarity, res_comp_similarity, sse_comp_similarity].to_stats_array.mean
-              interface_similarity.save!
-
-              $logger.info ">>> Updating interface distances between interface #{@interfaces[i].id} and #{@interfaces[j]}: done (#{index + 1}/#{total})"
+              $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{index}/#{total})"
               ActiveRecord::Base.remove_connection
             end
           end
