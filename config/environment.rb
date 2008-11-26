@@ -70,4 +70,9 @@ Rails::Initializer.run do |config|
   config.time_zone = 'UTC'
 end
 
+# for will_paginate plugin
 WillPaginate.enable_named_scope
+
+# for workling plugin
+Workling::Clients::MemcacheQueueClient.memcache_client_class = RudeQ::Client
+Workling::Remote.dispatcher = Workling::Remote::Runners::ClientRunner.new
