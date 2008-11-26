@@ -22,9 +22,7 @@ module Bipa
 
     def get_atom_vectors
       # filter hydogen atoms
-      atoms.select { |a1| a1.atom_name !~ /^H/ }.map { |a2|
-        Vector[a2.x, a2.y, a2.z]
-      }
+      atoms.select { |a1| a1.atom_name !~ /^H/ }.map { |a2| Vector[a2.x, a2.y, a2.z] }
     end
 
     # the molecular centroid (ctd)

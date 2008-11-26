@@ -3,6 +3,12 @@ class Interface < ActiveRecord::Base
   include Bipa::Constants
   include Bipa::ComposedOfResidues
 
+  has_many  :interface_similarities,
+            :dependent  => :destroy
+
+  has_many  :similar_interfaces,
+            :through    => :interface_similarities
+
 end
 
 class DomainInterface < Interface
@@ -47,17 +53,17 @@ class DomainInterface < Interface
     end
   end
 
-  def calculate_singlet_percentage_of(res)
+  def calculate_residue_percentage_of(res)
     result = 100.0 * delta_asa_of_residue(res) / delta_asa rescue 0
   end
-  #memoize :calculate_singlet_frequency_of
+  #memoize :calculate_residue_frequency_of
 
-  def calculate_singlet_propensity_of(res)
+  def calculate_residue_propensity_of(res)
     result = ((delta_asa_of_residue(res) / delta_asa) /
               (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
-  #memoize :calculate_singlet_propensity_of
+  #memoize :calculate_residue_propensity_of
 
   def calculate_sse_percentage_of(sse)
     result = 100.0 * delta_asa_of_sse(sse) / delta_asa rescue 0
@@ -210,7 +216,7 @@ class DomainInterface < Interface
   #memoize :calculate_polarity
 
   def residue_percentage_google_chart_url
-    data = AminoAcids::Residues::STANDARD.map { |r| calculate_singlet_percentage_of(r) }
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_percentage_of(r) }
     Gchart.bar(:size              => '700x100',
                :title             => 'Residue Percentage (%)',
                :data              => data,
@@ -219,7 +225,7 @@ class DomainInterface < Interface
   end
 
   def residue_propensity_google_chart_url
-    data = AminoAcids::Residues::STANDARD.map { |r| calculate_singlet_propensity_of(r) }
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_propensity_of(r) }
     Gchart.bar(:size              => '700x100',
                :title             => 'Residue Propensity',
                :data              => data,
@@ -244,6 +250,18 @@ class DomainInterface < Interface
                :axis_with_labels  => 'x,y',
                :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
   end
+
+  def residue_percentage_vector
+    AminoAcids::Residues::STANDARD.map { |r| self[:"residue_propensity_of_#{r.downcase}"] }
+  end
+
+  def residue_propensity_vector
+    AminoAcids::Residues::STANDARD.map { |r| calculate_residue_propensity_of(r) }
+  end
+
+  def sse_percentage_vector
+  end
+
 end # class DomainInterface
 
 

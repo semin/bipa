@@ -533,48 +533,50 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              interface.update_attribute :asa, interface.delta_asa
-              interface.update_attribute :polarity, interface.calculate_polarity
-              interface.update_attribute :atoms_count, interface.atoms.length
-              interface.update_attribute :residues_count, interface.residues.length
-              interface.update_attribute :vdw_contacts_count, interface.vdw_contacts.length
-              interface.update_attribute :whbonds_count, interface.whbonds.length
-              interface.update_attribute :hbonds_as_donor_count, interface.hbonds_as_donor.length
-              interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
-              interface.update_attribute :hbonds_count, interface.hbonds_as_donor.length + interface.hbonds_as_acceptor.length
-
+#              interface.update_attribute :asa, interface.delta_asa
+#              interface.update_attribute :polarity, interface.calculate_polarity
+#              interface.update_attribute :atoms_count, interface.atoms.length
+#              interface.update_attribute :residues_count, interface.residues.length
+#              interface.update_attribute :vdw_contacts_count, interface.vdw_contacts.length
+#              interface.update_attribute :whbonds_count, interface.whbonds.length
+#              interface.update_attribute :hbonds_as_donor_count, interface.hbonds_as_donor.length
+#              interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
+#              interface.update_attribute :hbonds_count, interface.hbonds_as_donor.length + interface.hbonds_as_acceptor.length
+#
               AminoAcids::Residues::STANDARD.each do |aa|
-                interface.update_attribute :"singlet_propensity_of_#{aa.downcase}", interface.calculate_singlet_propensity_of(aa)
+#                interface.update_attribute :"residue_propensity_of_#{aa.downcase}", interface.calculate_residue_propensity_of(aa)
+                interface.update_attribute :"residue_percentage_of_#{aa.downcase}", interface.calculate_residue_percentage_of(aa)
               end
               Sses::ALL.each do |sse|
-                interface.update_attribute :"sse_propensity_of_#{sse.downcase}", interface.calculate_sse_propensity_of(sse)
+#                interface.update_attribute :"sse_propensity_of_#{sse.downcase}", interface.calculate_sse_propensity_of(sse)
+                interface.update_attribute :"sse_percentage_of_#{sse.downcase}", interface.calculate_sse_percentage_of(sse)
               end
-              %w[hbond whbond vdw_contact].each do |intact|
-                AminoAcids::Residues::STANDARD.each do |aa|
-                  interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids=",
-                                interface.send("calculate_frequency_of_#{intact}_between_nucleic_acids_and_", aa))
-                end
-
-                na_residues.each do |na_residue|
-                  interface.send("frequency_of_#{intact}_between_amino_acids_and_#{na_residue.downcase}=",
-                                interface.send("calculate_frequency_of_#{intact}_between_amino_acids_and_", na_residue))
-
-                  AminoAcids::Residues::STANDARD.each do |aa|
-                    interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{na_residue.downcase}=",
-                                  interface.send("calculate_frequency_of_#{intact}_between", aa, na_residue))
-                  end
-                end
-
-                %w[sugar phosphate].each do |moiety|
-                  interface.send("frequency_of_#{intact}_between_amino_acids_and_#{moiety}=",
-                    AminoAcids::Residues::STANDARD.inject(0) { |sum, aa| sum + interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa) })
-
-                  AminoAcids::Residues::STANDARD.each do |aa|
-                    interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}=",
-                                  interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa))
-                  end
-                end
-              end
+#              %w[hbond whbond vdw_contact].each do |intact|
+#                AminoAcids::Residues::STANDARD.each do |aa|
+#                  interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids=",
+#                                interface.send("calculate_frequency_of_#{intact}_between_nucleic_acids_and_", aa))
+#                end
+#
+#                na_residues.each do |na_residue|
+#                  interface.send("frequency_of_#{intact}_between_amino_acids_and_#{na_residue.downcase}=",
+#                                interface.send("calculate_frequency_of_#{intact}_between_amino_acids_and_", na_residue))
+#
+#                  AminoAcids::Residues::STANDARD.each do |aa|
+#                    interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{na_residue.downcase}=",
+#                                  interface.send("calculate_frequency_of_#{intact}_between", aa, na_residue))
+#                  end
+#                end
+#
+#                %w[sugar phosphate].each do |moiety|
+#                  interface.send("frequency_of_#{intact}_between_amino_acids_and_#{moiety}=",
+#                    AminoAcids::Residues::STANDARD.inject(0) { |sum, aa| sum + interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa) })
+#
+#                  AminoAcids::Residues::STANDARD.each do |aa|
+#                    interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}=",
+#                                  interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa))
+#                  end
+#                end
+#              end
               interface.save!
               $logger.info ">>> Updating seondary fields of 'interfaces' table for #{interfaces.class}, #{interface.id}: done (#{i+1}/#{interfaces.size})"
               ActiveRecord::Base.remove_connection
@@ -585,5 +587,21 @@ namespace :bipa do
       end
     end
 
+
+#    desc "Update interface_distances table"
+#    task :interface_similarities => [:environment] do
+#      @interfaces = Interface.all
+#      0.upto(@interfaces.count - 2) do |i|
+#        (i+1).upto(@interfaces.count - 1) do |j|
+#          shape_sim     = @interfaces[i].shape_similarity_with(@interfaces[j])
+#          asa_sim       = (@interfaces[i].asa - @interfaces[j].asa).to_similarity
+#          polarity_sim  = (@interfaces[i].polarity - @interfaces[j].polarity).to_similarity
+#          res_comp_sim  = (@interfaces[i].res_comp - @interfaces[j].res_comp).to_similarity
+#          sse_comp_sim  = (@interfaces[i].sse_comp - @interfaces[j].sse_comp).to_similarity
+#          all_sim       = (@interfaces[i].asa - @interfaces[j].asa).to_similarity
+#        end
+#      end
+#    end
+#
   end
 end

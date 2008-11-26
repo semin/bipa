@@ -323,19 +323,19 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :hbonds_as_acceptor_count,  :default => 0
 
     AminoAcids::Residues::STANDARD.each do |aa|
-      t.float :"singlet_propensity_of_#{aa.downcase}"
+      t.float :"residue_propensity_of_#{aa.downcase}"
+      t.float :"residue_percentage_of_#{aa.downcase}"
     end
 
     Sses::ALL.each do |sse|
       t.float :"sse_propensity_of_#{sse.downcase}"
+      t.float :"sse_percentage_of_#{sse.downcase}"
     end
 
     %w(hbond whbond vdw_contact).each do |intact|
-
       %w(sugar phosphate).each do |moiety|
         t.integer :"frequency_of_#{intact}_between_amino_acids_and_#{moiety}"
       end
-
       AminoAcids::Residues::STANDARD.each do |aa|
         t.integer :"frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids"
 
@@ -343,13 +343,10 @@ ActiveRecord::Schema.define(:version => 1) do
           t.integer :"frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}"
         end
       end
-
       %w(dna rna).each do |na|
         na_residues = "NucleicAcids::#{na.camelize}::Residues::STANDARD".constantize
-
         na_residues.each do |nar|
           t.integer :"frequency_of_#{intact}_between_amino_acids_and_#{nar.downcase}"
-
           AminoAcids::Residues::STANDARD.each do |aa|
             t.integer :"frequency_of_#{intact}_between_#{aa.downcase}_and_#{nar.downcase}"
           end
@@ -657,4 +654,18 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :test_alignments, :sp
   add_index :test_alignments, :tc
 
+
+  create_table :interface_similarities, :force => true do |t|
+    t.belongs_to  :interface
+    t.belongs_to  :similar_interface
+    t.float       :similarity_in_usr
+    t.float       :similarity_in_asa
+    t.float       :similarity_in_polarity
+    t.float       :similarity_in_res_composition
+    t.float       :similarity_in_sse_composition
+    t.float       :similarity_in_all
+  end
+
+  add_index :interface_similarities, [:interface_id, :similar_interface_id], :unique => true, :name => "by_int_id_and_sim_int_id"
+  add_index :interface_similarities, [:similar_interface_id, :interface_id], :unique => true, :name => "by_sim_int_id_and_int_id"
 end

@@ -6,6 +6,7 @@ require "vector_extensions"
 require "kernel_extentions"
 require "string_extensions"
 require "struct_extensions"
+require "numeric_extensions"
 require "active_record_extensions"
 require "bipa"
 
