@@ -590,13 +590,19 @@ namespace :bipa do
 
     desc "Update interface_distances table"
     task :interface_similarities => [:environment] do
-      interfaces = Interface.all
+
+      include Bipa::Constants
+
+      interfaces = DomainInterface.find(:all,
+                                        :select => "id, asa, polarity, " +
+                                            AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
+                                            Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
       total      = (interfaces.count ** 2 - interfaces.count) / 2
-      index      = 0
       fmanager   = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+        config  = ActiveRecord::Base.remove_connection
+        index   = 0
 
         0.upto(interfaces.count - 2) do |i|
           (i + 1).upto(interfaces.count - 1) do |j|
@@ -605,7 +611,7 @@ namespace :bipa do
               is                                = InterfaceSimilarity.new
               is.interface                      = interfaces[i]
               is.similar_interface              = interfaces[j]
-              is.similarity_in_usr              = interfaces[i].shape_similarity_with(interfaces[j])
+              is.similarity_in_usr              = interfaces[i].shape_similarity_with(interfaces[j]) rescue 0.0
               is.similarity_in_asa              = (interfaces[i][:asa] - interfaces[j][:asa]).abs.to_similarity
               is.similarity_in_polarity         = (interfaces[i][:polarity] - interfaces[j][:polarity]).abs.to_similarity
               is.similarity_in_res_composition  = NMath::sqrt((interfaces[i].residue_propensity_vector - interfaces[j].residue_propensity_vector)**2).to_similarity
@@ -614,7 +620,7 @@ namespace :bipa do
               is.save!
               index += 1
 
-              $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{index}/#{total})"
+              $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{total})"
               ActiveRecord::Base.remove_connection
             end
           end
