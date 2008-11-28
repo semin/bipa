@@ -38,6 +38,7 @@ ActionController::Routing::Routes.draw do |map|
                 :singular => "taxon",
                 :collection => { :search => :get }
 
+  map.resources :fugue_searches
 
   # Sample of regular route:
   #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
