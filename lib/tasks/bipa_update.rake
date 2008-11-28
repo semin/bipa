@@ -629,5 +629,40 @@ namespace :bipa do
       end # fmanager.manage
     end
 
+
+    desc "Update registered of 'go_terms' table"
+    task :registered_go_terms => [:environment] do
+
+      # supposed to be updated when importing domain_interfaces!!!
+
+      domains = ScopDomain.rpall
+      domains.each_with_index do |domain, i|
+        domain.chains.each do |chain|
+          chain.go_terms.each do |go_term|
+            go_term.registered = true
+            go_term.save!
+            begin
+              go_terms.sources.each do |source|
+                source.registered = true
+              end
+            end while(done)
+          end
+        end
+      end
+
+        %w[dna rna].each do |na|
+          if domain.send("#{na}_interfaces").size > 0
+            domain.send("rpall_#{na}=", true)
+            domain.save!
+            domain.ancestors.each do |anc|
+              anc.rpall = true
+              anc.send("rpall_#{na}=", true)
+              anc.save!
+            end
+          end
+        end
+        $logger.info ">>> Updating SCOP domain's rpall_dna, rpall_rna: done (#{i + 1}/#{domains.count})"
+      end
+    end
   end
 end

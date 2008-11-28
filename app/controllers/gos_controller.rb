@@ -55,6 +55,14 @@ class GosController < ApplicationController
     end
   end
 
+  def hierarchy
+    @go_term = GoTerm.find(params[:id])
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
   def show
     @go_term = GoTerm.find(params[:id])
 

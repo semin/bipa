@@ -29,6 +29,7 @@ ActionController::Routing::Routes.draw do |map|
 
   map.resources :gos,
                 :singular => "go",
+                :member => { :hierarchy => :get },
                 :collection => { :search => :get }
 
   map.resources :taxa,

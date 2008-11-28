@@ -107,9 +107,12 @@ class GoTerm < ActiveRecord::Base
     indexes definition, :sortable => true
   end
 
+  named_scope :registered, :conditions => { :registered => true }
   named_scope :molecular_function, :conditions => { :namespace => "molecular_function" }
   named_scope :biological_process, :conditions => { :namespace => "biological_process" }
   named_scope :cellular_component, :conditions => { :namespace => "cellular_component" }
 
+  def ancestors
+  end
 end
 
