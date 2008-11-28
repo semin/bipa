@@ -2,7 +2,7 @@
   <%= @interface.class.to_s.match(/DNA/i) ? "DNA" : "RNA" %> Interface of SCOP domain, <%= link_to @interface.domain.sid, scop_path(@interface.domain) %>
 </div>
 
-<table id="interface_table">
+<table id="interface_table" class="bipa">
   <tr>
     <td class="title">No. of Atoms</td>
     <td colspan=6><%=h @interface[:atoms_count] %>
@@ -20,23 +20,51 @@
     <td colspan=6><%=h @interface[:polarity] %></td>
   </tr>
   <tr>
-    <td class="title">Residue Composition</td>
+    <td class="title" rowspan=2>Residue Composition</td>
     <td colspan=6>
-      <%= image_tag @interface.residue_percentage_google_chart_url %><br />
+      <%= image_tag @interface.residue_percentage_google_chart_url %>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=6>
       <%= image_tag @interface.residue_propensity_google_chart_url %>
     </td>
   </tr>
   <tr>
     <td class="title">SSE Composition</td>
-    <td colspan=2>
+    <td colspan=3>
       <%= image_tag @interface.sse_percentage_google_chart_url %>
     </td>
-    <td colspan=2>
+    <td colspan=3>
       <%= image_tag @interface.sse_propensity_google_chart_url %>
     </td>
-    <td colspan=2>
-    </td>
   </tr>
+  <tr>
+    <td class="title">Similar Interfaces in</td>
+    <th colspan=2 class="title">Shape</th>
+    <th colspan=2 class="title">ASA</th>
+    <th colspan=2 class="title">Polarity</th>
+  </tr>
+  <tr>
+    <td></td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
+  </tr>
+  <tr>
+    <td></td>
+    <th colspan=2>Residue Composition</th>
+    <th colspan=2>SSE Composition</th>  
+    <th colspan=2>All Aspects</th>
+  </tr>
+  <tr>
+    <td></td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
+    <td colspan=2>N/A</td>
+  </tr>
+</table>
+<!--
   <tr>
     <td class="title">SCOP classification</td>
     <td align="center" class="title">Class</td>
@@ -72,28 +100,4 @@
       <td align="center"><%= chain.go_terms_for_html(:cellular_component) %></td>
     </tr>
   <% end %>
-  <tr>
-    <td class="title">Similar Interfaces in</td>
-    <th colspan=2 class="title">Shape</th>
-    <th colspan=2 class="title">ASA</th>
-    <th colspan=2 class="title">Polarity</th>
-  </tr>
-  <tr>
-    <td></td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
-  </tr>
-  <tr>
-    <td></td>
-    <th colspan=2>Residue Composition</th>
-    <th colspan=2>SSE Composition</th>  
-    <th colspan=2>All Aspects</th>
-  </tr>
-  <tr>
-    <td></td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
-  </tr>
-</table>
+-->

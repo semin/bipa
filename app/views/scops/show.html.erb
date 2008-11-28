@@ -2,18 +2,15 @@
   SCOP Domain: <%= @scop.sid %>
 </div>
 
-<table id="scop_table">
-  <tr>
-    <td colspan=3></td>
-    <td rowspan=11 style="width:280px" align="center">
-      <%= image_tag @scop.local_image_link, :width => 250, :border => 1 %><br />
-      3D View: <%= link_to "Jmol", jmol_scop_path %>
-    </td>
-  </tr>
+<table id="scop_table" class="bipa">
   <tr>
     <td class="title">PDB</td>
     <td class="title">Title</td>
     <td><%= link_to @scop.structure.title, structure_path(@scop.structure) %></td>
+    <td rowspan=10 style="width:280px" align="center">
+      <%= image_tag @scop.local_image_link, :width => 250 %><br />
+      3D View: <%= link_to "Jmol", jmol_scop_path %>
+    </td>
   </tr>
   <tr>
     <td></td>
@@ -65,16 +62,15 @@
     </td>
   </tr>
   <tr>
-    <td class="title">Structural Alignments</td>
+    <td class="title" rowspan=<%= @scop.dna_interfaces.size + @scop.rna_interfaces.size + 4 %>>Structural Alignments</td>
     <th colspan=3>Subfamily Alignment (PID &gt; 80)</th>
   </tr>
   <% if @scop.dna_interfaces.size > 0 %>
     <tr>
-      <td></td>
       <td class="title">DNA<br />Binding</th> 
       <td colspan=4 class="alignment">
         <% if @scop.nr80_dna_subfamily && @scop.nr80_dna_subfamily.alignment %>
-          <div class="sequence">
+          <div class="alignment">
             <%= @scop.nr80_dna_subfamily.alignment.ruler_with_margin %>
             <%= render :partial => "/alignments/sequence",
               :collection => @scop.nr80_dna_subfamily.alignment.sequences,
@@ -83,7 +79,7 @@
         <% else %>
           N/A [<%= link_to "?", "#dna_sub_alignment_na_box", :id => "dna_sub_alignment_na_box_link" %>]<br />
           <div id="dna_sub_alignment_na_box">
-            A subfamily alignment is generated with domain structures in the subfamily that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, so it is impossible to generate a subfamily alignment in that situtation.
+            A subfamily alignment is generated from domain structures in the subfamily that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, so it is impossible to generate a subfamily alignment in that situtation.
           </div>
         <% end %>
       </td>
@@ -91,11 +87,10 @@
   <% end %>
   <% if @scop.rna_interfaces.size > 0 %>
     <tr>
-      <td></td>
-      <td>RNA<br />Binding</td> 
+      <td class="title">RNA<br />Binding</td> 
       <td colspan=4 class="alignment">
         <% if @scop.nr80_rna_subfamily && @scop.nr80_rna_subfamily.alignment %>
-          <div class="sequence">
+          <div class="alignment">
             <%= @scop.nr80_rna_subfamily.alignment.ruler_with_margin %>
             <%= render :partial => "/alignments/sequence",
               :collection => @scop.nr80_rna_subfamily.alignment.sequences,
@@ -104,23 +99,21 @@
         <% else %>
           N/A [<%= link_to "?", "#rna_sub_alignment_na_box", :id => "rna_sub_alignment_na_box_link" %>]<br />
           <div id="rna_sub_alignment_na_box">
-            A subfamily alignment is generated with domain structures in the subfamily that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, so it is impossible to generate a subfamily alignment in that situtation.
+            A subfamily alignment is generated from domain structures in the subfamily that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, so it is impossible to generate a subfamily alignment in that situtation.
           </div>
         <% end %>
       </td>
     </tr>
   <% end %>
   <tr>
-    <td></td>
     <th colspan=3>Representative Family (<%= link_to @scop.scop_family.description, scop_path(@scop.scop_family) %>) Alignment (PID &lt; 80)</th>
   </tr>
   <% if @scop.dna_interfaces.size > 0 %>
     <tr>
-      <td></td>
       <td class="title">DNA<br />Binding</td> 
       <td colspan=4 class="alignment">
         <% if @scop.scop_family.nr80_dna_alignment %>
-          <div class="sequence">
+          <div class="alignment">
             <%= @scop.scop_family.nr80_dna_alignment.ruler_with_margin %>
             <%= render  :partial => "/alignments/sequence",
               :collection => @scop.scop_family.nr80_dna_alignment.sequences,
@@ -129,7 +122,7 @@
         <% else %>
           N/A [<%= link_to "?", "#dna_rep_alignment_na_box", :id => "dna_rep_alignment_na_box_link" %>]<br />
           <div id="dna_rep_alignment_na_box">
-            A representatitive family alignment is generated with a representative set of domain structures from subfamilies that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, so it is impossible to generate a representative family alignment in that situtation.
+            A representatitive family alignment is generated from a representative set of domain structures from subfamilies that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, so it is impossible to generate a representative family alignment in that situtation.
           </div>
         <% end %>
       </td>
@@ -137,11 +130,10 @@
   <% end %>
   <% if @scop.rna_interfaces.size > 0 %>
     <tr>
-      <td></td>
       <td class="title">RNA<br />Binding</td> 
       <td colspan=4 class="alignment">
         <% if @scop.scop_family.nr80_rna_alignment %>
-          <div class="sequence">
+          <div class="alignment">
             <%= @scop.scop_family.nr80_rna_alignment.ruler_with_margin %>
             <%= render  :partial => "/alignments/sequence",
               :collection => @scop.scop_family.nr80_rna_alignment.sequences,
@@ -150,17 +142,15 @@
         <% else %>
           N/A [<%= link_to "?", "#rna_rep_alignment_na_box", :id => "rna_rep_alignment_na_box_link" %>]<br />
           <div id="rna_rep_alignment_na_box">
-            A representatitive family alignment is generated with a representative set of domain structures from subfamilies that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, so it is impossible to generate a representative family alignment in that situtation.
+            A representatitive family alignment is generated from a representative set of domain structures from subfamilies that is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, so it is impossible to generate a representative family alignment in that situtation.
           </div>
         <% end %>
       </td>
     </tr>
   <% end %>
   <tr>
-    <td></td>
-    <td></td>
-    <td colspan=4>
-      <table class="joy_annotation">
+    <td colspan=5>
+      <table class="joy_annotation" align="center">
         <tr>
           <td><b>Key for HTML output</b></td>
           <td></td>

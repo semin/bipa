@@ -670,9 +670,13 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   create_table :fugue_searches, :force => true do |t|
-    t.string    :job_title
+    t.string    :type
+    t.string    :name
+    t.string    :email
+    t.text      :sequence
     t.timestamp :started_at
     t.timestamp :finished_at
+    t.timestamps
   end
 
 

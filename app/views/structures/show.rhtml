@@ -2,17 +2,14 @@
   Structure: <%= link_to @structure.pdb_code, @structure.rcsb_html_link, :popup => true %>
 </div>
 
-<table id="structure_table">
-  <tr>
-    <td colspan=6></td>
-    <td colspan=2 rowspan=7 style="width:280px" align="center">
-      <%= image_tag @structure.local_image_link, :width => 250, :border => 1 %><br />
-      3D View: <%= link_to "Jmol", jmol_structure_path %>
-    </td>
-  </tr>
+<table id="structure_table" class="bipa">
   <tr>
     <td class="title">Title</td>
     <td colspan=5><%=h @structure.title %></td>
+    <td colspan=2 rowspan=6 style="width:280px" align="center">
+      <%= image_tag @structure.local_image_link, :width => 250 %><br />
+      3D View: <%= link_to "Jmol", jmol_structure_path %>
+    </td>
   </tr>
   <tr>
     <td class="title">Citation</td>
@@ -45,21 +42,24 @@
     <td colspan=5><%=h @structure.source %></td>
   </tr>
   <tr class="title">
-    <td>SCOP<br />Classification</td>
+    <td rowspan=<%= @structure.domains.count + 1 %>>SCOP<br />Classification</td>
     <td class="title_center">Domain</td>
-    <td class="title_center">Class</td>
-    <td class="title_center">Fold</td>
-    <td class="title_center">Superfamily</td>
-    <td class="title_center">Family</td>
-    <td class="title_center">Protein<br />Domain</td>
     <td class="title_center">Species</td>
+    <td class="title_center">Protein</td>
+    <td class="title_center">Family</td>
+    <td class="title_center">Superfamily</td>
+    <td class="title_center">Fold</td>
+    <td class="title_center">Class</td>
   </tr>
   <% if @structure.domains.size > 0 %>
     <% @structure.domains.each do |domain| %>
       <tr>
-        <td></td>
         <td>
-          <%= link_to domain.sid, scop_path(domain) %>
+          <% if domain.rpall %>
+            <%= link_to domain.sid, scop_path(domain) %>
+          <% else %>
+            <%= domain.sid %>
+          <% end %>
           <% if domain.dna_interfaces.size > 0 %>
             <br />[<%= link_to "DNA interface", interface_path(domain.dna_interfaces.first) %>]
           <% end %>
@@ -67,17 +67,52 @@
             <br />[<%= link_to "RNA interface", interface_path(domain.rna_interfaces.first) %>]
           <% end %>
         </td>
-        <td align="center"><%= link_to domain.scop_class.description,       scop_path(domain.scop_class)       %></td>
-        <td align="center"><%= link_to domain.scop_fold.description,        scop_path(domain.scop_fold)        %></td>
-        <td align="center"><%= link_to domain.scop_superfamily.description, scop_path(domain.scop_superfamily) %></td>
-        <td align="center"><%= link_to domain.scop_family.description,      scop_path(domain.scop_family)      %></td>
-        <td align="center"><%= link_to domain.scop_protein.description,     scop_path(domain.scop_protein)     %></td>
-        <td align="center"><%= link_to domain.scop_species.description,     scop_path(domain.scop_species)     %></td>
+        <td align="center">
+          <% if domain.scop_species.rpall %>
+            <%= link_to domain.scop_species.description, scop_path(domain.scop_species) %>
+          <% else %>
+            <%= domain.scop_species.description %>
+          <% end %>
+        </td>
+        <td align="center">
+          <% if domain.scop_protein.rpall %>
+            <%= link_to domain.scop_protein.description, scop_path(domain.scop_protein) %>
+          <% else %>
+            <%= domain.scop_protein.description %>
+          <% end %>
+        </td>
+        <td align="center">
+          <% if domain.scop_family.rpall %>
+            <%= link_to domain.scop_family.description, scop_path(domain.scop_family) %>
+          <% else %>
+            <%= domain.scop_family.description %>
+          <% end %>
+        </td>
+        <td align="center">
+          <% if domain.scop_superfamily.rpall %>
+            <%= link_to domain.scop_superfamily.description, scop_path(domain.scop_superfamily) %>
+          <% else %>
+            <%= domain.scop_superfamily.description %>
+          <% end %>
+        </td>
+        <td align="center">
+          <% if domain.scop_fold.rpall %>
+            <%= link_to domain.scop_fold.description, scop_path(domain.scop_fold) %>
+          <% else %>
+            <%= domain.scop_fold.description %>
+          <% end %>
+        </td>
+        <td align="center">
+          <% if domain.scop_class.rpall %>
+            <%= link_to domain.scop_class.description, scop_path(domain.scop_class) %>
+          <% else %>
+            <%= domain.scop_class.description %>
+          <% end %>
+        </td>
       </tr>
     <% end %>
   <% else %>
     <tr>
-      <td></td>
       <td colspan=7 align="center">
         N/A [<%= link_to "?", "#scop_na_box", :id => "scop_na_box_link" %>]<br />
         <div id="scop_na_box">
@@ -87,16 +122,14 @@
     </tr>
   <% end %>
   <tr class="title">
-    <td>GO Terms</td>
+    <td rowspan=<%= @structure.aa_chains.count + 2 %>>GO Terms</td>
     <td class="title_center" colspan=4>Polymer</td>
     <td class="title_center">Molecular<br />Function</td>
     <td class="title_center">Biological<br />Process</td>
     <td class="title_center">Cellular<br />Component</td>
   <tr>
-  <% @structure.chains.each do |chain| %>
-    <% next if chain.chain_code.nil? %>
+  <% @structure.aa_chains.each do |chain| %>
     <tr>
-      <td></td>
       <td colspan=4><%= chain.chain_code %>: <%= chain.molecule.html_word_wrap(50) %></td>
       <td align="center"><%= chain.go_terms_for_html(:molecular_function) %></td>
       <td align="center"><%= chain.go_terms_for_html(:biological_process) %></td>
@@ -104,16 +137,17 @@
     </tr>
   <% end %>
   <tr class="title">
-    <td>Structural and Functional Restraints</td>
+    <td rowspan=<%= @structure.aa_chains.size + 2 %>>
+      Structural and Functional Restraints
+    </td>
     <td class="title_center">Polymer</td>
     <td class="title_center" colspan=6>Sequence &amp; Restraints</td>
   </tr>
   <% @structure.aa_chains.each do |chain| %>
     <tr>
-      <td></td>
       <td><%= chain.chain_code %></td> 
       <td colspan=6 class="alignment">
-        <div class="sequence" style="width:750;height:50px;overflow-x:auto;overflow-y:hidden;white-space:nowrap;">
+        <div class="sequence"> 
           <%= chain.ruler_with_margin %><br />
           <%= chain.formatted_sequence %>
         <div>
@@ -121,10 +155,8 @@
     </tr>
   <% end %>
   <tr>
-    <td></td>
-    <td></td>
-    <td colspan=6>
-      <table class="joy_annotation">
+    <td colspan=8>
+      <table class="joy_annotation" align="center">
         <tr>
           <td><b>Key for HTML output</b></td>
           <td></td>
@@ -195,7 +227,7 @@
   </tr>
 </table>
 
-<div id="abstract">
+<div id="abstract" class="zoomed">
   <%=h @structure.abstract %>
 </div>
 

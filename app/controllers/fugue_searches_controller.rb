@@ -40,16 +40,19 @@ class FugueSearchesController < ApplicationController
   # POST /fugue_searches
   # POST /fugue_searches.xml
   def create
-    @fugue_search = FugueSearch.new(params[:fugue_search])
+    if params[:type] == "DNA"
+      @fugue_search = FugueSearchDna.new(params[:fugue_search])
+    else
+      @fugue_search = FugueSearchRna.new(params[:fugue_search])
+    end
 
     respond_to do |format|
       if @fugue_search.save
-        flash[:notice] = 'FugueSearch was successfully created.'
-        format.html { redirect_to(@fugue_search) }
-        format.xml  { render :xml => @fugue_search, :status => :created, :location => @fugue_search }
+        flash[:notice] = "Your query was successfully submitted. "
+        flash[:notice] += "An email will be sent to you when it's done."
+        format.html { redirect_to new_fugue_search_path }
       else
         format.html { render :action => "new" }
-        format.xml  { render :xml => @fugue_search.errors, :status => :unprocessable_entity }
       end
     end
   end

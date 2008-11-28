@@ -14,6 +14,7 @@ require_dependency "gloria"
 require_dependency "mmcif"
 require_dependency "esst"
 require_dependency "fugue_hit"
+require_dependency "fugue_search"
 require_dependency "test_alignment"
 
 class ApplicationController < ActionController::Base

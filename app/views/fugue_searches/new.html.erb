@@ -1,11 +1,38 @@
-<h1>New fugue_search</h1>
+<div class="main_title">
+  FUGUE-na Search:
+</div>
 
-<% form_for(@fugue_search) do |f| %>
-  <%= f.error_messages %>
+<div id="fugue_search_form">
+  <% form_for(:fugue_search,
+              @fugue_search,
+              :url => { :action => "create" }) do |f| %>
 
-  <p>
-    <%= f.submit "Create" %>
-  </p>
-<% end %>
+    <p>
+      <%= f.error_messages %>
+    </p>
 
-<%= link_to 'Back', fugue_searches_path %>
+    <p>
+    <%= label :fugue_search, :type, "* Search against: " %>
+    <%= select_tag "type", options_for_select(%w[DNA RNA], "DNA") %>-binding SCOP families
+    </p>
+
+    <p>
+    <%= label :fugue_search, :email, "* Email: " %>
+    <%= f.text_field :email, :size => 40 %>
+    </p>
+
+    <p>
+    <%= label :fugue_search, :name, "* Name of your sequence (optional): " %>
+    <%= f.text_field :name, :size => 30 %>
+    </p>
+
+    <p>
+    <%= label :fugue_search, :sequence, "* Enter your amino acid sequence: " %><br />
+    <%= f.text_area :sequence, :rows => 7, :cols => 60 %>
+    </p>
+
+    <p>
+      <%= f.submit "Submit" %>
+    </p>
+  <% end %>
+</div>

@@ -7,7 +7,7 @@ html, body {
 body {
   color: #000;
   background: #FFF;
-  font-family: Optima, Lucida Grande, Georgia, Verdana, sans-serif;
+  font-family: Optima, "Lucida Grande", Georgia, Verdana, sans-serif;
   font-size: 100%;
 }
 
@@ -83,7 +83,7 @@ span.representative {
 #main_banner {
   position: absolute;
   top: 20px;
-  font-family: Optima, Lucida Grande, Georgia, Arial, serif;
+  font-family: Optima, "Lucida Grande", Georgia, Arial, serif;
   font-size: 160%;
   font-weight: bold;
   text-align: left;
@@ -93,7 +93,7 @@ span.representative {
 #sub_banner {
   position: absolute;
   top: 50px;
-  font-family: Optima, Lucida Grande, Georgia, Arial, serif;
+  font-family: Optima, "Lucida Grande", Georgia, Arial, serif;
   font-size: 110%;
   text-align: left;
 }
@@ -134,30 +134,13 @@ form.search_form {
   display: inline;
 }
 
-#notice {
-  position: fixed;
-  top: 30%;
-  left: 20%;
-  width: 60%;
-  height: auto;
-  margin-left: auto;
-  margin-right: auto;
-  padding-top: 10px;
-  padding-bottom: 10px;
-  z-index: 1000;
-  font-size: 150%;
-  color: #FFF;
-  background: #000;
-  text-align: center;
-}
-
 #middler {
   position: relative;
   width: 100%;
   padding-top: 10px; 
   padding-left: 10px;
   padding-right: 10px;
-  overflow: hide;
+  overflow: hidden;
   z-index: 0;
 }
 
@@ -172,7 +155,6 @@ div#home {
 }
 
 div#home_intro {
-  background: #EAF2F5;
   padding: 10px 10px 0px 10px;
   text-indent: 20pt;
   margin-bottom: 10px;
@@ -180,13 +162,11 @@ div#home_intro {
 
 div#home_news {
   padding: 10px 10px 0px 10px;
-  background: #EAF2F5;
   margin-bottom: 10px;
 }
 
 div#home_reference {
   padding: 10px 10px 0px 10px;
-  background: #EAF2F5;
   margin-bottom: 10px;
 }
 
@@ -200,12 +180,11 @@ div#mol_month1 {
 div#mol_month2 {
   width: 430px;
   padding: 10px 10px 0px 10px;
-  background: #EAF2F5;
 }
 
 img#mol_month_img {
-  width: 400px;
-  margin-left: 15px;
+  width: 350px;
+  margin-left: 30px;
 }
 
 #footer {
@@ -221,6 +200,21 @@ img#mol_month_img {
 
 div#jmol {
   width: 100%;
+}
+
+div#fugue_search_form {
+  width: 500px;
+  margin-top: 15px;
+  margin-left: 10px;
+}
+
+div#notice {
+  width: 800px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: 110%;
+  font-weight: bold;
+  color: #009900;
 }
 
 div.relative {
@@ -275,6 +269,7 @@ div.current_hierarchy a:hover, a:active {
 }
 
 .list_title {
+  margin-left: 100px;
   font-weight: bold;
 }
 
@@ -286,7 +281,7 @@ img#list_figure {
 .list_content {
   font-size: 90%;
   padding-left: 15px;
-  margin-left: 80px;
+  margin-left: 90px;
 }
 
 .list_score {
@@ -323,51 +318,70 @@ ul li div.contact_affiliation {}
 
 ul li div.contact_email {}
 
-table {
+table.bipa {
   width: 930px;
+  /* word-wrap: break-word; */
+  border-style: solid;
+  border-width: 1px;
+  border-color: #666666;
+  border-collapse: collapse;
+  margin-top: 10px;
   margin-bottom: 10px;
 }
 
-table th {
+table.bipa th {
   text-align: center;
   font-weight: bold;
   font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
 }
 
-table td {
+table.bipa td {
   font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
 }
 
-table a {
+table.bipa a {
   color: #00F;
 }
 
-table a:link, a:visited {
+table.bipa a:link, a:visited {
   color: #00F;
   text-decoration: none;
 }
 
-table a:hover, a:active {
+table.bipa a:hover, a:active {
   color: #00F;
   text-decoration: underline;
 }
 
-table tr.title, td.title {
+table.bipa tr.title, td.title {
+  margin: 0px;
   font-weight: bold;
 }
 
-table td.title_center {
+table.bipa td.title_center {
   text-align: center;
 }
 
-table#structure_table {
-  word-wrap: break-word;
-  table-layout: fixed;
+table.joy_annotation {
+  border-style: none;
+  font-family: "Courier New", courier, monospace;
+  width: 700px;
 }
 
-table.joy_annotation {
-  font-family: courier new, courier, monospace;
-  width: 700px;
+table.joy_annotation th {
+  margin: 0px;
+  padding: 0px;
+  border-style: none;
+}
+
+table.joy_annotation td {
+  margin: 0px;
+  padding: 0px;
+  border-style: none;
 }
 
 #scop_tree {
@@ -375,17 +389,19 @@ table.joy_annotation {
 }
 
 .alignment {
-  margin-top: 10px;
-  padding-left: 5px;
-  font-family: courier new, courier, monospace;
-  font-size: 80%;
-  background: #FFF;
-  color: #000;
+  width: 700px;
+  margin-bottom: 5px;
+  font-family: "Courier New", courier, monospace;
+  font-size: 90%;
+  white-space: nowrap;
+  overflow-x: auto;
 }
 
 .sequence {
   width: 700px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  font-size: 90%;
+  font-family: "Courier New", courier, monospace;
   white-space: nowrap;
   overflow-x: auto;
 }
@@ -400,6 +416,10 @@ table.joy_annotation {
   margin-top: 5px;
   text-align: right;
   font-size: 80%;
+}
+
+div#zoom {
+  font-size: 90%;
 }
 
 /* Environments */
@@ -451,4 +471,38 @@ table.joy_annotation {
 .vdw_contacting_rna {
   background: #46C7C7;
   text-decoration: underline;
+}
+
+.fieldWithErrors {
+  padding: 2px;
+  background-color: red;
+  display: inline;
+}
+
+#errorExplanation {
+  width: 600px;
+  border: 2px solid red;
+  padding: 5px;
+  margin-bottom: 20px;
+  background-color: #f0f0f0;
+}
+
+#errorExplanation h2 {
+  text-align: left;
+  font-weight: bold;
+  padding: 5px 5px 5px 15px;
+  font-size: 110%;
+  margin: 5px;
+  background-color: #c00;
+  color: #fff;
+}
+
+#errorExplanation p {
+  color: #333;
+  padding: 5px;
+}
+
+#errorExplanation ul li {
+  font-size: 100%;
+  list-style: square;
 }

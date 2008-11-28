@@ -19,17 +19,12 @@
     <script type="text/javascript">
       var $j = jQuery.noConflict();
       $j(document).ready(function() {
-        $j("#notice").fadeOut(6500);
         $j("ul.sf-menu").superfish();
-        $j("#home_intro").corner("round");
-        $j("#home_news").corner("round");
-        $j("#home_reference").corner("round");
-        $j("#mol_month2").corner("round");
       });
     
       FancyZoomBox.directory = '/images';
       $(document).observe('dom:loaded', function() {
-        new FancyZoom('abstract_link', {width:400, height:300});
+        new FancyZoom('abstract_link', {width:600, height:300});
         new FancyZoom('scop_na_box_link', {width:400, height:150});
         new FancyZoom('dna_rep_alignment_na_box_link', {width:400, height:150});
         new FancyZoom('rna_rep_alignment_na_box_link', {width:400, height:150});
@@ -40,7 +35,6 @@
   </head>
 
   <body>
-    <%= content_tag("div", flash[:notice], :class => "notice", :id => "notice") if flash[:notice] %>
     <div id="wrapper">
       <div id="header"> 
         <ul id="header_menu" class="sf-menu">
@@ -87,6 +81,7 @@
       </div>
 
       <div id="middler">
+        <%= content_tag("div", flash[:notice], :class => "notice", :id => "notice") if flash[:notice] %>
         <%= yield :layout %>
       </div>
 
