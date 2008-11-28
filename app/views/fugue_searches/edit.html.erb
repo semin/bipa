@@ -1,0 +1,12 @@
+<h1>Editing fugue_search</h1>
+
+<% form_for(@fugue_search) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @fugue_search %> |
+<%= link_to 'Back', fugue_searches_path %>

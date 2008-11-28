@@ -25,10 +25,7 @@ ActionController::Routing::Routes.draw do |map|
                 :collection => {
                   :search => :get,
                   :set => :get
-                }) do |scop|
-    scop.resources :interfaces
-    scop.resources :alignments
-  end
+                })
 
   map.resources :gos,
                 :singular => "go",

@@ -1,0 +1,19 @@
+<div id="main_title">
+  Listing FUGUE-na searches
+</div>
+
+<table>
+  <tr>
+  </tr>
+<% for fugue_search in @fugue_searches %>
+  <tr>
+    <td><%= link_to 'Show', fugue_search %></td>
+    <td><%= link_to 'Edit', edit_fugue_search_path(fugue_search) %></td>
+    <td><%= link_to 'Destroy', fugue_search, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New fugue_search', new_fugue_search_path %>

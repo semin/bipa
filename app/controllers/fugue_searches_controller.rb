@@ -1,26 +1,38 @@
 class FugueSearchesController < ApplicationController
-
-  # GET /fugue_searchs
+  # GET /fugue_searches
+  # GET /fugue_searches.xml
   def index
-    fugue_searches = FugueSearch.all
+    @fugue_searches = FugueSearch.find(:all)
 
     respond_to do |format|
-      format.html # index.rhtml
-      format.xml  { render :xml => @fugue_searchs.to_xml }
+      format.html # index.html.erb
+      format.xml  { render :xml => @fugue_searches }
     end
   end
 
-  # GET /fugue_searchs/1
+  # GET /fugue_searches/1
+  # GET /fugue_searches/1.xml
   def show
-    fugue_searches = FugueSearch.find(params[:id])
+    @fugue_search = FugueSearch.find(params[:id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @fugue_search }
+    end
   end
 
-  # GET /fugue_searchs/new
+  # GET /fugue_searches/new
+  # GET /fugue_searches/new.xml
   def new
     @fugue_search = FugueSearch.new
+
+    respond_to do |format|
+      format.html # new.html.erb
+      format.xml  { render :xml => @fugue_search }
+    end
   end
 
-  # GET /fugue_searches/1;edit
+  # GET /fugue_searches/1/edit
   def edit
     @fugue_search = FugueSearch.find(params[:id])
   end
@@ -33,11 +45,11 @@ class FugueSearchesController < ApplicationController
     respond_to do |format|
       if @fugue_search.save
         flash[:notice] = 'FugueSearch was successfully created.'
-        format.html { redirect_to fugue_search_url(@fugue_search) }
-        format.xml  { head :created, :location => fugue_search_url(@fugue_search) }
+        format.html { redirect_to(@fugue_search) }
+        format.xml  { render :xml => @fugue_search, :status => :created, :location => @fugue_search }
       else
         format.html { render :action => "new" }
-        format.xml  { render :xml => @fugue_search.errors.to_xml }
+        format.xml  { render :xml => @fugue_search.errors, :status => :unprocessable_entity }
       end
     end
   end
@@ -50,11 +62,11 @@ class FugueSearchesController < ApplicationController
     respond_to do |format|
       if @fugue_search.update_attributes(params[:fugue_search])
         flash[:notice] = 'FugueSearch was successfully updated.'
-        format.html { redirect_to fugue_search_url(@fugue_search) }
+        format.html { redirect_to(@fugue_search) }
         format.xml  { head :ok }
       else
         format.html { render :action => "edit" }
-        format.xml  { render :xml => @fugue_search.errors.to_xml }
+        format.xml  { render :xml => @fugue_search.errors, :status => :unprocessable_entity }
       end
     end
   end
@@ -66,9 +78,8 @@ class FugueSearchesController < ApplicationController
     @fugue_search.destroy
 
     respond_to do |format|
-      format.html { redirect_to fugue_searches_url }
+      format.html { redirect_to(fugue_searches_url) }
       format.xml  { head :ok }
     end
   end
-
 end

@@ -1,0 +1,2 @@
+module FugueSearchesHelper
+end
