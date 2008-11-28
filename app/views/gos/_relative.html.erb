@@ -1,0 +1,11 @@
+<div class="relative">
+  <% relative.level.times do %>
+    &nbsp;&nbsp;
+  <% end %>
+  <% if relative.targets.size > 0 %>
+    &#43;
+  <% else %>
+    &#45;
+  <% end %>
+  <b><%= relative.go_id %></b>: <%= link_to "#{relative.description}", scop_path(relative) %>
+</div>

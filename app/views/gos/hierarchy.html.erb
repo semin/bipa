@@ -1,0 +1,25 @@
+<div class="main_title">
+  Browse GO: <%= @go_term.go_id %>:<%= @go_term.name %>
+</div>
+
+<div id="go_tree">
+  <% if @go_term.sources.registered.count > 0 %>
+    <%= render :partial => "/gos/relative", :collection => @go_term.sources.registered %>
+  <% end %>
+
+  <div class="current_hierarchy">
+    <% @scop.level.times do %>
+      &nbsp;&nbsp; 
+    <% end %>
+
+    &#45; <b><%= @scop.hierarchy %></b>: <%= link_to "#{@scop.description}", scop_path(@scop) %>
+  </div>
+
+  <% if @scop.level < 7 && @scop.children.rpall.size > 0 %>
+    <%= render :partial => "/scops/relative", :collection => @scop.children.rpall %>
+  <% end %>
+
+  <% if @scop.siblings.size > 0 %>
+    <%= render :partial => "/scops/relative", :collection => @scop.siblings.rpall %>
+  <% end %>
+</div>
