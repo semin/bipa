@@ -473,10 +473,14 @@ div#zoom {
   text-decoration: underline;
 }
 
+.fugue_search_text_area {
+}
+
 .fieldWithErrors {
   padding: 2px;
   background-color: red;
-  display: inline;
+  border: 2px solid red;
+  display: inline-block;
 }
 
 #errorExplanation {
