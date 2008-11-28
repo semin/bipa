@@ -20,7 +20,7 @@ Rails::Initializer.run do |config|
   config.gem "composite_primary_keys"
   config.gem "RubyInline", :lib => "inline"
   config.gem "googlecharts", :lib => "gchart"
-  config.gem "ruby-graphviz". :lib => "graphviz"
+  config.gem "ruby-graphviz", :lib => "graphviz"
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
