@@ -1,8 +1,7 @@
 log/*.log
 tmp/**/*
 .DS_Store
-doc/api
-doc/app
+config/database.yml
 public/pdb
 public/scop
 public/families
