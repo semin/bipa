@@ -601,27 +601,30 @@ namespace :bipa do
       fmanager   = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-        config  = ActiveRecord::Base.remove_connection
-        index   = 0
-
         0.upto(interfaces.count - 2) do |i|
           (i + 1).upto(interfaces.count - 1) do |j|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
-              is                                = InterfaceSimilarity.new
-              is.interface                      = interfaces[i]
-              is.similar_interface              = interfaces[j]
-              is.similarity_in_usr              = interfaces[i].shape_similarity_with(interfaces[j]) rescue 0.0
-              is.similarity_in_asa              = (interfaces[i][:asa] - interfaces[j][:asa]).abs.to_similarity
-              is.similarity_in_polarity         = (interfaces[i][:polarity] - interfaces[j][:polarity]).abs.to_similarity
-              is.similarity_in_res_composition  = NMath::sqrt((interfaces[i].residue_propensity_vector - interfaces[j].residue_propensity_vector)**2).to_similarity
-              is.similarity_in_sse_composition  = NMath::sqrt((interfaces[i].sse_propensity_vector - interfaces[j].sse_propensity_vector)**2).to_similarity
-              is.similarity_in_all              = [is.similarity_in_usr, is.similarity_in_asa, is.similarity_in_polarity, is.similarity_in_res_composition, is.similarity_in_sse_composition].to_stats_array.mean
-              is.save!
-              index += 1
+            if InterfaceSimilarity.find_by_interface_id_and_similar_interface_id(interfaces[i].id, interfaces[j].id)
+              #$logger.info ">>> Skipped interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{total})"
+              next
+            else
+              config = ActiveRecord::Base.remove_connection
+              fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
+                is                                = InterfaceSimilarity.new
+                is.interface                      = interfaces[i]
+                is.similar_interface              = interfaces[j]
+                is.similarity_in_usr              = interfaces[i].shape_similarity_with(interfaces[j]) rescue 0.0
+                is.similarity_in_asa              = (interfaces[i][:asa] - interfaces[j][:asa]).abs.to_similarity
+                is.similarity_in_polarity         = (interfaces[i][:polarity] - interfaces[j][:polarity]).abs.to_similarity
+                is.similarity_in_res_composition  = NMath::sqrt((interfaces[i].residue_propensity_vector - interfaces[j].residue_propensity_vector)**2).to_similarity
+                is.similarity_in_sse_composition  = NMath::sqrt((interfaces[i].sse_propensity_vector - interfaces[j].sse_propensity_vector)**2).to_similarity
+                is.similarity_in_all              = [is.similarity_in_usr, is.similarity_in_asa, is.similarity_in_polarity, is.similarity_in_res_composition, is.similarity_in_sse_composition].to_stats_array.mean
+                is.save!
+                index += 1
 
-              $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{total})"
-              ActiveRecord::Base.remove_connection
+                $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{total})"
+                ActiveRecord::Base.remove_connection
+              end
             end
           end
         end
