@@ -649,20 +649,7 @@ namespace :bipa do
           end
         end
       end
-
-        %w[dna rna].each do |na|
-          if domain.send("#{na}_interfaces").size > 0
-            domain.send("rpall_#{na}=", true)
-            domain.save!
-            domain.ancestors.each do |anc|
-              anc.rpall = true
-              anc.send("rpall_#{na}=", true)
-              anc.save!
-            end
-          end
-        end
-        $logger.info ">>> Updating SCOP domain's rpall_dna, rpall_rna: done (#{i + 1}/#{domains.count})"
-      end
     end
+
   end
 end
