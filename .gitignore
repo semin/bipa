@@ -3,3 +3,13 @@ tmp/**/*
 .DS_Store
 doc/api
 doc/app
+public/pdb
+public/scop
+public/families
+public/go
+public/taxonomy
+public/dssp
+public/essts
+public/hbplus
+public/naccess
+
