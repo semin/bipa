@@ -625,10 +625,10 @@ namespace :bipa do
                 $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{total})"
                 ActiveRecord::Base.remove_connection
               end
+              ActiveRecord::Base.establish_connection(config)
             end
           end
         end
-        ActiveRecord::Base.establish_connection(config)
       end # fmanager.manage
     end
 
