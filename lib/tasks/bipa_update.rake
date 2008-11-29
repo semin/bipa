@@ -603,8 +603,9 @@ namespace :bipa do
       fmanager.manage do
         0.upto(interfaces.count - 2) do |i|
           (i + 1).upto(interfaces.count - 1) do |j|
+            index = j + (interfaces.count * i) - (1..i+1).inject { |s,e| s + e }
             if InterfaceSimilarity.find_by_interface_id_and_similar_interface_id(interfaces[i].id, interfaces[j].id)
-              #$logger.info ">>> Skipped interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{total})"
+              #$logger.info ">>> Skipped interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{index}/#{total})"
               next
             else
               config = ActiveRecord::Base.remove_connection
@@ -620,9 +621,8 @@ namespace :bipa do
                 is.similarity_in_sse_composition  = NMath::sqrt((interfaces[i].sse_propensity_vector - interfaces[j].sse_propensity_vector)**2).to_similarity
                 is.similarity_in_all              = [is.similarity_in_usr, is.similarity_in_asa, is.similarity_in_polarity, is.similarity_in_res_composition, is.similarity_in_sse_composition].to_stats_array.mean
                 is.save!
-                index += 1
 
-                $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{total})"
+                $logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{index}/#{total})"
                 ActiveRecord::Base.remove_connection
               end
               ActiveRecord::Base.establish_connection(config)
