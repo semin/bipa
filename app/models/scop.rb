@@ -394,4 +394,12 @@ class ScopDomain < Scop
   def local_image_link
     "/scop/#{sunid}.png"
   end
+
+  def html_sunid_link
+    "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sunid=#{sunid}"
+  end
+
+  def html_sccs_link
+    "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sccs=#{sccs}"
+  end
 end

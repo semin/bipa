@@ -1,8 +1,7 @@
 class ScopsController < ApplicationController
 
   def index
-    @scops = ScopDomain.rpall.paginate(:page => params[:page] || 1,
-                                       :per_page => 20)
+    @scops = ScopDomain.rpall.paginate(:page => params[:page] || 1, :per_page => 20)
 
     respond_to do |format|
       format.html

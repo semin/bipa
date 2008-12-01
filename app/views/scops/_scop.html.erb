@@ -1,7 +1,11 @@
-<tr>
-  <td><%= link_to scop.sunid, hierarchy_scop_path(scop) %></td>
-  <td><%= scop.hierarchy %></td>
-  <td><%= scop.sccs %></td>
-  <td><%= scop.sid %></td>
-  <td style="text-align: left"><%= scop.description %></td>
-</tr>
+<div class="list">
+  <%= image_tag scop.local_image_link, :id => "list_figure" %>
+  <div class="list_title blue_link">
+    SCOP sid: <%= link_to scop.sid, scop_path(scop) %> (<%= scop.scop_protein.description %>)
+  </div>
+  <div class="list_content blue_link">
+    SCOP sccs:  <%= link_to scop.sccs, scop.html_sccs_link, :popup => true  %><br />
+    SCOP sunid: <%= link_to scop.sunid, scop.html_sunid_link, :popup => true  %><br />
+    PDB Code:   <%= link_to scop.structure.pdb_code, structure_path(scop.structure) %><br />
+  </div>
+</div>
