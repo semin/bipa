@@ -665,6 +665,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :similarity_in_sse_composition
     t.float       :similarity_in_all
   end
+  add_index :interface_similarities, :interface_id
+  add_index :interface_similarities, :similar_interface_id
   add_index :interface_similarities, [:interface_id, :similar_interface_id], :unique => true, :name => "by_int_id_and_sim_int_id"
   add_index :interface_similarities, [:similar_interface_id, :interface_id], :unique => true, :name => "by_sim_int_id_and_int_id"
 

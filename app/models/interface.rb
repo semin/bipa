@@ -6,8 +6,47 @@ class Interface < ActiveRecord::Base
   has_many  :interface_similarities,
             :dependent  => :destroy
 
+  @@cutoff = {
+    :usr              => 0.5,
+    :asa              => 0.5,
+    :polarity         => 0.999,
+    :res_composition  => 0.0,
+    :sse_composition  => 0.5,
+    :all              => 0.4
+  }
+
+  %w[usr asa polarity res_composition sse_composition all].each do |item|
+    class_eval <<-RUBY_CODE
+    acts_as_network :similar_interfaces_in_#{item},
+                    :through                  => :interface_similarities,
+                    :foreign_key              => 'interface_id',
+                    :association_foreign_key  => 'similar_interface_id',
+                    :conditions               => ['similarity_in_#{item} > #{@@cutoff[item.to_sym]}']
+
+    def self.similarity_in_#{item}_between(int1, int2)
+      sim1 = InterfaceSimilarity.first(:conditions => { :interface_id => int1.id, :similar_interface_id => int2.id })
+      sim2 = InterfaceSimilarity.first(:conditions => { :interface_id => int2.id, :similar_interface_id => int1.id })
+      sim1 ? sim1.similarity_in_#{item} : sim2.similarity_in_#{item}
+    end
+
+    def sorted_similar_interfaces_in_#{item}(min = nil)
+      if min
+        similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse[0..min-1]
+      else
+        similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse
+      end
+    end
+
+    RUBY_CODE
+  end
+
   has_many  :similar_interfaces,
             :through    => :interface_similarities
+
+
+  def interface_type
+    (self[:type].match(/DNA/i) ? "DNA" : "RNA") + " interface"
+  end
 
 end
 

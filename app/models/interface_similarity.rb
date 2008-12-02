@@ -4,7 +4,8 @@ class InterfaceSimilarity < ActiveRecord::Base
               :class_name   => "Interface",
               :foreign_key  => "interface_id"
 
-  belongs_to  :similar_interface,
+  belongs_to  :interface_target,
               :class_name   => "Interface",
               :foreign_key  => "similar_interface_id"
+
 end

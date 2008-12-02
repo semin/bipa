@@ -40,64 +40,54 @@
     </td>
   </tr>
   <tr>
-    <td class="title">Similar Interfaces in</td>
+    <td rowspan=4 class="title">Similar Interfaces in</td>
     <th colspan=2 class="title">Shape</th>
     <th colspan=2 class="title">ASA</th>
     <th colspan=2 class="title">Polarity</th>
   </tr>
   <tr>
-    <td></td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
+    <td colspan=2>
+      <% @interface.sorted_similar_interfaces_in_usr(10).each do |int| %>
+        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>
+        (<%= "%.2f" % Interface.similarity_in_usr_between(@interface, int) %>)<br />
+      <% end %>
+    </td>
+    <td colspan=2>
+      <% @interface.sorted_similar_interfaces_in_asa(10).each do |int| %>
+        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>
+        (<%= "%.2f" % Interface.similarity_in_asa_between(@interface, int) %>)<br />
+      <% end %>
+    </td>
+    <td colspan=2>
+      <% @interface.sorted_similar_interfaces_in_polarity(10).each do |int| %>
+        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>
+        (<%= "%.2f" % Interface.similarity_in_polarity_between(@interface, int) %>)<br />
+      <% end %>
+    </td>
   </tr>
   <tr>
-    <td></td>
     <th colspan=2>Residue Composition</th>
     <th colspan=2>SSE Composition</th>  
     <th colspan=2>All Aspects</th>
   </tr>
   <tr>
-    <td></td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
-    <td colspan=2>N/A</td>
+    <td colspan=2>
+      <% @interface.sorted_similar_interfaces_in_res_composition(10).each do |int| %>
+        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>
+        (<%= "%.2f" % Interface.similarity_in_res_composition_between(@interface, int) %>)<br />
+      <% end %>
+    </td>
+    <td colspan=2>
+      <% @interface.sorted_similar_interfaces_in_sse_composition(10).each do |int| %>
+        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>
+        (<%= "%.2f" % Interface.similarity_in_sse_composition_between(@interface, int) %>)<br />
+      <% end %>
+    </td>
+    <td> 
+      <% @interface.sorted_similar_interfaces_in_all(10).each do |int| %>
+        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>
+        (<%= "%.2f" % Interface.similarity_in_all_between(@interface, int) %>)<br />
+      <% end %>
+    </td>
   </tr>
 </table>
-<!--
-  <tr>
-    <td class="title">SCOP classification</td>
-    <td align="center" class="title">Class</td>
-    <td align="center" class="title">Fold</td>
-    <td align="center" class="title">Superfamily</td>
-    <td align="center" class="title">Family</td>
-    <td align="center" class="title">Protein</td>
-    <td align="center" class="title">Species</td>
-  </tr>
-  <tr>
-    <td></td>
-    <td align="center"><%= @interface.domain.scop_class.description %></td>
-    <td align="center"><%= @interface.domain.scop_fold.description %></td>
-    <td align="center"><%= @interface.domain.scop_superfamily.description %></td>
-    <td align="center"><%= @interface.domain.scop_family.description %></td>
-    <td align="center"><%= @interface.domain.scop_protein.description %></td>
-    <td align="center"><%= @interface.domain.scop_species.description %></td>
-  </tr>
-  <tr class="title">
-    <td>GO Terms</td>
-    <td class="title_center" colspan=3>Polymer</td>
-    <td class="title_center">Molecular Function</td>
-    <td class="title_center">Biological Process</td>
-    <td class="title_center">Cellular Component</td>
-  <tr>
-  <% @interface.chains.each do |chain| %>
-    <% next if chain.chain_code.nil? %>
-    <tr>
-      <td></td>
-      <td colspan=3><%= chain.chain_code %>: <%= chain.molecule.html_word_wrap(55) %></td>
-      <td align="center"><%= chain.go_terms_for_html(:molecular_function) %></td>
-      <td align="center"><%= chain.go_terms_for_html(:biological_process) %></td>
-      <td align="center"><%= chain.go_terms_for_html(:cellular_component) %></td>
-    </tr>
-  <% end %>
--->
