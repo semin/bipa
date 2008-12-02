@@ -672,12 +672,9 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   create_table :fugue_searches, :force => true do |t|
-    t.string    :type
-    t.string    :name
-    t.string    :email
+    t.string    :type, :name, :email
     t.text      :sequence
-    t.timestamp :started_at
-    t.timestamp :finished_at
+    t.timestamp :started_at, :finished_at
     t.timestamps
   end
 

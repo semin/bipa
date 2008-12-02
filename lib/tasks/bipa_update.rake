@@ -613,7 +613,7 @@ namespace :bipa do
                 ActiveRecord::Base.establish_connection(config)
                 is                                = InterfaceSimilarity.new
                 is.interface                      = interfaces[i]
-                is.similar_interface              = interfaces[j]
+                is.interface_target               = interfaces[j]
                 is.similarity_in_usr              = interfaces[i].shape_similarity_with(interfaces[j]) rescue 0.0
                 is.similarity_in_asa              = (interfaces[i][:asa] - interfaces[j][:asa]).abs.to_similarity
                 is.similarity_in_polarity         = (interfaces[i][:polarity] - interfaces[j][:polarity]).abs.to_similarity
