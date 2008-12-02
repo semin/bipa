@@ -469,5 +469,74 @@ namespace :bipa do
 
       chdir cwd
     end
+
+
+    desc "Generate a flat file for interfaces table"
+    task :interfaces_flat_file => [:environment] do
+
+      File.open("./tmp/interfaces.csv", "w") do |file|
+        Interface.find_all_in_chunks do |int|
+          begin
+            file.puts [
+              int.id,
+              int.asa,
+              int.polarity,
+              int.shape_descriptors.to_a,
+              int.residue_propensity_vector.to_a,
+              int.sse_propensity_vector.to_a
+            ].join(",")
+          rescue
+            next
+          end
+        end
+      end
+    end
+
+
+    desc "Generate a dump file for interface_similarities table"
+    task :interface_similarities_dump_file => [:environment] do
+
+      InterfaceStruct = Struct.new(:int_id, :asa, :polarity, :shape_descriptors, :res_composition, :sse_composition)
+      interfaces      = Array.new
+
+      IO.foreach("./tmp/interfaces.csv") do |line|
+        elements = line.chomp.split(",")
+        interfaces << InterfaceStruct.new(elements[0].to_i,
+                                          elements[1].to_f,
+                                          elements[2].to_f,
+                                          NVector[*elements[3..14].map(&:to_f)],
+                                          NVector[*elements[15..34].map(&:to_f)],
+                                          NVector[*elements[35..42].map(&:to_f)])
+      end
+
+      total_count = interfaces.size
+      fmanager    = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        0.upto(total_count -2) do |i|
+          (i + 1).upto(total_count - 1) do |j|
+            index = j + (total_count * i) - NVector[1..i+1].sum
+
+            fmanager.fork do
+              asa_sim = (interfaces[i].asa - interfaces[j].asa).abs.to_similarity
+              pol_sim = (interfaces[i].polarity - interfaces[j].polarity).abs.to_similarity
+              usr_sim = 1.0 / (1 + ((interfaces[i].shape_descriptors - interfaces[j].shape_descriptors).abs.sum / 12.0))
+              res_sim = NMath::sqrt((interfaces[i].res_composition - interfaces[j].res_composition)**2).to_similarity
+              sse_sim = NMath::sqrt((interfaces[i].sse_composition - interfaces[j].sse_composition)**2).to_similarity
+
+              puts [
+                index,
+                interfaces[i].int_id,
+                interfaces[j].int_id,
+                asa_sim, pol_sim, usr_sim, res_sim, sse_sim,
+                (asa_sim + pol_sim + usr_sim + res_sim + sse_sim) / 5.0
+              ].join(",")
+              #$logger.info ">>> Updating interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{index}/#{total})"
+            end
+          end
+        end
+      end # fmanager.manage
+    end
+
   end
 end

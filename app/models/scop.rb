@@ -61,6 +61,10 @@ class Scop < ActiveRecord::Base
     end
   end
 
+  def scop_domains
+    leaves.select(&:rpall)
+  end
+
 #  def interfaces(redundancy, resolution)
 #    dna_interfaces(redundancy, resolution) +
 #    rna_interfaces(redundancy, resolution)

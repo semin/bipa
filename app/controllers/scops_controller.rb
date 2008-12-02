@@ -16,7 +16,16 @@ class ScopsController < ApplicationController
         format.html
       end
     else
-      redirect_to hierarchy_scop_path(@scop)
+      redirect_to domains_scop_path(@scop)
+    end
+  end
+
+  def domains
+    @scop = Scop.find(params[:id])
+    @doms = @scop.scop_domains.paginate(:page => params[:page] || 1, :per_page => 20)
+
+    respond_to do |format|
+      format.html
     end
   end
 

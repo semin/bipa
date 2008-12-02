@@ -1,10 +1,10 @@
-<div class="main_title">
-  SCOP Domain: <%= @scop.sid %>
+<div class="main_title blue_link">
+  SCOP Domain: <%= link_to @scop.sid, @scop.html_sunid_link %>
 </div>
 
 <table id="scop_table" class="bipa">
   <tr>
-    <td class="title">PDB</td>
+    <td class="title" rowspan=2>PDB</td>
     <td class="title">Title</td>
     <td><%= link_to @scop.structure.title, structure_path(@scop.structure) %></td>
     <td rowspan=10 style="width:280px" align="center">
@@ -13,49 +13,42 @@
     </td>
   </tr>
   <tr>
-    <td></td>
-    <td class="title">PDB Code</td>
+    <td class="title">Code</td>
     <td><%= link_to @scop.structure.pdb_code, @scop.structure.rcsb_html_link, :popup => true %></td>
   </tr>
   <tr>
-    <td class="title">SCOP<br />Classification</td>
+    <td class="title" rowspan=6>SCOP<br />Classification</td>
     <td class="title">Class</td>
-    <td><%= link_to @scop.scop_class.description, scop_path(@scop.scop_class) %></td>
+    <td><%= link_to @scop.scop_class.description, domains_scop_path(@scop.scop_class) %></td>
   </tr>
   <tr>
-    <td></td>
     <td class="title">Fold</td>
-    <td><%= link_to @scop.scop_fold.description, scop_path(@scop.scop_fold) %></td>
+    <td><%= link_to @scop.scop_fold.description, domains_scop_path(@scop.scop_fold) %></td>
   </tr>
   <tr>
-    <td></td>
     <td class="title">Superfamily</td>
-    <td><%= link_to @scop.scop_superfamily.description, scop_path(@scop.scop_superfamily) %></td>
+    <td><%= link_to @scop.scop_superfamily.description, domains_scop_path(@scop.scop_superfamily) %></td>
   </tr>
   <tr>
-    <td></td>
     <td class="title">Family</td>
-    <td><%= link_to @scop.scop_family.description, scop_path(@scop.scop_family) %></td>
+    <td><%= link_to @scop.scop_family.description, domains_scop_path(@scop.scop_family) %></td>
   </tr>
   <tr>
-    <td></td>
     <td class="title">Protein<br />Domain</td>
-    <td><%= link_to @scop.scop_protein.description, scop_path(@scop.scop_protein) %></td>
+    <td><%= link_to @scop.scop_protein.description, domains_scop_path(@scop.scop_protein) %></td>
   </tr>
   <tr>
-    <td></td>
     <td class="title">Species</td>
-    <td><%= link_to @scop.scop_species.description, scop_path(@scop.scop_species) %></td>
+    <td><%= link_to @scop.scop_species.description, domains_scop_path(@scop.scop_species) %></td>
   </tr>
   <tr>
-    <td class="title">Interfaces</td>
+    <td class="title" rowspan=2>Interfaces</td>
     <td class="title">DNA</td>
     <td>
       <%= @scop.dna_interfaces.size > 0 ? link_to("DNA interface", interface_path(@scop.dna_interfaces.first)) : "N/A" %>
     </td>
   </tr>
   <tr>
-    <td></td>
     <td class="title">RNA</td>
     <td>
       <%= @scop.rna_interfaces.size > 0 ? link_to("RNA interface", interface_path(@scop.rna_interfaces.first)) : "N/A" %>

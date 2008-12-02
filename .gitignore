@@ -1,4 +1,5 @@
 log/*.log
+tmp/*.csv
 tmp/**/*
 .DS_Store
 config/database.yml

@@ -21,10 +21,11 @@ ActionController::Routing::Routes.draw do |map|
                   :propensities   => :get,
                   :chisquare_test => :get,
                   :jmol           => :get,
+                  :domains        => :get,
                 },
                 :collection => {
-                  :search => :get,
-                  :set => :get
+                  :search   => :get,
+                  :set      => :get
                 })
 
   map.resources :gos,

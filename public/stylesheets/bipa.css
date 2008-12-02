@@ -170,21 +170,11 @@ div#home_reference {
   margin-bottom: 10px;
 }
 
-div#mol_month1 {
+div#brief_stats {
   float: right;
   width: 470px;
   margin-left:10px;
   margin-bottom: 10px;
-}
-
-div#mol_month2 {
-  width: 430px;
-  padding: 10px 10px 0px 10px;
-}
-
-img#mol_month_img {
-  width: 350px;
-  margin-left: 30px;
 }
 
 #footer {
@@ -203,7 +193,7 @@ div#jmol {
 }
 
 div#fugue_search_form {
-  width: 500px;
+  width: 700px;
   margin-top: 15px;
   margin-left: 10px;
 }
@@ -318,6 +308,36 @@ ul li div.contact_affiliation {}
 
 ul li div.contact_email {}
 
+table.brief_stats {
+  width: 450px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: .666666;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+table.brief_stats th {
+  text-align: left;
+  font-weight: bold;
+  font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
+}
+
+table.brief_stats td {
+  text-align: right;
+  font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
+}
+
+table.brief_stats th.center {
+  text-align: center;
+}
+
+
 table.bipa {
   width: 930px;
   /* word-wrap: break-word; */
@@ -421,6 +441,12 @@ table.joy_annotation td {
 div#zoom {
   font-size: 90%;
 }
+
+.link_des {
+  font-size: 70%;
+  font-variant: small-caps;
+}
+
 
 /* Environments */
 .helix {

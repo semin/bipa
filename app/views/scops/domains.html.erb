@@ -1,0 +1,9 @@
+<div class="main_title">
+  Browse: SCOP Domains in <%= @scop.description %> <%= @scop.hierarchy %>
+</div>
+
+<%= will_paginate @doms %>
+
+<%= render :partial => "scop", :collection => @doms, :spacer_template => "/shared/list_spacer" %>
+
+<%= will_paginate @doms %>

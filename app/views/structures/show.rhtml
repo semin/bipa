@@ -6,7 +6,7 @@
   <tr>
     <td class="title">Title</td>
     <td colspan=5><%=h @structure.title %></td>
-    <td colspan=2 rowspan=6 style="width:280px" align="center">
+    <td colspan=2 rowspan=5 style="width:280px" align="center">
       <%= image_tag @structure.local_image_link, :width => 250 %><br />
       3D View: <%= link_to "Jmol", jmol_structure_path %>
     </td>
@@ -21,8 +21,7 @@
   <tr>
     <td class="title">History</td>
     <td colspan=5>
-      Deposition: <%=h @structure.deposited_at %><br />
-      Release: <%=h @structure.released_at %>
+      Deposition: <%=h @structure.deposited_at %>
     </td>
   </tr>
   <tr>
@@ -36,10 +35,6 @@
   <tr>
     <td class="title">Classification</td>
     <td colspan=5><%=h @structure.classification %></td>
-  </tr>
-  <tr>
-    <td class="title">Source</td>
-    <td colspan=5><%=h @structure.source %></td>
   </tr>
   <tr class="title">
     <td rowspan=<%= @structure.domains.empty? ? 2 : @structure.domains.count + 1 %>>SCOP<br />Classification</td>

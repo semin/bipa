@@ -2,7 +2,7 @@
   <span class="main_title">Home: Welcome to BIPA 1.0 release</span>
   <div id="home_intro" class="blue_link">
     <p>
-    BIPA is a comprehensive database for protein-nucleic acid interaction. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org" %> complexes and <%= link_to ScopDomain.rpall.count, scops_path %> SCOP domains in BIPA. For each SCOP family level, a representative set of structures is selected and aligned using <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/" %>. Then, environment-specific substitution tables (<%= link_to "ESSTs", "http://www-cryst.bioc.cam.ac.uk/ESST" %>) were generated using <%= link_to "EGOR", "http://www-cryst.bioc.cam.ac.uk/egor" %> with an extended environment feature definition including atomic interactions between amino acids and nucleic acids. <%= link_to "FUGUE", "http://tardis.nibio.go.jp/fugue/" %> profiles are also generated using the extended environment-specific subsitution tables to provide remote homology detection specialized for nucleic acid-binding proteins.
+    BIPA is a protein-nucleic acid interaction database, especially focusing on structural and functional restraints on nulceic acid-binding protein families. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org" %> complexes and <%= link_to ScopDomain.rpall.count, scops_path %> <% link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html" %> domains in BIPA. For each SCOP family level, a representative set of structures is selected and aligned using <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/" %>. Then, environment-specific substitution tables (<%= link_to "ESSTs", "http://www-cryst.bioc.cam.ac.uk/ESST" %>) were generated using <%= link_to "EGOR", "http://www-cryst.bioc.cam.ac.uk/egor" %> with an extended environment feature definition including atomic interactions between amino acids and nucleic acids. <%= link_to "FUGUE", "http://tardis.nibio.go.jp/fugue/" %> profiles are also generated using the extended environment-specific subsitution tables to provide remote homology detection which is specialized for nucleic acid-binding protein families.
     </p>
   </div>
 
@@ -25,14 +25,91 @@
   </div>
 </div>
 
-<div id="mol_month1">
-  <span class="main_title">Molecule of The Month:</span>
-  <div id="mol_month2">
-    <p>
-      Title: <%= link_to @structure.title, structure_path(@structure) %><br />
-      PDB Code: <%= @structure.pdb_code %><br />
-      Deposited at: <%= @structure.deposited_at %><br />
-      <%= image_tag(@structure.local_image_link, :id => "mol_month_img") %> 
-    </p>
-  </div>
+<div id="brief_stats">
+  <span class="main_title">Brief Statistics:</span>
+  <table class="brief_stats">
+    <tr>
+      <th class="center">Type</th>
+      <th class="center">Counts</th>
+    </tr>
+    <tr>
+      <th>Protein-DNA Complexes</th>
+      <td><%= Structure.untainted.select { |s| s.dna_chains.count > 0}.count %></td>
+    </tr>
+    <tr>
+      <th>Protein-RNA Complexes</th>
+      <td><%= Structure.untainted.select { |s| s.rna_chains.count > 0}.count %></td>
+    </tr>
+    <tr>
+      <th>DNA-binding SCOP domains</th>
+      <td><%= DomainDnaInterface.count %></td>
+    </tr>
+    <tr>
+      <th>RNA-binding SCOP domains</th>
+      <td><%= DomainRnaInterface.count %></td>
+    </tr>
+  </table>
+
+  <table class="brief_stats">
+    <tr>
+      <th class="center">Property</th>
+      <th class="center" width="120px">DNA interface</th>
+      <th class="center" width="120px">RNA interface</th>
+    </tr>
+    <tr>
+      <th>Average ASA</th>
+      <td>
+        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.mean %> &Aring;<sup>2</sup><br />
+        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.stddev %> &Aring;<sup>2</sup>)
+      </td>
+      <td>
+        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.mean %> &Aring;<sup>2</sup><br />
+        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.stddev %> &Aring;<sup>2</sup>)
+      </td>
+    </tr>
+    <tr>
+      <th>Polarity</th>
+      <td>
+        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.mean %>
+        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.stddev %>)
+      </td>
+      <td>
+        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.mean %>
+        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.stddev %>)
+      </td>
+    </tr>
+    <tr>
+      <th>No. of hydrogen bonds</th>
+      <td>
+        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.mean %> 
+        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.stddev %>)
+      </td>
+      <td>
+        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.mean %> 
+        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.stddev %>)
+      </td>
+    </tr>
+    <tr>
+      <th>No. of water-mediated hydrogen bonds</th>
+      <td>
+        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.mean %> 
+        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.stddev %>)
+      </td>
+      <td>
+        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.mean %> 
+        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.stddev %>)
+      </td>
+    </tr>
+    <tr>
+      <th>No. of van der Waals contacts</th> 
+      <td>
+        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.mean %> 
+        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.stddev %>)
+      </td>
+      <td>
+        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.mean %> 
+        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.stddev %>)
+      </td>
+    </tr>
+  </table>
 </div>
