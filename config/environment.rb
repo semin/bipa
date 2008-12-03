@@ -17,6 +17,7 @@ Rails::Initializer.run do |config|
   config.gem "fork_manager"
   config.gem "ar-extensions"
   config.gem "simple_memoize"
+  config.gem "ambethia-smtp-tls", :lib => "smtp-tls"
   config.gem "composite_primary_keys"
   config.gem "RubyInline", :lib => "inline"
   config.gem "googlecharts", :lib => "gchart"
@@ -45,7 +46,7 @@ Rails::Initializer.run do |config|
 
   # Your secret key for verifying cookie session data integrity.
   # If you change this key, all old sessions will become invalid!
-  # Make sure the secret is at least 30 characters and all random, 
+  # Make sure the secret is at least 30 characters and all random,
   # no regular words or you'll be exposed to dictionary attacks.
   config.action_controller.session = {
     :session_key => '_bipa_session',
@@ -74,12 +75,12 @@ Rails::Initializer.run do |config|
   # for Action Mailer
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    :address        => "localhost" ,
-    :port           => 25,
+    :address        => "smtp.gmail.com" ,
+    :port           => 587,
     :domain         => "bioc.cam.ac.uk",
-    :authentication => :login,
-    :user_name      => ENV["EMAIL_ID"],
-    :password       => ENV["EMAIL_PW"]
+    :authentication => :plain,
+    :user_name      => "seminlee",
+    :password       => "gmlwjd1119"
   }
   config.action_mailer.default_charset = "utf-8"
 end
@@ -90,4 +91,3 @@ WillPaginate.enable_named_scope
 # for workling plugin
 Workling::Clients::MemcacheQueueClient.memcache_client_class = RudeQ::Client
 Workling::Remote.dispatcher = Workling::Remote::Runners::ClientRunner.new
-

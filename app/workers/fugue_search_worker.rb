@@ -1,11 +1,11 @@
+require "rubygems"
+require "fileutils"
+require "tmpdir"
+require "bio"
+
+include FileUtils
+
 class FugueSearchWorker < Workling::Base
-
-  require "rubygems"
-  require "fileutils"
-  require "tmpdir"
-  require "bio"
-
-  include FileUtils
 
   def search(options)
     @fugue_search = FugueSearch.find(options[:id])
@@ -15,7 +15,7 @@ class FugueSearchWorker < Workling::Base
     @fugue_search.started_at = Time.now
 
     # a name for the fasta file to store user sequence and run fugueseq
-    fasta_file = File.join(Dir::tmpdir, "fugue_search-#{@fugue_search.id}.fa")
+    fasta_file = File.join(Dir::tmpdir, "fugue_na_search-#{@fugue_search.id}.fa")
 
     # Create fasta file for user sequence
     File.open(fasta_file, "w") do |file|

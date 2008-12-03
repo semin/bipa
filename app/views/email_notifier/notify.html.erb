@@ -1,3 +1,9 @@
 <pre>
-  <%= @fugue_search.result %>
+  Job ID: fugue_na_search-<%=h @fugue_search.id %><br />
+  Query Definition: <%=h @fugue_search.definition ? @fugue_search.definition : "N/A" %><br />
+  Query Name: <%=h @fugue_search.name ? @fugue_search.name : "N/A" %><br />
+  Query Sequence: <%=h @fugue_search.sequence %>
+
+  FUGUE-na Search Result:<br />
+  <%=h @fugue_search.result %>
 </pre>
