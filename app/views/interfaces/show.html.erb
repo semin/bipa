@@ -45,7 +45,7 @@
     <th colspan=2 class="title">ASA</th>
     <th colspan=2 class="title">Polarity</th>
   </tr>
-  <tr>
+  <tr valign="top">
     <td colspan=2>
       <% @interface.sorted_similar_interfaces_in_usr(10).each do |int| %>
         <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>
@@ -70,7 +70,7 @@
     <th colspan=2>SSE Composition</th>  
     <th colspan=2>All Aspects</th>
   </tr>
-  <tr>
+  <tr valign="top">
     <td colspan=2>
       <% @interface.sorted_similar_interfaces_in_res_composition(10).each do |int| %>
         <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %>

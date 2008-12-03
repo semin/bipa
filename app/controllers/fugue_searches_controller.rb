@@ -50,6 +50,9 @@ class FugueSearchesController < ApplicationController
       if @fugue_search.save
         flash[:notice] = "Your query was successfully submitted. "
         flash[:notice] += "An email will be sent to you when it's done."
+
+        FugueSearchWorker.asynch_search(:id => @fugue_search.id)
+
         format.html { redirect_to new_fugue_search_path }
       else
         format.html { render :action => "new" }

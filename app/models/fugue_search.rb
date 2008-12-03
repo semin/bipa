@@ -3,16 +3,17 @@ class FugueSearch < ActiveRecord::Base
   validates_presence_of :email, :sequence
   validate :valid_email?
 
-  def start
-    puts "FUGUE search st start!"
-  end
+  before_save :sanitize_sequence
 
   def valid_email?
-      TMail::Address.parse(email)
+    TMail::Address.parse(email)
   rescue
-      errors.add_to_base("Must be a valid email")
+    errors.add_to_base("Must be a valid email")
   end
 
+  def sanitize_sequence
+    sequence.upcase!
+  end
 end
 
 

@@ -1,4 +1,5 @@
 log/*.log
+log/workling*
 tmp/*.csv
 tmp/**/*
 .DS_Store
