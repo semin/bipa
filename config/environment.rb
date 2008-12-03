@@ -75,12 +75,10 @@ Rails::Initializer.run do |config|
   # for Action Mailer
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    :address        => "smtp.gmail.com" ,
-    :port           => 587,
-    :domain         => "bioc.cam.ac.uk",
-    :authentication => :plain,
-    :user_name      => "seminlee",
-    :password       => "gmlwjd1119"
+    :address        => "localhost",
+    :port           => 25,
+    :domain         => "localhost.localdomain",
+    :authentication => :login,
   }
   config.action_mailer.default_charset = "utf-8"
 end
