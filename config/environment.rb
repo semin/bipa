@@ -74,12 +74,12 @@ Rails::Initializer.run do |config|
   # for Action Mailer
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
-    :address => "localhost" ,
-    :port => 25,
-    :domain => "brunor.bioc.cam.ac.uk" ,
+    :address        => "localhost" ,
+    :port           => 25,
+    :domain         => "bioc.cam.ac.uk",
     :authentication => :login,
-    :user_name => ENV["EMAIL_ID"],
-    :password => ENV["EMAIL_PW"]
+    :user_name      => ENV["EMAIL_ID"],
+    :password       => ENV["EMAIL_PW"]
   }
   config.action_mailer.default_charset = "utf-8"
 end

@@ -50,8 +50,7 @@ class FugueSearchWorker < Workling::Base
     @fugue_search.save!
 
     # send an email to user
-    email = Notifier.create_notify(@fugue_search)
-    Notifier.deliver(email)
+    EmailNotifier.deliver_notify(@fugue_search)
 
     logger.info ">>> Running FUGUE search for FugueSearch, #{@fugue_search.id}: finish"
   end
