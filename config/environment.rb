@@ -70,6 +70,18 @@ Rails::Initializer.run do |config|
   # in the database in UTC, and return them converted to the specified local zone.
   # Run "rake -D time" for a list of tasks for finding time zone names. Uncomment to use default local time.
   config.time_zone = 'UTC'
+
+  # for Action Mailer
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    :address => "localhost" ,
+    :port => 25,
+    :domain => "brunor.bioc.cam.ac.uk" ,
+    :authentication => :login,
+    :user_name => ENV["EMAIL_ID"],
+    :password => ENV["EMAIL_PW"]
+  }
+  config.action_mailer.default_charset = "utf-8"
 end
 
 # for will_paginate plugin
@@ -78,3 +90,4 @@ WillPaginate.enable_named_scope
 # for workling plugin
 Workling::Clients::MemcacheQueueClient.memcache_client_class = RudeQ::Client
 Workling::Remote.dispatcher = Workling::Remote::Runners::ClientRunner.new
+

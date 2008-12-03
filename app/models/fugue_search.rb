@@ -12,6 +12,12 @@ class FugueSearch < ActiveRecord::Base
   end
 
   def sanitize_sequence
+    if sequence.match(/^>/)
+      ff  = Bio::FlatFile.auto(StringIO.new(sequence))
+      ent = ff.first
+      self.definition = ent.definition
+      self.sequence = ent.seq
+    end
     sequence.upcase!
   end
 end
