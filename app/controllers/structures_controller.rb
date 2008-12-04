@@ -1,6 +1,6 @@
 class StructuresController < ApplicationController
 
-  caches_page :index, :show
+  caches_page :show
 
   def index
     @structures = Structure.untainted.paginate(:page => params[:page] || 1, :per_page => 10)
