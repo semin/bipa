@@ -30,10 +30,10 @@ class FugueSearchWorker < Workling::Base
     end
 
     # Run fugueseq with the fasta file created above
-    fugueseq  =  "/BiO/Install/ORCHESTRAR/Package_1.8b/Orchestrar_source/bin/fugueseq"
+    fugueseq  =  "#{RAILS_ROOT}/bin/fugueseq"
     prflist   =  @fugue_search.is_a?(FugueSearchDna) ?
-                "/BiO/Research/BIPA/bipa/public/essts/nr80/dna/64/FUGLIST" :
-                "/BiO/Research/BIPA/bipa/public/essts/nr80/rna/64/FUGLIST"
+                "#{RAILS_ROOT}/public/essts/nr80/dna/64/FUGLIST" :
+                "#{RAILS_ROOT}/public/essts/nr80/rna/64/FUGLIST"
 
     if File.exist? fasta_file
       cwd = pwd
