@@ -1,5 +1,7 @@
 class InterfacesController < ApplicationController
 
+  caches_page :index, :show
+
   before_filter :find_scop, :only => :index
 
   def index
