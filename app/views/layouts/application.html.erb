@@ -20,6 +20,7 @@
       var $j = jQuery.noConflict();
       $j(document).ready(function() {
         $j("ul.sf-menu").superfish();
+        $j("#notice").fadeOut(5000);
       });
     
       FancyZoomBox.directory = '/images';
@@ -32,7 +33,7 @@
         new FancyZoom('rna_sub_alignment_na_box_link', {width:500, height:150});
         new FancyZoom('search_against_box_link', {width:500, height:150});
         new FancyZoom('zcutoff_box_link', {width:500, height:60});
-        new FancyZoom('email_box_link', {width:600, height:350});
+        new FancyZoom('email_box_link', {width:600, height:400});
       });
     </script>
   </head>
