@@ -3,9 +3,7 @@
 </div>
 
 <div id="fugue_search_form">
-  <% form_for(:fugue_search,
-              @fugue_search,
-              :url => { :action => "create" }) do |f| %>
+  <% form_for(:fugue_search, @fugue_search, :url => { :action => "create" }) do |f| %>
 
     <p>
       <%= f.error_messages %>
@@ -27,6 +25,11 @@
     </p>
 
     <p>
+    <%= label :fugue_search, :zcutoff, "* Z-value cutoff: " %>
+    <%= f.text_field :zcutoff, :size => 5 %>
+    </p>
+
+    <p>
     <%= label :fugue_search, :sequence, "* Enter your amino acid sequence: " %><br />
     <%= f.text_area :sequence, :rows => 7, :cols => 60, :class => "fugue_search_text_area" %><br />
     (Please use FASTA or pure amino acid format.)<br />
@@ -39,11 +42,9 @@
   <% end %>
 </div>
 
-<div class="references">
-  <h3>References</h3>
-  <ul class="refernces">
-    <li>
-      Shi, J., Blundell, T. L. & Mizuguchi, K. (2001), J Mol Biol, 310(1), 243-57.
-    </li>
-  </ul>
-</div>
+<h3>References</h3>
+<ul>
+  <li>
+    Shi, J., Blundell, T. L. &amp; Mizuguchi, K. (2001), J Mol Biol, 310(1), 243-57.
+  </li>
+</ul>

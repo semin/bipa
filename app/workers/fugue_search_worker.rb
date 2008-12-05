@@ -38,7 +38,7 @@ class FugueSearchWorker < Workling::Base
     if File.exist? fasta_file
       cwd = pwd
       cd Dir::tmpdir
-      @result = `#{fugueseq} -seq #{File.basename(fasta_file)} -list #{prflist} -toprank #{@fugue_search.toprank}`
+      @result = `#{fugueseq} -seq #{File.basename(fasta_file)} -list #{prflist} -zcutoff #{@fugue_search.zcutoff}`
       @fugue_search.result = (@result ? @result : "We tried to run FUGUE, but something is wrong...")
       cd cwd
     else
