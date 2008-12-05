@@ -25,11 +25,14 @@
       FancyZoomBox.directory = '/images';
       $(document).observe('dom:loaded', function() {
         new FancyZoom('abstract_link', {width:600, height:300});
-        new FancyZoom('scop_na_box_link', {width:400, height:150});
-        new FancyZoom('dna_rep_alignment_na_box_link', {width:400, height:150});
-        new FancyZoom('rna_rep_alignment_na_box_link', {width:400, height:150});
-        new FancyZoom('dna_sub_alignment_na_box_link', {width:400, height:150});
-        new FancyZoom('rna_sub_alignment_na_box_link', {width:400, height:150});
+        new FancyZoom('scop_na_box_link', {width:500, height:150});
+        new FancyZoom('dna_rep_alignment_na_box_link', {width:500, height:150});
+        new FancyZoom('rna_rep_alignment_na_box_link', {width:500, height:150});
+        new FancyZoom('dna_sub_alignment_na_box_link', {width:500, height:150});
+        new FancyZoom('rna_sub_alignment_na_box_link', {width:500, height:150});
+        new FancyZoom('search_against_box_link', {width:500, height:150});
+        new FancyZoom('zcutoff_box_link', {width:500, height:60});
+        new FancyZoom('email_box_link', {width:600, height:350});
       });
     </script>
   </head>
@@ -56,10 +59,15 @@
             <%= link_to "Statistics", "/statistics" %>
           </li>
           <li>
-            <%= link_to "FUGUE-na", new_fugue_search_path %>
-          </li>
-          <li>
-            <%= link_to "Help", "/help" %>
+            <%= link_to "Search", "#" %>
+            <ul>
+              <li>
+                <%= link_to "NA Interfaces", search_interfaces_path %>
+              </li>
+              <li>
+                <%= link_to "NA-binding Protein Families", new_fugue_search_path %>
+              </li>
+            </ul>
           </li>
           <li>
             <%= link_to "Contact", "/contact" %>
@@ -67,7 +75,7 @@
         </ul>
         <div id="header_search">
           <% form_tag(search_scops_path, :method => "get", :class => "search_form") do %>
-            <%= select_tag(:search_model, options_for_select(%w{ PDB SCOP GO TAXONOMY })) %>
+            <%= select_tag(:search_model, options_for_select(%w[ PDB SCOP ])) %>
             <%= text_field_tag :query, nil, :size => 20 %>
             <%= submit_tag "Search", :name => nil %>
           <% end %>

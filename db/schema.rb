@@ -676,7 +676,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string    :name,        :default => nil
     t.string    :email
     t.string    :definition,  :default => nil
-    t.float     :zcutoff,     :default => 2.0
+    t.float     :zcutoff,     :default => 3.0
     t.text      :sequence
     t.text      :result,      :default => nil
     t.timestamp :started_at, :finished_at

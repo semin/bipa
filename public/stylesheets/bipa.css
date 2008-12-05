@@ -471,12 +471,12 @@ div#zoom {
 
 .hbonding_dna {
   background: #FF8040;
-  text-decoration: overline;
+  font-weight: bold;
 }
 
 .whbonding_dna {
   background: #FF8040;
-  text-decoration: line-through;
+  text-decoration: overline;
 }
 
 .vdw_contacting_dna {
@@ -486,12 +486,12 @@ div#zoom {
 
 .hbonding_rna {
   background: #46C7C7;
-  text-decoration: overline;
+  font-weight: bold;
 }
 
 .whbonding_rna {
   background: #46C7C7;
-  text-decoration: line-through;
+  text-decoration: overline;
 }
 
 .vdw_contacting_rna {

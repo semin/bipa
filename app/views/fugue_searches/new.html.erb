@@ -2,7 +2,7 @@
   FUGUE-na Search:
 </div>
 
-<div id="fugue_search_form">
+<div id="fugue_search_form" class="blue_link">
   <% form_for(:fugue_search, @fugue_search, :url => { :action => "create" }) do |f| %>
 
     <p>
@@ -12,6 +12,8 @@
     <p>
     <%= label :fugue_search, :type, "* Search against: " %>
     <%= select_tag "type", options_for_select(%w[DNA RNA], "DNA") %>-binding SCOP families
+    [<%= link_to "?", "#search_against_box", :id => "search_against_box_link" %>]
+    
     </p>
 
     <p>
@@ -22,11 +24,13 @@
     <p>
     <%= label :fugue_search, :email, "* Email: " %>
     <%= f.text_field :email, :size => 40 %>
+    [<%= link_to "?", "#email_box", :id => "email_box_link" %>]
     </p>
 
     <p>
     <%= label :fugue_search, :zcutoff, "* Z-value cutoff: " %>
     <%= f.text_field :zcutoff, :size => 5 %>
+    [<%= link_to "?", "#zcutoff_box", :id => "zcutoff_box_link" %>]
     </p>
 
     <p>
@@ -48,3 +52,57 @@
     Shi, J., Blundell, T. L. &amp; Mizuguchi, K. (2001), J Mol Biol, 310(1), 243-57.
   </li>
 </ul>
+
+<div id="search_against_box">
+  BIPA currently contains 87 FUGUE profiles of DNA-binding SCOP families and 72 profiles of RNA-binding families. The profiles were generated using extended environment-specific substitution tables taking account of atomic interfactions between amino acids and nucleic acids. Preliminary tests have confirmed the profiles based on the extended ESSTs ourperform <%= link_to "conventional ESSTs", "http://www-cryst.bioc.cam.ac.uk/ESST/", :popup => true %> considering only structural restraints such as secondary struture, solvent accessibility, and internal hydrogen bonds and disulphide bonds in terms of remote homology detection for nucleic acid-binding protein families.
+</div>
+
+<div id="email_box">
+  If you enter a valid email address here, an email will be sent to you when FUGUE-na search on your query sequence is done. It will look like this:
+  <pre>
+  <%=h <<-FUGUE_RESULT
+
+# Job ID: <Your FUGUE-na search job ID>
+# Query Definition: <A definition of your query sequence>
+# Query Name: <A name for your query sequence>
+# Query Sequence: <Your query sequence>
+# FUGUE-na Search Result:
+# * A number in the 'Profile' column below means SCOP family sunid that
+#   your query sequence has searched against.
+
+###############################################################################
+#  FUGUE  v2.s.05 (JUL 2002)                                                  #
+#                                                                             #
+#  Search sequence(s) against fold library using environment-specific         #
+#         substitution tables and structure-dependent gap penalties.          #
+#                                                                             #
+#  Fold library and substitution tables are based on the HOMSTRAD database.   #
+#         http://www-cryst.bioc.cam.ac.uk/~homstrad/                          #
+#                                                                             #
+#  FUGUE server is available at:                                              #
+#         http://www-cryst.bioc.cam.ac.uk/~fugue/                             #
+#         http://www-cryst.bioc.cam.ac.uk/~fugue/prfsearch.html               #
+#                                                                             #
+#  Citation:                                                                  #
+#  J. Shi, T. L. Blundell and K. Mizuguchi (2001), J Mol Biol, 310(1), 243-57 #
+#                                                                             #
+#  blah, blah, blah...                                                        #
+#                                                                             #
+###############################################################################
+
+
+#-----------------------------------------------------------------------------#
+#  Profile           PLEN  RAWS RVN  ZSCORE   PVZ     ZORI    EVP     EVF   AL#
+#                                    ******                                   #
+#-----------------------------------------------------------------------------#
+ 54929                183    -6  31    1.86 1.0E+03    1.71 1.0E+03 1.0E+03 00
+ 46764                 72   -81  31    1.74 1.0E+03    3.18 1.0E+03 1.0E+03 02
+ 54792                 79   -68  21    1.73 1.0E+03    2.95 1.0E+03 1.0E+03 02
+FUGUE_RESULT
+%>
+  </pre>
+</div>
+
+<div id="zcutoff_box">
+  We recommend you to use 3.0 or bigger values for Z-score cut-offs. Z-scores &gt; 6.0 are likely to indicate evolutionary relationships and/or common folds. (See FUGUE <%= link_to "web page", "http://tardis.nibio.go.jp/fugue/prfsearch.html", :popup => true %>)
+</div>

@@ -11,7 +11,8 @@ ActionController::Routing::Routes.draw do |map|
                 :member     => { :jmol => :get },
                 :collection => { :search => :get }
 
-  map.resources :interfaces
+  map.resources :interfaces,
+                :collection => { :search => :get }
 
   map.resources(:scops,
                 :singular => "scop",
