@@ -71,7 +71,6 @@ span.representative {
   height: 80px;
   width: 100%;
   border-bottom: 2px black dotted;
-  z-index: 1;
 }
 
 #header_menu {
