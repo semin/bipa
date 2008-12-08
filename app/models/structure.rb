@@ -101,10 +101,6 @@ class Structure < ActiveRecord::Base
     medline.abstract.empty? ? "N/A" : medline.abstract
   end
 
-  def resolution_for_html
-    resolution ? resolution : "N/A"
-  end
-
   def rcsb_html_link
     "http://www.rcsb.org/pdb/explore.do?structureId=#{pdb_code}"
   end
