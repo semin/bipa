@@ -79,9 +79,16 @@ span.representative {
   right: 0px;
 }
 
+#main_logo {
+  position: absolute;
+  top: 10px;
+  display: inline;
+}
+
 #main_banner {
   position: absolute;
   top: 20px;
+  margin-left: 40px;
   font-family: Optima, "Lucida Grande", Georgia, Arial, serif;
   font-size: 160%;
   font-weight: bold;
@@ -92,6 +99,7 @@ span.representative {
 #sub_banner {
   position: absolute;
   top: 50px;
+  margin-left: 40px;
   font-family: Optima, "Lucida Grande", Georgia, Arial, serif;
   font-size: 110%;
   text-align: left;
