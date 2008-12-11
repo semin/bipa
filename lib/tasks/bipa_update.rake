@@ -656,6 +656,7 @@ namespace :bipa do
 
             subfamily.domains.each do |domain|
               interfaces.concat(domain.send("#{na}_interfaces"))
+              interfaces.concat(domain.send("#{na}_interfaces.find(:all, :select => 'id, asa, polarity, " + AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," + Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
             end
 
             # for intra-subfamily interfaces
