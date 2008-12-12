@@ -24,14 +24,6 @@ class Scop < ActiveRecord::Base
     named_scope :"rs#{resolution}", :conditions => { :"rs#{resolution}" => true }
   end
 
-  define_index do
-    indexes sunid,        :sortable => true
-    indexes stype,        :sortable => true
-    indexes sccs,         :sortable => true
-    indexes sid,          :sortable => true
-    indexes description,  :sortable => true
-  end
-
   def self.factory_create!(opts={})
     case opts[:stype]
     when "root" then ScopRoot.create!(opts)
@@ -308,6 +300,21 @@ class ScopDomain < Scop
   has_many  :fugue_hits,
             :class_name   => "FugueHit",
             :foreign_key  => "scop_id"
+
+  define_index do
+    indexes sunid,        :sortable => true
+    indexes stype,        :sortable => true
+    indexes sccs,         :sortable => true
+    indexes sid,          :sortable => true
+    indexes description,  :sortable => true
+    indexes structure.description,        :as => :structure_description
+    indexes scop_species.description,     :as => :species_description
+    indexes scop_protein.description,     :as => :protein_description
+    indexes scop_family.description,      :as => :family_description
+    indexes scop_superfamily.description, :as => :superfamily_description
+    indexes scop_fold.description,        :as => :fold_description
+    indexes scop_class.description,       :as => :class_description
+  end
 
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "_#{pdb_code.downcase}%"])
