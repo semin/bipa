@@ -645,13 +645,13 @@ namespace :bipa do
         %w[dna rna].each do |na|
           subfamilies = family.send("nr80_#{na}_subfamilies")
           subfamilies.each do |subfamily|
-            rep_subfamily = subfamily.representative
-            rep_interface = rep_subfamily.send("#{na}_interfaces").find(:first,
-                                                                        :select => "id, asa, polarity," +
-                                                                        AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
-                                                                        Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
+            rep_domain = subfamily.representative
+            rep_interface = rep_domain.send("#{na}_interfaces").find(:first,
+                                                                     :select => "id, asa, polarity," +
+                                                                     AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
+                                                                     Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
 
-            if rep_subfamily && rep_interfaces && rep_interfaces.size > 0
+            if rep_domain && rep_interface
               rep_interfaces << rep_interface
             end
 
@@ -697,6 +697,7 @@ namespace :bipa do
               end
             end
           end
+          $logger.info ">>> Updating intra-subfamily interface distances for #{na.upcase}-binding SCOP family, #{family.sunid}: done"
         end
         $logger.info ">>> Updating intra-subfamily interface distances for SCOP family, #{family.sunid}: done (#{fam_index + 1}/#{families.count})"
       end
