@@ -16,6 +16,7 @@
     <td colspan=5>
       <%=h @structure.citation %>
       [<a href="#abstract" id="abstract_link">Abstract</a>]
+      [<%= link_to "PubMed", @structure.pubmed_link, :popup => true %>]
     </td>
   </tr>
   <tr>

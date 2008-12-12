@@ -4,6 +4,7 @@ ActionController::Routing::Routes.draw do |map|
   map.connect "",           :controller => "main", :action => "home"
   map.connect "home",       :controller => "main", :action => "home"
   map.connect "help",       :controller => "main", :action => "help"
+  map.connect "search",     :controller => "main", :action => "search"
   map.connect "contact",    :controller => "main", :action => "contact"
   map.connect "statistics", :controller => "main", :action => "statistics"
 

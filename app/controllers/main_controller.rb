@@ -16,4 +16,15 @@ class MainController < ApplicationController
       format.html
     end
   end
+
+  def search
+    case params[:search_model]
+    when "PDB"
+      redirect_to :controller => "structures", :action => "search", :query => params[:query]
+    when "SCOP"
+      redirect_to :controller => "scops", :action => "search", :query => params[:query]
+    else
+      redirect_to "/"
+    end
+  end
 end

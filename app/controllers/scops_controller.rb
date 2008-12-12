@@ -33,7 +33,7 @@ class ScopsController < ApplicationController
 
   def search
     @query = params[:query]
-    @hits = Scop.rpall.search(@query).compact
+    @scops = ScopDomain.rpall.search(@query).compact.paginate(:page => params[:page] || 1, :per_page => 10)
 
     respond_to do |format|
       format.html

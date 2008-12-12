@@ -30,7 +30,6 @@ class Scop < ActiveRecord::Base
     indexes sccs,         :sortable => true
     indexes sid,          :sortable => true
     indexes description,  :sortable => true
-    indexes resolution,   :sortable => true
   end
 
   def self.factory_create!(opts={})

@@ -1,9 +1,11 @@
 <div class="main_title">
-  Search: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @hits.size %></font>
+  Search SCOP Domains: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @scops.total_entries %></font>
 </div>
 
-<% if @hits && @hits.size > 0 %>
-  <%= render :partial => "hit", :collection => @hits, :spacer_template => "/shared/list_spacer" %>
+<% if @scops && @scops.total_entries > 0 %>
+  <%= will_paginate @scops %>
+  <%= render :partial => "scop", :collection => @scops, :spacer_template => "/shared/list_spacer" %>
+  <%= will_paginate @scops %>
 <% else %>
-  No hits
+  Sorry. No hits found.
 <% end %>

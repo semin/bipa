@@ -101,6 +101,16 @@ class Structure < ActiveRecord::Base
     medline.abstract.empty? ? "N/A" : medline.abstract
   end
 
+  def pubmed_link
+    citation = Citation.find_by_Structure_ID(pdb_code)
+    "http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=PubMed&dopt=Abstract&list_uids=#{citation.pdbx_database_id_PubMed}"
+  end
+
+  def doi_link
+    citation = Citation.find_by_Structure_ID(pdb_code)
+    "http://dx.doi.org/#{citation.pdbx_database_id_DOI}"
+  end
+
   def resolution_for_html
     resolution ? "%.2f &Aring;" % resolution : "N/A"
   end

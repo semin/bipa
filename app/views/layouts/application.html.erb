@@ -75,7 +75,7 @@
           </li>
         </ul>
         <div id="header_search">
-          <% form_tag(search_scops_path, :method => "get", :class => "search_form") do %>
+          <% form_tag("/search", :method => "get", :class => "search_form") do %>
             <%= select_tag(:search_model, options_for_select(%w[ PDB SCOP ])) %>
             <%= text_field_tag :query, nil, :size => 20 %>
             <%= submit_tag "Search", :name => nil %>

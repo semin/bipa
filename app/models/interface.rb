@@ -17,32 +17,30 @@ class Interface < ActiveRecord::Base
 
   %w[usr asa polarity res_composition sse_composition all].each do |item|
     class_eval <<-RUBY_CODE
-    acts_as_network :similar_interfaces_in_#{item},
-                    :through                  => :interface_similarities,
-                    :foreign_key              => 'interface_id',
-                    :association_foreign_key  => 'similar_interface_id',
-                    :conditions               => ['similarity_in_#{item} > #{@@cutoff[item.to_sym]}']
+      acts_as_network :similar_interfaces_in_#{item},
+                      :through                  => :interface_similarities,
+                      :foreign_key              => 'interface_id',
+                      :association_foreign_key  => 'similar_interface_id'
+                      #:conditions               => ['similarity_in_#{item} > #{@@cutoff[item.to_sym]}']
 
-    def self.similarity_in_#{item}_between(int1, int2)
-      sim1 = InterfaceSimilarity.first(:conditions => { :interface_id => int1.id, :similar_interface_id => int2.id })
-      sim2 = InterfaceSimilarity.first(:conditions => { :interface_id => int2.id, :similar_interface_id => int1.id })
-      sim1 ? sim1.similarity_in_#{item} : sim2.similarity_in_#{item}
-    end
-
-    def sorted_similar_interfaces_in_#{item}(min = nil)
-      if min
-        similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse[0..min-1]
-      else
-        similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse
+      def self.similarity_in_#{item}_between(int1, int2)
+        sim1 = InterfaceSimilarity.first(:conditions => { :interface_id => int1.id, :similar_interface_id => int2.id })
+        sim2 = InterfaceSimilarity.first(:conditions => { :interface_id => int2.id, :similar_interface_id => int1.id })
+        sim1 ? sim1.similarity_in_#{item} : sim2.similarity_in_#{item}
       end
-    end
 
+      def sorted_similar_interfaces_in_#{item}(min = nil)
+        if min
+          similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse[0..min-1]
+        else
+          similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse
+        end
+      end
     RUBY_CODE
   end
 
   has_many  :similar_interfaces,
             :through    => :interface_similarities
-
 
   def interface_type
     (self[:type].match(/DNA/i) ? "DNA" : "RNA") + " interface"
@@ -84,13 +82,13 @@ class DomainInterface < Interface
     }
   }
 
-  def na_type
-    "Protein-" + case self[:type]
-    when /Dna/i then "DNA"
-    when /Rna/i then "RNA"
-    else; "Unknown"
-    end
-  end
+#  def na_type
+#    "Protein-" + case self[:type]
+#    when /Dna/i then "DNA"
+#    when /Rna/i then "RNA"
+#    else; "Unknown"
+#    end
+#  end
 
   def calculate_residue_percentage_of(res)
     result = 100.0 * delta_asa_of_residue(res) / delta_asa rescue 0

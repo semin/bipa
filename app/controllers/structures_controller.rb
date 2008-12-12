@@ -28,4 +28,12 @@ class StructuresController < ApplicationController
     end
   end
 
+  def search
+    @query      = params[:query]
+    @structures = Structure.untainted.search(@query).compact.paginate(:page => params[:page] || 1, :per_page => 10)
+
+    respond_to do |format|
+      format.html
+    end
+  end
 end
