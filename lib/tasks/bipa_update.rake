@@ -646,7 +646,10 @@ namespace :bipa do
           subfamilies = family.send("nr80_#{na}_subfamilies")
           subfamilies.each do |subfamily|
             rep_subfamily = subfamily.representative
-            rep_interface = rep_subfamily.send("#{na}_interfaces")
+            rep_interface = rep_subfamily.send("#{na}_interfaces").find(:first,
+                                                                        :select => "id, asa, polarity," +
+                                                                        AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
+                                                                        Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
 
             if rep_subfamily && rep_interfaces && rep_interfaces.size > 0
               rep_interfaces << rep_interface
@@ -655,8 +658,10 @@ namespace :bipa do
             interfaces = []
 
             subfamily.domains.each do |domain|
-              interfaces.concat(domain.send("#{na}_interfaces"))
-              interfaces.concat(domain.send("#{na}_interfaces.find(:all, :select => 'id, asa, polarity, " + AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," + Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
+              interfaces << domain.send("#{na}_interfaces").find(:first,
+                                                                 :select => "id, asa, polarity," +
+                                                                 AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
+                                                                 Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
             end
 
             # for intra-subfamily interfaces
