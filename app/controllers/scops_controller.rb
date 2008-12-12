@@ -33,7 +33,7 @@ class ScopsController < ApplicationController
 
   def search
     @query = params[:query]
-    @scops = ScopDomain.rpall.search(@query, :page => params[:page] || 1, :per_page => 10).compact
+    @scops = ScopDomain.rpall.find_with_ferret(@query, :page => params[:page] || 1, :per_page => 10)
 
     respond_to do |format|
       format.html

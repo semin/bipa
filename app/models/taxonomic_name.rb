@@ -6,11 +6,11 @@ class TaxonomicName < ActiveRecord::Base
 
   delegate :rank, :to => :node
 
-  define_index do
-    indexes name_txt,     :sortable => true
-    indexes unique_name,  :sortable => true
-    indexes name_class,   :sortable => true
-    indexes node.rank,    :sortable => true, :as => :rank
-  end
+#  define_index do
+#    indexes name_txt,     :sortable => true
+#    indexes unique_name,  :sortable => true
+#    indexes name_class,   :sortable => true
+#    indexes node.rank,    :sortable => true, :as => :rank
+#  end
 
 end

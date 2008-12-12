@@ -2,16 +2,6 @@ class Structure < ActiveRecord::Base
 
   include Bipa::ComposedOfResidues
 
-  define_index do
-    indexes pdb_code,       :sortable => true
-    indexes classification, :sortable => true
-    indexes title,          :sortable => true
-    indexes exp_method,     :sortable => true
-    indexes resolution,     :sortable => true
-
-    has deposited_at
-  end
-
   has_many  :models,
             :dependent  => :destroy
 
@@ -48,6 +38,21 @@ class Structure < ActiveRecord::Base
   named_scope :max_resolution, lambda { |res|
      { :conditions => ["resolution <= ?", res.to_f] }
   }
+
+  acts_as_ferret :fields => { :pdb_code => {},
+                              :resolution => {},
+                              :classification => {},
+                              :title => {},
+                              :exp_method => {} }
+#  define_index do
+#    indexes pdb_code,       :sortable => true
+#    indexes resolution,     :sortable => true
+#    indexes classification
+#    indexes title
+#    indexes exp_method
+#
+#    has deposited_at
+#  end
 
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }

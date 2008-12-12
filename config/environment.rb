@@ -14,6 +14,7 @@ Rails::Initializer.run do |config|
   config.gem "bio"
   config.gem "tmail"
   config.gem "narray"
+  config.gem "ferret"
   config.gem "fork_manager"
   config.gem "ar-extensions"
   config.gem "simple_memoize"

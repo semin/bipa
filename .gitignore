@@ -1,6 +1,8 @@
 .DS_Store
 *.swp
-db/sphinx/
+index/
+log/ferret.pid
+log/ferret_server.out
 log/*.log
 log/workling*
 log/searchd.development.pid

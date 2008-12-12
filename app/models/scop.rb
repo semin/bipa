@@ -266,6 +266,19 @@ class ScopDomain < Scop
 
   include Bipa::ComposedOfResidues
 
+  acts_as_ferret :fields => { :sunid => {},
+                              :stype => {},
+                              :sccs => {},
+                              :sid => {},
+                              :description => {},
+                              :structure_description => {},
+                              :species_description => {},
+                              :protein_description => {},
+                              :family_description => {},
+                              :superfamily_description => {},
+                              :fold_description => {},
+                              :class_description => {} }
+
   %w[dna rna].each do |na|
     (20..100).step(20) do |identity|
       belongs_to  :"nr#{identity}_#{na}_subfamily",
@@ -301,20 +314,20 @@ class ScopDomain < Scop
             :class_name   => "FugueHit",
             :foreign_key  => "scop_id"
 
-  define_index do
-    indexes sunid,        :sortable => true
-    indexes stype,        :sortable => true
-    indexes sccs,         :sortable => true
-    indexes sid,          :sortable => true
-    indexes description,  :sortable => true
-    indexes structure.description,        :as => :structure_description
-    indexes scop_species.description,     :as => :species_description
-    indexes scop_protein.description,     :as => :protein_description
-    indexes scop_family.description,      :as => :family_description
-    indexes scop_superfamily.description, :as => :superfamily_description
-    indexes scop_fold.description,        :as => :fold_description
-    indexes scop_class.description,       :as => :class_description
-  end
+#  define_index do
+#    indexes sunid,        :sortable => true
+#    indexes stype,        :sortable => true
+#    indexes sccs,         :sortable => true
+#    indexes sid,          :sortable => true
+#    indexes description,  :sortable => true
+#    indexes structure.description,        :as => :structure_description
+#    indexes scop_species.description,     :as => :species_description
+#    indexes scop_protein.description,     :as => :protein_description
+#    indexes scop_family.description,      :as => :family_description
+#    indexes scop_superfamily.description, :as => :superfamily_description
+#    indexes scop_fold.description,        :as => :fold_description
+#    indexes scop_class.description,       :as => :class_description
+#  end
 
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "_#{pdb_code.downcase}%"])
@@ -377,28 +390,56 @@ class ScopDomain < Scop
     parent.parent.parent.parent.parent.parent
   end
 
+  def class_description
+    scop_class.description
+  end
+
   def scop_fold
     parent.parent.parent.parent.parent
+  end
+
+  def fold_description
+    scop_fold.description
   end
 
   def scop_superfamily
     parent.parent.parent.parent
   end
 
+  def superfamily_description
+    scop_superfamily.description
+  end
+
   def scop_family
     parent.parent.parent
+  end
+
+  def family_description
+    scop_family.description
   end
 
   def scop_protein
     parent.parent
   end
 
+  def protein_description
+    scop_protein.description
+  end
+
   def scop_species
     parent
   end
 
+  def species_description
+    scop_species.description
+  end
+
   def structure
     residues.first.chain.model.structure
+  end
+
+  def structure_description
+    structure.description
   end
 
   def local_image_link

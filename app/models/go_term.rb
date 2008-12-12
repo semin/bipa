@@ -100,12 +100,12 @@ class GoTerm < ActiveRecord::Base
   has_many  :chains,
             :through      => :goa_pdbs
 
-  define_index do
-    indexes go_id,      :sortable => true
-    indexes :name,      :sortable => true
-    indexes :namespace, :sortable => true
-    indexes definition, :sortable => true
-  end
+#  define_index do
+#    indexes go_id,      :sortable => true
+#    indexes :name,      :sortable => true
+#    indexes :namespace, :sortable => true
+#    indexes definition, :sortable => true
+#  end
 
   named_scope :registered, :conditions => { :registered => true }
   named_scope :molecular_function, :conditions => { :namespace => "molecular_function" }
