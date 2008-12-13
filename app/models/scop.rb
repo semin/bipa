@@ -266,18 +266,19 @@ class ScopDomain < Scop
 
   include Bipa::ComposedOfResidues
 
-  acts_as_ferret :fields => { :sunid => {},
-                              :stype => {},
-                              :sccs => {},
-                              :sid => {},
-                              :description => {},
-                              :structure_description => {},
-                              :species_description => {},
-                              :protein_description => {},
-                              :family_description => {},
-                              :superfamily_description => {},
-                              :fold_description => {},
-                              :class_description => {} }
+  acts_as_ferret {  :fields => {  :sunid => {},
+                                  :stype => {},
+                                  :sccs => {},
+                                  :sid => {},
+                                  :description => {},
+                                  :structure_description => {},
+                                  :species_description => {},
+                                  :protein_description => {},
+                                  :family_description => {},
+                                  :superfamily_description => {},
+                                  :fold_description => {},
+                                  :class_description => {} },
+                    :remote=> true }
 
   %w[dna rna].each do |na|
     (20..100).step(20) do |identity|

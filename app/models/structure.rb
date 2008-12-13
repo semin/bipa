@@ -39,11 +39,13 @@ class Structure < ActiveRecord::Base
      { :conditions => ["resolution <= ?", res.to_f] }
   }
 
-  acts_as_ferret :fields => { :pdb_code => {},
+  acts_as_ferret {  :fields => { :pdb_code => {},
                               :resolution => {},
                               :classification => {},
                               :title => {},
-                              :exp_method => {} }
+                              :exp_method => {} },
+                    :remote => true }
+
 #  define_index do
 #    indexes pdb_code,       :sortable => true
 #    indexes resolution,     :sortable => true
