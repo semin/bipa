@@ -16,7 +16,7 @@ production:
 # configured here.
 development:
   host: localhost
-  port: 9010
+  port: 9011
   pid_file: log/ferret.pid
 test:
   host: localhost

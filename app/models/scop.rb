@@ -266,19 +266,20 @@ class ScopDomain < Scop
 
   include Bipa::ComposedOfResidues
 
-  acts_as_ferret {  :fields => {  :sunid => {},
-                                  :stype => {},
-                                  :sccs => {},
-                                  :sid => {},
-                                  :description => {},
-                                  :structure_description => {},
-                                  :species_description => {},
-                                  :protein_description => {},
-                                  :family_description => {},
-                                  :superfamily_description => {},
-                                  :fold_description => {},
-                                  :class_description => {} },
-                    :remote=> true }
+  acts_as_ferret(:fields => {
+                              :sunid => {},
+                              :stype => {},
+                              :sccs => {},
+                              :sid => {},
+                              :description => {},
+                              :structure_description => {},
+                              :species_description => {},
+                              :protein_description => {},
+                              :family_description => {},
+                              :superfamily_description => {},
+                              :fold_description => {},
+                              :class_description => {}
+                            })
 
   %w[dna rna].each do |na|
     (20..100).step(20) do |identity|
@@ -314,21 +315,6 @@ class ScopDomain < Scop
   has_many  :fugue_hits,
             :class_name   => "FugueHit",
             :foreign_key  => "scop_id"
-
-#  define_index do
-#    indexes sunid,        :sortable => true
-#    indexes stype,        :sortable => true
-#    indexes sccs,         :sortable => true
-#    indexes sid,          :sortable => true
-#    indexes description,  :sortable => true
-#    indexes structure.description,        :as => :structure_description
-#    indexes scop_species.description,     :as => :species_description
-#    indexes scop_protein.description,     :as => :protein_description
-#    indexes scop_family.description,      :as => :family_description
-#    indexes scop_superfamily.description, :as => :superfamily_description
-#    indexes scop_fold.description,        :as => :fold_description
-#    indexes scop_class.description,       :as => :class_description
-#  end
 
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "_#{pdb_code.downcase}%"])
