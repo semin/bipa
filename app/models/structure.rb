@@ -2,14 +2,6 @@ class Structure < ActiveRecord::Base
 
   include Bipa::ComposedOfResidues
 
-  acts_as_ferret(:fields => {
-                              :pdb_code => {},
-                              :resolution => {},
-                              :classification => {},
-                              :title => {},
-                              :exp_method => {}
-                            })
-
   has_many  :models,
             :dependent  => :destroy
 
@@ -47,6 +39,14 @@ class Structure < ActiveRecord::Base
      { :conditions => ["resolution <= ?", res.to_f] }
   }
 
+  acts_as_ferret(:fields => {
+                              :pdb_code => {},
+                              :resolution => {},
+                              :classification => {},
+                              :title => {},
+                              :exp_method => {}
+                            },
+                 :remote => true)
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }
   end

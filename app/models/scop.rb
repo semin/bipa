@@ -266,21 +266,6 @@ class ScopDomain < Scop
 
   include Bipa::ComposedOfResidues
 
-  acts_as_ferret(:fields => {
-                              :sunid => {},
-                              :stype => {},
-                              :sccs => {},
-                              :sid => {},
-                              :description => {},
-                              :structure_description => {},
-                              :species_description => {},
-                              :protein_description => {},
-                              :family_description => {},
-                              :superfamily_description => {},
-                              :fold_description => {},
-                              :class_description => {}
-                            })
-
   %w[dna rna].each do |na|
     (20..100).step(20) do |identity|
       belongs_to  :"nr#{identity}_#{na}_subfamily",
@@ -315,6 +300,22 @@ class ScopDomain < Scop
   has_many  :fugue_hits,
             :class_name   => "FugueHit",
             :foreign_key  => "scop_id"
+
+  acts_as_ferret(:fields => {
+                              :sunid => {},
+                              :stype => {},
+                              :sccs => {},
+                              :sid => {},
+                              :description => {},
+                              :structure_description => {},
+                              :species_description => {},
+                              :protein_description => {},
+                              :family_description => {},
+                              :superfamily_description => {},
+                              :fold_description => {},
+                              :class_description => {}
+                            },
+                :remote => true)
 
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "_#{pdb_code.downcase}%"])
