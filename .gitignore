@@ -1,13 +1,12 @@
 .DS_Store
 *.swp
 index/
-log/ferret.pid
-log/ferret_server.out
 log/*.log
 log/workling*
 log/searchd.development.pid
 tmp/*.csv
 tmp/**/*
+db/sphinx
 config/development.sphinx.conf
 config/database.yml
 public/pdb

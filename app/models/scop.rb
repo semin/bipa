@@ -24,6 +24,15 @@ class Scop < ActiveRecord::Base
     named_scope :"rs#{resolution}", :conditions => { :"rs#{resolution}" => true }
   end
 
+  define_index do
+    indexes :type
+    indexes :sunid
+    indexes :stype
+    indexes :sccs
+    indexes :sid
+    indexes :description
+  end
+
   def self.factory_create!(opts={})
     case opts[:stype]
     when "root" then ScopRoot.create!(opts)
@@ -301,22 +310,6 @@ class ScopDomain < Scop
             :class_name   => "FugueHit",
             :foreign_key  => "scop_id"
 
-  acts_as_ferret(:fields => {
-                              :sunid => {},
-                              :stype => {},
-                              :sccs => {},
-                              :sid => {},
-                              :description => {},
-                              :structure_description => {},
-                              :species_description => {},
-                              :protein_description => {},
-                              :family_description => {},
-                              :superfamily_description => {},
-                              :fold_description => {},
-                              :class_description => {}
-                            },
-                :remote => true)
-
   def self.find_all_by_pdb_code(pdb_code)
     find(:all, :conditions => ["sid like ?", "_#{pdb_code.downcase}%"])
   end
@@ -378,56 +371,28 @@ class ScopDomain < Scop
     parent.parent.parent.parent.parent.parent
   end
 
-  def class_description
-    scop_class.description
-  end
-
   def scop_fold
     parent.parent.parent.parent.parent
-  end
-
-  def fold_description
-    scop_fold.description
   end
 
   def scop_superfamily
     parent.parent.parent.parent
   end
 
-  def superfamily_description
-    scop_superfamily.description
-  end
-
   def scop_family
     parent.parent.parent
-  end
-
-  def family_description
-    scop_family.description
   end
 
   def scop_protein
     parent.parent
   end
 
-  def protein_description
-    scop_protein.description
-  end
-
   def scop_species
     parent
   end
 
-  def species_description
-    scop_species.description
-  end
-
   def structure
     residues.first.chain.model.structure
-  end
-
-  def structure_description
-    structure.description
   end
 
   def local_image_link

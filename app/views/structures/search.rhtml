@@ -1,8 +1,8 @@
 <div class="main_title">
-  Search PDB: <font color="green"><%=h @query %></font>, Hits: <font color="green"><%= @structures.total_hits %></font>
+  Search PDB: <font color="green"><%=h @query %></font>, Hits: <font color="green"><%= @structures.total_entries %></font>
 </div>
 
-<% if @structures && @structures.total_hits > 0 %>
+<% if @structures && @structures.total_entries > 0 %>
   <%= will_paginate @structures %>
   <%= render :partial => "structure", :collection => @structures, :spacer_template => "/shared/list_spacer" %>
   <%= will_paginate @structures %>

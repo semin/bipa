@@ -30,7 +30,7 @@ class StructuresController < ApplicationController
 
   def search
     @query      = params[:query]
-    @structures = Structure.untainted.find_with_ferret(@query, :page => params[:page] || 1, :per_page => 10)
+    @structures = Structure.untainted.search(@query, :page => params[:page], :per_page => 10).compact
 
     respond_to do |format|
       format.html

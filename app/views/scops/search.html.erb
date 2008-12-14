@@ -1,8 +1,8 @@
 <div class="main_title">
-  Search SCOP Domains: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @scops.total_hits %></font>
+  Search SCOP Domains: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @scops.total_entries %></font>
 </div>
 
-<% if @scops && @scops.total_hits > 0 %>
+<% if @scops && @scops.total_entries > 0 %>
   <%= will_paginate @scops %>
   <%= render :partial => "scop", :collection => @scops, :spacer_template => "/shared/list_spacer" %>
   <%= will_paginate @scops %>

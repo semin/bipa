@@ -39,14 +39,16 @@ class Structure < ActiveRecord::Base
      { :conditions => ["resolution <= ?", res.to_f] }
   }
 
-  acts_as_ferret(:fields => {
-                              :pdb_code => {},
-                              :resolution => {},
-                              :classification => {},
-                              :title => {},
-                              :exp_method => {}
-                            },
-                 :remote => true)
+  define_index do
+    indexes :pdb_code
+    indexes :classification
+    indexes :title
+    indexes :exp_method
+    indexes :resolution
+
+    has :deposited_at
+  end
+
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }
   end
