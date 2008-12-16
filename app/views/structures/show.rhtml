@@ -213,7 +213,8 @@
 </div>
 
 <div id="big_image" class="zoomed">
-  <%= image_tag @structure.local_image_link %>
+  <%= image_tag @structure.local_image_link %><br />
+  <%= @structure.pdb_code %>, <%= @structure.title %>
 </div>
 
 <%= link_to "Back to the structure list", structures_path %>

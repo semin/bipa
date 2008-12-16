@@ -270,7 +270,7 @@ div.current_hierarchy a:hover, a:active {
   font-weight: bold;
 }
 
-img#list_figure {
+img.list_figure {
   float: left;
   width: 80px;
 }

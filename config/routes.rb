@@ -18,10 +18,6 @@ ActionController::Routing::Routes.draw do |map|
   map.resources(:scops,
                 :singular => "scop",
                 :member => {
-                  :hierarchy      => :get,
-                  :distributions  => :get,
-                  :propensities   => :get,
-                  :chisquare_test => :get,
                   :jmol           => :get,
                   :domains        => :get,
                 },

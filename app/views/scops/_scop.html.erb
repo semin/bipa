@@ -1,15 +1,15 @@
-<div class="list">
+<div class="list blue_link">
   <div class="small_image">
-    <a href="#big_image_<%= scop.sunid %>"><%= image_tag scop.local_image_link, :id => "list_figure", :border => 0 %></a>
+    <a href="#big_image_<%= scop.sunid %>"><%= image_tag scop.local_image_link, :class => "list_figure", :border => 0 %></a>
   </div>
   <div id="big_image_<%= scop.sunid %>">
     <%= image_tag scop.local_image_link %><br />
-    <%= scop.sid %>, <%= scop.description %>
+    <%= link_to scop.sid, scop_path(scop) %>
   </div>
-  <div class="list_title blue_link">
+  <div class="list_title">
     <%= link_to "#{scop.scop_protein.description}, #{scop.description}", scop_path(scop) %>
   </div>
-  <div class="list_content blue_link">
+  <div class="list_content">
     SCOP sid:   <%= scop.sid %><br />
     SCOP sunid: <%= scop.sunid %><br />
     SCOP sccs:  <%= scop.sccs  %><br />
