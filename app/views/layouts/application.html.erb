@@ -26,7 +26,9 @@
     
       FancyZoomBox.directory = '/images';
       $(document).observe('dom:loaded', function() {
+        $$("div.small_image a").each(function(el) { new FancyZoom(el); })
         new FancyZoom('abstract_link', {width:600, height:300});
+        new FancyZoom('big_image_link', {width:510, height:510});
         new FancyZoom('scop_na_box_link', {width:500, height:150});
         new FancyZoom('dna_rep_alignment_na_box_link', {width:500, height:150});
         new FancyZoom('rna_rep_alignment_na_box_link', {width:500, height:150});

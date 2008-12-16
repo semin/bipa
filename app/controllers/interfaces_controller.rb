@@ -19,4 +19,7 @@ class InterfacesController < ApplicationController
     end
   end
 
+  def search
+  end
+
 end

@@ -1,5 +1,11 @@
 <div class="list">
-  <%= image_tag structure.local_image_link, :id => "list_figure" %>
+  <div class="small_image">
+    <a href="#big_image_<%= structure.pdb_code %>"><%= image_tag structure.local_image_link, :id => "list_figure", :border => 0 %></a>
+  </div>
+  <div id="big_image_<%= structure.pdb_code %>">
+    <%= image_tag structure.local_image_link %><br />
+    <%= structure.pdb_code %>, <%= structure.classification %>
+  </div>
   <div class="list_title blue_link">
     <%= link_to "#{structure.title}", structure_path(structure) %>
   </div>
