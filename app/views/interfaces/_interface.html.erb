@@ -1,9 +1,14 @@
-<div class="list">
+<div class="list blue_link">
   <div class="list_title">
-    <b><%= interface.na_type %> interface</b>: <%= link_to interface.description, scop_interface_path(@scop, interface) %>
+    <%= link_to "#{@interface_search.interface_type}-Binding Interface of #{interface.domain.sid}", interface_path(interface) %>
   </div>
   <div class="list_content">
-    PDB Title: <%= interface.residues.first.chain.model.structure.title %><br />
-    SCOP sunid: <%= interface.domain.sunid %>
+    ASA: <%= interface.asa %> &Aring;<sup>2</sup><br />
+    Polarity: <%= interface.polarity %><br />
+    No. of Residues: <%= interface.residues_count %><br />
+    No. of Atoms: <%= interface.atoms_count %><br />
+    No. of Hydrogen Bonds: <%= interface.hbonds_count %><br />
+    No. of Water-mediated Hydrogen Bonds: <%= interface.whbonds_count %><br />
+    No. of van der Waals Contacts: <%= interface.vdw_contacts_count %>
   </div>
 </div>

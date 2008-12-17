@@ -1,0 +1,62 @@
+<div class="main_title">
+  Search Nucleic Acid-Binding Interfaces:
+</div>
+
+<div id="interface_search_form" class="blue_link">
+  <% form_for(:interface_search, @interface_search, :url => { :action => "create" }) do |f| %>
+    <p>
+    <%= f.error_messages %>
+    </p>
+
+    <p>
+    <%= label :interface_search, :interface_type, "* Search against: " %>
+    <%= f.select "interface_type", [%w[DNA DNA], %w[RNA RNA]] %>-Binding Interfaces
+    </p>
+
+    <p>
+    <%= label :interface_search, :asa, "* ASA Range: " %>
+    <%= f.text_field :min_asa, :size => 5 %> -
+    <%= f.text_field :max_asa, :size => 5 %>
+    </p>
+
+    <p>
+    <%= label :interface_search, :polarity, "* Polarity Range: " %>
+    <%= f.text_field :min_polarity, :size => 5 %> -
+    <%= f.text_field :max_polarity, :size => 5 %>
+    </p>
+
+    <p>
+    <%= label :interface_search, :residues_count, "* Residue Count Range: " %>
+    <%= f.text_field :min_residues_count, :size => 5 %> -
+    <%= f.text_field :max_residues_count, :size => 5 %>
+    </p>
+
+    <p>
+    <%= label :interface_search, :atoms_count, "* Atom Count Range: " %>
+    <%= f.text_field :min_atoms_count, :size => 5 %> -
+    <%= f.text_field :max_atoms_count, :size => 5 %>
+    </p>
+
+    <p>
+    <%= label :interface_search, :hbonds_count, "* Hydrogen Bond Count Range: " %>
+    <%= f.text_field :min_hbonds_count, :size => 5 %> -
+    <%= f.text_field :max_hbonds_count, :size => 5 %>
+    </p>
+
+    <p>
+    <%= label :interface_search, :whbonds_count, "* Water-mediated Hydrogen Bond Count Range: " %>
+    <%= f.text_field :min_whbonds_count, :size => 5 %> -
+    <%= f.text_field :max_whbonds_count, :size => 5 %>
+    </p>
+
+    <p>
+    <%= label :interface_search, :vdw_contactss_count, "* van der Waals Contact Count Range: " %>
+    <%= f.text_field :min_vdw_contacts_count, :size => 5 %> -
+    <%= f.text_field :max_vdw_contacts_count, :size => 5 %>
+    </p>
+
+    <p>
+      <%= f.submit "Search" %>
+    </p>
+  <% end %>
+</div>

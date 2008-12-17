@@ -66,7 +66,7 @@
             <%= link_to "Search", "#" %>
             <ul>
               <li>
-                <%= link_to "NA Interfaces", search_interfaces_path %>
+                <%= link_to "NA Interfaces", new_interface_search_path %>
               </li>
               <li>
                 <%= link_to "NA-binding Protein Families", new_fugue_search_path %>
@@ -85,7 +85,7 @@
           <% end %>
         </div>
         <div id="main_logo">
-          <%= image_tag "bipa_logo.png", :size => "40x70" %>
+          <%= link_to(image_tag("bipa_logo.png", :size => "40x70", :border => 0), "/") %>
         </div>
         <div id="main_banner">
           BIPA

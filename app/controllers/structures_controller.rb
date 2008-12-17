@@ -3,7 +3,7 @@ class StructuresController < ApplicationController
   caches_page :show
 
   def index
-    @structures = Structure.untainted.paginate(:page => params[:page] || 1, :per_page => 10)
+    @structures = Structure.untainted.paginate(:page => params[:page], :per_page => 10)
 
     respond_to do |format|
       format.html # index.rhtml

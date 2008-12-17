@@ -3,7 +3,7 @@
 </div>
 
 <div id="interface_search_form" class="blue_link">
-  <% form_for(:interface, @fugue_search, :url => { :action => "create" }) do |f| %>
+  <% form_for(:interface, :url => { :action => "search" }) do |f| %>
 
     <p>
       <%= f.error_messages %>

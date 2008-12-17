@@ -15,6 +15,50 @@ class Interface < ActiveRecord::Base
     :all              => 0.4
   }
 
+  named_scope :in_asa_range, lambda { |min_asa, max_asa|
+    { :conditions => ["asa >= ? and asa <= ?", min_asa, max_asa] }
+  }
+
+  named_scope :in_polarity_range, lambda { |min_polarity, max_polarity|
+    { :conditions => ["polarity >= ? and polarity <= ?", min_polarity, max_polarity] }
+  }
+
+  named_scope :in_residues_count_range, lambda { |min_residues_count, max_residues_count|
+    { :conditions => ["residues_count >= ? and residues_count <= ?", min_residues_count, max_residues_count] }
+  }
+
+  named_scope :in_atoms_count_range, lambda { |min_atoms_count, max_atoms_count|
+    { :conditions => ["atoms_count >= ? and atoms_count <= ?", min_atoms_count, max_atoms_count] }
+  }
+
+  named_scope :in_hbonds_count_range, lambda { |min_hbonds_count, max_hbonds_count|
+    { :conditions => ["hbonds_count >= ? and hbonds_count <= ?", min_hbonds_count, max_hbonds_count] }
+  }
+
+  named_scope :in_whbonds_count_range, lambda { |min_whbonds_count, max_whbonds_count|
+    { :conditions => ["whbonds_count >= ? and whbonds_count <= ?", min_whbonds_count, max_whbonds_count] }
+  }
+
+  named_scope :in_vdw_contacts_count_range, lambda { |min_vdw_contacts_count, max_vdw_contacts_count|
+    { :conditions => ["vdw_contacts_count >= ? and vdw_contacts_count <= ?", min_vdw_contacts_count, max_vdw_contacts_count] }
+  }
+
+#  AminoAcids::Residues::STANDARD.each do |aa|
+#    class_eval <<-RUBY_CODE
+#      named_scope :in_residue_percentage_of_#{aa.downcase}_range, lambda { |min_residue_percentage_of_#{aa.downcase}, max_residue_percentage_of_#{aa.downcase}|
+#        { :conditions => ["residue_percentage_of_#{aa.downcase} >= ? and residue_percentage_of_#{aa.downcase} <= ?", min_residue_percentage_of_#{aa.downcase}, max_residue_percentage_of_#{aa.downcase}] }
+#      }
+#    RUBY_CODE
+#  end
+#
+#  Sses::ALL.each do |sse|
+#    class_eval <<-RUBY_CODE
+#      named_scope :in_sse_percentage_of_#{sse}_range, lambda { |min_sse_percentage_of_#{sse.downcase}, max_sse_percentage_of_#{sse.downcase}|
+#        { :conditions => ["sse_percentage_of_#{sse.downcase} >= ? and sse_percentage_of_#{sse.downcase} <= ?", min_sse_percentage_of_#{sse.downcase}, max_sse_percentage_of_#{sse.downcase}] }
+#      }
+#    RUBY_CODE
+#  end
+
   %w[usr asa polarity res_composition sse_composition all].each do |item|
     class_eval <<-RUBY_CODE
       acts_as_network :similar_interfaces_in_#{item},

@@ -1,0 +1,12 @@
+<h1>Editing interface_searches</h1>
+
+<% form_for(@interface_searches) do |f| %>
+  <%= f.error_messages %>
+
+  <p>
+    <%= f.submit "Update" %>
+  </p>
+<% end %>
+
+<%= link_to 'Show', @interface_searches %> |
+<%= link_to 'Back', interface_searches_path %>

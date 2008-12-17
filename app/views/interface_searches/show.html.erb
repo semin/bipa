@@ -1,0 +1,9 @@
+<div class="main_title">
+  Search <font color="green"><%= @interface_search.interface_type %></font>-Binding Interfaces: <font color="green"><%= @interfaces.total_entries %></font> Hits
+</div>
+
+<%= will_paginate @interfaces %>
+
+<%= render :partial => "interfaces/interface", :collection => @interfaces, :spacer_template => "/shared/list_spacer" %>
+
+<%= will_paginate @interfaces %>

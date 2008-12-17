@@ -1,0 +1,18 @@
+<h1>Listing interface_searches</h1>
+
+<table>
+  <tr>
+  </tr>
+
+<% for interface_searches in @interface_searches %>
+  <tr>
+    <td><%= link_to 'Show', interface_searches %></td>
+    <td><%= link_to 'Edit', edit_interface_searches_path(interface_searches) %></td>
+    <td><%= link_to 'Destroy', interface_searches, :confirm => 'Are you sure?', :method => :delete %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New interface_searches', new_interface_searches_path %>
