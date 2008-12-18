@@ -671,19 +671,6 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :interface_similarities, [:similar_interface_id, :interface_id], :unique => true, :name => "by_sim_int_id_and_int_id"
 
 
-  create_table :fugue_searches, :force => true do |t|
-    t.string    :type
-    t.string    :name,        :default => nil
-    t.string    :email
-    t.string    :definition,  :default => nil
-    t.float     :zcutoff,     :default => 3.0
-    t.text      :sequence
-    t.text      :result,      :default => nil
-    t.timestamp :started_at, :finished_at
-    t.timestamps
-  end
-
-
   create_table :interface_searches, :force => true do |t|
     t.string    :interface_type
     t.float     :max_asa,                 :default => 10000.0
@@ -711,6 +698,20 @@ ActiveRecord::Schema.define(:version => 1) do
 #      t.float :"min_sse_percentage_of_#{sse.downcase}", :default => 0.0
 #    end
   end
+
+
+  create_table :fugue_searches, :force => true do |t|
+    t.string    :type
+    t.string    :name,        :default => nil
+    t.string    :email
+    t.string    :definition,  :default => nil
+    t.integer   :toprank,     :default => 10
+    t.text      :sequence
+    t.text      :result,      :default => nil
+    t.timestamp :started_at, :finished_at
+    t.timestamps
+  end
+
 
   # For RudeQ
   # http://github.com/matthewrudy/rudeq/tree/master

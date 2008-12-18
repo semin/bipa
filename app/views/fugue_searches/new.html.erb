@@ -1,5 +1,5 @@
 <div class="main_title">
-  FUGUE-na Search:
+  Search Against Nucleic Acid-Binding Protein Families:
 </div>
 
 <div id="fugue_search_form" class="blue_link">
@@ -28,9 +28,8 @@
     </p>
 
     <p>
-    <%= label :fugue_search, :zcutoff, "* Z-value cutoff: " %>
-    <%= f.text_field :zcutoff, :size => 5 %>
-    [<%= link_to "?", "#zcutoff_box", :id => "zcutoff_box_link" %>]
+    <%= label :fugue_search, :toprank, "* Report top " %>
+    <%= f.text_field :toprank, :size => 5 %> hits
     </p>
 
     <p>
@@ -93,8 +92,4 @@
 FUGUE_RESULT
 %>
   </pre>
-</div>
-
-<div id="zcutoff_box">
-  We recommend you to use 3.0 or bigger values for Z-score cut-offs. Z-scores &gt; 6.0 are likely to indicate evolutionary relationships and/or common folds. (See FUGUE <%= link_to "web page", "http://tardis.nibio.go.jp/fugue/prfsearch.html", :popup => true %>)
 </div>

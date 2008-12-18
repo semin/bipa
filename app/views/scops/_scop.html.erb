@@ -1,4 +1,7 @@
 <div class="list blue_link">
+  <div class="list_title">
+    <%= link_to "#{scop.scop_protein.description}, #{scop.description}", scop_path(scop) %>
+  </div>
   <div class="small_image">
     <a href="#big_image_<%= scop.sunid %>"><%= image_tag scop.local_image_link, :class => "list_figure", :border => 0 %></a>
   </div>
@@ -6,13 +9,9 @@
     <%= image_tag scop.local_image_link %><br />
     <%= link_to scop.sid, scop_path(scop) %>
   </div>
-  <div class="list_title">
-    <%= link_to "#{scop.scop_protein.description}, #{scop.description}", scop_path(scop) %>
-  </div>
   <div class="list_content">
     SCOP sid:   <%= scop.sid %><br />
     SCOP sunid: <%= scop.sunid %><br />
     SCOP sccs:  <%= scop.sccs  %><br />
-    PDB Code:   <%= scop.structure.pdb_code %><br />
   </div>
 </div>

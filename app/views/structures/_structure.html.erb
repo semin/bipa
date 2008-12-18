@@ -1,4 +1,7 @@
 <div class="list blue_link">
+  <div class="list_title">
+    <%= link_to "#{structure.title}", structure_path(structure) %>
+  </div>
   <div class="small_image">
     <a href="#big_image_<%= structure.pdb_code %>"><%= image_tag structure.local_image_link, :class => "list_figure", :border => 0 %></a>
   </div>
@@ -6,13 +9,10 @@
     <%= image_tag structure.local_image_link %><br />
     <%= link_to structure.pdb_code, structure_path(structure) %>
   </div>
-  <div class="list_title">
-    <%= link_to "#{structure.title}", structure_path(structure) %>
-  </div>
   <div class="list_content">
     PDB Code: <%= structure.pdb_code %><br />
     Classification: <%= structure.classification %><br />
-    Experiment method: <%= structure.exp_method %><br />
+    Experiment method: <%= structure.exp_method %>,&nbsp;
     Resolution: <%= structure.resolution_for_html %><br />
     Release date: <%= structure.deposited_at %><br />
   </div>
