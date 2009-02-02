@@ -65,6 +65,14 @@ class Scop < ActiveRecord::Base
     leaves.select(&:rpall)
   end
 
+  def html_sunid_link
+    "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sunid=#{sunid}"
+  end
+
+  def html_sccs_link
+    "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sccs=#{sccs}"
+  end
+
 #  def interfaces(redundancy, resolution)
 #    dna_interfaces(redundancy, resolution) +
 #    rna_interfaces(redundancy, resolution)
@@ -399,11 +407,4 @@ class ScopDomain < Scop
     "/scop/#{sunid}.png"
   end
 
-  def html_sunid_link
-    "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sunid=#{sunid}"
-  end
-
-  def html_sccs_link
-    "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sccs=#{sccs}"
-  end
 end

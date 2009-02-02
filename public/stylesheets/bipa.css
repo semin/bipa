@@ -16,7 +16,6 @@ h4 {
 }
 
 p {
-  text-align: justify;
   margin-top: 0px;
 }
 
@@ -158,22 +157,22 @@ form.search_form {
 
 div#home {
   float: left;
-  width: 450px;
+  width: 470px;
 }
 
 div#home_intro {
-  padding: 10px 10px 0px 10px;
+  padding: 10px 10px 0px 0px;
   text-indent: 20pt;
   margin-bottom: 10px;
 }
 
 div#home_news {
-  padding: 10px 10px 0px 10px;
+  padding: 10px 10px 0px 0px;
   margin-bottom: 10px;
 }
 
 div#home_reference {
-  padding: 10px 10px 0px 10px;
+  padding: 10px 10px 0px 0px;
   margin-bottom: 10px;
 }
 
@@ -272,16 +271,16 @@ div.list_title {
 
 div.small_image {
   float: left;
+  margin-right: 10px;
 }
 
 img.list_figure {
-  width: 80px;
+  width: 100px;
 }
 
 div.list_content {
   float: left;
   font-size: 90%;
-  padding-left: 15px;
 }
 
 div.list_content2 {

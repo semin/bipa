@@ -1,5 +1,5 @@
-<div class="main_title">
-  Browse: SCOP Domains in <%= @scop.description %> <%= @scop.hierarchy %>
+<div class="main_title blue_link">
+  Browse: SCOP Domains in <%= link_to @scop.description, @scop.html_sunid_link, :popup => true %> <%= @scop.hierarchy %>
 </div>
 
 <%= will_paginate @doms %>

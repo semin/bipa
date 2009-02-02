@@ -1,25 +1,22 @@
 <div id="home">
-  <span class="main_title">Home: Welcome to BIPA 1.0 release</span>
+  <span class="main_title">Welcome to BIPA 1.0 release</span>
   <div id="home_intro" class="blue_link">
     <p>
-    BIPA is a protein-nucleic acid interaction database, especially focusing on structural and functional restraints on nucleic acid-binding protein families. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org" %> complexes and <%= link_to ScopDomain.rpall.count, scops_path %> <% link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html" %> domains in BIPA. For each SCOP family level, a representative set of structures is selected and aligned using <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/" %>. Then, environment-specific substitution tables (<%= link_to "ESSTs", "http://www-cryst.bioc.cam.ac.uk/ESST" %>) were generated using <%= link_to "EGOR", "http://www-cryst.bioc.cam.ac.uk/egor" %> with an extended environment feature definition including atomic interactions between amino acids and nucleic acids. <%= link_to "FUGUE", "http://tardis.nibio.go.jp/fugue/" %> profiles are also generated using the extended ESSTs to provide remote homology detection, which is specialized for nucleic acid-binding protein families.
+    BIPA is a protein-nucleic acid interaction database, especially focusing on structural and functional restraints on nucleic acid-binding protein families and their relationships with mutations such nsSNPs. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org" %> complexes, <%= link_to ScopDomain.rpall.count, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html" %> domains, and <%= DomainInterface.all.count %> domain-nucleic acid interfaces in BIPA.
+    </p>
+    <p>
+    At the SCOP family level, a representative set of structures is selected and aligned using <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/" %>, and the structural alignments were further annotated using <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/" %> to recognise specific local environments of amino acids. Then, environment-specific substitution tables (<%= link_to "ESSTs", "http://www-cryst.bioc.cam.ac.uk/ESST" %>) were generated using <%= link_to "EGOR", "http://www-cryst.bioc.cam.ac.uk/egor" %> with an extended environment feature definition including atomic interactions between amino acids and nucleic acids to understand the patterns of amino acid substitutions under the functional restraints along with structural ones.
+    </p>
+    <p>
+    Furthermore, by relating BIPA to other in-house databases, DoubleMap and Requiem, nsSNPs were mapped onto the nucleic acid-binding proteins to provide potential candidates of mutations which might be affecting protein-nucleic acid interactions.
     </p>
   </div>
 
-  <span class="main_title">News:</span>
+  <span class="main_title">Recent News:</span>
   <div id="home_news">
     <ul class="news">
       <li>
-        Initial Release! (19 November 2008)
-      </li>
-    </ul>
-  </div>
-
-  <span class="main_title">Reference:</span>
-  <div id="home_reference">
-    <ul>
-      <li>
-      Semin Lee and Tom L. Blundell, (2008). "BIPA: Biological database for Interaction between Protein and nucleic Acid", <i>Bioinformatics</i>, Vol XXX, pXXX-XXX.
+        Initial Release! (10 Feb 2008)
       </li>
     </ul>
   </div>
@@ -30,7 +27,7 @@
   <table class="brief_stats">
     <tr>
       <th class="center">Type</th>
-      <th class="center">Counts</th>
+      <th class="center">Count</th>
     </tr>
     <tr>
       <th>Protein-DNA Complexes</th>
@@ -47,6 +44,18 @@
     <tr>
       <th>RNA-binding SCOP domains</th>
       <td><%= DomainRnaInterface.count %></td>
+    </tr>
+    <tr>
+      <th>nsSNPs found in nucleic acid-binding proteins</th>
+      <td>XXX</td>
+    </tr>
+    <tr>
+      <th>nsSNPs found in Protein-DNA interfaces</th>
+      <td>XXX</td>
+    </tr>
+    <tr>
+      <th>nsSNPs found in Protein-RNA interfaces</th>
+      <td>XXX</td>
     </tr>
   </table>
 

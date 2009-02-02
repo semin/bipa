@@ -213,7 +213,5 @@
 </div>
 
 <div id="big_image" class="zoomed">
-  <%= image_tag @structure.local_image_link %><br />
+  <%= image_tag @structure.local_image_link, :width => 400 %><br />
 </div>
-
-<%= link_to "Back to the structure list", structures_path %>

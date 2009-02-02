@@ -298,7 +298,7 @@ class DomainInterface < Interface
 
   def residue_percentage_google_chart_url
     data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_percentage_of(r) }
-    Gchart.bar(:size              => '650x100',
+    Gchart.bar(:size              => '600x100',
                :title             => 'Residue Percentage (%)',
                :data              => data,
                :axis_with_labels  => 'x,y',
@@ -307,7 +307,7 @@ class DomainInterface < Interface
 
   def residue_propensity_google_chart_url
     data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_propensity_of(r) }
-    Gchart.bar(:size              => '650x100',
+    Gchart.bar(:size              => '600x100',
                :title             => 'Residue Propensity',
                :data              => data,
                :axis_with_labels  => 'x,y',

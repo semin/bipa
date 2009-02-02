@@ -27,7 +27,7 @@
       $(document).observe('dom:loaded', function() {
         $$("div.small_image a").each(function(el) { new FancyZoom(el); })
         new FancyZoom('abstract_link', {width:600, height:300});
-        new FancyZoom('big_image_link', {width:510, height:520});
+        new FancyZoom('big_image_link', {width:410, height:420});
         new FancyZoom('scop_na_box_link', {width:500, height:50});
         new FancyZoom('dna_rep_alignment_na_box_link', {width:500, height:100});
         new FancyZoom('rna_rep_alignment_na_box_link', {width:500, height:100});
@@ -48,6 +48,9 @@
             <%= link_to "Home", "/" %>
           </li>
           <li>
+            <%= link_to "News", "/news" %>
+          </li>
+          <li>
             <%= link_to "Browse", "#" %>
             <ul>
               <li>
@@ -62,15 +65,10 @@
             <%= link_to "Statistics", "/statistics" %>
           </li>
           <li>
-            <%= link_to "Search", "#" %>
-            <ul>
-              <li>
-                <%= link_to "NA Interfaces", new_interface_search_path %>
-              </li>
-              <li>
-                <%= link_to "NA-binding Protein Families", new_fugue_search_path %>
-              </li>
-            </ul>
+            <%= link_to "Search", new_interface_search_path %>
+          </li>
+          <li>
+            <%= link_to "References", "/references" %>
           </li>
           <li>
             <%= link_to "Contact", "/contact" %>

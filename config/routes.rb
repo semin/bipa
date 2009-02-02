@@ -3,8 +3,9 @@ ActionController::Routing::Routes.draw do |map|
 
   map.connect "",           :controller => "main", :action => "home"
   map.connect "home",       :controller => "main", :action => "home"
-  map.connect "help",       :controller => "main", :action => "help"
+  map.connect "news",       :controller => "main", :action => "news"
   map.connect "search",     :controller => "main", :action => "search"
+  map.connect "references", :controller => "main", :action => "references"
   map.connect "contact",    :controller => "main", :action => "contact"
   map.connect "statistics", :controller => "main", :action => "statistics"
 
