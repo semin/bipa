@@ -17,6 +17,7 @@ h4 {
 
 p {
   margin-top: 0px;
+  margin-bottom: 5px;
 }
 
 ul {
@@ -158,6 +159,7 @@ form.search_form {
 div#home {
   float: left;
   width: 470px;
+  font-size: 95%;
 }
 
 div#home_intro {
