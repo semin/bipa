@@ -83,6 +83,15 @@ class Residue < ActiveRecord::Base
                                                     :pdb_ins_code => ins_code })
     var2pdbs.map { |vp| vp.variation }
   end
+
+  def nssnps
+    variations.select { |v| v.non_synonymous? }
+  end
+
+  def ssnps
+    variations.select { |v| v.synonymous? }
+  end
+
 end # class Residue
 
 

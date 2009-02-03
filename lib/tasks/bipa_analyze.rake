@@ -34,5 +34,26 @@ namespace :bipa do
       end
     end
 
+
+    desc "Get nsSNP statistics over Domain-DNA/RNA interfaces"
+    task :nssnp_stats => [:environment] do
+      puts "DOM_SID DOM_RES_CNT DOM_NSSNP_CNT CORE_RES_CNT CORE_NSSNP_CNT SURF_RES_CNT SURF_NSSNP_CNT INTF_RES_CNT INTF_NSSNP_MAPPED_RES_CNT"
+
+      DomainDnaInterface.in_residues_count_range(4, 1000).find_all_in_chunks do |intf|
+        dom = intf.domain
+        if dom.variation_mapped_residues.size > 0
+          puts [dom.sid,
+                dom.residues.count,
+                dom.nssnp_mapped_residues.count,
+                dom.buried_residues.count,
+                dom.buried_residues.select { |r| r.nssnps.size > 0 }.andand.count,
+                dom.surface_residues.count,
+                dom.surface_residues.select { |r| r.nssnps.size > 0 }.andand.count,
+                intf.residues.count,
+                intf.nssnp_mapped_residues.count].join(" ")
+        end
+      end
+    end
+
   end
 end

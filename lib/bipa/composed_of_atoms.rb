@@ -136,17 +136,17 @@ module Bipa
     %w[unbound bound delta].each do |state|
       module_eval <<-END
         def #{state}_asa
-          atoms.inject(0) { |s, a| !a.naccess.nil? ? s + a.#{state}_asa : s }
+          atoms.inject(0) { |s, a| a.naccess ? s + a.#{state}_asa : s }
         end
         #memoize :#{state}_asa
 
         def #{state}_asa_polar
-          atoms.inject(0) { |s, a| !a.naccess.nil? && a.polar? ? s + a.#{state}_asa : s }
+          atoms.inject(0) { |s, a| a.naccess && a.polar? ? s + a.#{state}_asa : s }
         end
         #memoize :#{state}_asa_polar
 
         def #{state}_of_atom(atm)
-          atoms.inject(0) { |s, a| !a.naccess.nil? && a.atom_name == atm.upcase ? s + a.#{state}_asa : s }
+          atoms.inject(0) { |s, a| a.naccess && (a.atom_name == atm.upcase) ? s + a.#{state}_asa : s }
         end
         #memoize :#{state}_of_atom
       END

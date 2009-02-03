@@ -57,9 +57,9 @@ class Atom < ActiveRecord::Base
 
   has_one   :zap
 
-  delegate :aa?, :dna?, :rna?, :na?, :het?, :water?, :to => :residue
+  delegate :aa?, :dna?, :rna?, :na?, :het?, :water?, :to => :residue, :allow_nil => true
 
-  delegate :unbound_asa, :bound_asa, :delta_asa, :radius, :to => :naccess
+  delegate :unbound_asa, :bound_asa, :delta_asa, :radius, :to => :naccess, :allow_nil => true
 
   named_scope :surface, lambda { |*args|
     { :conditions => ["unbound_asa > ?", (args.first || MIN_SURFACE_ATOM_ASA)] }
@@ -79,7 +79,7 @@ class Atom < ActiveRecord::Base
 
   # ASA related
   def on_surface?
-    unbound_asa ? unbound_asa > MIN_SURFACE_ATOM_ASA : false
+    naccess ? (unbound_asa > MIN_SURFACE_ATOM_ASA) : false
   end
 
   def buried?
@@ -87,7 +87,7 @@ class Atom < ActiveRecord::Base
   end
 
   def on_interface?
-    delta_asa ? delta_asa > MIN_INTERFACE_ATOM_DELTA_ASA : false
+    naccess ? (delta_asa > MIN_INTERFACE_ATOM_DELTA_ASA) : false
   end
 
   def polar?

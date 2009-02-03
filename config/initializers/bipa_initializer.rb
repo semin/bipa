@@ -1,36 +1,37 @@
-require "matrix"
+require 'matrix'
+require 'andand'
 require 'acts_as_ferret'
-require "bio_extensions"
-require "math_extensions"
-require "array_extensions"
-require "vector_extensions"
-require "kernel_extentions"
-require "string_extensions"
-require "struct_extensions"
-require "numeric_extensions"
-require "active_record_extensions"
-require "bipa"
+require 'bio_extensions'
+require 'math_extensions'
+require 'array_extensions'
+require 'vector_extensions'
+require 'kernel_extentions'
+require 'string_extensions'
+require 'struct_extensions'
+require 'numeric_extensions'
+require 'active_record_extensions'
+require 'bipa'
 
 # STI dependency
-require_dependency "scop"
-require_dependency "atom"
-require_dependency "chain"
-require_dependency "residue"
-require_dependency "interface"
-require_dependency "subfamily"
-require_dependency "alignment"
-require_dependency "go_relationship"
-require_dependency "gloria"
-require_dependency "mmcif"
-require_dependency "requiem"
-require_dependency "esst"
-require_dependency "fugue_hit"
-require_dependency "fugue_search"
-require_dependency "test_alignment"
+require_dependency 'scop'
+require_dependency 'atom'
+require_dependency 'chain'
+require_dependency 'residue'
+require_dependency 'interface'
+require_dependency 'subfamily'
+require_dependency 'alignment'
+require_dependency 'go_relationship'
+require_dependency 'gloria'
+require_dependency 'mmcif'
+require_dependency 'requiem'
+require_dependency 'esst'
+require_dependency 'fugue_hit'
+require_dependency 'fugue_search'
+require_dependency 'test_alignment'
 
 # Constants for BIPA
-RESUME    = (ENV["RESUME"].to_i > 0    ? ENV["RESUME"].to_i    : false)
-MAX_FORK  = (ENV["MAX_FORK"].to_i > 0  ? ENV["MAX_FORK"].to_i  : 2)
+RESUME    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
+MAX_FORK  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
 
 EPSILON                           = 1.0E-6
 MAX_VDW_DISTANCE                  = 3.9

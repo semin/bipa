@@ -88,5 +88,18 @@ module Bipa
         #memoize :#{stat}_asa_of_sse
       END
     end
+
+
+    def variation_mapped_residues
+      residues.select { |r| r.variations.size > 0 }
+    end
+
+    def nssnp_mapped_residues
+      residues.select { |r| r.nssnps.size > 0 }
+    end
+
+    def ssnp_mapped_residues
+      residues.select { |r| r.ssnps.size > 0 }
+    end
   end
 end
