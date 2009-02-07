@@ -37,22 +37,53 @@ namespace :bipa do
 
     desc "Get nsSNP statistics over Domain-DNA/RNA interfaces"
     task :nssnp_stats => [:environment] do
-      puts "DOM_SID DOM_RES_CNT DOM_NSSNP_CNT CORE_RES_CNT CORE_NSSNP_CNT SURF_RES_CNT SURF_NSSNP_CNT INTF_RES_CNT INTF_NSSNP_MAPPED_RES_CNT"
 
+      fh_dna = File.open("nssnp_stats_dna.txt", 'w')
+      fh_dna.puts "DOM_SID DOM_RES_CNT DOM_NSSNP_CNT DOM_DIS_CNT CORE_RES_CNT CORE_NSSNP_CNT CORE_DIS_CNT SURF_RES_CNT SURF_NSSNP_CNT SURF_DIS_CNT INTF_RES_CNT INTF_NSSNP_CNT INF_DIS_CNT"
       DomainDnaInterface.in_residues_count_range(4, 1000).find_all_in_chunks do |intf|
         dom = intf.domain
-        if dom.variation_mapped_residues.size > 0
-          puts [dom.sid,
-                dom.residues.count,
-                dom.nssnp_mapped_residues.count,
-                dom.buried_residues.count,
-                dom.buried_residues.select { |r| r.nssnps.size > 0 }.andand.count,
-                dom.surface_residues.count,
-                dom.surface_residues.select { |r| r.nssnps.size > 0 }.andand.count,
-                intf.residues.count,
-                intf.nssnp_mapped_residues.count].join(" ")
+        if dom.nssnp_mapped_residues.size > 0
+          fh_dna.puts [dom.sid,
+            dom.residues.count,
+            dom.nssnp_mapped_residues.count,
+            dom.disease_nssnp_mapped_residues.count,
+            dom.buried_residues.count,
+            dom.buried_residues.select { |r| r.nssnps.size > 0 }.andand.count,
+            dom.buried_residues.select { |r| r.disease_nssnps.size > 0 }.andand.count,
+            dom.surface_residues.count,
+            dom.surface_residues.select { |r| r.nssnps.size > 0 }.andand.count,
+            dom.surface_residues.select { |r| r.disease_nssnps.size > 0 }.andand.count,
+            intf.residues.count,
+            intf.nssnp_mapped_residues.count,
+            intf.disease_nssnp_mapped_residues.count,
+          ].join(" ")
         end
       end
+      fh_dna.close
+
+
+      fh_rna = File.open("nssnp_stats_rna.txt", 'w')
+      fh_rna.puts "DOM_SID DOM_RES_CNT DOM_NSSNP_CNT DOM_DIS_CNT CORE_RES_CNT CORE_NSSNP_CNT CORE_DIS_CNT SURF_RES_CNT SURF_NSSNP_CNT SURF_DIS_CNT INTF_RES_CNT INTF_NSSNP_CNT INF_DIS_CNT"
+      DomainRnaInterface.in_residues_count_range(4, 1000).find_all_in_chunks do |intf|
+        dom = intf.domain
+        if dom.nssnp_mapped_residues.size > 0
+          fh_rna.puts [dom.sid,
+            dom.residues.count,
+            dom.nssnp_mapped_residues.count,
+            dom.disease_nssnp_mapped_residues.count,
+            dom.buried_residues.count,
+            dom.buried_residues.select { |r| r.nssnps.size > 0 }.andand.count,
+            dom.buried_residues.select { |r| r.disease_nssnps.size > 0 }.andand.count,
+            dom.surface_residues.count,
+            dom.surface_residues.select { |r| r.nssnps.size > 0 }.andand.count,
+            dom.surface_residues.select { |r| r.disease_nssnps.size > 0 }.andand.count,
+            intf.residues.count,
+            intf.nssnp_mapped_residues.count,
+            intf.disease_nssnp_mapped_residues.count,
+          ].join(" ")
+        end
+      end
+      fh_rna.close
     end
 
   end

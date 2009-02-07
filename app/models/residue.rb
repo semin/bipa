@@ -92,6 +92,10 @@ class Residue < ActiveRecord::Base
     variations.select { |v| v.synonymous? }
   end
 
+  def disease_nssnps
+    nssnps.select { |v| v.omims.size > 0 }
+  end
+
 end # class Residue
 
 

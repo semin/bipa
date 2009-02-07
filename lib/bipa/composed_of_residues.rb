@@ -101,5 +101,9 @@ module Bipa
     def ssnp_mapped_residues
       residues.select { |r| r.ssnps.size > 0 }
     end
+
+    def disease_nssnp_mapped_residues
+      nssnp_mapped_residues.select { |r| r.nssnps.any? { |v| v.omims.size > 0 } }
+    end
   end
 end
