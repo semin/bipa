@@ -1,5 +1,6 @@
 .DS_Store
 *.swp
+*~
 index/
 log/*.log
 log/workling*

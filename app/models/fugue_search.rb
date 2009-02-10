@@ -5,11 +5,11 @@ class FugueSearch < ActiveRecord::Base
 
   before_save :sanitize_sequence
 
-  def valid_email?
-    TMail::Address.parse(email)
-  rescue
-    errors.add_to_base("Must be a valid email")
-  end
+#  def valid_email?
+#    TMail::Address.parse(email)
+#  rescue
+#    errors.add_to_base("Must be a valid email")
+#  end
 
   def sanitize_sequence
     if sequence.match(/^>/)

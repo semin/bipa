@@ -1,6 +1,5 @@
 require 'matrix'
 require 'andand'
-require 'acts_as_ferret'
 require 'bio_extensions'
 require 'math_extensions'
 require 'array_extensions'
