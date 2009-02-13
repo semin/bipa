@@ -5,6 +5,7 @@ index/
 log/*.log
 log/workling*
 log/searchd.development.pid
+tmp/*
 tmp/*.csv
 tmp/**/*
 db/sphinx
