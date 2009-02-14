@@ -329,7 +329,7 @@ table.brief_stats {
   width: 450px;
   border-style: solid;
   border-width: 1px;
-  border-color: .666666;
+  border-color: #666666;
   border-collapse: collapse;
   margin-top: 10px;
   margin-bottom: 10px;
@@ -428,6 +428,8 @@ table.joy_annotation td {
 /* for compatibility issues with IE and Firefox
  * both class .sequence and .alighment had to be set below
  *
+ * 'overflow-x: scroll;
+ *
  * http://www.positioniseverything.net/explorer/expandingboxbug.html
  */
 
@@ -443,8 +445,6 @@ table.joy_annotation td {
 .sequence {
   width: 700px;
   margin-bottom: 5px;
-  font-family: "Courier New", courier, monospace;
-  font-size: 90%;
   white-space: nowrap;
   overflow-x: scroll;
 }
