@@ -425,22 +425,28 @@ table.joy_annotation td {
   margin-bottom: 10px;
 }
 
+/* for compatibility issues with IE and Firefox
+ * both class .sequence and .alighment had to be set below
+ *
+ * http://www.positioniseverything.net/explorer/expandingboxbug.html
+ */
+
 .alignment {
   width: 700px;
   margin-bottom: 5px;
   font-family: "Courier New", courier, monospace;
   font-size: 90%;
   white-space: nowrap;
-  overflow-x: auto;
+  overflow-x: scroll;
 }
 
 .sequence {
   width: 700px;
   margin-bottom: 5px;
-  font-size: 90%;
   font-family: "Courier New", courier, monospace;
+  font-size: 90%;
   white-space: nowrap;
-  overflow-x: auto;
+  overflow-x: scroll;
 }
 
 .ruler {
