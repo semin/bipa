@@ -522,149 +522,150 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :news, :date
 
 
-  create_table :essts, :force => true do |t|
-    t.string  :type
-    t.integer :redundancy
-    t.integer :number
-    t.string  :environment
-    t.string  :secondary_structure
-    t.string  :solvent_accessibility
-    t.string  :hbond_to_sidechain
-    t.string  :hbond_to_mainchain_carbonyl
-    t.string  :hbond_to_mainchain_amide
-    t.string  :dna_rna_interface
-  end
-
-  # This is for the case sesitivity of 'essts' table
-  # Please uncomment following line if your default collation is not case sensitive!!!
-  #execute "ALTER TABLE essts CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
-
-  add_index :essts, [:redundancy, :number]
-  add_index :essts, [:environment]
-
-
-  create_table :substitutions, :force => true do |t|
-    t.belongs_to  :esst
-    t.string      :aa1
-    t.string      :aa2
-    t.float       :prob
-    t.integer     :log
-    t.integer     :cnt
-  end
-
-  add_index :substitutions, :esst_id
+#  create_table :essts, :force => true do |t|
+#    t.string  :type
+#    t.integer :redundancy
+#    t.integer :number
+#    t.string  :environment
+#    t.string  :secondary_structure
+#    t.string  :solvent_accessibility
+#    t.string  :hbond_to_sidechain
+#    t.string  :hbond_to_mainchain_carbonyl
+#    t.string  :hbond_to_mainchain_amide
+#    t.string  :dna_rna_interface
+#  end
+#
+#  # This is for the case sesitivity of 'essts' table
+#  # Please uncomment following line if your default collation is not case sensitive!!!
+#  #execute "ALTER TABLE essts CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
+#
+#  add_index :essts, [:redundancy, :number]
+#  add_index :essts, [:environment]
 
 
-  create_table :profiles, :force => true do |t|
-    t.belongs_to  :alignment
-    t.string      :type
-    t.string      :name
-    t.string      :command
-    t.integer     :length
-    t.integer     :no_sequences
-    t.integer     :no_structures
-    t.integer     :enhance_num
-    t.float       :enhance_div
-    t.integer     :weighting
-    t.float       :weighting_threshold
-    t.integer     :weighting_seed
-    t.float       :multiple_factor
-    t.string      :format
-    t.string      :similarity_matrix
-    t.string      :similarity_matrix_offset
-    t.string      :ignore_gap_weight
-    t.string      :symbol_in_row
-    t.string      :symbol_in_column
-    t.string      :symbol_structural_feature
-    t.integer     :gap_ins_open_terminal
-    t.integer     :gap_del_open_terminal
-    t.integer     :gap_ins_ext_terminal
-    t.integer     :gap_del_ext_terminal
-    t.integer     :evd
-  end
-
-  add_index :profiles, :alignment_id
+#  create_table :substitutions, :force => true do |t|
+#    t.belongs_to  :esst
+#    t.string      :aa1
+#    t.string      :aa2
+#    t.float       :prob
+#    t.integer     :log
+#    t.integer     :cnt
+#  end
+#
+#  add_index :substitutions, :esst_id
 
 
-  create_table :profile_columns, :force => true do |t|
-    t.belongs_to  :profile
-    t.belongs_to  :column
-    t.string      :type
-    t.string      :seq
-    t.integer     :aa_A, :aa_C, :aa_D, :aa_E, :aa_F, :aa_G, :aa_H, :aa_I, :aa_K, :aa_L, :aa_M,
-                  :aa_N, :aa_P, :aa_Q, :aa_R, :aa_S, :aa_T, :aa_V, :aa_W, :aa_Y, :aa_J, :aa_U
-    t.integer     :InsO, :InsE, :DelO, :DelE, :COIL, :HNcp, :HCcp, :HIn, :SNcp, :SCcp, :SInt, :NRes, :Ooi, :Acc
-    t.integer     :H, :E, :P, :C, :At, :Af, :St, :Sf, :Ot, :Of, :Nt, :Nf, :D, :R, :N
-  end
+#  create_table :profiles, :force => true do |t|
+#    t.belongs_to  :alignment
+#    t.string      :type
+#    t.string      :name
+#    t.string      :command
+#    t.integer     :length
+#    t.integer     :no_sequences
+#    t.integer     :no_structures
+#    t.integer     :enhance_num
+#    t.float       :enhance_div
+#    t.integer     :weighting
+#    t.float       :weighting_threshold
+#    t.integer     :weighting_seed
+#    t.float       :multiple_factor
+#    t.string      :format
+#    t.string      :similarity_matrix
+#    t.string      :similarity_matrix_offset
+#    t.string      :ignore_gap_weight
+#    t.string      :symbol_in_row
+#    t.string      :symbol_in_column
+#    t.string      :symbol_structural_feature
+#    t.integer     :gap_ins_open_terminal
+#    t.integer     :gap_del_open_terminal
+#    t.integer     :gap_ins_ext_terminal
+#    t.integer     :gap_del_ext_terminal
+#    t.integer     :evd
+#  end
+#
+#  add_index :profiles, :alignment_id
 
-  add_index :profile_columns, :profile_id
-  add_index :profile_columns, :column_id
+
+#  create_table :profile_columns, :force => true do |t|
+#    t.belongs_to  :profile
+#    t.belongs_to  :column
+#    t.string      :type
+#    t.string      :seq
+#    t.integer     :aa_A, :aa_C, :aa_D, :aa_E, :aa_F, :aa_G, :aa_H, :aa_I, :aa_K, :aa_L, :aa_M,
+#                  :aa_N, :aa_P, :aa_Q, :aa_R, :aa_S, :aa_T, :aa_V, :aa_W, :aa_Y, :aa_J, :aa_U
+#    t.integer     :InsO, :InsE, :DelO, :DelE, :COIL, :HNcp, :HCcp, :HIn, :SNcp, :SCcp, :SInt, :NRes, :Ooi, :Acc
+#    t.integer     :H, :E, :P, :C, :At, :Af, :St, :Sf, :Ot, :Of, :Nt, :Nf, :D, :R, :N
+#  end
+#
+#  add_index :profile_columns, :profile_id
+#  add_index :profile_columns, :column_id
 
   # This is for the case sesitivity of 'profile_columns' table
   # Please uncomment following line if your default collation is not case sensitive!!!
   #execute "ALTER TABLE profile_columns CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
 
 
-  create_table :fugue_hits, :force => true do |t|
-    t.belongs_to  :profile
-    t.belongs_to  :scop
-    t.string      :type
-    t.string      :name
-    t.integer     :raws
-    t.integer     :rvn
-    t.float       :zscore
-    t.float       :zori
-    t.boolean     :fam_tp
-    t.boolean     :fam_fp
-    t.boolean     :fam_tn
-    t.boolean     :fam_fn
-    t.boolean     :supfam_tp
-    t.boolean     :supfam_fp
-    t.boolean     :supfam_tn
-    t.boolean     :supfam_fn
-  end
-
-  add_index :fugue_hits, :profile_id
-  add_index :fugue_hits, :scop_id
-  add_index :fugue_hits, :zscore
-
-
-  create_table :reference_alignments, :force => true do |t|
-    t.belongs_to  :alignment
-    t.belongs_to  :template
-    t.belongs_to  :target
-    t.float       :pid1
-    t.float       :pid2
-    t.float       :pid3
-    t.float       :pid4
-  end
-
-  add_index :reference_alignments, :alignment_id
-  add_index :reference_alignments, [:template_id, :target_id]
+#  create_table :fugue_hits, :force => true do |t|
+#    t.belongs_to  :profile
+#    t.belongs_to  :scop
+#    t.string      :type
+#    t.string      :name
+#    t.integer     :raws
+#    t.integer     :rvn
+#    t.float       :zscore
+#    t.float       :zori
+#    t.boolean     :fam_tp
+#    t.boolean     :fam_fp
+#    t.boolean     :fam_tn
+#    t.boolean     :fam_fn
+#    t.boolean     :supfam_tp
+#    t.boolean     :supfam_fp
+#    t.boolean     :supfam_tn
+#    t.boolean     :supfam_fn
+#  end
+#
+#  add_index :fugue_hits, :profile_id
+#  add_index :fugue_hits, :scop_id
+#  add_index :fugue_hits, :zscore
 
 
-  create_table :test_alignments, :force => true do |t|
-    t.belongs_to  :reference_alignment
-    t.string      :type
-    t.float       :sp
-    t.float       :tc
-  end
+#  create_table :reference_alignments, :force => true do |t|
+#    t.belongs_to  :alignment
+#    t.belongs_to  :template
+#    t.belongs_to  :target
+#    t.float       :pid1
+#    t.float       :pid2
+#    t.float       :pid3
+#    t.float       :pid4
+#  end
+#
+#  add_index :reference_alignments, :alignment_id
+#  add_index :reference_alignments, [:template_id, :target_id]
 
-  add_index :test_alignments, :reference_alignment_id
-  add_index :test_alignments, :sp
-  add_index :test_alignments, :tc
+
+#  create_table :test_alignments, :force => true do |t|
+#    t.belongs_to  :reference_alignment
+#    t.string      :type
+#    t.float       :sp
+#    t.float       :tc
+#  end
+#
+#  add_index :test_alignments, :reference_alignment_id
+#  add_index :test_alignments, :sp
+#  add_index :test_alignments, :tc
 
 
   create_table :interface_similarities, :force => true do |t|
     t.belongs_to  :interface
     t.belongs_to  :similar_interface
     t.float       :similarity_in_usr
-    t.float       :similarity_in_asa
-    t.float       :similarity_in_polarity
-    t.float       :similarity_in_res_composition
-    t.float       :similarity_in_sse_composition
-    t.float       :similarity_in_all
+#    t.float       :similarity_in_asa
+#    t.float       :similarity_in_polarity
+#    t.float       :similarity_in_res_composition
+#    t.float       :similarity_in_sse_composition
+#    t.float       :similarity_in_all
   end
+
   add_index :interface_similarities, :interface_id
   add_index :interface_similarities, :similar_interface_id
   add_index :interface_similarities, [:interface_id, :similar_interface_id], :unique => true, :name => "by_int_id_and_sim_int_id"
@@ -700,29 +701,29 @@ ActiveRecord::Schema.define(:version => 1) do
   end
 
 
-  create_table :fugue_searches, :force => true do |t|
-    t.string    :type
-    t.string    :name,        :default => nil
-    t.string    :email
-    t.string    :definition,  :default => nil
-    t.integer   :toprank,     :default => 10
-    t.text      :sequence
-    t.text      :result,      :default => nil
-    t.timestamp :started_at, :finished_at
-    t.timestamps
-  end
+#  create_table :fugue_searches, :force => true do |t|
+#    t.string    :type
+#    t.string    :name,        :default => nil
+#    t.string    :email
+#    t.string    :definition,  :default => nil
+#    t.integer   :toprank,     :default => 10
+#    t.text      :sequence
+#    t.text      :result,      :default => nil
+#    t.timestamp :started_at, :finished_at
+#    t.timestamps
+#  end
 
 
-  # For RudeQ
-  # http://github.com/matthewrudy/rudeq/tree/master
-  create_table :rude_queues, :force => true do |t|
-    t.string  :queue_name
-    t.text    :data
-    t.string  :token,     :default => nil
-    t.boolean :processed, :default => false, :null => false
-    t.timestamps
-  end
-  add_index :rude_queues, :processed
-  add_index :rude_queues, [:queue_name, :processed]
+#  # For RudeQ
+#  # http://github.com/matthewrudy/rudeq/tree/master
+#  create_table :rude_queues, :force => true do |t|
+#    t.string  :queue_name
+#    t.text    :data
+#    t.string  :token,     :default => nil
+#    t.boolean :processed, :default => false, :null => false
+#    t.timestamps
+#  end
+#  add_index :rude_queues, :processed
+#  add_index :rude_queues, [:queue_name, :processed]
 
 end

@@ -2,13 +2,10 @@
   <span class="main_title">Welcome to BIPA 1.0 release</span>
   <div id="home_intro" class="blue_link">
     <p>
-    BIPA, a database for protein-nucleic acid interaction, provides various properties of protein-nuleic acid interfaces. especially focusing on structural and functional restraints on nucleic acid-binding protein families and their relationships with mutations such nsSNPs. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org" %> complexes, <%= link_to ScopDomain.rpall.count, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html" %> domains, and <%= DomainInterface.all.count %> domain-nucleic acid interfaces in BIPA.
+    BIPA, a database for protein-nucleic acid interaction, provides various features of protein-nuleic acid interfaces. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org" %> complexes, <%= link_to ScopDomain.rpall.count, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html" %> domains, and <%= DomainInterface.all.count %> domain-nucleic acid interfaces in BIPA. BIPA also provides a multiple structural alignment of representative structures at the SCOP family level using the program <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/" %>, and the structural alignments were further annotated using <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/" %> to detect specific local environments of amino acids. 
     </p>
     <p>
-    At the SCOP family level, a representative set of structures is selected and aligned using <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/" %>, and the structural alignments were further annotated using <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/" %> to detect specific local environments of amino acids. Then, environment-specific substitution tables (<%= link_to "ESSTs", "http://www-cryst.bioc.cam.ac.uk/ESST" %>) were generated using <%= link_to "EGOR", "http://www-cryst.bioc.cam.ac.uk/egor" %> with an extended environment feature definition including atomic interactions between amino acids and nucleic acids to understand the patterns of amino acid substitutions under the functional restraints along with structural ones.
-    </p>
-    <p>
-    Furthermore, by relating BIPA to other in-house databases, DoubleMap and Requiem, nsSNPs were mapped onto the nucleic acid-binding proteins to provide potential candidates of mutations which might be affecting protein-nucleic acid interactions.
+    Furthermore, by relating BIPA to other in-house databases, DoubleMap and Requiem, UniProt annotations and nsSNPs were mapped onto the nucleic acid-binding proteins to provide additional information and the potential candidates of mutations which might be affecting protein-nucleic acid interactions.
     </p>
   </div>
 
@@ -47,14 +44,6 @@
     </tr>
     <tr>
       <th>nsSNPs found in nucleic acid-binding proteins</th>
-      <td>XXX</td>
-    </tr>
-    <tr>
-      <th>nsSNPs found in Protein-DNA interfaces</th>
-      <td>XXX</td>
-    </tr>
-    <tr>
-      <th>nsSNPs found in Protein-RNA interfaces</th>
       <td>XXX</td>
     </tr>
   </table>

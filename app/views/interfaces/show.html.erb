@@ -4,98 +4,123 @@
 
 <table id="interface_table" class="bipa">
   <tr>
-    <td class="title">ASA</td>
-    <td colspan=6><%=h "%.2f" % @interface[:asa] %> &Aring;</td>
+    <th colspan=3>Interface Features</th>
+    <th colspan=9>Interface Diagram</th>
   </tr>
   <tr>
-    <td class="title">Polarity</td>
-    <td colspan=3><%=h "%.2f" % @interface[:polarity] %></td>
-    <td class="title">No. of Hydrogen Bond</td>
-    <td colspan=2><%=h @interface[:hbonds_count] %></td>
+    <td colspan=2 class="title">ASA</td>
+    <td class="cell_number"><%=h "%.2f" % @interface[:asa] %> &Aring;</td>
+    <td colspan=9 rowspan=10>Diagram</td>
   </tr>
   <tr>
-    <td class="title">No. of Atoms</td>
-    <td colspan=3><%=h @interface[:atoms_count] %></td>
-    <td class="title">No. of Water-mediated Hydrogen Bond</td>
-    <td colspan=2><%=h @interface[:whbonds_count] %></td>
+    <td colspan=2 class="title">% of ASA</td>
+    <td class="cell_number"><%=h "%.2f" % @interface[:asa] %></td>
   </tr>
   <tr>
-    <td class="title">No. of Residues</td>
-    <td colspan=3><%=h @interface[:residues_count] %></td>
-    <td class="title">No. of van der Waals Contact</td>
-    <td colspan=2><%=h @interface[:vdw_contacts_count] %></td>
+    <td colspan=2 class="title">Polarity</td>
+    <td class="cell_number"><%=h "%.2f" % @interface[:polarity] %></td>
   </tr>
   <tr>
-    <td class="title" rowspan=2>Residue Composition</td>
-    <td colspan=6 align="center">
-      <%= image_tag @interface.residue_percentage_google_chart_url %>
-    </td>
+    <td colspan=2 class="title">No. of Residues</td>
+    <td class="cell_number"><%=h @interface[:residues_count] %></td>
   </tr>
   <tr>
-    <td colspan=6 align="center">
-      <%= image_tag @interface.residue_propensity_google_chart_url %>
-    </td>
+    <td colspan=2 class="title">No. of Atoms</td>
+    <td class="cell_number"><%=h @interface[:atoms_count] %></td>
+  </tr>
+  <tr>
+    <td colspan=2 class="title">No. of Hydrogen Bond</td>
+    <td class="cell_number"><%=h @interface[:hbonds_count] %></td>
+  </tr>
+  <tr>
+    <td colspan=2 class="title">No. of Water-mediated Hydrogen Bond</td>
+    <td class="cell_number"><%=h @interface[:whbonds_count] %></td>
+  </tr>
+  <tr>
+    <td colspan=2 class="title">No. of van der Waals Contact</td>
+    <td class="cell_number"><%=h @interface[:vdw_contacts_count] %></td>
   </tr>
   <tr>
     <td class="title" rowspan=2>SSE Composition</td>
-    <td colspan=6 align="center">
+    <td colspan=2 align="center">
       <%= image_tag @interface.sse_percentage_google_chart_url %>
     </td>
   </tr>
   <tr>
-    <td colspan=6 align="center">
+    <td colspan=2 align="center">
       <%= image_tag @interface.sse_propensity_google_chart_url %>
     </td>
   </tr>
   <tr>
-    <td rowspan=4 class="title">Similar Interfaces in</td>
-    <th colspan=2 class="title">Shape</th>
-    <th colspan=2 class="title">ASA</th>
-    <th colspan=2 class="title">Polarity</th>
-  </tr>
-  <tr valign="top">
-    <td colspan=2>
-      <% @interface.sorted_similar_interfaces_in_usr(10).each do |int| %>
-        <font style="font-family: Courier New, fixed"><%= "%.2f" % Interface.similarity_in_usr_between(@interface, int) %>: </font>
-        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %><br />
-      <% end %>
-    </td>
-    <td colspan=2>
-      <% @interface.sorted_similar_interfaces_in_asa(10).each do |int| %>
-        <font style="font-family: Courier New, fixed"><%= "%.2f" % Interface.similarity_in_asa_between(@interface, int) %>: </font>
-        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %><br />
-      <% end %>
-    </td>
-    <td colspan=2>
-      <% @interface.sorted_similar_interfaces_in_polarity(10).each do |int| %>
-        <font style="font-family: Courier New, fixed"><%= "%.2f" % Interface.similarity_in_polarity_between(@interface, int) %>: </font>
-        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %><br />
-      <% end %>
+    <td class="title" rowspan=2>Residue Composition</td>
+    <td colspan=11 align="center">
+      <%= image_tag @interface.residue_percentage_google_chart_url %>
     </td>
   </tr>
   <tr>
-    <th colspan=2>Residue Composition</th>
-    <th colspan=2>SSE Composition</th>  
-    <th colspan=2>All Aspects</th>
+    <td colspan=11 align="center">
+      <%= image_tag @interface.residue_propensity_google_chart_url %>
+    </td>
   </tr>
-  <tr valign="top">
-    <td colspan=2>
-      <% @interface.sorted_similar_interfaces_in_res_composition(10).each do |int| %>
-        <font style="font-family: Courier New, fixed"><%= "%.2f" % Interface.similarity_in_res_composition_between(@interface, int) %>: </font>
-        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %><br />
-      <% end %>
-    </td>
-    <td colspan=2>
-      <% @interface.sorted_similar_interfaces_in_sse_composition(10).each do |int| %>
-        <font style="font-family: Courier New, fixed"><%= "%.2f" % Interface.similarity_in_sse_composition_between(@interface, int) %>: </font>
-        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %><br />
-      <% end %>
-    </td>
-    <td colspan=2>
-      <% @interface.sorted_similar_interfaces_in_all(10).each do |int| %>
-        <font style="font-family: Courier New, fixed"><%= "%.2f" % Interface.similarity_in_all_between(@interface, int) %>: </font>
-        <%= link_to int.interface_type, interface_path(int) %> of <%= int.domain.sid %><br />
-      <% end %>
-    </td>
+  <tr>
+    <td colspan=12 align="center" class="title">Similar Interfaces in Shape [?]</td>
+  </tr>
+  <tr>
+    <th class="title" rowspan=11>in the same Subfamily</th>
+    <th class="title">USR Score</th>
+    <th class="title">Interface Type</th>
+    <th class="title">SCOP domain sid</th>
+    <th class="title">ASA</th>
+    <th class="title">% of ASA</th>
+    <th class="title">Polarity</th>
+    <th class="title">No. of Atoms</th>
+    <th class="title">No. of Residues</th>
+    <th class="title">No. of Hydrogen Bonds</th>
+    <th class="title">No. of Water-mediated Hydrogen Bonds</th>
+    <th class="title">No. of van der Waals contacts</th>
+  </tr>
+  <% @interface.sorted_similar_interfaces_in_usr(10).each do |int| %>
+    <tr>
+      <td class="cell_number"><%= "%.2f" % Interface.similarity_in_usr_between(@interface, int) %></td>
+      <td class="cell_text"><%= link_to int.interface_type, interface_path(int) %></td>
+      <td class="cell_text"><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
+      <td class="cell_number"><%= "%.2f" % int.asa %></td>
+      <td class="cell_number"><%= "%.2f" % int.asa %></td>
+      <td class="cell_number"><%= "%.2f" % int.polarity %></td>
+      <td class="cell_number"><%= int.residues_count %></td>
+      <td class="cell_number"><%= int.atoms_count %></td>
+      <td class="cell_number"><%= int.hbonds_count %></td>
+      <td class="cell_number"><%= int.whbonds_count %></td>
+      <td class="cell_number"><%= int.vdw_contacts_count %></td>
+    </tr>
+  <% end %>
+  <tr>
+    <th class="title" rowspan=11>among representative interfaces at the SCOP family level</th>
+    <th class="title">USR Score</th>
+    <th class="title">Interface Type</th>
+    <th class="title">SCOP domain sid</th>
+    <th class="title">ASA</th>
+    <th class="title">% of ASA</th>
+    <th class="title">Polarity</th>
+    <th class="title">No. of Atoms</th>
+    <th class="title">No. of Residues</th>
+    <th class="title">No. of Hydrogen Bonds</th>
+    <th class="title">No. of Water-mediated Hydrogen Bonds</th>
+    <th class="title">No. of van der Waals contacts</th>
+  <% @interface.sorted_similar_interfaces_in_usr(10).each do |int| %>
+    <tr>
+      <td class="cell_number"><%= "%.2f" % Interface.similarity_in_usr_between(@interface, int) %></td>
+      <td class="cell_text"><%= link_to int.interface_type, interface_path(int) %></td>
+      <td class="cell_text"><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
+      <td class="cell_number"><%= "%.2f" % int.asa %></td>
+      <td class="cell_number"><%= "%.2f" % int.asa %></td>
+      <td class="cell_number"><%= "%.2f" % int.polarity %></td>
+      <td class="cell_number"><%= int.residues_count %></td>
+      <td class="cell_number"><%= int.atoms_count %></td>
+      <td class="cell_number"><%= int.hbonds_count %></td>
+      <td class="cell_number"><%= int.whbonds_count %></td>
+      <td class="cell_number"><%= int.vdw_contacts_count %></td>
+    </tr>
+  <% end %>
   </tr>
 </table>
