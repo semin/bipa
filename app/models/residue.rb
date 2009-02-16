@@ -77,10 +77,10 @@ class Residue < ActiveRecord::Base
   def variations
     ins_code = icode.nil? ? '' : icode
     var2pdbs = Variation2PDB.find(:all,
-                                  :conditions => {  :pdb => chain.model.structure.pdb_code,
-                                                    :pdb_chain_id => chain.chain_code,
-                                                    :pdb_res_num => residue_code,
-                                                    :pdb_ins_code => ins_code })
+                                  :conditions => {:pdb          => chain.model.structure.pdb_code,
+                                                  :pdb_chain_id => chain.chain_code,
+                                                  :pdb_res_num  => residue_code,
+                                                  :pdb_ins_code => ins_code })
     var2pdbs.map { |vp| vp.variation }
   end
 
