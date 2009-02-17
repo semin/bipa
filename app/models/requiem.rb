@@ -67,4 +67,12 @@ class Variation < Requiem
     }.compact
   end
 
+  def dbsnp_url
+    code = variation_name.match(/^rs(\d+)/).andand[0]
+    if code
+      "http://www.ncbi.nlm.nih.gov/SNP/snp_ref.cgi?rs=#{code}"
+    else
+      nil
+    end
+  end
 end

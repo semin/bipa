@@ -4,7 +4,7 @@ class MainController < ApplicationController
 
   def home
     @structure = Structure.latest.first
-    #@structure = Structure.find_by_pdb_code("1A36")
+    @latest_news = News.order('date desc').limit(5)
 
     respond_to do |format|
       format.html
@@ -15,6 +15,10 @@ class MainController < ApplicationController
     respond_to do |format|
       format.html
     end
+  end
+
+  def news
+    @news = News.order('date desc')
   end
 
   def search

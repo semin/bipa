@@ -2,19 +2,25 @@
   <span class="main_title">Welcome to BIPA 1.0 release</span>
   <div id="home_intro" class="blue_link">
     <p>
-    BIPA, a database for protein-nucleic acid interaction, provides various features of protein-nuleic acid interfaces. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org" %> complexes, <%= link_to ScopDomain.rpall.count, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html" %> domains, and <%= DomainInterface.all.count %> domain-nucleic acid interfaces in BIPA. BIPA also provides a multiple structural alignment of representative structures at the SCOP family level using the program <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/" %>, and the structural alignments were further annotated using <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/" %> to detect specific local environments of amino acids. 
+    BIPA, a database for protein-nucleic acid interaction, provides various features of protein-nuleic acid interfaces. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org", :popup => true %> complexes, <%= link_to ScopDomain.rpall.count, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html", :popup => true %> domains, and <%= DomainInterface.all.count %> domain-nucleic acid interfaces in BIPA. BIPA also provides a multiple structural alignment of representative structures at the SCOP family level using the program <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/", :popup => true %>, and the structural alignments were further annotated using the program <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/", :popup => true %> to detect local environments of amino acids. All by all shape similarities among protein-nucleic acid interfaces were calculated using <%= link_to "USR", "http://www.ncbi.nlm.nih.gov/pubmed/17342716", :popup => true %> method, which enables us to navigate similar interfaces across the protein families.
     </p>
     <p>
-    Furthermore, by relating BIPA to other in-house databases, DoubleMap and Requiem, UniProt annotations and nsSNPs were mapped onto the nucleic acid-binding proteins to provide additional information and the potential candidates of mutations which might be affecting protein-nucleic acid interactions.
+    Furthermore, by relating BIPA to our in-house databases such as DoubleMap and Requiem, UniProt annotations and nsSNPs were mapped onto the nucleic acid-binding proteins to provide additional information and the potential candidates of mutations which might be affecting protein-nucleic acid interactions.
     </p>
   </div>
 
   <span class="main_title">Recent News:</span>
   <div id="home_news">
     <ul class="news">
-      <li>
-        Initial Release! (10 Feb 2008)
-      </li>
+      <% if @latest_news.size > 0 %>
+        <% @latest_news.each do |news| %>
+        <li>
+          <%= news.date %>: <%= news.title %>
+        </li>
+        <% end %>
+      <% else %>
+        N/A
+      <% end %>
     </ul>
   </div>
 </div>
@@ -41,10 +47,6 @@
     <tr>
       <th>RNA-binding SCOP domains</th>
       <td><%= DomainRnaInterface.count %></td>
-    </tr>
-    <tr>
-      <th>nsSNPs found in nucleic acid-binding proteins</th>
-      <td>XXX</td>
     </tr>
   </table>
 

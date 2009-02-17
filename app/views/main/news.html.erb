@@ -4,8 +4,11 @@
 
 <div id="home_news">
   <ul class="news">
-    <li>
-      Initial Release! (10 Feb 2008)
-    </li>
+    <% @news.each do |news| %>
+      <li>
+      <%= news.date %>: <%= news.title %><br />
+      <p><%= news.content %></p>
+      </li>
+    <% end %>
   </ul>
 </div>
