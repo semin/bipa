@@ -17,6 +17,14 @@ class Feature < Uniprot
   def uniprot_url
     "http://www.uniprot.org/uniprot/#{acc}"
   end
+
+  def feature_type_value
+    if feature_type
+      feature_type.val ? feature_type.val : "-"
+    else
+      "-"
+    end
+  end
 end
 
 

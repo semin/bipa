@@ -109,7 +109,7 @@
       <td class="cell_text" colspan=3>
         <% if res.uniprot_features.size > 0 %>
           <% res.uniprot_features.each do |unif| %>
-            <%= link_to unif.feature_type.val, unif.uniprot_url, :popup => true %><br />
+            <%= link_to unif.feature_type_value, unif.uniprot_url, :popup => true %><br />
           <% end %>
         <% else %>
           N/A
