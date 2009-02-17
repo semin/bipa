@@ -6,6 +6,9 @@ class Interface < ActiveRecord::Base
   has_many  :interface_similarities,
             :dependent  => :destroy
 
+  has_many  :similar_interfaces,
+            :through    => :interface_similarities
+
   named_scope :in_asa_range, lambda { |min_asa, max_asa|
     { :conditions => ["asa >= ? and asa <= ?", min_asa, max_asa] }
   }
@@ -54,9 +57,6 @@ class Interface < ActiveRecord::Base
     end
   end
 
-  has_many  :similar_interfaces,
-            :through    => :interface_similarities
-
   def interface_type
     (self[:type].match(/DNA/i) ? "DNA" : "RNA") + " interface"
   end
@@ -97,13 +97,17 @@ class DomainInterface < Interface
     }
   }
 
-#  def na_type
-#    "Protein-" + case self[:type]
-#    when /Dna/i then "DNA"
-#    when /Rna/i then "RNA"
-#    else; "Unknown"
-#    end
-#  end
+  def na_type
+    "Protein-" + case self[:type]
+    when /Dna/i then "DNA"
+    when /Rna/i then "RNA"
+    else; "Unknown"
+    end
+  end
+
+  def percent_asa
+    100.0 * self[:asa] / domain.unbound_asa rescue 0
+  end
 
   def calculate_residue_percentage_of(res)
     result = 100.0 * delta_asa_of_residue(res) / delta_asa rescue 0

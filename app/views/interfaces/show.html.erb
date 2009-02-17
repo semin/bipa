@@ -4,64 +4,108 @@
 
 <table id="interface_table" class="bipa">
   <tr>
-    <th colspan=3>Interface Features</th>
-    <th colspan=9>Interface Diagram</th>
+    <th colspan=12>Interface Features</th>
   </tr>
   <tr>
-    <td colspan=2 class="title">ASA</td>
-    <td class="cell_number"><%=h "%.2f" % @interface[:asa] %> &Aring;</td>
-    <td colspan=9 rowspan=10>Diagram</td>
-  </tr>
-  <tr>
-    <td colspan=2 class="title">% of ASA</td>
-    <td class="cell_number"><%=h "%.2f" % @interface[:asa] %></td>
-  </tr>
-  <tr>
-    <td colspan=2 class="title">Polarity</td>
-    <td class="cell_number"><%=h "%.2f" % @interface[:polarity] %></td>
-  </tr>
-  <tr>
-    <td colspan=2 class="title">No. of Residues</td>
-    <td class="cell_number"><%=h @interface[:residues_count] %></td>
-  </tr>
-  <tr>
-    <td colspan=2 class="title">No. of Atoms</td>
-    <td class="cell_number"><%=h @interface[:atoms_count] %></td>
-  </tr>
-  <tr>
-    <td colspan=2 class="title">No. of Hydrogen Bond</td>
-    <td class="cell_number"><%=h @interface[:hbonds_count] %></td>
-  </tr>
-  <tr>
-    <td colspan=2 class="title">No. of Water-mediated Hydrogen Bond</td>
-    <td class="cell_number"><%=h @interface[:whbonds_count] %></td>
-  </tr>
-  <tr>
-    <td colspan=2 class="title">No. of van der Waals Contact</td>
-    <td class="cell_number"><%=h @interface[:vdw_contacts_count] %></td>
-  </tr>
-  <tr>
-    <td class="title" rowspan=2>SSE Composition</td>
-    <td colspan=2 align="center">
+    <td colspan=4 class="title">ASA</td>
+    <td colspan=2 class="cell_number"><%=h "%.2f" % @interface[:asa] %> &Aring;</td>
+    <td colspan=2 rowspan=8 class="title">SSE Composition</td>
+    <td colspan=4 rowspan=4 align="center">
       <%= image_tag @interface.sse_percentage_google_chart_url %>
     </td>
   </tr>
+    <td colspan=4 class="title">% of ASA</td>
+    <td colspan=2 class="cell_number"><%=h "%.2f" % @interface.percent_asa %></td>
+  </tr>
   <tr>
-    <td colspan=2 align="center">
+    <td colspan=4 class="title">Polarity</td>
+    <td colspan=2 class="cell_number"><%=h "%.2f" % @interface[:polarity] %></td>
+  </tr>
+  <tr>
+    <td colspan=4 class="title">No. of Residues</td>
+    <td colspan=2 class="cell_number"><%=h @interface[:residues_count] %></td>
+  </tr>
+  <tr>
+    <td colspan=4 class="title">No. of Atoms</td>
+    <td colspan=2 class="cell_number"><%=h @interface[:atoms_count] %></td>
+    <td colspan=4 rowspan=4 align="center">
       <%= image_tag @interface.sse_propensity_google_chart_url %>
     </td>
   </tr>
   <tr>
-    <td class="title" rowspan=2>Residue Composition</td>
-    <td colspan=11 align="center">
+    <td colspan=4 class="title">No. of Hydrogen Bond</td>
+    <td colspan=2 class="cell_number"><%=h @interface[:hbonds_count] %></td>
+  </tr>
+  <tr>
+    <td colspan=4 class="title">No. of Water-mediated Hydrogen Bond</td>
+    <td colspan=2 class="cell_number"><%=h @interface[:whbonds_count] %></td>
+  </tr>
+  <tr>
+    <td colspan=4 class="title">No. of van der Waals Contact</td>
+    <td colspan=2 class="cell_number"><%=h @interface[:vdw_contacts_count] %></td>
+  </tr>
+  <tr>
+    <td colspan=4 rowspan=2 class="title">Residue Composition</td>
+    <td colspan=8 align="center">
       <%= image_tag @interface.residue_percentage_google_chart_url %>
     </td>
   </tr>
   <tr>
-    <td colspan=11 align="center">
+    <td colspan=8 align="center">
       <%= image_tag @interface.residue_propensity_google_chart_url %>
     </td>
   </tr>
+  <tr>
+    <td colspan=12 align="center" class="title">
+      <%= @interface.na_type %>-Binding Residues
+    </td>
+  </tr>
+  <tr>
+    <th>Chain ID</th>
+    <th>Residue Number</th>
+    <th>Residue Name</th>
+    <th>SSE</th>
+    <th>Unbound ASA</th>
+    <th>Bound ASA</th>
+    <th>&Delta;ASA</th>
+    <th>No. of Hydrogen Bond</th>
+    <th>No. of Water-mediated Hydrogen Bond</th>
+    <th>No. of van der Waals contact</th>
+    <th>nsSNP</th>
+    <th>UniProt Annotation</th>
+  </tr>
+  <% @interface.residues.each do |res| %>
+    <tr>
+      <td><%= res.chain.chain_code %></td>
+      <td><%= res.residue_code %></td>
+      <td><%= res.residue_name%></td>
+      <td><%= res.dssp.andand.sse %></td>
+      <td><%= res.unbound_asa %></td>
+      <td><%= res.bound_asa %></td>
+      <td><%= res.delta_asa %></td>
+      <td><%= res.hbonds_as_donor.count + res.hbonds_as_acceptor.count %></td>
+      <td><%= res.whbonds.count %></td>
+      <td><%= res.vdw_contacts.count %></td>
+      <td>
+        <% if res.nssnps.count > 0 %>
+          <% res.nssnps.each do |nssnp| %>
+            <%= nssnp.variation_name %>
+          <% end %>
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+      <td>
+        <% if res.uniprot_features.size > 0 %>
+          <% res.uniprot_features.each do |unif| %>
+            <%= unif.featureClass %>
+          <% end %>
+        <% else %>
+          N/A
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
   <tr>
     <td colspan=12 align="center" class="title">
       Similar Interfaces in Shape [<%= link_to "?", "#similar_interfaces_box", :id => "similar_interfaces_box_link" %>]<br />
@@ -89,8 +133,8 @@
         <td class="cell_number"><%= "%.2f" % Interface.usr_score_between(@interface, int) %></td>
         <td class="cell_text"><%= link_to int.interface_type, interface_path(int) %></td>
         <td class="cell_text" colspan=2><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
-        <td class="cell_number"><%= "%.2f" % int.asa %></td>
-        <td class="cell_number"><%= "%.2f" % int.asa %></td>
+        <td class="cell_number"><%= "%.2f" % int[:asa] %></td>
+        <td class="cell_number"><%= "%.2f" % int.percent_asa %></td>
         <td class="cell_number"><%= "%.2f" % int.polarity %></td>
         <td class="cell_number"><%= int.residues_count %></td>
         <td class="cell_number"><%= int.atoms_count %></td>

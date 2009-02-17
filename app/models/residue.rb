@@ -96,6 +96,21 @@ class Residue < ActiveRecord::Base
     nssnps.select { |v| v.omims.size > 0 }
   end
 
+  def uniprot_features
+    resmap = ResMap.find(:first, :conditions => {
+      :pdb => chain.model.structure.pdb_code.downcase,
+      :pdb_chain_id => chain.chain_code,
+      :res_3code => residue_name,
+      :pdb_res_num => residue_code
+    })
+
+    Feature.find(:all,
+                 :conditions => ['acc = ? and start = ? and end = ?',
+                                 resmap.uniprot,
+                                 resmap.uniprot_res_num,
+                                 resmap.uniprot_res_num])
+  end
+
 end # class Residue
 
 
@@ -138,6 +153,7 @@ class AaResidue < StdResidue
           :foreign_key  => "residue_id"
 
   delegate :sse, :to => :dssp
+
 
   def positive_phi?
     (dssp.phi > 0 and dssp.phi != 360.0) rescue false
