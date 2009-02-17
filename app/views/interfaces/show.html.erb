@@ -9,7 +9,22 @@
   <tr>
     <td colspan=4 class="title">ASA</td>
     <td colspan=2 class="cell_number"><%=h "%.2f" % @interface[:asa] %> &Aring;</td>
-    <td colspan=2 rowspan=8 class="title">SSE Composition</td>
+    <td colspan=2 rowspan=8 class="title">
+      SSE Composition [<%= link_to "?", "#sse_box", :id => "sse_box_link" %>]<br />
+      <div id="sse_box">
+        <div class="cell_text">
+          H = alpha helix<br />
+          B = residue in isolated beta-bridge<br />
+          E = extended strand, participates in beta ladder<br />
+          G = 3-helix (3/10 helix)<br />
+          I = 5 helix (pi helix)<br />
+          T = hydrogen bonded turn<br />
+          S = bend<br /><br />
+        </div>
+
+        Please check <%= link_to "this page", "http://swift.cmbi.ru.nl/gv/dssp/", :popup => true %>, for more details.
+      </div>
+    </td>
     <td colspan=4 rowspan=4 align="center">
       <%= image_tag @interface.sse_percentage_google_chart_url %>
     </td>
@@ -57,7 +72,7 @@
   </tr>
   <tr>
     <td colspan=12 align="center" class="title">
-      <%= @interface.na_type %>-Binding Residues
+      <%= @interface[:type].match(/DNA/i) ? "DNA" : "RNA" %>-Binding Residues
     </td>
   </tr>
   <tr>
@@ -112,8 +127,8 @@
   </tr>
   <tr>
     <th class="title">USR Score</th>
-    <th class="title">Interface Type</th>
-    <th class="title" colspan=2>SCOP domain sid</th>
+    <th class="title">Interface to</th>
+    <th class="title" colspan=2>SCOP domain</th>
     <th class="title">ASA</th>
     <th class="title">% of ASA</th>
     <th class="title">Polarity</th>
@@ -127,7 +142,7 @@
     <% @similar_interfaces.each do |int| %>
       <tr>
         <td class="cell_number"><%= "%.2f" % Interface.usr_score_between(@interface, int) %></td>
-        <td class="cell_text"><%= link_to int.interface_type, interface_path(int) %></td>
+        <td class="cell_text"><%= link_to int.interface_to, interface_path(int) %></td>
         <td class="cell_text" colspan=2><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
         <td class="cell_number"><%= "%.2f" % int[:asa] %></td>
         <td class="cell_number"><%= "%.2f" % int.percent_asa %></td>

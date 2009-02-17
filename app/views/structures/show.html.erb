@@ -5,7 +5,7 @@
 <table id="structure_table" class="bipa">
   <tr>
     <td class="title">Title</td>
-    <td colspan=5><%=h @structure.title %></td>
+    <td colspan=6><%=h @structure.title %></td>
     <td colspan=2 rowspan=5 style="width:280px" align="center">
       <a href="#big_image" id="big_image_link"><%= image_tag @structure.local_image_link, :width => 250, :border => 0 %></a><br />
       3D View: <%= link_to "Jmol", jmol_structure_path %>
@@ -13,7 +13,7 @@
   </tr>
   <tr>
     <td class="title">Citation</td>
-    <td colspan=5>
+    <td colspan=6>
       <%=h @structure.citation %>
       [<a href="#abstract" id="abstract_link">Abstract</a>]
       [<%= link_to "PubMed", @structure.pubmed_link, :popup => true %>]
@@ -21,13 +21,13 @@
   </tr>
   <tr>
     <td class="title">History</td>
-    <td colspan=5>
+    <td colspan=6>
       Deposition: <%=h @structure.deposited_at %>
     </td>
   </tr>
   <tr>
     <td class="title">Experimental Method</td>
-    <td colspan=5><%=h @structure.exp_method %>
+    <td colspan=6><%=h @structure.exp_method %>
       <% if @structure.resolution %>
         , Resolution: <%= @structure.resolution %> &Aring;
       <% end %>
@@ -35,10 +35,11 @@
   </tr>
   <tr>
     <td class="title">Classification</td>
-    <td colspan=5><%=h @structure.classification %></td>
+    <td colspan=6><%=h @structure.classification %></td>
   </tr>
   <tr class="title">
     <td rowspan=<%= @structure.domains.empty? ? 2 : @structure.domains.count + 1 %>>SCOP<br />Classification</td>
+    <td class="title_center">Interface to</td>
     <td class="title_center">Domain</td>
     <td class="title_center">Species</td>
     <td class="title_center">Protein</td>
@@ -50,17 +51,22 @@
   <% if @structure.domains.size > 0 %>
     <% @structure.domains.each do |domain| %>
       <tr>
-        <td>
+        <td align="center">
+          <% if domain.dna_interfaces.size > 0 %>
+            <%= link_to "DNA", interface_path(domain.dna_interfaces.first) %>
+          <% end %>
+          <% if domain.rna_interfaces.size > 0 %>
+            <%= link_to "RNA", interface_path(domain.rna_interfaces.first) %>
+          <% end %>
+          <% if domain.dna_interfaces.size < 1 and domain.rna_interfaces.size < 1 %>
+            N/A
+          <% end %>
+        </td>
+        <td align="center">
           <% if domain.rpall %>
             <%= link_to domain.sid, scop_path(domain) %>
           <% else %>
             <%= domain.sid %>
-          <% end %>
-          <% if domain.dna_interfaces.size > 0 %>
-            <br />[<%= link_to "DNA interface", interface_path(domain.dna_interfaces.first) %>]
-          <% end %>
-          <% if domain.rna_interfaces.size > 0 %>
-            <br />[<%= link_to "RNA interface", interface_path(domain.rna_interfaces.first) %>]
           <% end %>
         </td>
         <td align="center">
@@ -127,7 +133,7 @@
   <% @structure.aa_chains.each do |chain| %>
     <tr>
       <td><%= chain.chain_code %></td> 
-      <td colspan=6 class="alignment">
+      <td colspan=7 class="alignment">
         <div class="sequence"> 
           <%= chain.ruler_with_margin %><br />
           <%= chain.formatted_sequence %>
@@ -136,7 +142,7 @@
     </tr>
   <% end %>
   <tr>
-    <td colspan=8>
+    <td colspan=9>
       <table class="joy_annotation" align="center">
         <tr>
           <td colspan=3><b>Key for HTML output</b></td>

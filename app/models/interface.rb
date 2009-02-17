@@ -61,6 +61,10 @@ class Interface < ActiveRecord::Base
     (self[:type].match(/DNA/i) ? "DNA" : "RNA") + " interface"
   end
 
+  def interface_to
+    self[:type].match(/DNA/i) ? "DNA" : "RNA"
+  end
+
 end
 
 class DomainInterface < Interface
