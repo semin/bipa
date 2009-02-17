@@ -6,15 +6,6 @@ class Interface < ActiveRecord::Base
   has_many  :interface_similarities,
             :dependent  => :destroy
 
-  @@cutoff = {
-    :usr              => 0.5,
-    :asa              => 0.5,
-    :polarity         => 0.999,
-    :res_composition  => 0.0,
-    :sse_composition  => 0.5,
-    :all              => 0.4
-  }
-
   named_scope :in_asa_range, lambda { |min_asa, max_asa|
     { :conditions => ["asa >= ? and asa <= ?", min_asa, max_asa] }
   }
@@ -43,44 +34,24 @@ class Interface < ActiveRecord::Base
     { :conditions => ["vdw_contacts_count >= ? and vdw_contacts_count <= ?", min_vdw_contacts_count, max_vdw_contacts_count] }
   }
 
-#  AminoAcids::Residues::STANDARD.each do |aa|
-#    class_eval <<-RUBY_CODE
-#      named_scope :in_residue_percentage_of_#{aa.downcase}_range, lambda { |min_residue_percentage_of_#{aa.downcase}, max_residue_percentage_of_#{aa.downcase}|
-#        { :conditions => ["residue_percentage_of_#{aa.downcase} >= ? and residue_percentage_of_#{aa.downcase} <= ?", min_residue_percentage_of_#{aa.downcase}, max_residue_percentage_of_#{aa.downcase}] }
-#      }
-#    RUBY_CODE
-#  end
-#
-#  Sses::ALL.each do |sse|
-#    class_eval <<-RUBY_CODE
-#      named_scope :in_sse_percentage_of_#{sse}_range, lambda { |min_sse_percentage_of_#{sse.downcase}, max_sse_percentage_of_#{sse.downcase}|
-#        { :conditions => ["sse_percentage_of_#{sse.downcase} >= ? and sse_percentage_of_#{sse.downcase} <= ?", min_sse_percentage_of_#{sse.downcase}, max_sse_percentage_of_#{sse.downcase}] }
-#      }
-#    RUBY_CODE
-#  end
+  acts_as_network :similar_interfaces_in_usr,
+                  :through                  => :interface_similarities,
+                  :foreign_key              => 'interface_id',
+                  :association_foreign_key  => 'similar_interface_id',
+                  :conditions               => ['usr_score > 0.5']
 
-  %w[usr asa polarity res_composition sse_composition all].each do |item|
-    class_eval <<-RUBY_CODE
-      acts_as_network :similar_interfaces_in_#{item},
-                      :through                  => :interface_similarities,
-                      :foreign_key              => 'interface_id',
-                      :association_foreign_key  => 'similar_interface_id'
-                      #:conditions               => ['similarity_in_#{item} > #{@@cutoff[item.to_sym]}']
+  def self.usr_score_between(int1, int2)
+    sim1 = InterfaceSimilarity.first(:conditions => { :interface_id => int1.id, :similar_interface_id => int2.id })
+    sim2 = InterfaceSimilarity.first(:conditions => { :interface_id => int2.id, :similar_interface_id => int1.id })
+    sim1 ? sim1.usr_score : sim2.usr_score
+  end
 
-      def self.similarity_in_#{item}_between(int1, int2)
-        sim1 = InterfaceSimilarity.first(:conditions => { :interface_id => int1.id, :similar_interface_id => int2.id })
-        sim2 = InterfaceSimilarity.first(:conditions => { :interface_id => int2.id, :similar_interface_id => int1.id })
-        sim1 ? sim1.similarity_in_#{item} : sim2.similarity_in_#{item}
-      end
-
-      def sorted_similar_interfaces_in_#{item}(min = nil)
-        if min
-          similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse[0..min-1]
-        else
-          similar_interfaces_in_#{item}.sort_by { |i| self.class.similarity_in_#{item}_between(self, i) }.reverse
-        end
-      end
-    RUBY_CODE
+  def sorted_similar_interfaces_in_usr(min = nil)
+    if min
+      similar_interfaces_in_usr.sort_by { |i| self.class.usr_score_between(self, i) }.reverse[0..min-1]
+    else
+      similar_interfaces_in_usr.sort_by { |i| self.class.usr_score_between(self, i) }.reverse
+    end
   end
 
   has_many  :similar_interfaces,

@@ -23,6 +23,7 @@ module Bipa
     def get_atom_vectors
       # filter hydogen atoms
       atoms.select { |a1| a1.atom_name !~ /^H/ }.map { |a2| Vector[a2.x, a2.y, a2.z] }
+      #interface_atoms.select { |a1| a1.atom_name !~ /^H/ }.map { |a2| Vector[a2.x, a2.y, a2.z] }
     end
 
     # the molecular centroid (ctd)
@@ -91,7 +92,13 @@ module Bipa
     end
 
     def calculate_distance_distribution_to(target_vector)
-      atom_vectors.map { |atom_vector| (atom_vector - target_vector).r }
+        atom_vectors.map { |atom_vector|
+          begin
+            (atom_vector - target_vector).r
+          rescue
+            raise "Atom vector: #{atom_vector}, Target vector: #{target_vector}"
+          end
+        }
     end
 
     def shape_descriptors

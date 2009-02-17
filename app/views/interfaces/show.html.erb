@@ -63,13 +63,17 @@
     </td>
   </tr>
   <tr>
-    <td colspan=12 align="center" class="title">Similar Interfaces in Shape [?]</td>
+    <td colspan=12 align="center" class="title">
+      Similar Interfaces in Shape [<%= link_to "?", "#similar_interfaces_box", :id => "similar_interfaces_box_link" %>]<br />
+      <div id="similar_interfaces_box">
+        Similarities among nucleic acid-binding interfaces were measured using Ultrafast Shape Recognition (USR) method. Please see <a href="http://www.ncbi.nlm.nih.gov/pubmed/17342716">Ballester and Richard, 2007</a> for details.
+      </div>
+    </td>
   </tr>
   <tr>
-    <th class="title" rowspan=11>in the same Subfamily</th>
     <th class="title">USR Score</th>
     <th class="title">Interface Type</th>
-    <th class="title">SCOP domain sid</th>
+    <th class="title" colspan=2>SCOP domain sid</th>
     <th class="title">ASA</th>
     <th class="title">% of ASA</th>
     <th class="title">Polarity</th>
@@ -79,48 +83,30 @@
     <th class="title">No. of Water-mediated Hydrogen Bonds</th>
     <th class="title">No. of van der Waals contacts</th>
   </tr>
-  <% @interface.sorted_similar_interfaces_in_usr(10).each do |int| %>
+  <% if @similar_interfaces.size > 0 %>
+    <% @similar_interfaces.each do |int| %>
+      <tr>
+        <td class="cell_number"><%= "%.2f" % Interface.usr_score_between(@interface, int) %></td>
+        <td class="cell_text"><%= link_to int.interface_type, interface_path(int) %></td>
+        <td class="cell_text" colspan=2><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
+        <td class="cell_number"><%= "%.2f" % int.asa %></td>
+        <td class="cell_number"><%= "%.2f" % int.asa %></td>
+        <td class="cell_number"><%= "%.2f" % int.polarity %></td>
+        <td class="cell_number"><%= int.residues_count %></td>
+        <td class="cell_number"><%= int.atoms_count %></td>
+        <td class="cell_number"><%= int.hbonds_count %></td>
+        <td class="cell_number"><%= int.whbonds_count %></td>
+        <td class="cell_number"><%= int.vdw_contacts_count %></td>
+      </tr>
+    <% end %>
+  <% else %>
     <tr>
-      <td class="cell_number"><%= "%.2f" % Interface.similarity_in_usr_between(@interface, int) %></td>
-      <td class="cell_text"><%= link_to int.interface_type, interface_path(int) %></td>
-      <td class="cell_text"><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
-      <td class="cell_number"><%= "%.2f" % int.asa %></td>
-      <td class="cell_number"><%= "%.2f" % int.asa %></td>
-      <td class="cell_number"><%= "%.2f" % int.polarity %></td>
-      <td class="cell_number"><%= int.residues_count %></td>
-      <td class="cell_number"><%= int.atoms_count %></td>
-      <td class="cell_number"><%= int.hbonds_count %></td>
-      <td class="cell_number"><%= int.whbonds_count %></td>
-      <td class="cell_number"><%= int.vdw_contacts_count %></td>
+      <td colspan=12 style="text-align:center;">
+        N/A [<%= link_to "?", "#similar_interfaces_na_box", :id => "similar_interfaces_na_box_link" %>]<br />
+        <div id="similar_interfaces_na_box">
+          There is no interfaces having similar shapes in terms of Ultrafast Shape Recognition (USR) score (&gt; 0.5).
+        </div>
+      </td>
     </tr>
   <% end %>
-  <tr>
-    <th class="title" rowspan=11>among representative interfaces at the SCOP family level</th>
-    <th class="title">USR Score</th>
-    <th class="title">Interface Type</th>
-    <th class="title">SCOP domain sid</th>
-    <th class="title">ASA</th>
-    <th class="title">% of ASA</th>
-    <th class="title">Polarity</th>
-    <th class="title">No. of Atoms</th>
-    <th class="title">No. of Residues</th>
-    <th class="title">No. of Hydrogen Bonds</th>
-    <th class="title">No. of Water-mediated Hydrogen Bonds</th>
-    <th class="title">No. of van der Waals contacts</th>
-  <% @interface.sorted_similar_interfaces_in_usr(10).each do |int| %>
-    <tr>
-      <td class="cell_number"><%= "%.2f" % Interface.similarity_in_usr_between(@interface, int) %></td>
-      <td class="cell_text"><%= link_to int.interface_type, interface_path(int) %></td>
-      <td class="cell_text"><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
-      <td class="cell_number"><%= "%.2f" % int.asa %></td>
-      <td class="cell_number"><%= "%.2f" % int.asa %></td>
-      <td class="cell_number"><%= "%.2f" % int.polarity %></td>
-      <td class="cell_number"><%= int.residues_count %></td>
-      <td class="cell_number"><%= int.atoms_count %></td>
-      <td class="cell_number"><%= int.hbonds_count %></td>
-      <td class="cell_number"><%= int.whbonds_count %></td>
-      <td class="cell_number"><%= int.vdw_contacts_count %></td>
-    </tr>
-  <% end %>
-  </tr>
 </table>

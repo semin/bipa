@@ -1562,5 +1562,21 @@ namespace :bipa do
 
       end
     end
+
+
+    desc "Import USR Results"
+    task :interface_similarities => [:environment] do
+
+      usr_result = "./tmp/interface_similarities.txt"
+
+      if File.exists? usr_result
+        system "mysqlimport -h 192.168.1.1 -psemin --local --fields-terminated-by='\\t' --lines-terminated-by='\\n' BIPA_devel #{usr_result}"
+        $logger.info "Importing #{usr_result} done."
+      else
+        $logger.error "could not find #{usr_result}"
+        exit 1
+      end
+
+    end
   end
 end

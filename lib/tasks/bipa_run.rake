@@ -640,5 +640,12 @@ namespace :bipa do
       end
     end
 
+
+    desc "Run usr with ./tmp/interface_descriptors.txt file"
+    task :usr_c => [:environment] do
+      system "./bin/usr < ./tmp/interface_descriptors.txt > ./tmp/interface_similarities.txt"
+      $logger.info "Running usr done."
+    end
+
   end
 end

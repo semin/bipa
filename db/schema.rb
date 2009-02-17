@@ -658,7 +658,7 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :interface_similarities, :force => true do |t|
     t.belongs_to  :interface
     t.belongs_to  :similar_interface
-    t.float       :similarity_in_usr
+    t.float       :usr_score
 #    t.float       :similarity_in_asa
 #    t.float       :similarity_in_polarity
 #    t.float       :similarity_in_res_composition

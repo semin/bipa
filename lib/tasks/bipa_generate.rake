@@ -542,11 +542,11 @@ namespace :bipa do
 
 
     desc "Generate a dump file for interface atom coordiantes"
-    task :interface_coordinate_file => [:environment] do
+    task :interface_descriptor_file => [:environment] do
 
-      File.open("./tmp/interface_coordinates.txt", "w") do |file|
+      File.open("./tmp/interface_descriptors.txt", "w") do |file|
         DomainInterface.find_all_in_chunks do |int|
-          file.puts [int.id].concat(int.interface_atoms.map { |a| [a.x, a.y, a.z].join(", ") }).join(", ")
+          file.puts [int.id, *int.shape_descriptors].join(", ") if int.interface_atoms.size > 3
         end
       end
     end
