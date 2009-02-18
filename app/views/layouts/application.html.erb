@@ -29,7 +29,7 @@
         $j("ul.sf-menu").superfish();
       });
     
-      FancyZoomBox.directory = '/images';
+      FancyZoomBox.directory = 'http://www-cryst.bioc.cam.ac.uk/bipa/images';
       $(document).observe('dom:loaded', function() {
         $$("div.small_image a").each(function(el) { new FancyZoom(el); })
         new FancyZoom('abstract_link', {width:600, height:300});
@@ -54,10 +54,10 @@
       <div id="header"> 
         <ul id="header_menu" class="sf-menu">
           <li class="current">
-            <%= link_to "Home", "/" %>
+          <%= link_to "Home", :controller => "main", :action => "home" %>
           </li>
           <li>
-            <%= link_to "News", "/news" %>
+          <%= link_to "News", :controller => "main", :action => "news" %>
           </li>
           <li>
             <%= link_to "Browse", "#" %>
@@ -71,14 +71,14 @@
             </ul>
           </li>
           <li>
-            <%= link_to "References", "/references" %>
+          <%= link_to "References", :controller => "main", :action => "references" %>
           </li>
           <li>
-            <%= link_to "Contact", "/contact" %>
+          <%= link_to "Contact", :controller => "main", :action => "contact" %>
           </li>
         </ul>
         <div id="header_search">
-          <% form_tag("/search", :method => "get", :class => "search_form") do %>
+          <% form_tag(:controller => "main", :action => "search", :method => "get", :class => "search_form") do %>
             <%= select_tag(:search_model, options_for_select(%w[ PDB SCOP ])) %>
             <%= text_field_tag :query, nil, :size => 20 %>
             <%= submit_tag "Search", :name => nil %>
@@ -101,7 +101,7 @@
       </div>
 
       <div id="footer" class="black_link">
-        &copy; 2008 <%= link_to "Semin Lee", "/contact" %>, <%= link_to "Blundell Group", "http://www-cryst.bioc.cam.ac.uk" %>, <%= link_to "Department of Biochemistry", "http://www.bioc.cam.ac.uk" %>, <%= link_to "University of Cambridge", "http://www.cam.ac.uk" %>, UK
+        &copy; 2008 <%= link_to "Semin Lee", :controller => "main", :action => "contact" %>, <%= link_to "Blundell Group", "http://www-cryst.bioc.cam.ac.uk" %>, <%= link_to "Department of Biochemistry", "http://www.bioc.cam.ac.uk" %>, <%= link_to "University of Cambridge", "http://www.cam.ac.uk" %>, UK
       </div>
     </div>
   </body>
