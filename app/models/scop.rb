@@ -1,12 +1,12 @@
 class Scop < ActiveRecord::Base
 
+  include Bipa::Constants
+
   cattr_reader :version
 
   @@version = "1.73"
 
   set_table_name :scop
-
-  include Bipa::Constants
 
   acts_as_nested_set
 
@@ -73,12 +73,6 @@ class Scop < ActiveRecord::Base
     "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sccs=#{sccs}"
   end
 
-#  def interfaces(redundancy, resolution)
-#    dna_interfaces(redundancy, resolution) +
-#    rna_interfaces(redundancy, resolution)
-#  end
-#  memoize :interfaces
-#
   %w(dna rna).each do |na|
     class_eval <<-END
       def #{na}_interfaces
@@ -124,14 +118,14 @@ class Scop < ActiveRecord::Base
 #          memoize :#{property}_#{na}_interface_singlet_propensity_of_#{aa}
 #        END
 #
-##        %w(hbond whbond vdw_contact).each do |intact|
-##          class_eval <<-END
-##            def #{property}_#{dna}_interface_#{intact}_singlet_propensity_of_#{aa}(redundancy, resolution)
-##              #{na}_interfaces(redundancy, resolution).map(&:#{intact}_singlet_propensity_of_#{aa}).to_stats_array.#{property}
-##            end
-##            memoize :#{property}_#{dna}_interface_#{intact}_singlet_propensity_of_#{aa}
-##          END
-##        end
+#        %w(hbond whbond vdw_contact).each do |intact|
+#          class_eval <<-END
+#            def #{property}_#{dna}_interface_#{intact}_singlet_propensity_of_#{aa}(redundancy, resolution)
+#              #{na}_interfaces(redundancy, resolution).map(&:#{intact}_singlet_propensity_of_#{aa}).to_stats_array.#{property}
+#            end
+#            memoize :#{property}_#{dna}_interface_#{intact}_singlet_propensity_of_#{aa}
+#          END
+#        end
 #      end
 #
 #      Sses::ALL.map(&:downcase).each do |sse|

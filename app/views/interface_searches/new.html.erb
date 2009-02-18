@@ -1,9 +1,11 @@
 <div class="main_title">
-  Search Nucleic Acid-Binding Interfaces:
+  Search Nucleic Acid-Binding Interfaces:<br />
 </div>
 
 <div id="interface_search_form" class="blue_link">
-  <% form_for(:interface_search, @interface_search, :url => { :action => "create" }) do |f| %>
+  <% form_for(:interface_search,
+              @interface_search,
+              :url => { :action => "create" }) do |f| %>
     <p>
     <%= f.error_messages %>
     </p>

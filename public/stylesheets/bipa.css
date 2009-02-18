@@ -425,6 +425,11 @@ table.joy_annotation td {
   margin-bottom: 10px;
 }
 
+table caption {
+  font-size: 70%;
+  text-align: left;
+}
+
 /* for compatibility issues with IE and Firefox
  * both class .sequence and .alighment had to be set below
  *

@@ -2,10 +2,10 @@
   <span class="main_title">Welcome to BIPA 1.0 release</span>
   <div id="home_intro" class="blue_link">
     <p>
-    BIPA, a database for protein-nucleic acid interaction, provides various features of protein-nuleic acid interfaces. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org", :popup => true %> complexes, <%= link_to ScopDomain.rpall.count, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html", :popup => true %> domains, and <%= DomainInterface.all.count %> domain-nucleic acid interfaces in BIPA. BIPA also provides a multiple structural alignment of representative structures at the SCOP family level using the program <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/", :popup => true %>, and the structural alignments were further annotated using the program <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/", :popup => true %> to detect local environments of amino acids. All by all shape similarities among protein-nucleic acid interfaces were calculated using <%= link_to "USR", "http://www.ncbi.nlm.nih.gov/pubmed/17342716", :popup => true %> method, which enables us to navigate similar interfaces across the protein families.
+    BIPA, a database for protein-nucleic acid interaction, provides various features of protein-nuleic acid interfaces. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to Structure.untainted.count, structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org", :popup => true %> complexes, <%= link_to ScopDomain.rpall.count, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html", :popup => true %> domains, and <%= DomainInterface.all.count %> domain-nucleic acid interfaces in BIPA. BIPA also provides a multiple structural alignment of representative structures at the SCOP family level using the program <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/", :popup => true %>, and the structural alignments were further annotated using the program <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/", :popup => true %> to detect local environments of amino acids. All by all shape similarities among protein-nucleic acid interfaces were calculated using <%= link_to "USR", "http://www.ncbi.nlm.nih.gov/pubmed/17342716", :popup => true %> method, which enables us to navigate similar interfaces across the families.
     </p>
     <p>
-    Furthermore, by relating BIPA to our in-house databases such as DoubleMap and Requiem, UniProt annotations and nsSNPs were mapped onto the nucleic acid-binding proteins to provide additional information and the potential candidates of mutations which might be affecting protein-nucleic acid interactions.
+    Furthermore, by relating BIPA to our in-house databases such as DoubleMap and Requiem, UniProt annotations and nsSNPs were mapped onto the nucleic acid-binding proteins to provide additional information and potential candidates of mutations which might be affecting protein-nucleic acid interactions.
     </p>
   </div>
 
@@ -52,64 +52,67 @@
 
   <table class="brief_stats">
     <tr>
-      <th class="center">Property</th>
+      <th class="center">Property<sup>*</sup></th>
       <th class="center" width="120px">DNA interface</th>
       <th class="center" width="120px">RNA interface</th>
     </tr>
     <tr>
       <th>Average ASA</th>
       <td>
-        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.mean %> &Aring;<sup>2</sup><br />
-        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.stddev %> &Aring;<sup>2</sup>)
+        <%= "%.2f" % @mean_dna_interface_asa %> &Aring;<sup>2</sup><br />
+        (&plusmn; <%= "%.2f" % @stddev_dna_interface_asa %> &Aring;<sup>2</sup>)
       </td>
       <td>
-        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.mean %> &Aring;<sup>2</sup><br />
-        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "asa").map(&:asa).to_stats_array.stddev %> &Aring;<sup>2</sup>)
+        <%= "%.2f" % @mean_rna_interface_asa %> &Aring;<sup>2</sup><br />
+        (&plusmn; <%= "%.2f" % @stddev_rna_interface_asa %> &Aring;<sup>2</sup>)
       </td>
     </tr>
     <tr>
       <th>Polarity</th>
       <td>
-        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.mean %>
-        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_dna_interface_polarity %>
+        (&plusmn; <%= "%.2f" % @stddev_dna_interface_polarity %>)
       </td>
       <td>
-        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.mean %>
-        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "polarity").map(&:polarity).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_rna_interface_polarity %>
+        (&plusmn; <%= "%.2f" % @stddev_rna_interface_polarity %>)
       </td>
     </tr>
     <tr>
       <th>No. of hydrogen bonds</th>
       <td>
-        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.mean %> 
-        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_dna_interface_hbonds_count %> 
+        (&plusmn; <%= "%.2f" % @stddev_dna_interface_hbonds_count %>)
       </td>
       <td>
-        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.mean %> 
-        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "hbonds_count").map(&:hbonds_count).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_rna_interface_hbonds_count %> 
+        (&plusmn; <%= "%.2f" % @stddev_rna_interface_hbonds_count %>)
       </td>
     </tr>
     <tr>
       <th>No. of water-mediated hydrogen bonds</th>
       <td>
-        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.mean %> 
-        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_dna_interface_whbonds_count %> 
+        (&plusmn; <%= "%.2f" % @stddev_dna_interface_whbonds_count %>)
       </td>
       <td>
-        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.mean %> 
-        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "whbonds_count").map(&:whbonds_count).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_rna_interface_whbonds_count %> 
+        (&plusmn; <%= "%.2f" % @stddev_rna_interface_whbonds_count %>)
       </td>
     </tr>
     <tr>
       <th>No. of van der Waals contacts</th> 
       <td>
-        <%= "%.2f" % DomainDnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.mean %> 
-        (&plusmn; <%= "%.2f" % DomainDnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_dna_interface_vdw_contacts_count %> 
+        (&plusmn; <%= "%.2f" % @stddev_dna_interface_vdw_contacts_count %>)
       </td>
       <td>
-        <%= "%.2f" % DomainRnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.mean %> 
-        (&plusmn; <%= "%.2f" % DomainRnaInterface.find(:all, :select => "vdw_contacts_count").map(&:vdw_contacts_count).to_stats_array.stddev %>)
+        <%= "%.2f" % @mean_rna_interface_vdw_contacts_count %> 
+        (&plusmn; <%= "%.2f" % @stddev_rna_interface_vdw_contacts_count %>)
       </td>
     </tr>
+    <caption align="bottom">
+      * Properties were calculated from non-redundant sets of protein-nucleic acid interfaces (PID &lt; 80).
+    </caption>
   </table>
 </div>
