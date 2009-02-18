@@ -1,6 +1,6 @@
 class InterfacesController < ApplicationController
 
-  #caches_page :show
+  caches_page :show
 
   def index
     @interfaces = DomainInterface.all.paginate(:page => params[:page], :per_page => 10)

@@ -37,6 +37,9 @@ end
 
 class Variation < Requiem
 
+  # only dnSNP data has to be used!!!
+  default_scope :source => 'dbSNP'
+
   set_table_name :Variations
 
   has_many  :variation2_pdbs,

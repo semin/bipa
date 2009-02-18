@@ -71,19 +71,19 @@ Rails::Initializer.run do |config|
   config.time_zone = 'UTC'
 
   # for Action Mailer
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    :address        => "localhost",
-    :port           => 25,
-    :domain         => "localhost.localdomain",
-    :authentication => :login,
-  }
-  config.action_mailer.default_charset = "utf-8"
+#  config.action_mailer.delivery_method = :smtp
+#  config.action_mailer.smtp_settings = {
+#    :address        => "localhost",
+#    :port           => 25,
+#    :domain         => "localhost.localdomain",
+#    :authentication => :login,
+#  }
+#  config.action_mailer.default_charset = "utf-8"
 end
 
 # for will_paginate plugin
 WillPaginate.enable_named_scope
 
 # for workling plugin
-Workling::Clients::MemcacheQueueClient.memcache_client_class = RudeQ::Client
-Workling::Remote.dispatcher = Workling::Remote::Runners::ClientRunner.new
+#Workling::Clients::MemcacheQueueClient.memcache_client_class = RudeQ::Client
+#Workling::Remote.dispatcher = Workling::Remote::Runners::ClientRunner.new

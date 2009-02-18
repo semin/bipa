@@ -451,7 +451,7 @@ table caption {
   width: 700px;
   margin-bottom: 5px;
   white-space: nowrap;
-  overflow-x: auto;
+  overflow-x: scroll;
 }
 
 .cell_number {
