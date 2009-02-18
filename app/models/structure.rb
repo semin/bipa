@@ -72,7 +72,7 @@ class Structure < ActiveRecord::Base
   end
 
   def local_image_link
-    "/pdb/#{pdb_code.downcase}.png"
+    "/images/pdb/#{pdb_code.downcase}.png"
   end
 
   def authors

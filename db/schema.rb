@@ -668,23 +668,23 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :interface_similarities, [:similar_interface_id, :interface_id], :unique => true, :name => "by_sim_int_id_and_int_id"
 
 
-  create_table :interface_searches, :force => true do |t|
-    t.string    :interface_type
-    t.float     :max_asa,                 :default => 10000.0
-    t.float     :min_asa,                 :default => 0.0
-    t.float     :max_polarity,            :default => 1.0
-    t.float     :min_polarity,            :default => 0.0
-    t.integer   :max_residues_count,      :default => 200
-    t.integer   :min_residues_count,      :default => 0
-    t.integer   :max_atoms_count,         :default => 2000
-    t.integer   :min_atoms_count,         :default => 0
-    t.integer   :max_hbonds_count,        :default => 100
-    t.integer   :min_hbonds_count,        :default => 0
-    t.integer   :max_whbonds_count,       :default => 100
-    t.integer   :min_whbonds_count,       :default => 0
-    t.integer   :max_vdw_contacts_count,  :default => 2000
-    t.integer   :min_vdw_contacts_count,  :default => 0
-
+#  create_table :interface_searches, :force => true do |t|
+#    t.string    :interface_type
+#    t.float     :max_asa,                 :default => 10000.0
+#    t.float     :min_asa,                 :default => 0.0
+#    t.float     :max_polarity,            :default => 1.0
+#    t.float     :min_polarity,            :default => 0.0
+#    t.integer   :max_residues_count,      :default => 200
+#    t.integer   :min_residues_count,      :default => 0
+#    t.integer   :max_atoms_count,         :default => 2000
+#    t.integer   :min_atoms_count,         :default => 0
+#    t.integer   :max_hbonds_count,        :default => 100
+#    t.integer   :min_hbonds_count,        :default => 0
+#    t.integer   :max_whbonds_count,       :default => 100
+#    t.integer   :min_whbonds_count,       :default => 0
+#    t.integer   :max_vdw_contacts_count,  :default => 2000
+#    t.integer   :min_vdw_contacts_count,  :default => 0
+#
 #    AminoAcids::Residues::STANDARD.each do |aa|
 #      t.float :"max_residue_percentage_of_#{aa.downcase}", :default => 1.0
 #      t.float :"min_residue_percentage_of_#{aa.downcase}", :default => 0.0
@@ -694,7 +694,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #      t.float :"max_sse_percentage_of_#{sse.downcase}", :default => 1.0
 #      t.float :"min_sse_percentage_of_#{sse.downcase}", :default => 0.0
 #    end
-  end
+#  end
 
 
 #  create_table :fugue_searches, :force => true do |t|

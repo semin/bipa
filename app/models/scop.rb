@@ -398,7 +398,7 @@ class ScopDomain < Scop
   end
 
   def local_image_link
-    "/scop/#{sunid}.png"
+    "/images/scop/#{sunid}.png"
   end
 
 end
