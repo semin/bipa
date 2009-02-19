@@ -1,9 +1,9 @@
 <div class="list blue_link">
   <div class="small_image">
-    <a href="#big_image_<%= scop.sunid %>"><%= image_tag scop.local_image_link, :class => "list_figure", :border => 0 %></a>
+    <a href="#big_image_<%= scop.sunid %>"><%= image_tag scop.small_image, :border => 0 %></a>
   </div>
   <div id="big_image_<%= scop.sunid %>">
-    <%= image_tag scop.local_image_link, :width => 400 %><br />
+    <%= image_tag scop.big_image, :width => 400 %><br />
     <%= link_to scop.sid, scop_path(scop) %>
   </div>
   <div class="list_title">

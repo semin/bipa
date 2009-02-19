@@ -445,7 +445,7 @@ namespace :bipa do
         system  "molauto -notitle -nice #{stem}.pdb | " +
                 "molscript -r | " +
                 "perl -pi -e 's/^0 0 0\s+background.*$/1 1 1      background colour\n/g' | " +
-                "render -png #{stem}.png"
+                "render -png #{stem}_100.png -size100x100"
       end
 
       chdir cwd
@@ -464,7 +464,7 @@ namespace :bipa do
         system  "molauto -notitle -nice #{stem}.pdb | " +
                 "molscript -r | " +
                 "perl -pi -e 's/^0 0 0\s+background.*$/1 1 1      background colour\n/g' | " +
-                "render -png #{stem}.png"
+                "render -png #{stem}_100.png -size 100x100"
       end
 
       chdir cwd

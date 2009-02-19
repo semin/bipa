@@ -71,8 +71,12 @@ class Structure < ActiveRecord::Base
     "http://www.rcsb.org/pdb/images/#{pdb_code.downcase}_asym_r_500.jpg"
   end
 
-  def local_image_link
-    "/images/pdb/#{pdb_code.downcase}.png"
+  def small_image
+    "/images/pdb/#{pdb_code.downcase}_100.png"
+  end
+
+  def big_image
+    "/images/pdb/#{pdb_code.downcase}_500.png"
   end
 
   def authors

@@ -397,8 +397,12 @@ class ScopDomain < Scop
     residues.first.chain.model.structure
   end
 
-  def local_image_link
-    "/images/scop/#{sunid}.png"
+  def big_image
+    "/images/scop/#{sunid}_500.png"
+  end
+
+  def small_image
+    "/images/scop/#{sunid}_100.png"
   end
 
 end
