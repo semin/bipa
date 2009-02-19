@@ -42,15 +42,6 @@ Rails::Initializer.run do |config|
   # (by default production uses :info, the others :debug)
   # config.log_level = :warn
 
-  # Your secret key for verifying cookie session data integrity.
-  # If you change this key, all old sessions will become invalid!
-  # Make sure the secret is at least 30 characters and all random,
-  # no regular words or you'll be exposed to dictionary attacks.
-  config.action_controller.session = {
-    :session_key => '_bipa_session',
-    :secret      => 'fe1264f4c08f2230f95658e3a5d976a9e1c4d24b23ad927cd9fb14a25724377b153b1e03480047969d9c563744bd7f48e0fec03e2d612f77d7966354abc73d63'
-  }
-
   # Use the database for sessions instead of the cookie-based default,
   # which shouldn't be used to store highly confidential information
   # (create the session table with 'rake db:sessions:create')
@@ -83,7 +74,3 @@ end
 
 # for will_paginate plugin
 WillPaginate.enable_named_scope
-
-# for workling plugin
-#Workling::Clients::MemcacheQueueClient.memcache_client_class = RudeQ::Client
-#Workling::Remote.dispatcher = Workling::Remote::Runners::ClientRunner.new

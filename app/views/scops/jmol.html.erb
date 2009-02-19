@@ -6,7 +6,7 @@
   <applet code="<%= REL_URL_ROOT %>/javascripts/jmol/JmolAppletSigned.jar" width=500 height=500 align=center>
     <PARAM name="load" value="../../scop/<%= @scop.sunid %>.pdb">
     <PARAM name="java_code" value="JmolApplet">
-    <PARAM name="java_archive" value="/javascripts/jmol/JmolAppletSigned.jar">
+    <PARAM name="java_archive" value="<%= REL_URL_ROOT %>/javascripts/jmol/JmolAppletSigned.jar">
     <PARAM name="type" value="application/x-java-applet;version=1.1">
     <PARAM name="script" value="select all;spacefill off; wireframe off;cartoon;color cartoon chain;select ligand;wireframe 40;spacefill 120;">
     <PARAM name="progressbar" value="true">
