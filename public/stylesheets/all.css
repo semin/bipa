@@ -1,0 +1,747 @@
+html, body { 
+  border: 0px;
+  margin: 0px;
+  padding: 0px;
+}
+
+body {
+  color: #000;
+  background: #FFF;
+  font-family: Optima, "Lucida Grande", Georgia, Verdana, sans-serif;
+  font-size: 100%;
+}
+
+h4 {
+  padding: 5px;
+}
+
+p {
+  margin-top: 0px;
+  margin-bottom: 5px;
+}
+
+ul {
+  margin-top: 0px;
+}
+
+div.black_link a {
+  color: #000;
+}
+
+div.black_link a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+div.black_link a:hover, a:active {
+  color: #000;
+  text-decoration: underline;
+}
+
+div.blue_link a {
+  color: #00F;
+}
+
+div.blue_link a:link, a:visited {
+  color: #00F;
+  text-decoration: none;
+}
+
+div.blue_link a:hover, a:active {
+  color: #00F;
+  text-decoration: underline;
+}
+
+span.self {
+  font-weight: bold;
+}
+
+span.representative {
+  background: yellow;
+}
+
+#wrapper {
+  position: static;
+  width: 950px;
+  margin: 0 auto;
+}
+
+#header {
+  position: relative;
+  height: 80px;
+  width: 100%;
+  border-bottom: 2px black dotted;
+}
+
+#header_menu {
+  position: absolute;
+  top: 2px;
+  right: 0px;
+}
+
+#main_logo {
+  position: absolute;
+  top: 10px;
+  display: inline;
+}
+
+#main_banner {
+  position: absolute;
+  top: 20px;
+  margin-left: 40px;
+  font-family: Optima, "Lucida Grande", Georgia, Arial, serif;
+  font-size: 160%;
+  font-weight: bold;
+  text-align: left;
+  display: inline;
+}
+
+#sub_banner {
+  position: absolute;
+  top: 50px;
+  margin-left: 40px;
+  font-family: Optima, "Lucida Grande", Georgia, Arial, serif;
+  font-size: 110%;
+  text-align: left;
+}
+
+#cambridge_logo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+#browse {
+  display: inline;
+}
+
+#browse_form {
+  display: inline;
+}
+
+#header_search {
+  position: absolute;
+  top: 50px;
+  right: 0px;
+  font-size: 90%;
+}
+
+div.search_form {
+  display: inline;
+}
+
+form.search_form {
+  display: inline;
+}
+#settings {
+  display: inline;
+}
+
+#settings_form {
+  display: inline;
+}
+
+#middler {
+  position: relative;
+  width: 100%;
+  padding-top: 10px; 
+  padding-left: 10px;
+  padding-right: 10px;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.main_title {
+  font-size: 120%;
+  font-weight: bold;
+}
+
+div#home {
+  float: left;
+  width: 470px;
+  font-size: 100%;
+}
+
+div#home_intro {
+  padding: 10px 10px 0px 0px;
+  text-indent: 20pt;
+  margin-bottom: 10px;
+}
+
+div#home_news {
+  padding: 10px 10px 0px 0px;
+  margin-bottom: 10px;
+}
+
+div#home_reference {
+  padding: 10px 10px 0px 0px;
+  margin-bottom: 10px;
+}
+
+div#brief_stats {
+  float: right;
+  width: 470px;
+  margin-left:10px;
+  margin-bottom: 10px;
+}
+
+#footer {
+  position: relative;
+  clear:both;
+  height: 20px;
+  width: 100%;
+  padding-top: 2px;
+  border-top: 2px black dotted;
+  font-size: 90%;
+  text-align: center;
+}
+
+div#jmol {
+  width: 100%;
+}
+
+div#fugue_search_form {
+  width: 700px;
+  margin-top: 15px;
+  margin-left: 10px;
+}
+
+div#notice {
+  width: 800px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: 110%;
+  font-weight: bold;
+  color: #336600;
+}
+
+div.relative {
+  margin-left: 20px;
+}
+
+div.relative a {
+  color: #000;
+}
+
+div.relative a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+div.relative a:hover, a:active {
+  color: #000;
+  background: #AAA;
+  text-decoration: underline;
+}
+
+div.current_hierarchy {
+  margin-left: 20px;
+}
+
+div.current_hierarchy a {
+  color: #000;
+  background: #DDD;
+}
+
+div.current_hierarchy a:link, a:visited {
+  color: #000;
+  text-decoration: none;
+}
+
+div.current_hierarchy a:hover, a:active {
+  color: #000;
+  background: #AAA;
+  text-decoration: underline;
+}
+
+div.list {
+  padding: 4px;
+  width: 99%;
+  height: auto;
+  background: #FFF;
+}
+
+div.list:hover {
+  padding: 4px;
+  width: 99%;
+  background: #FFF;
+}
+
+div.list_title {
+  font-weight: bold;
+}
+
+div.small_image {
+  float: left;
+  margin-right: 10px;
+}
+
+div.list_content {
+  float: left;
+  font-size: 90%;
+}
+
+div.list_content2 {
+  float: left;
+  margin-top: 5px;
+  font-size: 90%;
+  padding-left: 15px;
+}
+
+div.list_spacer {
+  clear: both;
+  height: 2px;
+  width: 99%;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  background: #AAA;
+}
+
+/* CSS for uncounted list */
+ul.stats {
+  margin-top: 5px;
+  padding-top: 0px;
+}
+
+ul.contact {
+  margin: 0px;
+  padding: 0px;
+  text-align: center;
+}
+
+ul li.contact {
+  list-style-type: none;
+}
+
+ul li div.contact_name {}
+
+ul li div.contact_lab {}
+
+ul li div.contact_affiliation {}
+
+ul li div.contact_email {}
+
+table.brief_stats {
+  width: 450px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #666666;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+table.brief_stats th {
+  text-align: left;
+  font-weight: bold;
+  font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
+}
+
+table.brief_stats td {
+  text-align: right;
+  font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
+}
+
+table.brief_stats th.center {
+  text-align: center;
+}
+
+
+table.bipa {
+  width: 930px;
+  /* word-wrap: break-word; */
+  border-style: solid;
+  border-width: 1px;
+  border-color: #666666;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+table.bipa th {
+  text-align: center;
+  font-weight: bold;
+  font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
+}
+
+table.bipa td {
+  font-size: 90%;
+  padding: 5px;
+  border: 1px solid #666666;
+}
+
+table.bipa a {
+  color: #00F;
+}
+
+table.bipa a:link, a:visited {
+  color: #00F;
+  text-decoration: none;
+}
+
+table.bipa a:hover, a:active {
+  color: #00F;
+  text-decoration: underline;
+}
+
+table.bipa tr.title, td.title {
+  margin: 0px;
+  font-weight: bold;
+}
+
+table.bipa td.title_center {
+  text-align: center;
+}
+
+table.joy_annotation {
+  border-style: none;
+  font-family: "Courier New", courier, monospace;
+  width: 700px;
+}
+
+table.joy_annotation th {
+  margin: 0px;
+  padding: 0px;
+  border-style: none;
+}
+
+table.joy_annotation td {
+  margin: 0px;
+  padding: 0px;
+  border-style: none;
+}
+
+#scop_tree {
+  margin-bottom: 10px;
+}
+
+table caption {
+  font-size: 70%;
+  text-align: left;
+}
+
+/* for compatibility issues with IE and Firefox
+ * both class .sequence and .alighment had to be set below
+ *
+ * 'overflow-x: scroll;
+ *
+ * http://www.positioniseverything.net/explorer/expandingboxbug.html
+ */
+
+.alignment {
+  width: 700px;
+  margin-bottom: 5px;
+  font-family: "Courier New", courier, monospace;
+  font-size: 90%;
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+
+.sequence {
+  width: 700px;
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow-x: scroll;
+}
+
+.cell_number {
+  text-align: right;
+  font-family: "Courier New", courier, monospace;
+}
+
+.cell_text {
+  text-align: left;
+  font-family: "Courier New", courier, monospace;
+}
+
+.ruler {
+  margin-top: 5px;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.button {
+  margin-top: 5px;
+  text-align: right;
+  font-size: 80%;
+}
+
+div#zoom {
+  font-size: 90%;
+}
+
+.link_des {
+  font-size: 70%;
+  font-variant: small-caps;
+}
+
+
+/* Environments */
+.helix {
+  color: #F00;
+}
+
+.beta_sheet {
+  color: #00F;
+}
+
+.positive_phi {
+  font-style: italic;
+}
+
+.on_surface {
+  text-transform: uppercase;
+}
+
+.buried {
+  text-transform: lowercase;
+}
+
+.hbonding_dna {
+  background: #FF8040;
+  font-weight: bold;
+}
+
+.whbonding_dna {
+  background: #FF8040;
+  text-decoration: overline;
+}
+
+.vdw_contacting_dna {
+  background: #FF8040;
+  text-decoration: underline;
+}
+
+.hbonding_rna {
+  background: #46C7C7;
+  font-weight: bold;
+}
+
+.whbonding_rna {
+  background: #46C7C7;
+  text-decoration: overline;
+}
+
+.vdw_contacting_rna {
+  background: #46C7C7;
+  text-decoration: underline;
+}
+
+.fugue_search_text_area {
+}
+
+.fieldWithErrors {
+  padding: 2px;
+  background-color: red;
+  border: 2px solid red;
+  display: inline-block;
+}
+
+#errorExplanation {
+  width: 600px;
+  border: 2px solid red;
+  padding: 5px;
+  margin-bottom: 20px;
+  background-color: #f0f0f0;
+}
+
+#errorExplanation h2 {
+  text-align: left;
+  font-weight: bold;
+  padding: 5px 5px 5px 15px;
+  font-size: 110%;
+  margin: 5px;
+  background-color: #c00;
+  color: #fff;
+}
+
+#errorExplanation p {
+  color: #333;
+  padding: 5px;
+}
+
+#errorExplanation ul li {
+  font-size: 100%;
+  list-style: square;
+}
+
+
+
+/*** ESSENTIAL STYLES ***/
+.sf-menu, .sf-menu * {
+	margin:			0;
+	padding:		0;
+	list-style:		none;
+        z-index:                1;
+}
+.sf-menu {
+	line-height:	1.0;
+}
+.sf-menu ul {
+	position:		absolute;
+	top:			-999em;
+	width:			10em; /* left offset of submenus need to match (see below) */
+}
+.sf-menu ul li {
+	width:			100%;
+}
+.sf-menu li:hover {
+	visibility:		inherit; /* fixes IE7 'sticky bug' */
+}
+.sf-menu li {
+	float:			left;
+	position:		relative;
+}
+.sf-menu a {
+	display:		block;
+	position:		relative;
+}
+.sf-menu li:hover ul,
+.sf-menu li.sfHover ul {
+	left:			0;
+	top:			1.6em; /* match top ul list item height */
+	z-index:		99;
+}
+ul.sf-menu li:hover li ul,
+ul.sf-menu li.sfHover li ul {
+	top:			-999em;
+}
+ul.sf-menu li li:hover ul,
+ul.sf-menu li li.sfHover ul {
+	left:			10em; /* match ul width */
+	top:			0;
+}
+ul.sf-menu li li:hover li ul,
+ul.sf-menu li li.sfHover li ul {
+	top:			-999em;
+}
+ul.sf-menu li li li:hover ul,
+ul.sf-menu li li li.sfHover ul {
+	left:			10em; /* match ul width */
+	top:			0;
+}
+
+/*** DEMO SKIN ***/
+.sf-menu {
+	float:	left;
+	margin-bottom:	1em;
+}
+.sf-menu a {
+	border-left:	1px solid #FFF;
+	border-top:   	1px solid #FFF;
+	/*padding:        .75em 1em;*/
+	padding:        0.2em 0.3em;
+	text-decoration:none;
+}
+.sf-menu a, .sf-menu a:visited  { /* visited pseudo selector so IE6 applies text colour*/
+	color:			#000;
+}
+.sf-menu li {
+	background:		#FFF;
+}
+.sf-menu li li {
+	background:		#AAA;
+}
+.sf-menu li li li {
+	background:		#AAA;
+}
+.sf-menu li:hover, .sf-menu li.sfHover,
+.sf-menu a:focus, .sf-menu a:hover, .sf-menu a:active {
+	background:		#DDD;
+	outline:		0;
+}
+
+/*** arrows **/
+.sf-menu a.sf-with-ul {
+	/*padding-right: 	2.25em;*/
+	min-width:    	1px; /* trigger IE7 hasLayout so spans position accurately */
+}
+.sf-sub-indicator {
+	position:		absolute;
+	display:		block;
+	right:			.75em;
+	top:			1.05em; /* IE6 only */
+	width:			10px;
+	height:			10px;
+	text-indent: 	        -999em;
+	overflow:		hidden;
+	/*background:		url('/images/arrows-ffffff.png') no-repeat -10px -100px;*/
+}
+a > .sf-sub-indicator {  /* give all except IE6 the correct values */
+	top:			.8em;
+	background-position: 0 -100px; /* use translucent arrow for modern browsers*/
+}
+/* apply hovers to modern browsers */
+a:focus > .sf-sub-indicator,
+a:hover > .sf-sub-indicator,
+a:active > .sf-sub-indicator,
+li:hover > a > .sf-sub-indicator,
+li.sfHover > a > .sf-sub-indicator {
+	background-position: -10px -100px; /* arrow hovers for modern browsers*/
+}
+
+/* point right for anchors in subs */
+.sf-menu ul .sf-sub-indicator { background-position:  -10px 0; }
+.sf-menu ul a > .sf-sub-indicator { background-position:  0 0; }
+/* apply hovers to modern browsers */
+.sf-menu ul a:focus > .sf-sub-indicator,
+.sf-menu ul a:hover > .sf-sub-indicator,
+.sf-menu ul a:active > .sf-sub-indicator,
+.sf-menu ul li:hover > a > .sf-sub-indicator,
+.sf-menu ul li.sfHover > a > .sf-sub-indicator {
+	background-position: -10px 0; /* arrow hovers for modern browsers*/
+}
+
+/*** shadows for all but IE6 ***/
+.sf-shadow ul {
+	background:	url('../images/shadow.png') no-repeat bottom right;
+	padding: 0 8px 9px 0;
+	-moz-border-radius-bottomleft: 17px;
+	-moz-border-radius-topright: 17px;
+	-webkit-border-top-right-radius: 17px;
+	-webkit-border-bottom-left-radius: 17px;
+}
+.sf-shadow ul.sf-shadow-off {
+	background: transparent;
+}
+
+
+.pagination {
+  clear: both;
+  width: 100%;
+  padding: 3px;
+  margin: 3px;
+  font-size: 80%;
+  text-align: center;
+}
+.pagination a {
+  padding: 2px 5px 2px 5px;
+  margin: 2px;
+  border: 1px solid #FFFFFF;
+  text-decoration: none;
+  color: #000000;
+}
+.pagination a:hover, .pagination a:active {
+  border: 1px solid #000000;
+  color: #000000;
+}
+.pagination span.current {
+  padding: 2px 5px 2px 5px;
+  margin: 2px;
+  border: 1px solid #000000;
+  font-weight: bold;
+  background-color: #000000;
+  color: #FFFFFF;
+}
+.pagination span.disabled {
+  padding: 2px 5px 2px 5px;
+  margin: 2px;
+  border: 1px solid #FFFFFF;
+  color: #C5C2B8;
+}
