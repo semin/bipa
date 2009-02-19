@@ -3,7 +3,7 @@
 </div>
 
 <div id="jmol">
-  <applet code="/javascripts/jmol/JmolAppletSigned0.jar" width=500 height=500 align=center>
+  <applet code="<%= ActionController::Base.relative_url_root ? '/' + ActionController::Base.relative_url_root.to_s : '' %>}/javascripts/jmol/JmolAppletSigned0.jar" width=500 height=500 align=center>
     <PARAM name="load" value="../../pdb/<%= @structure.pdb_code.downcase %>.pdb">
     <PARAM name="java_code" value="JmolApplet">
     <PARAM name="java_archive" value="/javascripts/jmol/JmolAppletSigned0.jar">
