@@ -45,6 +45,7 @@
         new FancyZoom('similar_interfaces_box_link', {width:600, height:60});
         new FancyZoom('similar_interfaces_na_box_link', {width:600, height:60});
         new FancyZoom('sse_box_link', {width:500, height:200});
+        new FancyZoom('search_box_link', {width:500, height:100});
       });
     </script>
   </head>
@@ -82,6 +83,9 @@
             <%= select_tag(:search_model, options_for_select(%w[ PDB SCOP ])) %>
             <%= text_field_tag :query, nil, :size => 20 %>
             <%= submit_tag "Search", :name => nil %>
+            [<%= link_to "?", "#search_box", :id => "search_box_link" %>]
+            <div id="search_box">
+              BIPA supports <%= link_to "Sphinx", "http://www.sphinxsearch.com/", :popup => true %>'s extended query syntax. The indexed fields for PDB are 'pdb_code', 'classify', 'title', 'exp_method', 'resolution', 'deposited_at', and the ones for SCOP (domain) are 'type', 'sunid', 'stype', 'sccs', 'sid', 'description'. Using these fields, you can customize your query in many ways. Please check <%= "this document", "http://www.sphinxsearch.com/docs/current.html#searching", :popup => true %> for more details.
           <% end %>
         </div>
         <div id="main_logo">

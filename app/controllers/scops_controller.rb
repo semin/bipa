@@ -33,7 +33,7 @@ class ScopsController < ApplicationController
 
   def search
     @query = params[:query]
-    @scops = ScopDomain.rpall.search(@query, :page => params[:page], :per_page => 10)
+    @scops = ScopDomain.rpall.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10)
 
     respond_to do |format|
       format.html
