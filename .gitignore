@@ -3,13 +3,12 @@
 *~
 index/
 log/*.log
-log/workling*
-log/searchd.development.pid
+log/*.pid
 tmp/*
 tmp/*.csv
 tmp/**/*
 db/sphinx
-config/development.sphinx.conf
+config/*.sphinx.conf
 config/database.yml
 public/pdb
 public/scop
