@@ -28,6 +28,10 @@ require_dependency 'fugue_hit'
 require_dependency 'fugue_search'
 require_dependency 'test_alignment'
 
+# Relative URL Root
+REL_URL_ROOT = ActionController::Base.relative_url_root ?
+               ActionController::Base.relative_url_root.to_s : ''
+
 # Constants for BIPA
 RESUME    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
 MAX_FORK  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
