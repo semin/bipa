@@ -77,27 +77,6 @@
             <%= text_field_tag :query, nil, :size => 20 %>
             <%= submit_tag "Search", :name => nil %>
             [<%= link_to "?", "#search_box", :id => "search_box_link" %>]
-            <div id="search_box">
-              BIPA supports <%= link_to "Sphinx", "http://www.sphinxsearch.com/", :popup => true %>'s extended query syntax. You can use the indexed fields of BIPA to build more sophisticated query :<br /><br />
-              <b>PDB</b><br />
-              <ul class="cell_text">
-                <li>pdb_code (STRING, '10MH')</li>
-                <li>classification (STRING, 'TRANSFERASE/DNA'</li>
-                <li>title (STRING, 'TERNARY STRUCTURE OF HHAI ...'</li>
-                <li>exp_method (STRING, 'X-RAY DIFFRACTION')</li>
-                <li>resolution (FLOAT, 2.55)</li>
-                <li>deposited_at (DATETIME, 1998-08-10)</li>
-              </ul>
-              <b>SCOP</b>
-              <ul class="cell_text">
-                <li>sid (STRING, 'd10mha_')</li>
-                <li>sunid (INTEGER, 34232)</li>
-                <li>stype (STRING, 'px')</li>
-                <li>sccs (STRING, 'c.66.1.26')</li>
-                <li>description (STRING, '10mh A:')</li>
-              </ul>
-              Please check <%= link_to "this document", "http://www.sphinxsearch.com/docs/current.html#searching", :popup => true %> for more details.
-            </div>
           <% end %>
         </div>
         <div id="main_logo">
@@ -119,6 +98,28 @@
       <div id="footer" class="black_link">
         &copy; 2008 <%= link_to "Semin Lee", :controller => "main", :action => "contact" %>, <%= link_to "Blundell Group", "http://www-cryst.bioc.cam.ac.uk", :popup => true %>, <%= link_to "Department of Biochemistry", "http://www.bioc.cam.ac.uk", :popup => true %>, <%= link_to "University of Cambridge", "http://www.cam.ac.uk", :popup => true %>, UK
       </div>
+    </div>
+
+    <div id="search_box">
+      BIPA supports <%= link_to "Sphinx", "http://www.sphinxsearch.com/", :popup => true %>'s extended query syntax. You can use the indexed fields of BIPA to build more sophisticated query :<br /><br />
+      <b>PDB</b><br />
+      <ul class="cell_text">
+        <li>pdb_code (STRING, '10MH')</li>
+        <li>classification (STRING, 'TRANSFERASE/DNA'</li>
+        <li>title (STRING, 'TERNARY STRUCTURE OF HHAI ...'</li>
+        <li>exp_method (STRING, 'X-RAY DIFFRACTION')</li>
+        <li>resolution (FLOAT, 2.55)</li>
+        <li>deposited_at (DATETIME, 1998-08-10)</li>
+      </ul>
+      <b>SCOP</b>
+      <ul class="cell_text">
+        <li>sid (STRING, 'd10mha_')</li>
+        <li>sunid (INTEGER, 34232)</li>
+        <li>stype (STRING, 'px')</li>
+        <li>sccs (STRING, 'c.66.1.26')</li>
+        <li>description (STRING, '10mh A:')</li>
+      </ul>
+      Please check <%= link_to "this document", "http://www.sphinxsearch.com/docs/current.html#searching", :popup => true %> for more details.
     </div>
 
     <script type="text/javascript">
