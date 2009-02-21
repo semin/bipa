@@ -60,10 +60,6 @@ Rails::Initializer.run do |config|
   # in the database in UTC, and return them converted to the specified local zone.
   # Run "rake -D time" for a list of tasks for finding time zone names. Uncomment to use default local time.
   config.time_zone = 'UTC'
-  config.action_controller.session = {
-  :key         => '_my_session',
-  :secret      => '51bf50c750f762a831eec3b57b9f8bb99d0573c3fae35eab5312aa08d6952ac0f435feab24af37b1538bb24ad5535e4e7b605acdb18be6f3cdac298880a6722a'
-}
 
   # for Action Mailer
 #  config.action_mailer.delivery_method = :smtp
