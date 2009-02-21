@@ -1,6 +1,7 @@
 .DS_Store
 *.swp
 *~
+*.old
 index/
 log/*.log
 log/*.pid

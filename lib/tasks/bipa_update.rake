@@ -350,6 +350,7 @@ namespace :bipa do
                     hbond_tem       = []
                     whbond_tem      = []
                     vdw_contact_tem = []
+                    bipa_tem        = []
                     db_residues     = domain.residues
                     ff_residues     = entry.data.gsub("\n", "").split("")
 
@@ -361,6 +362,7 @@ namespace :bipa do
                         hbond_tem       << "\n"
                         whbond_tem      << "\n"
                         vdw_contact_tem << "\n"
+                        bipa_tem        << "\n"
                       end
 
                       if res == "-"
@@ -368,6 +370,7 @@ namespace :bipa do
                         hbond_tem       << "-"
                         whbond_tem      << "-"
                         vdw_contact_tem << "-"
+                        bipa_tem        << "-"
                         next
                       else
                         if res == db_residues[pos].one_letter_code
@@ -375,6 +378,15 @@ namespace :bipa do
                           db_residues[pos].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
                           db_residues[pos].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
                           db_residues[pos].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
+                          if bind_tem.last == "T" and !db_residues[pos].on_interface?
+                            bipa_tem << "I"
+                          elsif db_residues[pos].on_interface?
+                            bipa_tem << "i"
+                          elsif db_residues[pos].on_surface?
+                            bipa_tem << "A"
+                          else
+                            bipa_tem << 'a'
+                          end
                           pos += 1
                         else
                           $logger.warn "!!! Unmatched residues at #{pos} of #{entry.entry_id}, #{res} <=> #{db_residues[pos].one_letter_code}"
@@ -399,6 +411,10 @@ namespace :bipa do
                       file.puts ">P1;#{entry.entry_id}"
                       file.puts "van der Waals contact to #{na.upcase}"
                       file.puts vdw_contact_tem.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "bipa environment"
+                      file.puts bipa_tem.join + "*"
                     end
                   end
                 end
@@ -490,7 +506,7 @@ namespace :bipa do
     end
 
 
-    desc "Update ASA related fields for 'residues' tabl"
+    desc "Update ASA related fields for 'residues' table"
     task :residues_asa => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)

@@ -396,8 +396,8 @@ namespace :bipa do
               end
             end
 
-            cp("#{na.upcase}#{env.upcase}_CLASSDEF".constantize, est_dir)
-
+#            cp("#{na.upcase}#{env.upcase}_CLASSDEF".constantize, est_dir)
+#
 #            cwd = pwd
 #            chdir est_dir
 #            cp "classdef.#{na}#{env}.dat", "classdef.dat"
