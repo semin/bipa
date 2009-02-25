@@ -107,7 +107,7 @@ module Bipa
     end
 
     def hbonding_dna_phosphate?
-      if respond_to?(:hbond_dna_phosphate) && !hbonding_dna_phosphate.nil?
+      if respond_to?(:hbond_dna_phosphate) && !hbond_dna_phosphate.nil?
         hbond_dna_phosphate
       else
         hbonding_dna_phosphate_as_donor? || hbonding_dna_phosphate_as_acceptor?
