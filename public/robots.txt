@@ -4,11 +4,4 @@
 # User-Agent: *
 # Disallow: /
 User-Agent: *
-Disallow: /structures/
-Disallow: /scops/
-Disallow: /interfaces/
-Disallow: /bipa/structures/
-Disallow: /bipa/scops/
-Disallow: /bipa/interfaces/
-
-
+Disallow: /

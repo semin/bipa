@@ -8,7 +8,7 @@
     <td class="title">Title</td>
     <td><%= link_to @scop.structure.title, structure_path(@scop.structure) %></td>
     <td rowspan=10 style="width:280px" align="center">
-      <%= link_to image_tag (@scop.big_image, :width => 250, :border => 0), jmol_scop_path %><br />
+      <%= link_to image_tag(@scop.big_image, :width => 250, :border => 0), jmol_scop_path %><br />
       3D View: <%= link_to "Jmol", jmol_scop_path %>
     </td>
   </tr>
