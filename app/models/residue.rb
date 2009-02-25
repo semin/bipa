@@ -209,7 +209,6 @@ class AaResidue < StdResidue
 
     case
     when positive_phi?  then css_class << "positive_phi"
-    when coil?          then css_class << "coil"
     when helix?         then css_class << "helix"
     when beta_sheet?    then css_class << "beta_sheet"
     end

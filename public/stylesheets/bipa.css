@@ -483,6 +483,10 @@ div#zoom {
 
 
 /* Environments */
+.positive_phi {
+  font-style: italic;
+}
+
 .helix {
   color: #F00;
 }
@@ -491,16 +495,16 @@ div#zoom {
   color: #00F;
 }
 
-.positive_phi {
-  font-style: italic;
-}
-
 .on_surface {
   text-transform: uppercase;
 }
 
 .buried {
   text-transform: lowercase;
+}
+
+.dna_interface {
+  background: #FF8040;
 }
 
 .hbonding_dna {
@@ -516,6 +520,10 @@ div#zoom {
 .vdw_contacting_dna {
   background: #FF8040;
   text-decoration: underline;
+}
+
+.rna_interface {
+  background: #46C7C7;
 }
 
 .hbonding_rna {
