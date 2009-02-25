@@ -3,3 +3,12 @@
 # To ban all spiders from the entire site uncomment the next two lines:
 # User-Agent: *
 # Disallow: /
+User-Agent: *
+Disallow: /structures/
+Disallow: /scops/
+Disallow: /interfaces/
+Disallow: /bipa/structures/
+Disallow: /bipa/scops/
+Disallow: /bipa/interfaces/
+
+
