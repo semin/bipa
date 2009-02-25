@@ -24,6 +24,12 @@ class MainController < ApplicationController
     end
   end
 
+  def references
+    respond_to do |format|
+      format.html
+    end
+  end
+
   def contact
     respond_to do |format|
       format.html

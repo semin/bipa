@@ -7,7 +7,7 @@ ActionController::Routing::Routes.draw do |map|
   map.connect "search",     :controller => "main", :action => "search"
   map.connect "references", :controller => "main", :action => "references"
   map.connect "contact",    :controller => "main", :action => "contact"
-  map.connect "statistics", :controller => "main", :action => "statistics"
+  #map.connect "statistics", :controller => "main", :action => "statistics"
 
   map.resources :structures,
                 :member     => { :jmol => :get },
@@ -27,18 +27,18 @@ ActionController::Routing::Routes.draw do |map|
                   :set      => :get
                 })
 
-  map.resources :gos,
-                :singular => "go",
-                :member => { :hierarchy => :get },
-                :collection => { :search => :get }
+  #map.resources :gos,
+  #              :singular => "go",
+  #              :member => { :hierarchy => :get },
+  #              :collection => { :search => :get }
 
-  map.resources :taxa,
-                :singular => "taxon",
-                :collection => { :search => :get }
+  #map.resources :taxa,
+  #              :singular => "taxon",
+  #              :collection => { :search => :get }
 
-  map.resources :fugue_searches
+  #map.resources :fugue_searches
 
-  map.resources :interface_searches
+  #map.resources :interface_searches
 
   # Sample of regular route:
   #   map.connect 'products/:id', :controller => 'catalog', :action => 'view'
