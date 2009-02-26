@@ -451,34 +451,25 @@ namespace :bipa do
     desc "Update DNA/RNA interactibility for all residues"
     task :residues_na_interactibility => [:environment] do
 
-      intfs     = DomainInterface.all
-      total     = intfs.count
-      fmanager  = ForkManager.new(MAX_FORK)
+      aa_total  = AaResidue.count
+      aa_cnt    = 0
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-        intfs.each_with_index do |intf, i|
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-            %w[dna rna].each do |na|
-              intf.residues.each do |aa|
-                aa.send("hbond_#{na}_base=",       true) if aa.send("hbonding_#{na}_base_as_donor?") || aa.send("hbonding_#{na}_base_as_acceptor?")
-                aa.send("hbond_#{na}_sugar=",      true) if aa.send("hbonding_#{na}_sugar_as_donor?") || aa.send("hbonding_#{na}_sugar_as_acceptor?")
-                aa.send("hbond_#{na}_phosphate=",  true) if aa.send("hbonding_#{na}_phosphate_as_donor?") || aa.send("hbonding_#{na}_phosphate_as_acceptor?")
-                aa.send("whbond_#{na}_base=",      true) if aa.send("whbond_#{na}_base?")
-                aa.send("whbond_#{na}_sugar=",     true) if aa.send("whbond_#{na}_sugar?")
-                aa.send("whbond_#{na}_phosphate=", true) if aa.send("whbond_#{na}_phosphate?")
-                aa.send("vdw_#{na}_base=",         true) if aa.send("vdw_contacting_#{na}_base?")
-                aa.send("vdw_#{na}_sugar=",        true) if aa.send("vdw_contacting_#{na}_sugar?")
-                aa.send("vdw_#{na}_phophate=",     true) if aa.send("vdw_contacting_#{na}_phosphate?")
-                aa.save!
-              end
-            end
-            $logger.debug ">>> Updating DNA/RNA interactibility for residues in interface, #{intf.id}: done (#{i+1}/#{total})"
-            ActiveRecord::Base.remove_connection
-          end
+      AaResidue.find_all_in_chunks do |aa|
+        %w[dna rna].each do |na|
+          aa_cnt += 1
+          aa.send("hbond_#{na}_base=",       true) if aa.send("hbonding_#{na}_base_as_donor?") || aa.send("hbonding_#{na}_base_as_acceptor?")
+          aa.send("hbond_#{na}_sugar=",      true) if aa.send("hbonding_#{na}_sugar_as_donor?") || aa.send("hbonding_#{na}_sugar_as_acceptor?")
+          aa.send("hbond_#{na}_phosphate=",  true) if aa.send("hbonding_#{na}_phosphate_as_donor?") || aa.send("hbonding_#{na}_phosphate_as_acceptor?")
+          aa.send("whbond_#{na}_base=",      true) if aa.send("whbond_#{na}_base?")
+          aa.send("whbond_#{na}_sugar=",     true) if aa.send("whbond_#{na}_sugar?")
+          aa.send("whbond_#{na}_phosphate=", true) if aa.send("whbond_#{na}_phosphate?")
+          aa.send("vdw_#{na}_base=",         true) if aa.send("vdw_contacting_#{na}_base?")
+          aa.send("vdw_#{na}_sugar=",        true) if aa.send("vdw_contacting_#{na}_sugar?")
+          aa.send("vdw_#{na}_phosphate=",    true) if aa.send("vdw_contacting_#{na}_phosphate?")
+          aa.save!
         end
-        ActiveRecord::Base.establish_connection(config)
+        aa_cnt += 1
+        $logger.info "Residue #{aa.id}'s NA interactibility updated (#{aa_cnt}/#{aa_total})"
       end
     end
 
