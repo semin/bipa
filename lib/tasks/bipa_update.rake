@@ -456,7 +456,6 @@ namespace :bipa do
 
       AaResidue.find_all_in_chunks do |aa|
         %w[dna rna].each do |na|
-          aa_cnt += 1
           aa.send("hbond_#{na}_base=",       true) if aa.send("hbonding_#{na}_base_as_donor?") || aa.send("hbonding_#{na}_base_as_acceptor?")
           aa.send("hbond_#{na}_sugar=",      true) if aa.send("hbonding_#{na}_sugar_as_donor?") || aa.send("hbonding_#{na}_sugar_as_acceptor?")
           aa.send("hbond_#{na}_phosphate=",  true) if aa.send("hbonding_#{na}_phosphate_as_donor?") || aa.send("hbonding_#{na}_phosphate_as_acceptor?")
