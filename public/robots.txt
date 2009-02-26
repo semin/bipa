@@ -5,3 +5,6 @@
 # Disallow: /
 User-Agent: *
 Disallow: /
+
+User-Agent: Googlebot
+Disallow: /
