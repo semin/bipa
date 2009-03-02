@@ -11,19 +11,6 @@
     <td colspan=2 class="cell_number"><%=h "%.2f" % @interface[:asa] %> &Aring;</td>
     <td colspan=2 rowspan=8 class="title">
       SSE Composition [<%= link_to "?", "#sse_box", :id => "sse_box_link" %>]<br />
-      <div id="sse_box">
-        <div class="cell_text">
-          H = alpha helix<br />
-          B = residue in isolated beta-bridge<br />
-          E = extended strand, participates in beta ladder<br />
-          G = 3-helix (3/10 helix)<br />
-          I = 5 helix (pi helix)<br />
-          T = hydrogen bonded turn<br />
-          S = bend<br /><br />
-        </div>
-
-        Please check <%= link_to "this page", "http://swift.cmbi.ru.nl/gv/dssp/", :popup => true %>, for more details.
-      </div>
     </td>
     <td colspan=4 rowspan=4 align="center">
       <%= image_tag @interface.sse_percentage_google_chart_url %>
@@ -89,10 +76,10 @@
   </tr>
   <% @interface.residues.each do |res| %>
     <tr>
-      <td class="cell_text"><%= res.chain.chain_code %></td>
+      <td class="cell_text">  <%= res.chain.chain_code %></td>
       <td class="cell_number"><%= res.residue_code %></td>
-      <td class="cell_text"><%= res.residue_name%></td>
-      <td class="cell_text"><%= res.dssp.andand.sse %></td>
+      <td class="cell_text">  <%= res.residue_name%></td>
+      <td class="cell_text">  <%= res.dssp.andand.sse %></td>
       <td class="cell_number"><%= "%.2f" % res.delta_asa %></td>
       <td class="cell_number"><%= res.hbonds_as_donor.count + res.hbonds_as_acceptor.count %></td>
       <td class="cell_number"><%= res.whbonds.count %></td>
@@ -165,3 +152,16 @@
     </tr>
   <% end %>
 </table>
+
+<div id="sse_box">
+  <div class="cell_text">
+    H = alpha helix<br />
+    B = residue in isolated beta-bridge<br />
+    E = extended strand, participates in beta ladder<br />
+    G = 3-helix (3/10 helix)<br />
+    I = 5 helix (pi helix)<br />
+    T = hydrogen bonded turn<br />
+    S = bend<br /><br />
+  </div>
+  Please check <%= link_to "this page", "http://swift.cmbi.ru.nl/gv/dssp/", :popup => true %>, for more details.
+</div>
