@@ -89,9 +89,19 @@ module Bipa
       # fail "Buggy"
       return 0.0 if count < 2
       m = mean
-      s = inject(0) { |sum,xi| sum+(xi-m)**3 }
-      s.to_f/(count*variance**(3/2))
+      s = inject(0) { |sum, xi| sum+(xi-m)**3 }
+      s.to_f/(count*(variance**(3.0/2)))
     end
+
+    def population_skewness
+      if count < 2
+        warn "Your population has less than two members. Just returning regular skewness"
+        return skewness
+      else
+        skewness*Math::sqrt(count*(count-1))/(count-2)
+      end
+    end
+    alias pop_skewness population_skewness
 
     # The kurtosis of this sample.
     def kurtosis

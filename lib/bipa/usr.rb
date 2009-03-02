@@ -108,17 +108,17 @@ module Bipa
     def calculate_shape_descriptors
       Vector[
         ctd_distance_distribution.to_stats_array.mean,
-        ctd_distance_distribution.to_stats_array.variance,
-        ctd_distance_distribution.to_stats_array.skewness,
+        ctd_distance_distribution.to_stats_array.stddev,
+        Math::cbrt(ctd_distance_distribution.to_stats_array.pop_skewness),
         cst_distance_distribution.to_stats_array.mean,
-        cst_distance_distribution.to_stats_array.variance,
-        cst_distance_distribution.to_stats_array.skewness,
+        cst_distance_distribution.to_stats_array.stddev,
+        Math::cbrt(cst_distance_distribution.to_stats_array.pop_skewness),
         fct_distance_distribution.to_stats_array.mean,
-        fct_distance_distribution.to_stats_array.variance,
-        fct_distance_distribution.to_stats_array.skewness,
+        fct_distance_distribution.to_stats_array.stddev,
+        Math::cbrt(fct_distance_distribution.to_stats_array.pop_skewness),
         ftf_distance_distribution.to_stats_array.mean,
-        ftf_distance_distribution.to_stats_array.variance,
-        ftf_distance_distribution.to_stats_array.skewness
+        ftf_distance_distribution.to_stats_array.stddev,
+        Math::cbrt(ftf_distance_distribution.to_stats_array.pop_skewness)
       ]
     end
 
