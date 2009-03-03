@@ -663,7 +663,11 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-        seqs.each_with_index do |seq, i|
+        seqs.reverse.each_with_index do |seq, i|
+          unless seq.cssed_sequence.nil?
+            $logger.info ">>> Skipped Sequence, #{seq.id} (#{i+1}/#{total})"
+          end
+
           config = ActiveRecord::Base.remove_connection
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
