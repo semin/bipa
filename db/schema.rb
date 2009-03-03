@@ -313,6 +313,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  :chain
     t.string      :type
     t.float       :asa
+    t.float       :percent_asa
     t.float       :polarity
     t.integer     :residues_count,            :default => 0
     t.integer     :atoms_count,               :default => 0
