@@ -663,9 +663,10 @@ namespace :bipa do
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-        seqs.reverse.each_with_index do |seq, i|
+        seqs.each_with_index do |seq, i|
           unless seq.cssed_sequence.nil?
             $logger.info ">>> Skipped Sequence, #{seq.id} (#{i+1}/#{total})"
+            next
           end
 
           config = ActiveRecord::Base.remove_connection
