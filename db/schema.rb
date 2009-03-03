@@ -124,24 +124,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :bound_asa
     t.float       :delta_asa
     t.boolean     :ss,                    :default => nil
-    t.boolean     :hbond_dna_base,        :default => nil
-    t.boolean     :hbond_dna_sugar,       :default => nil
-    t.boolean     :hbond_dna_phosphate,   :default => nil
-    t.boolean     :whbond_dna_base,       :default => nil
-    t.boolean     :whbond_dna_sugar,      :default => nil
-    t.boolean     :whbond_dna_phosphate,  :default => nil
-    t.boolean     :vdw_dna_base,          :default => nil
-    t.boolean     :vdw_dna_sugar,         :default => nil
-    t.boolean     :vdw_dna_phosphate,     :default => nil
-    t.boolean     :hbond_rna_base,        :default => nil
-    t.boolean     :hbond_rna_sugar,       :default => nil
-    t.boolean     :hbond_rna_phosphate,   :default => nil
-    t.boolean     :whbond_rna_base,       :default => nil
-    t.boolean     :whbond_rna_sugar,      :default => nil
-    t.boolean     :whbond_rna_phosphate,  :default => nil
-    t.boolean     :vdw_rna_base,          :default => nil
-    t.boolean     :vdw_rna_sugar,         :default => nil
-    t.boolean     :vdw_rna_phosphate,     :default => nil
+    t.integer     :hbond_donors_count,    :default => nil
+    t.integer     :hbond_acceptors_count, :default => nil
+    t.integer     :whbonds_count,         :default => nil
+    t.integer     :vdw_contacts_count,    :default => nil
   end
 
   add_index :residues, :chain_id

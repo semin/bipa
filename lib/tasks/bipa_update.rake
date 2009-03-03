@@ -449,41 +449,28 @@ namespace :bipa do
 
 
     desc "Update DNA/RNA interactibility for all residues"
-    task :residues_na_interactibility => [:environment] do
+    task :atomic_bonds_count => [:environment] do
 
-      aa_total  = AaResidue.count
-      aa_cnt    = 0
-      fmanager  = ForkManager.new(MAX_FORK)
+      interfaces  = DomainInterface.all
+      total       = interfaces.size
+      fmanager    = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
-        AaResidue.find_all_in_chunks do |aa|
+        interfaces.each_with_index do |interface, i|
           config = ActiveRecord::Base.remove_connection
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
-
-            %w[dna rna].each do |na|
-              aa.send("hbond_#{na}_base=",      (aa.send("hbonding_#{na}_base_as_donor?") ||
-                                                 aa.send("hbonding_#{na}_base_as_acceptor?")) ?
-                                                 true : false)
-              aa.send("hbond_#{na}_sugar=",     (aa.send("hbonding_#{na}_sugar_as_donor?") ||
-                                                 aa.send("hbonding_#{na}_sugar_as_acceptor?")) ?
-                                                 true : false)
-              aa.send("hbond_#{na}_phosphate=", (aa.send("hbonding_#{na}_phosphate_as_donor?") ||
-                                                 aa.send("hbonding_#{na}_phosphate_as_acceptor?")) ?
-                                                 true : false)
-              aa.send("whbond_#{na}_base=",     aa.send("whbond_#{na}_base?") ? true : false)
-              aa.send("whbond_#{na}_sugar=",    aa.send("whbond_#{na}_sugar?") ? true : false)
-              aa.send("whbond_#{na}_phosphate=",aa.send("whbond_#{na}_phosphate?") ? true : false)
-              aa.send("vdw_#{na}_base=",        aa.send("vdw_contacting_#{na}_base?") ? true : false)
-              aa.send("vdw_#{na}_sugar=",       aa.send("vdw_contacting_#{na}_sugar?") ? true : false)
-              aa.send("vdw_#{na}_phosphate=",   aa.send("vdw_contacting_#{na}_phosphate?") ? true : false)
+            interface.residues.each do |aa|
+              aa.hbond_donors_count     = aa.hbonding_donors.length
+              aa.hbond_acceptors_count  = aa.hbonding_acceptors.length
+              aa.whbonds_count          = aa.whbonding_atoms.length
+              aa.vdw_contacts_count     = aa.vdw_contacting_atoms.length
+              aa.save!
             end
-            aa.save!
             ActiveRecord::Base.remove_connection
           end
           ActiveRecord::Base.establish_connection(config)
-          aa_cnt += 1
-          $logger.info "Residue #{aa.id}'s NA interactibility updated (#{aa_cnt}/#{aa_total})"
+          $logger.info "Counting atomic interactions for every residue in Interface, #{interface.id}: done (#{i+1}/#{total})"
         end
       end
     end
