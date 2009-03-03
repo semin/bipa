@@ -392,6 +392,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  :alignment
     t.belongs_to  :scop
     t.belongs_to  :chain
+    t.text        :cssed_sequence
   end
 
   add_index :sequences, :alignment_id

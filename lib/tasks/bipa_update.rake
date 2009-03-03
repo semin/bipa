@@ -655,6 +655,29 @@ namespace :bipa do
     end
 
 
+    desc "Update cssed_sequence for all Sequece"
+    task :cssed_sequence => [:environment] do
+
+      seqs      = Sequence.all
+      total     = seqs.size
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        seqs.each_with_index do |seq, i|
+          config = ActiveRecord::Base.remove_connection
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+            seq.cssed_sequence = seq.formatted_sequence
+            seq.save!
+            ActiveRecord::Base.remove_connection
+            $logger.info ">>> Updating cssed_sequence of Sequence, #{seq.id}: done (#{i+1}/#{total})"
+          end
+          ActiveRecord::Base.establish_connection(config)
+        end
+      end
+    end
+
+
     desc "Update interface_distances table 2"
     task :interface_similarities2 => [:environment] do
 
