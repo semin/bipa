@@ -81,11 +81,11 @@
       <td class="cell_text">  <%= res.residue_name%></td>
       <td class="cell_text">  <%= res.dssp.andand.sse %></td>
       <td class="cell_number"><%= "%.2f" % res.delta_asa %></td>
-      <td class="cell_number"><%= res.hbonds_as_donor.count + res.hbonds_as_acceptor.count %></td>
-      <td class="cell_number"><%= res.whbonds.count %></td>
-      <td class="cell_number"><%= res.vdw_contacts.count %></td>
+      <td class="cell_number"><%= res.hbonds_as_donor.size + res.hbonds_as_acceptor.size %></td>
+      <td class="cell_number"><%= res.whbonds.size %></td>
+      <td class="cell_number"><%= res.vdw_contacts.size %></td>
       <td class="cell_text">
-        <% if res.nssnps.count > 0 %>
+        <% if res.nssnps.size > 0 %>
           <% res.nssnps.each do |nssnp| %>
             <%= link_to nssnp.variation_name, nssnp.dbsnp_url, :popup => true %><br />
           <% end %>
@@ -132,13 +132,13 @@
         <td class="cell_text"><%= link_to int.interface_to, interface_path(int) %></td>
         <td class="cell_text" colspan=2><%= link_to int.domain.sid, scop_path(int.domain.id) %></td>
         <td class="cell_number"><%= "%.2f" % int[:asa] %></td>
-        <td class="cell_number"><%= "%.2f" % int.percent_asa %></td>
+        <td class="cell_number"><%= "%.2f" % int[:percent_asa] %></td>
         <td class="cell_number"><%= "%.2f" % int[:polarity] %></td>
-        <td class="cell_number"><%= int.residues_count %></td>
-        <td class="cell_number"><%= int.atoms_count %></td>
-        <td class="cell_number"><%= int.hbonds_count %></td>
-        <td class="cell_number"><%= int.whbonds_count %></td>
-        <td class="cell_number"><%= int.vdw_contacts_count %></td>
+        <td class="cell_number"><%= int[:residues_count] %></td>
+        <td class="cell_number"><%= int[:atoms_count] %></td>
+        <td class="cell_number"><%= int[:hbonds_count] %></td>
+        <td class="cell_number"><%= int[:whbonds_count] %></td>
+        <td class="cell_number"><%= int[:vdw_contacts_count] %></td>
       </tr>
     <% end %>
   <% else %>
