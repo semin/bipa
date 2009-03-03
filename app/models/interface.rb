@@ -40,13 +40,18 @@ class Interface < ActiveRecord::Base
   acts_as_network :similar_interfaces_in_usr,
                   :through                  => :interface_similarities,
                   :foreign_key              => 'interface_id',
-                  :association_foreign_key  => 'similar_interface_id',
-                  :conditions               => ['usr_score > 0.5']
+                  :association_foreign_key  => 'similar_interface_id'
 
   def self.usr_score_between(int1, int2)
     sim1 = InterfaceSimilarity.first(:conditions => { :interface_id => int1.id, :similar_interface_id => int2.id })
     sim2 = InterfaceSimilarity.first(:conditions => { :interface_id => int2.id, :similar_interface_id => int1.id })
-    sim1 ? sim1.usr_score : sim2.usr_score
+    if sim1
+      sim1.usr_score
+    elsif sim2
+      sim2.usr_score
+    else
+      nil
+    end
   end
 
   def sorted_similar_interfaces_in_usr(min = nil)
