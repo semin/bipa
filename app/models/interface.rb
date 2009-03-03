@@ -114,7 +114,7 @@ class DomainInterface < Interface
     end
   end
 
-  def percent_asa
+  def calculate_percent_asa
     100.0 * self[:asa] / domain.unbound_asa rescue 0
   end
 

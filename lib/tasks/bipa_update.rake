@@ -555,7 +555,7 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              interface.update_attribute :asa, interface.delta_asa
+              interface.update_attribute :percent_asa, interface.calculate_percent_asa
               interface.update_attribute :polarity, interface.calculate_polarity
               interface.update_attribute :atoms_count, interface.atoms.length
               interface.update_attribute :residues_count, interface.residues.length
