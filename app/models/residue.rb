@@ -104,11 +104,15 @@ class Residue < ActiveRecord::Base
       :pdb_res_num => residue_code
     })
 
-    Feature.find(:all,
-                 :conditions => ['acc = ? and start = ? and end = ?',
-                                 resmap.uniprot,
-                                 resmap.uniprot_res_num,
-                                 resmap.uniprot_res_num])
+    if resmap
+      Feature.find(:all,
+                   :conditions => ['acc = ? and start = ? and end = ?',
+                                   resmap.uniprot,
+                                   resmap.uniprot_res_num,
+                                   resmap.uniprot_res_num])
+    else
+      []
+    end
   end
 
 end # class Residue
