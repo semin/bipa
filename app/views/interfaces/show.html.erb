@@ -81,9 +81,9 @@
       <td class="cell_text">  <%= res.residue_name%></td>
       <td class="cell_text">  <%= res.dssp.andand.sse %></td>
       <td class="cell_number"><%= "%.2f" % res.delta_asa %></td>
-      <td class="cell_number"><%= res.hbonds_as_donor.size + res.hbonds_as_acceptor.size %></td>
-      <td class="cell_number"><%= res.whbonds.size %></td>
-      <td class="cell_number"><%= res.vdw_contacts.size %></td>
+      <td class="cell_number"><%= res[:hbonds_as_donor_count] + res[:hbonds_as_acceptor_count] %></td>
+      <td class="cell_number"><%= res[:whbonds_count] %></td>
+      <td class="cell_number"><%= res[:vdw_contacts_count] %></td>
       <td class="cell_text">
         <% if res.nssnps.size > 0 %>
           <% res.nssnps.each do |nssnp| %>

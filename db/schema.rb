@@ -124,10 +124,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :bound_asa
     t.float       :delta_asa
     t.boolean     :ss,                    :default => nil
-    t.integer     :hbond_donors_count,    :default => nil
-    t.integer     :hbond_acceptors_count, :default => nil
-    t.integer     :whbonds_count,         :default => nil
-    t.integer     :vdw_contacts_count,    :default => nil
+    t.integer     :hbonds_as_donor_count,    :default => nil
+    t.integer     :hbonds_as_acceptor_count, :default => nil
+    t.integer     :whbonds_count,            :default => nil
+    t.integer     :vdw_contacts_count,       :default => nil
   end
 
   add_index :residues, :chain_id

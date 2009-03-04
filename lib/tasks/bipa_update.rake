@@ -461,16 +461,16 @@ namespace :bipa do
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
             interface.residues.each do |aa|
-              aa.hbond_donors_count     = aa.hbonding_donors.length
-              aa.hbond_acceptors_count  = aa.hbonding_acceptors.length
-              aa.whbonds_count          = aa.whbonding_atoms.length
-              aa.vdw_contacts_count     = aa.vdw_contacting_atoms.length
+              aa.hbonds_as_donor_count    = aa.hbonds_as_donor.length
+              aa.hbonds_as_acceptor_count = aa.hbonds_as_acceptor.length
+              aa.whbonds_count            = aa.whbonds.length
+              aa.vdw_contacts_count       = aa.vdw_contacts.length
               aa.save!
             end
             ActiveRecord::Base.remove_connection
           end
           ActiveRecord::Base.establish_connection(config)
-          $logger.info "Counting atomic interactions for every residue in Interface, #{interface.id}: done (#{i+1}/#{total})"
+          $logger.info "Counting atomic interactions for residues of Interface, #{interface.id}: done (#{i+1}/#{total})"
         end
       end
     end
