@@ -687,7 +687,7 @@ namespace :bipa do
           config = ActiveRecord::Base.remove_connection
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
-            chain.cssed_chainuence = chain.formatted_sequence
+            chain.cssed_sequence = chain.formatted_sequence
             chain.save!
             ActiveRecord::Base.remove_connection
             $logger.info ">>> Updating cssed_sequence of Chain, #{chain.id}: done (#{i+1}/#{total})"
