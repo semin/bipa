@@ -643,7 +643,7 @@ namespace :bipa do
 
 
     desc "Update cssed_sequence for all Sequece"
-    task :cssed_sequence => [:environment] do
+    task :sequence_cssed_sequence => [:environment] do
 
       seqs      = Sequence.all
       total     = seqs.size
@@ -663,6 +663,34 @@ namespace :bipa do
             seq.save!
             ActiveRecord::Base.remove_connection
             $logger.info ">>> Updating cssed_sequence of Sequence, #{seq.id}: done (#{i+1}/#{total})"
+          end
+          ActiveRecord::Base.establish_connection(config)
+        end
+      end
+    end
+
+
+    desc "Update cssed_sequence for all Sequece"
+    task :chain_cssed_sequence => [:environment] do
+
+      chains    = AaChain.all
+      total     = chains.size
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        chains.each_with_index do |chain, i|
+          unless chain.cssed_sequence.nil?
+            $logger.info ">>> Skipped Chain, #{chain.id} (#{i+1}/#{total})"
+            next
+          end
+
+          config = ActiveRecord::Base.remove_connection
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+            chain.cssed_chainuence = chain.formatted_sequence
+            chain.save!
+            ActiveRecord::Base.remove_connection
+            $logger.info ">>> Updating cssed_sequence of Chain, #{chain.id}: done (#{i+1}/#{total})"
           end
           ActiveRecord::Base.establish_connection(config)
         end

@@ -136,7 +136,7 @@
       <td colspan=7 class="alignment">
         <div class="sequence"> 
           <%= chain.ruler_with_margin %><br />
-          <%= chain.formatted_sequence %>
+          <%= chain.cssed_sequence ? chain.cssed_sequence : chain.formatted_sequence %>
         <div>
       </td>
     </tr>

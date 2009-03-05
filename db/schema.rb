@@ -76,13 +76,6 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :models, :force => true do |t|
     t.belongs_to  :structure
     t.integer     :model_code
-    t.integer     :chains_count,        :default => 0
-    t.integer     :aa_chains_count,     :default => 0
-    t.integer     :na_chains_count,     :default => 0
-    t.integer     :dna_chains_count,    :default => 0
-    t.integer     :rna_chains_count,    :default => 0
-    t.integer     :hna_chains_count,    :default => 0
-    t.integer     :pseudo_chains_count, :default => 0
   end
 
   add_index :models, :structure_id
@@ -97,6 +90,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :mol_code
     t.string      :molecule,  :default => ""
     t.boolean     :tainted
+    t.text        :cssed_sequence
   end
 
   # This is for the case sesitivity of 'chain_code' column
