@@ -143,7 +143,7 @@ class AaChain < Chain
   end
 
   def formatted_sequence
-    std_residues.map { |r| r.formatted_residue_name }.join
+    std_residues.map { |r| r.formatted_residue_name rescue "X" }.join
   end
 end
 

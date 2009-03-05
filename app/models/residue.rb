@@ -192,8 +192,8 @@ class AaResidue < StdResidue
   end
 
   def one_letter_code
-    AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or
-    raise "No one letter code for residue: #{residue_name}"
+    AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or "X"
+    #raise "No one letter code for residue: #{residue_name}"
   end
 
   %w(unbound bound delta).each do |state|
