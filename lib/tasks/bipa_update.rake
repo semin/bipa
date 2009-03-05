@@ -643,7 +643,7 @@ namespace :bipa do
 
 
     desc "Update cssed_sequence for all Sequece"
-    task :sequence_cssed_sequence => [:environment] do
+    task :sequences_cssed_sequence => [:environment] do
 
       seqs      = Sequence.all
       total     = seqs.size
@@ -671,7 +671,7 @@ namespace :bipa do
 
 
     desc "Update cssed_sequence for all Sequece"
-    task :chain_cssed_sequence => [:environment] do
+    task :chains_cssed_sequence => [:environment] do
 
       chains    = AaChain.all
       total     = chains.size
