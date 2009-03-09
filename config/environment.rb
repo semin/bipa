@@ -5,7 +5,7 @@
 # ENV['RAILS_ENV'] ||= 'production'
 
 # Specifies gem version of Rails to use when vendor/rails is not present
-RAILS_GEM_VERSION = '2.3.0' unless defined? RAILS_GEM_VERSION
+RAILS_GEM_VERSION = '2.3.1' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -15,7 +15,7 @@ Rails::Initializer.run do |config|
   config.gem 'narray'
   config.gem 'andand'
   config.gem 'fork_manager'
-  config.gem 'ar-extensions'
+  #config.gem 'ar-extensions'
   config.gem 'simple_memoize'
   config.gem 'composite_primary_keys'
   config.gem 'RubyInline', :lib => 'inline'
