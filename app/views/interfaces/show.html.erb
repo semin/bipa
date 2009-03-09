@@ -1,5 +1,5 @@
 <div class="main_title blue_link">
-  <%= @interface.class.to_s.match(/DNA/i) ? "DNA" : "RNA" %> Interface of SCOP domain, <%= link_to @interface.domain.sid, scop_path(@interface.domain) %>
+  <%= @interface.class.to_s.match(/DNA/i) ? "DNA" : "RNA" %> Interface of SCOP domain, <%= link_to @interface.domain.sid, scop_path(@interface.domain) %> (<%= @interface.sccs %>)
 </div>
 
 <table id="interface_table" class="bipa">
