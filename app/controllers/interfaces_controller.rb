@@ -14,7 +14,7 @@ class InterfacesController < ApplicationController
     @interface = DomainInterface.find(params[:id])
     @similar_interfaces = @interface.sorted_similar_interfaces_in_usr
 
-    redirect_to :back unless @interface
+    #redirect_to :back unless @interface
     respond_to do |format|
       format.html
     end

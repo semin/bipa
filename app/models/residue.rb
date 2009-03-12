@@ -97,6 +97,9 @@ class Residue < ActiveRecord::Base
   end
 
   def uniprot_features
+    # temporary remedy for during Gloria.ResMap downtime
+    #return []
+
     resmap = ResMap.find(:first, :conditions => {
       :pdb => chain.model.structure.pdb_code.downcase,
       :pdb_chain_id => chain.chain_code,
