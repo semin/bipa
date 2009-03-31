@@ -18,6 +18,8 @@ class Residue < ActiveRecord::Base
 
   has_many  :positions
 
+  named_scope :on_interface, {:conditions => ['domain_interface_id IS NOT NULL'] }
+
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?

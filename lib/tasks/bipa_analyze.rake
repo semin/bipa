@@ -1,6 +1,20 @@
 namespace :bipa do
   namespace :analyze do
 
+    desc "Find residues binding both RNA/DNA"
+    task :residues_binding_dna_rna => [:environment] do
+      cnt = 0
+      Residue.on_interface.each do |res|
+        if res.binding_dna? && res.binding_rna?
+          puts "#{res.domain.sid}, #{res.residue_code}, #{res.residue_name}"
+          cnt += 1
+        end
+      end
+      puts "Total no. of residues on NA-binding interfaces: #{Residue.on_interface.count}"
+      puts "Total no. of DNA/RNA-binding residues: #{cnt} (#{100.0 * cnt / Residue.on_interface.count.to_f})"
+    end
+
+
     desc "Get a ROC table"
     task :roc => [:environment] do
       fam_std_fps     = StdFugueHit.fam_fp.sort_by(&:zscore).reverse

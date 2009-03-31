@@ -105,22 +105,20 @@
 
     <div id="search_box">
       BIPA supports <%= link_to "Sphinx", "http://www.sphinxsearch.com/", :popup => true %>'s extended query syntax. You can use the indexed fields of BIPA to build more sophisticated query :<br /><br />
-      <b>PDB</b><br />
+      <b>PDB</b>
       <ul class="cell_text">
-        <li>pdb_code (STRING, '10MH')</li>
-        <li>classification (STRING, 'TRANSFERASE/DNA')</li>
-        <li>title (STRING, 'TERNARY STRUCTURE OF HHAI ...')</li>
-        <li>exp_method (STRING, 'X-RAY DIFFRACTION')</li>
-        <li>resolution (FLOAT, 2.55)</li>
-        <li>deposited_at (DATETIME, 1998-08-10)</li>
+        <li>pdb_code (e.g. @pdb_code 10MH)</li>
+        <li>classification (e.g. @classification TRANSFERASE/DNA)</li>
+        <li>title (e.g. @title "TERNARY STRUCTURE OF HHAI")</li>
+        <li>exp_method (e.g. @exp_method "X-RAY DIFFRACTION")</li>
       </ul>
-      <b>SCOP</b>
+      <b>SCOP</b>: 
       <ul class="cell_text">
-        <li>sid (STRING, 'd10mha_')</li>
-        <li>sunid (INTEGER, 34232)</li>
-        <li>stype (STRING, 'px')</li>
-        <li>sccs (STRING, 'c.66.1.26')</li>
-        <li>description (STRING, '10mh A:')</li>
+        <li>sid (e.g. @sid d10mha_)</li>
+        <li>sunid (e.g. @sunid 34232)</li>
+        <li>stype (e.g. @stype px)</li>
+        <li>sccs (e.g. @sccs c.66.1.26)</li>
+        <li>description (e.g. @description "10mh A:")</li>
       </ul>
       Please check <%= link_to "this document", "http://www.sphinxsearch.com/docs/current.html#searching", :popup => true %> for more details.
     </div>

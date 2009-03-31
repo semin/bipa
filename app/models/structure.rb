@@ -44,7 +44,7 @@ class Structure < ActiveRecord::Base
     indexes :classification
     indexes :title
     indexes :exp_method
-    indexes :resolution
+    indexes :resolution, :sortable => true
 
     has :deposited_at
   end

@@ -48,7 +48,7 @@ module ThinkingSphinx
     end
     
     def to_riddle_for_core(offset, index)
-      add_internal_attributes
+      add_internal_attributes_and_facets
       link!
       
       source = Riddle::Configuration::SQLSource.new(
@@ -56,7 +56,7 @@ module ThinkingSphinx
       )
       
       set_source_database_settings  source
-      set_source_attributes         source
+      set_source_attributes         source, offset
       set_source_sql                source, offset
       set_source_settings           source
       
@@ -64,7 +64,7 @@ module ThinkingSphinx
     end
     
     def to_riddle_for_delta(offset, index)
-      add_internal_attributes
+      add_internal_attributes_and_facets
       link!
       
       source = Riddle::Configuration::SQLSource.new(
@@ -73,7 +73,7 @@ module ThinkingSphinx
       source.parent = "#{name}_core_#{index}"
       
       set_source_database_settings  source
-      set_source_attributes         source
+      set_source_attributes         source, offset
       set_source_sql                source, offset, true
       
       source
@@ -181,7 +181,7 @@ module ThinkingSphinx
       # and db:migrate). It's a bit hacky, but I can't think of a better way.
     rescue StandardError => err
       case err.class.name
-      when "Mysql::Error", "ActiveRecord::StatementInvalid"
+      when "Mysql::Error", "Java::JavaSql::SQLException", "ActiveRecord::StatementInvalid"
         return
       else
         raise err
@@ -200,8 +200,8 @@ module ThinkingSphinx
         }.flatten +
         # attribute associations
         @attributes.collect { |attrib|
-          attrib.associations.values
-        }.flatten
+          attrib.associations.values if attrib.include_as_association?
+        }.compact.flatten
       ).uniq.collect { |assoc|
         # get ancestors as well as column-level associations
         assoc.ancestors
@@ -238,7 +238,7 @@ module ThinkingSphinx
     def crc_column
       if @model.column_names.include?(@model.inheritance_column)
         adapter.cast_to_unsigned(adapter.convert_nulls(
-          adapter.crc(adapter.quote_with_table(@model.inheritance_column)),
+          adapter.crc(adapter.quote_with_table(@model.inheritance_column), true),
           @model.to_crc32
         ))
       else
@@ -246,32 +246,44 @@ module ThinkingSphinx
       end
     end
     
-    def add_internal_attributes
-      @attributes << Attribute.new(
-        FauxColumn.new(@model.primary_key.to_sym),
-        :type => :integer,
-        :as   => :sphinx_internal_id
-      ) unless @attributes.detect { |attr| attr.alias == :sphinx_internal_id }
+    def add_internal_attributes_and_facets
+      add_internal_attribute :sphinx_internal_id, :integer, @model.primary_key.to_sym
+      add_internal_attribute :class_crc,          :integer, crc_column, true
+      add_internal_attribute :subclass_crcs,      :multi,   subclasses_to_s
+      add_internal_attribute :sphinx_deleted,     :integer, "0"
+      
+      add_internal_facet :class_crc
+    end
+    
+    def add_internal_attribute(name, type, contents, facet = false)
+      return unless attribute_by_alias(name).nil?
       
       @attributes << Attribute.new(
-        FauxColumn.new(crc_column),
-        :type => :integer,
-        :as   => :class_crc
-      ) unless @attributes.detect { |attr| attr.alias == :class_crc }
+        FauxColumn.new(contents),
+        :type   => type,
+        :as     => name,
+        :facet  => facet
+      )
+    end
+    
+    def add_internal_facet(name)
+      return unless facet_by_alias(name).nil?
       
-      @attributes << Attribute.new(
-        FauxColumn.new("'" + (@model.send(:subclasses).collect { |klass|
-          klass.to_crc32.to_s
-        } << @model.to_crc32.to_s).join(",") + "'"),
-        :type => :multi,
-        :as   => :subclass_crcs
-      ) unless @attributes.detect { |attr| attr.alias == :subclass_crcs }
-      
-      @attributes << Attribute.new(
-        FauxColumn.new("0"),
-        :type => :integer,
-        :as   => :sphinx_deleted
-      ) unless @attributes.detect { |attr| attr.alias == :sphinx_deleted }
+      @model.sphinx_facets << ClassFacet.new(attribute_by_alias(name))
+    end
+    
+    def attribute_by_alias(attr_alias)
+      @attributes.detect { |attrib| attrib.alias == attr_alias }
+    end
+    
+    def facet_by_alias(name)
+      @model.sphinx_facets.detect { |facet| facet.name == name }
+    end
+    
+    def subclasses_to_s
+      "'" + (@model.send(:subclasses).collect { |klass|
+        klass.to_crc32.to_s
+      } << @model.to_crc32.to_s).join(",") + "'"
     end
         
     def set_source_database_settings(source)
@@ -285,9 +297,9 @@ module ThinkingSphinx
       source.sql_sock = config[:socket]
     end
     
-    def set_source_attributes(source)
+    def set_source_attributes(source, offset = nil)
       attributes.each do |attrib|
-        source.send(attrib.type_to_config) << attrib.config_value
+        source.send(attrib.type_to_config) << attrib.config_value(offset)
       end
     end
     
@@ -354,14 +366,14 @@ module ThinkingSphinx
          internal_groupings << "#{@model.quoted_table_name}.#{quote_column(@model.inheritance_column)}"
       end
       
-      unique_id_expr = "* #{ThinkingSphinx.indexed_models.size} + #{options[:offset] || 0}"
+      unique_id_expr = ThinkingSphinx.unique_id_expression(options[:offset])
       
       sql = <<-SQL
 SELECT #{ (
   ["#{@model.quoted_table_name}.#{quote_column(@model.primary_key)} #{unique_id_expr} AS #{quote_column(@model.primary_key)} "] + 
   @fields.collect { |field| field.to_select_sql } +
   @attributes.collect { |attribute| attribute.to_select_sql }
-).join(", ") }
+).compact.join(", ") }
 FROM #{ @model.table_name }
   #{ assocs.collect { |assoc| assoc.to_sql }.join(' ') }
 WHERE #{@model.quoted_table_name}.#{quote_column(@model.primary_key)} >= $start
@@ -375,10 +387,7 @@ GROUP BY #{ (
 ).join(", ") }
       SQL
       
-      if @model.connection.class.name == "ActiveRecord::ConnectionAdapters::MysqlAdapter"
-        sql += " ORDER BY NULL"
-      end
-      
+      sql += " ORDER BY NULL" if adapter.sphinx_identifier == "mysql"
       sql
     end
     
