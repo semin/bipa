@@ -12,6 +12,10 @@ class ScopsController < ApplicationController
 
   def show
     @scop = Scop.find(params[:id])
+    @dna_subfamily = @scop.andand.nr80_dna_subfamily
+    @rna_subfamily = @scop.andand.nr80_rna_subfamily
+    @dna_subfamily_alignment = @dna_subfamily.andand.alignment
+    @rna_subfamily_alignment = @rna_subfamily.andand.alignment
 
     if @scop.is_a? ScopDomain
       respond_to do |format|

@@ -1,0 +1,8 @@
+<div>
+  <applet code="jalview.bin.JalviewLite" width="200" height="100" archive="<%= REL_URL_ROOT %>/javascripts/jalviewApplet.jar">
+    <param name="embedded" value="true">
+    <% @alignment.sequences.each_with_index do |seq, i| %>
+      <param name="sequence<%= i %>" value="<%= seq.domain.sid %> <%= seq.sequence %>">
+    <% end %>
+  </applet>
+</div>

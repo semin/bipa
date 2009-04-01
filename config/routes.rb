@@ -27,6 +27,8 @@ ActionController::Routing::Routes.draw do |map|
                   :set      => :get
                 })
 
+  map.resources(:alignments, :member => { :jalview => :get })
+
   #map.resources :gos,
   #              :singular => "go",
   #              :member => { :hierarchy => :get },

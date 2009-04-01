@@ -60,14 +60,24 @@
   </tr>
   <% if @scop.dna_interfaces.size > 0 %>
     <tr>
-      <td class="title">DNA<br />Binding</th> 
+      <td class="title">DNA<br />Binding<br />
+        <% if @dna_subfamily_alignment %>
+          <script type="text/javascript">
+            function popup_jalview()
+            {
+              window.open('<%= "/alignments/#{@dna_subfamily_alignment.id}/jalview %>', 'Jalview', 'height=100,width=200,status=no,menubar=no,location=no,toolbar=no');
+            }
+          </script>
+          <a href='#' onclick='popup_jalview(); return false;'>Jalview</a>
+        <% end %>
+      </td>
       <td colspan=4 class="alignment">
-        <% if @scop.nr80_dna_subfamily && @scop.nr80_dna_subfamily.alignment %>
+        <% if @dna_subfamily_alignment %>
           <div class="alignment">
-            <%= @scop.nr80_dna_subfamily.alignment.ruler_with_margin %>
+            <%= @dna_subfamily_alignment.ruler_with_margin %>
             <%= render :partial => "/alignments/sequence",
-              :collection => @scop.nr80_dna_subfamily.alignment.sequences,
-              :locals => { :myself => @scop.sid, :representative => @scop.nr80_dna_subfamily.representative.sid } %>
+              :collection => @dna_subfamily_alignment.sequences,
+              :locals => { :myself => @scop.sid, :representative => @dna_subfamily.representative.sid } %>
           </div>
         <% else %>
           N/A [<%= link_to "?", "#dna_sub_alignment_na_box", :id => "dna_sub_alignment_na_box_link" %>]<br />

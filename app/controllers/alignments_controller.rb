@@ -33,6 +33,14 @@ class AlignmentsController < ApplicationController
     end
   end
 
+  def jalview
+    @alignment = Alignment.find(params[:id])
+
+    respond_to do |format|
+      format.html
+    end
+  end
+
 
   private
 
