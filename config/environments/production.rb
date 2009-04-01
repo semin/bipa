@@ -19,5 +19,3 @@ config.action_controller.perform_caching             = true
 
 # for relative path at group webserver
 ActionController::Base.relative_url_root = "/bipa"
-REL_URL_ROOT =  ActionController::Base.relative_url_root ?
-                ActionController::Base.relative_url_root.to_s : ''

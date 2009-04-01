@@ -1,8 +1,15 @@
-<div>
-  <applet code="jalview.bin.JalviewLite" width="200" height="100" archive="<%= REL_URL_ROOT %>/javascripts/jalviewApplet.jar">
+<div class="main_title">
+  Jalview: <%= @alignment.id %>
+</div>
+
+<div id="jalview">
+  <applet code="jalview.bin.JalviewLite" width="930" height="450" archive="<%= REL_URL_ROOT %>/javascripts/jalviewApplet.jar">
     <param name="embedded" value="true">
+    <param name="debug" value="false">
+    <param name="showFeatureSettings" value="false">
+    <param name="nojmol" value="true">
     <% @alignment.sequences.each_with_index do |seq, i| %>
-      <param name="sequence<%= i %>" value="<%= seq.domain.sid %> <%= seq.sequence %>">
+      <param name="sequence<%= i+1 %>" value="<%= seq.domain.sid %> <%= seq.sequence %>">
     <% end %>
   </applet>
 </div>

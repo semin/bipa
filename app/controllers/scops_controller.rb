@@ -16,6 +16,8 @@ class ScopsController < ApplicationController
     @rna_subfamily = @scop.andand.nr80_rna_subfamily
     @dna_subfamily_alignment = @dna_subfamily.andand.alignment
     @rna_subfamily_alignment = @rna_subfamily.andand.alignment
+    @dna_nr_family_alignment = @scop.scop_family.andand.nr80_dna_alignment
+    @rna_nr_family_alignment = @scop.scop_family.andand.nr80_rna_alignment
 
     if @scop.is_a? ScopDomain
       respond_to do |format|
