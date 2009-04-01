@@ -196,8 +196,14 @@ div#brief_stats {
   text-align: center;
 }
 
-div#jmol {
-  width: 100%;
+div#jmol_left {
+  float: left;
+  width: 60%;
+}
+
+div#jmol_right {
+  float: right;
+  width: 40%;
 }
 
 div#fugue_search_form {
@@ -508,17 +514,17 @@ div#zoom {
 }
 
 .hbonding_dna {
-  background: #FF8040;
+  background: #FFBB00;
   font-weight: bold;
 }
 
 .whbonding_dna {
-  background: #FF8040;
+  background: #FFBB00;
   text-decoration: overline;
 }
 
 .vdw_contacting_dna {
-  background: #FF8040;
+  background: #FFBB00;
   text-decoration: underline;
 }
 
@@ -527,21 +533,23 @@ div#zoom {
 }
 
 .hbonding_rna {
-  background: #46C7C7;
+  background: #00FFDD;
   font-weight: bold;
 }
 
 .whbonding_rna {
-  background: #46C7C7;
+  background: #00FFDD;
   text-decoration: overline;
 }
 
 .vdw_contacting_rna {
-  background: #46C7C7;
+  background: #00FFDD;
   text-decoration: underline;
 }
 
-.fugue_search_text_area {
+.binding_both {
+  background: #00CC00;
+  font-weight: bold;
 }
 
 .fieldWithErrors {

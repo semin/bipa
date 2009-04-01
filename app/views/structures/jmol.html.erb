@@ -1,14 +1,14 @@
 <div class="main_title">
-  Jmol view: <%= @structure.pdb_code %>
+  Jmol view: <%= link_to @structure.pdb_code, structure_path(@structure) %>
 </div>
 
-<div id="jmol">
+<div id="jmol_left">
   <applet code="<%= REL_URL_ROOT %>/javascripts/jmol/JmolAppletSigned.jar" width=500 height=500 align=center>
     <PARAM name="load" value="../../pdb/<%= @structure.pdb_code.downcase %>.pdb">
     <PARAM name="java_code" value="JmolApplet">
     <PARAM name="java_archive" value="<%= REL_URL_ROOT %>/javascripts/jmol/JmolAppletSigned.jar">
     <PARAM name="type" value="application/x-java-applet;version=1.1">
-    <PARAM name="script" value="select all;spacefill off; wireframe off;cartoon;color cartoon chain;select ligand;wireframe 40;spacefill 120;">
+    <PARAM name="script" value="select all; spacefill off; wireframe on; wireframe 40; select protein; color tan; select dna; color magenta; select rna; color deeppink; <%= @structure.interface_atoms.map {|a| 'select atomno=' + a.atom_code.to_s + '; spacefill 300; color cpk;'}.join %>">
     <PARAM name="progressbar" value="true">
     <PARAM name="progresscolor" value="blue">
     <PARAM name="boxmessage" value="Jmol applet is loading the selected PDB structure">
@@ -17,4 +17,5 @@
   </applet>
 </div>
 
-<%= link_to "Back to the structure", structure_path(@structure) %>
+<div id="jmol_right">
+</div>

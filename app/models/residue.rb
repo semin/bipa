@@ -224,13 +224,18 @@ class AaResidue < StdResidue
 
     css_class << (on_surface? ? "on_surface" : "buried")
 
-    css_class << "hbonding_dna"       if hbonding_dna?
-    css_class << "whbonding_dna"      if whbonding_dna?
-    css_class << "vdw_contacting_dna" if vdw_contacting_dna?
+    if ((hbonding_dna? || whbonding_dna? || vdw_contacting_dna?) &&
+        (hbonding_rna? || whbonding_rna? || vdw_contacting_rna?))
+      css_class << "binding_both"
+    else
+      css_class << "hbonding_dna"       if hbonding_dna?
+      css_class << "whbonding_dna"      if whbonding_dna?
+      css_class << "vdw_contacting_dna" if vdw_contacting_dna?
 
-    css_class << "hbonding_rna"       if hbonding_rna?
-    css_class << "whbonding_rna"      if whbonding_rna?
-    css_class << "vdw_contacting_rna" if vdw_contacting_rna?
+      css_class << "hbonding_rna"       if hbonding_rna?
+      css_class << "whbonding_rna"      if whbonding_rna?
+      css_class << "vdw_contacting_rna" if vdw_contacting_rna?
+    end
 
     res_code = if disulfide_bond?
                  if on_surface?

@@ -13,7 +13,7 @@
     <%= javascript_include_tag "fancyzoom" %>
     <%= javascript_include_tag "jmol/Jmol" %>
 
-    <%= stylesheet_link_tag :all, :cache => true %>
+    <%= stylesheet_link_tag :all %>
 
     <!--[if IE]>
     <style type="text/css">
@@ -38,7 +38,7 @@
         new FancyZoom('similar_interfaces_box_link', {width:600, height:50});
         new FancyZoom('similar_interfaces_na_box_link', {width:600, height:50});
         new FancyZoom('sse_box_link', {width:500, height:150});
-        new FancyZoom('search_box_link', {width:500, height:350});
+        new FancyZoom('search_box_link', {width:550, height:300});
       });
     </script>
   </head>
@@ -116,7 +116,6 @@
       <ul class="cell_text">
         <li>sid (e.g. @sid d10mha_)</li>
         <li>sunid (e.g. @sunid 34232)</li>
-        <li>stype (e.g. @stype px)</li>
         <li>sccs (e.g. @sccs c.66.1.26)</li>
         <li>description (e.g. @description "10mh A:")</li>
       </ul>
