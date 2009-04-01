@@ -1,6 +1,6 @@
 class ScopsController < ApplicationController
 
-  caches_page :show
+  caches_page :show, :jmol
 
   def index
     @scops = ScopDomain.rpall.paginate(:page => params[:page] || 1, :per_page => 20)

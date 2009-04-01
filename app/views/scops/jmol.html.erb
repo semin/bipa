@@ -1,5 +1,5 @@
 <div class="main_title">
-  Jmol view: <%= @scop.sid %>
+  Jmol view: <%= link_to @scop.sid, scop_path(@scop) %>
 </div>
 
 <div id="jmol">
@@ -16,6 +16,3 @@
     <PARAM name="boxfgcolor" value="white">
   </applet>
 </div>
-
-<%= link_to "Back to the domain", scop_path(@scop) %>
-
