@@ -15,7 +15,7 @@
       <% if @latest_news.size > 0 %>
         <% @latest_news.each do |news| %>
         <li>
-          <%= news.date %>: <%= news.title %>
+        <%= news.date %>: <%= link_to news.title, :controller => "main", :action => "news" %>
         </li>
         <% end %>
       <% else %>
