@@ -1,0 +1,8 @@
+--- 
+format: 1
+handler: 
+  commit: c7fcb8aacb8b41e37cbd5b7e54fe8816c67af2fa
+  branch: master
+lock: false
+repository_class: Piston::Git::Repository
+repository_url: git://github.com/sjlombardo/acts_as_network.git
