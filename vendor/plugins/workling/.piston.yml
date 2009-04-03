@@ -1,0 +1,8 @@
+--- 
+format: 1
+handler: 
+  commit: a7b52c7c158ab0f9ccaf963d0aa56266a5e91c00
+  branch: master
+lock: false
+repository_class: Piston::Git::Repository
+repository_url: git://github.com/purzelrakete/workling.git
