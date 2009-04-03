@@ -1,4 +1,0 @@
-rude_q_test:
-  adapter: mysql
-  username: rude_q
-  database: rude_q_test
