@@ -1,1 +1,0 @@
-require 'quick_scopes'
