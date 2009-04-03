@@ -1,0 +1,8 @@
+--- 
+format: 1
+handler: 
+  commit: cb2b0f36a60c8ec8c62354e8f29109c66afb50fb
+  branch: master
+lock: false
+repository_class: Piston::Git::Repository
+repository_url: git://github.com/pjhyett/auto_migrations.git
