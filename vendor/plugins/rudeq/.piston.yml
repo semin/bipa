@@ -1,0 +1,8 @@
+--- 
+format: 1
+handler: 
+  commit: 2b4e56593e2edf7be351e706712485b4a8742b5e
+  branch: master
+lock: false
+repository_class: Piston::Git::Repository
+repository_url: git://github.com/matthewrudy/rudeq.git

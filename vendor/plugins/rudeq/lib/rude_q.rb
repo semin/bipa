@@ -1,5 +1,4 @@
 # RudeQ
-require 'digest/sha1'
 
 # simply doing;
 #   class RudeQueue < ActiveRecord::Base
@@ -12,9 +11,18 @@ module RudeQ
 
   def self.included(mod) # :nodoc:
     mod.extend(ClassMethods)
-    mod.serialize(:data)
+    mod.send(:include, InstanceMethods)
   end
-  
+
+  module InstanceMethods
+    def data # :nodoc:
+      YAML.load(self[:data])
+    end
+    def data=(value) # :nodoc:
+      self[:data] = YAML.dump(value)
+    end
+  end
+
   module ClassMethods
     # Cleanup old processed items
     #
@@ -25,7 +33,6 @@ module RudeQ
     end
   
     # Add any serialize-able +data+ to the queue +queue_name+ (strings and symbols are treated the same)
-    #
     #   RudeQueue.set(:sausage_queue, Sausage.new(:sauce => "yummy"))
     #   RudeQueue.set("sausage_queue", Sausage.new(:other => true))
     #
@@ -37,6 +44,7 @@ module RudeQ
     #   -> nil
     def set(queue_name, data)
       queue_name = sanitize_queue_name(queue_name)
+
       self.create!(:queue_name => queue_name, :data => data)
       return nil # in line with Starling
     end
@@ -65,10 +73,41 @@ module RudeQ
       end
     end
 
+    # Grab the first item from the queue, and execute the supplied block if there is one
+    #   - it will return the value of the block
+    #
+    #   >> RudeQueue.fetch(:my_queue) do |data|
+    #   >>   Monster.devour(data)
+    #   >> end
+    #   -> nil
+    #
+    #   >> status = RudeQueue.fetch(:my_queue) do |data|
+    #   >>   process(data) # returns the value :update in this case
+    #   >> end
+    #   -> :update
+    #   >> status
+    #   -> :update
+    def fetch(queue_name, &block)
+      if data = get(queue_name)
+        return block.call(data)
+      end
+    end
+
     # A snapshot count of unprocessed items for the given +queue_name+
-    def backlog(queue_name)
-      qname = sanitize_queue_name(queue_name)
-      self.count(:conditions => {:queue_name => qname, :processed => false})
+    #
+    #   >> RudeQueue.backlog
+    #   -> 265
+    #   >> RudeQueue.backlog(:one_queue)
+    #   -> 212
+    #   >> RudeQueue.backlog(:another_queue)
+    #   -> 53
+    #
+    def backlog(queue_name=nil)
+      conditions = {:processed => false}
+      if queue_name
+        conditions[:queue_name] = sanitize_queue_name(queue_name)
+      end
+      self.count(:conditions => conditions)
     end
     
     def fetch_with_lock(qname, &block) # :nodoc:
@@ -106,6 +145,12 @@ module RudeQ
       @queue_options ||= {:processed => :set_flag, :lock => :pessimistic}
     end
 
+    def data # :nodoc:
+      YAML.load(self[:data])
+    end
+    def data=(value) # :nodoc:
+      self[:data] = YAML.dump(value)
+    end
     private
     
     def sanitize_queue_name(queue_name) # :nodoc:
@@ -141,8 +186,11 @@ module RudeQ
   # which misses the point
   #
   # also, it doesn't work on SQLite as it requires "UPDATE ... LIMIT 1 ORDER id ASC"
+  # and as of RudeQueue2, you'll need to manually add the "token" column
   module TokenLock
     class << self
+      
+      require 'digest/sha1'
       
       def fetch_with_lock(klass, qname) # :nodoc:
         token = get_unique_token
@@ -168,5 +216,5 @@ module RudeQ
       end
     end
   end
-
 end
+

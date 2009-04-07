@@ -21,6 +21,7 @@
 # then add a cron job to run "cd /path/to/wherever && rake worker:do RAILS_ENV=production"
 module RudeQ
   class Worker
+
     def queue_name
       raise NotImplementedError
     end
@@ -29,13 +30,9 @@ module RudeQ
       raise NotImplementedError
     end
     
-    def get_work
-      RudeQueue.get(queue_name)
-    end
-    
     def do!
       logger.info("starting up")
-      if work = get_work
+      if work = self.queue.get
         logger.info("found some work")
         do_work(work)
       else
@@ -54,6 +51,16 @@ module RudeQ
         end
       end
       return @logger
+    end
+
+    class << self
+      def queue
+        RudeQ::Scope.new(self.new.queue_name)
+      end
+    end
+
+    def queue
+      @queue ||= self.class.queue
     end
   end
 end

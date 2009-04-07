@@ -1,0 +1,8 @@
+--- 
+format: 1
+handler: 
+  commit: e02d33f03c990bdc15de66905330f7c8a71585a3
+  branch: master
+lock: false
+repository_class: Piston::Git::Repository
+repository_url: git://github.com/paolodona/import_with_load_data_in_file.git
