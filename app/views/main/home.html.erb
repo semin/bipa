@@ -1,5 +1,5 @@
 <div id="home">
-  <span class="main_title">Welcome to BIPA 1.1 release</span>
+  <span class="main_title">Welcome to BIPA Release 1.1</span>
   <div id="home_intro" class="blue_link">
     <p>
     BIPA, a database for protein-nucleic acid interaction, provides various features of protein-nuleic acid interfaces. As of <%= Time.now.strftime("%A %d %b %Y") %>, there are <%= link_to "2080", structures_path %> protein-nucleic acid <%= link_to "PDB", "http://www.rcsb.org", :popup => true %> complexes (<%= link_to "Lac repressor", structure_path(171) %>, <%= link_to "Cro", structure_path(2016) %>, <%= link_to "p53", structure_path(1223) %>, and etc.), <%= link_to 6203, scops_path %> <%= link_to "SCOP", "http://scop.mrc-lmb.cam.ac.uk/scop/index.html", :popup => true %> domains, and <%= 6269 %> domain-nucleic acid interfaces in BIPA. BIPA also provides a multiple structural alignment of representative structures at the SCOP family level using the program <%= link_to "BATON", "http://www-cryst.bioc.cam.ac.uk/COMPARER/", :popup => true %>, and the structural alignments were further annotated using the program <%= link_to "JOY", "http://tardis.nibio.go.jp/joy/", :popup => true %> to detect local environments of amino acids. All by all shape similarities among protein-nucleic acid interfaces were calculated using <%= link_to "USR", "http://www.ncbi.nlm.nih.gov/pubmed/17342716", :popup => true %> method, which enables us to navigate similar interfaces across the families.
@@ -9,7 +9,7 @@
     </p>
   </div>
 
-  <span class="main_title">Recent News:</span>
+  <span class="main_title">Recent News</span>
   <div id="home_news">
     <ul class="news">
       <% if @latest_news.size > 0 %>
@@ -26,7 +26,7 @@
 </div>
 
 <div id="brief_stats">
-  <span class="main_title">Brief Statistics:</span>
+  <span class="main_title">Brief Statistics</span>
   <table class="brief_stats">
     <tr>
 
