@@ -1,3 +1,6 @@
 [submodule "vendor/plugins/acts_as_network"]
 	path = vendor/plugins/acts_as_network
 	url = git://github.com/sjlombardo/acts_as_network.git
+[submodule "vendor/plugins/acts_as_tree"]
+	path = vendor/plugins/acts_as_tree
+	url = git://github.com/rails/acts_as_tree.git
