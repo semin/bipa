@@ -1,0 +1,3 @@
+[submodule "vendor/plugins/acts_as_network"]
+	path = vendor/plugins/acts_as_network
+	url = git://github.com/sjlombardo/acts_as_network.git
