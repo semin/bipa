@@ -10,3 +10,6 @@
 [submodule "vendor/plugins/import_with_load_data_in_file"]
 	path = vendor/plugins/import_with_load_data_in_file
 	url = git://github.com/paolodona/import_with_load_data_in_file.git
+[submodule "vendor/plugins/quick_scopes"]
+	path = vendor/plugins/quick_scopes
+	url = git://github.com/internuity/quick_scopes.git
