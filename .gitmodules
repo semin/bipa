@@ -16,3 +16,6 @@
 [submodule "vendor/plugins/rudeq"]
 	path = vendor/plugins/rudeq
 	url = git://github.com/matthewrudy/rudeq.git
+[submodule "vendor/plugins/thinking-sphinx"]
+	path = vendor/plugins/thinking-sphinx
+	url = git://github.com/freelancing-god/thinking-sphinx.git
