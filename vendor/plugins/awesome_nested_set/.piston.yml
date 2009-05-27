@@ -1,8 +1,0 @@
---- 
-format: 1
-handler: 
-  commit: 646087b232dd4354be2af113c9e6c50c859c3b90
-  branch: master
-lock: false
-repository_class: Piston::Git::Repository
-repository_url: git://github.com/collectiveidea/awesome_nested_set.git

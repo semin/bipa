@@ -1,6 +1,30 @@
 acts_as_network:
   repo: git://github.com/sjlombardo/acts_as_network.git
   path: vendor/plugins
+acts_as_tree:
+  repo: git://github.com/rails/acts_as_tree.git
+  path: vendor/plugins
 auto_migrations:
   repo: git://github.com/pjhyett/auto_migrations.git
+  path: vendor/plugins
+awesome_nested_set:
+  repo: git://github.com/collectiveidea/awesome_nested_set.git 
+  path: vendor/plugins
+import_with_load_data_in_file:
+  repo: git://github.com/paolodona/import_with_load_data_in_file.git 
+  path: vendor/plugins
+quick_scopes:
+  repo: git://github.com/internuity/quick_scopes.git
+  path: vendor/plugins
+rudeq:
+  repo: git://github.com/matthewrudy/rudeq.git
+  path: vendor/plugins
+thinking-sphinx:
+  repo: git://github.com/freelancing-god/thinking-sphinx.git 
+  path: vendor/plugins
+will_paginate:
+  repo: git://github.com/mislav/will_paginate.git
+  path: vendor/plugins
+workling:
+  repo: git://github.com/purzelrakete/workling.git
   path: vendor/plugins
