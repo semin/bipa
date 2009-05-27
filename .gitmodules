@@ -13,3 +13,6 @@
 [submodule "vendor/plugins/quick_scopes"]
 	path = vendor/plugins/quick_scopes
 	url = git://github.com/internuity/quick_scopes.git
+[submodule "vendor/plugins/rudeq"]
+	path = vendor/plugins/rudeq
+	url = git://github.com/matthewrudy/rudeq.git
