@@ -1,8 +1,0 @@
---- 
-format: 1
-handler: 
-  commit: df500424798bdc6fa5926a50827eaafdbcf33fec
-  branch: master
-lock: false
-repository_class: Piston::Git::Repository
-repository_url: git://github.com/internuity/quick_scopes.git
