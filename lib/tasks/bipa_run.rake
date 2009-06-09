@@ -75,7 +75,7 @@ namespace :bipa do
             chdir cwd
             rm_rf work_dir
 
-            $logger.info ">>> Running HBPlus on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
+            $logger.info "Running HBPlus on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end
@@ -107,7 +107,7 @@ namespace :bipa do
 
             if (pdb_obj.models.first.aa_chains.empty? ||
                 pdb_obj.models.first.na_chains.empty?)
-              $logger.warn "!!! SKIP: #{pdb_file} HAS NO AMINO ACID CHAIN OR NUCLEIC ACID CHAIN"
+              $logger.warn "SKIP: #{pdb_file} HAS NO AMINO ACID CHAIN OR NUCLEIC ACID CHAIN"
               next
             end
 
@@ -141,7 +141,7 @@ namespace :bipa do
             chdir cwd
             rm_r work_dir
 
-            $logger.info ">>> Running NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
+            $logger.info "Running NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end
@@ -165,7 +165,7 @@ namespace :bipa do
             sh "#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err"
             chdir cwd
 
-            $logger.info ">>> Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
+            $logger.info "Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end
@@ -195,7 +195,7 @@ namespace :bipa do
               domains = family.leaves.select(&:"rpall_#{na}")
               domains.each do |domain|
                 if domain.to_sequence.include?("X")
-                  $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
+                  $logger.warn "Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
                   next
                 end
 
@@ -203,11 +203,11 @@ namespace :bipa do
                   f.puts ">#{domain.sunid}"
                   f.puts domain.to_sequence
                 end
-                $logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
+                $logger.info "Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
               end
 
               if File.size? fam_fasta
-                (20..100).step(20) do |si|
+                PID_LIST.each do |si|
                   blastclust_cmd =
                     "blastclust " +
                     "-i #{fam_fasta} "+
@@ -220,7 +220,7 @@ namespace :bipa do
                 end
               end
               ActiveRecord::Base.remove_connection
-              $logger.info ">>> Creating cluster files for #{na.upcase} binding SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
+              $logger.info "Creating cluster files for #{na.upcase} binding SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
             end
           end
           ActiveRecord::Base.establish_connection(config)
@@ -238,6 +238,8 @@ namespace :bipa do
           sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
           full_dir  = File.join(FAMILY_DIR, "full", na)
           fmanager  = ForkManager.new(MAX_FORK)
+          clst_lvl  = 20
+
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
 
@@ -248,19 +250,30 @@ namespace :bipa do
                 fam_dir   = File.join(full_dir, sunid.to_s)
                 pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
-                next unless pdb_list.size > 0
-
-                clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster80")
-                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
-                list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
+                if pdb_list.size < 2
+                  $logger.warn "Only #{pdb_list.size} PDB structure detected."
+                  next
+                end
 
                 chdir fam_dir
-                ENV["PDB_EXT"] = ".pdb"
-                File.open("PDBLIST", "w") { |f| f.puts list.join("\n") }
-                sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
-                chdir cwd
+                clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{clst_lvl}")
+                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
 
-                $logger.info ">>> Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                clst_list.each_with_index do |c, ci|
+                  pdb_list_file = "cluster#{clst_lvl}-#{ci}.lst"
+                  File.open(pdb_list_file, "w") { |f| f.puts c.map { |p| p + ".pdb" }.join("\n") }
+                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
+
+                  if File.exists? "baton.ali"
+                    mv "baton.ali", "cluster#{clst_lvl}-#{ci}.ali"
+                  else
+                    $logger.error "Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
+                    exit 1
+                  end
+                end
+
+                chdir cwd
+                $logger.info "Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -300,7 +313,7 @@ namespace :bipa do
                   sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
                   chdir(cwd)
                 end
-                $logger.info ">>> BATON with representative PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info "BATON with representative PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -326,14 +339,10 @@ namespace :bipa do
                 cwd     = pwd
                 fam_dir = File.join(sub_dir, sunid.to_s)
 
-                (20..100).step(20) do |si|
-                  rep_dir = File.join(fam_dir, "nr#{si}")
-
-                  FileList[rep_dir + "/*"].each do |subfam_dir|
-                    chdir subfam_dir
-                    sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
-                    chdir cwd
-                  end
+                FileList[fam_dir + "/*"].each do |subfam_dir|
+                  chdir subfam_dir
+                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
+                  chdir cwd
                 end
                 $logger.info ">>> BATON with subfamily PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
@@ -365,14 +374,14 @@ namespace :bipa do
               pdb_file = File.join(NACCESS_DIR, pdb_stem + '.pdb')
 
               if File.size? zap_file
-                $logger.warn "!!! Skipped, #{pdb_code}: ZAP results files are already there!"
+                $logger.warn "Skipped, #{pdb_code}: ZAP results files are already there!"
                 next
               end
 
               #sh "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
               system "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
-            $logger.info ">>> Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info "Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
       end
@@ -398,10 +407,10 @@ namespace :bipa do
                   if File.exists? "./baton.ali"
                     system "joy baton.ali 1> joy.log 2>&1"
                   else
-                    $logger.warn "!!! Cannot find baton.ali at #{fam_dir}"
+                    $logger.warn "Cannot find baton.ali at #{fam_dir}"
                   end
                   chdir cwd
-                  $logger.info ">>> JOY with non-redundant set (#{si} pid) of SCOP Family, #{dir}: done"
+                  $logger.info "JOY with non-redundant set (#{si} pid) of SCOP Family, #{dir}: done"
                 end
               end
             end # fmanager.fork

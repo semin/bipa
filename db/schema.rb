@@ -26,13 +26,14 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :description
     t.float       :resolution
     %w[dna rna].each { |na|
-      (20..100).step(20)  { |i| t.belongs_to :"nr#{i}_#{na}_subfamily" }
-      (20..100).step(20)  { |i| t.boolean :"rp#{i}_#{na}",  :default => false }
-                                t.boolean :"rpall_#{na}",   :default => false
+      t.belongs_to  :"#{na}_subfamily"
+      t.boolean     :"rp_#{na}",    :default => false
+      t.boolean     :"rpall_#{na}", :default => false
     }
-    (2..10).step(2)     { |i| t.boolean :"rs#{i}", :default => false }
     t.boolean     :rpall, :default => false
-    t.boolean     :rsall, :default => false
+    #(2..10).step(2) { |i| t.boolean :"rs#{i}", :default => false }
+    #t.boolean     :rs,    :default => false
+    #t.boolean     :rsall, :default => false
   end
 
   add_index :scop, :sunid

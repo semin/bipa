@@ -250,54 +250,53 @@ namespace :bipa do
 
     desc "Update 'rpXXX' columns of 'scop' table"
     task :scop_rp => [:environment] do
+
       %w[dna rna].each do |na|
-        (20..100).step(20).each do |si|
-          klass = "Nr#{si}#{na.capitalize}Subfamily".constantize
-          klass.all.each do |subfamily|
-            rep = subfamily.representative
-            unless rep.nil?
-              rep.send("rp#{si}_#{na}=", true)
-              rep.save!
-              rep.ancestors.each do |anc|
-                anc.send("rp#{si}_#{na}=", true)
-                anc.save!
-              end
-              $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done"
-            else
-              $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id}"
+        klass = "#{na.capitalize}Subfamily".constantize
+        klass.all.each do |subfamily|
+          rep = subfamily.representative
+          unless rep.nil?
+            rep.send("rp_#{na}=", true)
+            rep.save!
+            rep.ancestors.each do |anc|
+              anc.send("rp_#{na}=", true)
+              anc.save!
             end
+            $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done"
+          else
+            $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id}"
           end
         end
       end
     end
 
 
-    desc "Update 'rsXXX' columns of 'scops' table"
-    task :scop_rs => [:environment] do
-
-      domains = ScopDomain.nrall
-      domains.each_with_index do |domain, i|
-        domain.rs2    = true if domain.resolution < 2
-        domain.rs4    = true if domain.resolution < 4
-        domain.rs6    = true if domain.resolution < 6
-        domain.rs8    = true if domain.resolution < 8
-        domain.rs10   = true if domain.resolution < 10
-        domain.rsall  = true if domain.resolution < 1000
-        domain.save!
-
-        domain.ancestors.each do |ancestor|
-          ancestor.rs2    = true if domain.rs2    == true
-          ancestor.rs4    = true if domain.rs4    == true
-          ancestor.rs6    = true if domain.rs6    == true
-          ancestor.rs8    = true if domain.rs8    == true
-          ancestor.rs10   = true if domain.rs10   == true
-          ancestor.rsall  = true if domain.rsall  == true
-          ancestor.save!
-        end
-
-        $logger.info ">>> Updating resolution info of #{domain.id} : done (#{i+1}/#{domains.size})"
-      end
-    end
+#    desc "Update 'rsXXX' columns of 'scops' table"
+#    task :scop_rs => [:environment] do
+#
+#      domains = ScopDomain.nrall
+#      domains.each_with_index do |domain, i|
+#        domain.rs2    = true if domain.resolution < 2
+#        domain.rs4    = true if domain.resolution < 4
+#        domain.rs6    = true if domain.resolution < 6
+#        domain.rs8    = true if domain.resolution < 8
+#        domain.rs10   = true if domain.resolution < 10
+#        domain.rsall  = true if domain.resolution < 1000
+#        domain.save!
+#
+#        domain.ancestors.each do |ancestor|
+#          ancestor.rs2    = true if domain.rs2    == true
+#          ancestor.rs4    = true if domain.rs4    == true
+#          ancestor.rs6    = true if domain.rs6    == true
+#          ancestor.rs8    = true if domain.rs8    == true
+#          ancestor.rs10   = true if domain.rs10   == true
+#          ancestor.rsall  = true if domain.rsall  == true
+#          ancestor.save!
+#        end
+#
+#        $logger.info ">>> Updating resolution info of #{domain.id} : done (#{i+1}/#{domains.size})"
+#      end
+#    end
 
 
     desc "Update JOY templates to include atomic interaction information"

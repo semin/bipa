@@ -31,6 +31,8 @@ require_dependency 'test_alignment'
 # Constants for BIPA
 RESUME    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
 MAX_FORK  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
+NR_PID    = 80
+FULL_PID  = 20
 
 EPSILON                           = 1.0E-6
 MAX_VDW_DISTANCE                  = 3.9
@@ -103,3 +105,6 @@ STD_MAT_LOG     = Rails.root.join("config/allmat.std.log.dat")
 
 ASTRAL40        = "/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa"
 BALISCORE_BIN   = "/BiO/Install/bali_score/bali_score"
+
+# environmental variables
+ENV["PDB_EXT"]  = ".pdb" # for Baton

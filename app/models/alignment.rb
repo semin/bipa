@@ -97,16 +97,12 @@ end
                 :class_name   => "ScopFamily",
                 :foreign_key  => "scop_id"
   end
-  EVAL
 
-  (20..100).step(20) do |si|
-    eval <<-EVAL
-      class Nr#{si}#{na.capitalize}Alignment < Alignment
+  class Nr#{na.capitalize}Alignment < Alignment
 
-        belongs_to  :family,
-                    :class_name   => "ScopFamily",
-                    :foreign_key  => "scop_id"
-      end
-    EVAL
+    belongs_to  :family,
+                :class_name   => "ScopFamily",
+                :foreign_key  => "scop_id"
   end
+  EVAL
 end

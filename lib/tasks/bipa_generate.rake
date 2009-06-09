@@ -76,28 +76,25 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              family = ScopFamily.find_by_sunid(sunid)
+              family      = ScopFamily.find_by_sunid(sunid)
+              nr_dir      = File.join(FAMILY_DIR, "nr", na)
+              family_dir  = File.join(nr_dir, "#{sunid}")
 
-              (20..100).step(20) do |si|
-                nr_dir      = File.join(FAMILY_DIR, "nr#{si}", na)
-                family_dir  = File.join(nr_dir, "#{sunid}")
+              mkdir_p family_dir
 
-                mkdir_p family_dir
+              subfamilies = family.send("nr_#{na}_subfamilies")
+              subfamilies.each do |subfamily|
+                domain = subfamily.representative
+                next if domain.nil?
 
-                subfamilies = family.send("nr#{si}_#{na}_subfamilies")
-                subfamilies.each do |subfamily|
-                  domain = subfamily.representative
-                  next if domain.nil?
+                domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
 
-                  domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
-
-                  if !File.size? domain_pdb_file
-                    $logger.warn "!!! Cannot find #{domain_pdb_file}"
-                    exit 1
-                  end
-
-                  cp domain_pdb_file, family_dir
+                if !File.size? domain_pdb_file
+                  $logger.warn "!!! Cannot find #{domain_pdb_file}"
+                  exit 1
                 end
+
+                cp domain_pdb_file, family_dir
               end
               ActiveRecord::Base.remove_connection
             end
@@ -120,6 +117,7 @@ namespace :bipa do
         full_dir  = File.join(FAMILY_DIR, "full", na)
 
         refresh_dir(sub_dir) unless RESUME
+
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
 
@@ -132,29 +130,24 @@ namespace :bipa do
 
               mkdir_p(family_dir)
 
-              (20..100).step(20) do |si|
-                nr_dir = File.join(family_dir, "nr#{si}")
-                mkdir_p nr_dir
+              subfamilies = family.send("#{na}_subfamilies")
+              subfamilies.each do |subfamily|
+                subfamily_dir = File.join(family_dir, subfamily.id.to_s)
+                mkdir_p subfamily_dir
 
-                subfamilies = family.send("nr#{si}_#{na}_subfamilies")
-                subfamilies.each do |subfamily|
-                  subfamily_dir = File.join(nr_dir, subfamily.id.to_s)
-                  mkdir_p subfamily_dir
+                domains = subfamily.domains
+                domains.each do |domain|
+                  domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
 
-                  domains = subfamily.domains
-                  domains.each do |domain|
-                    domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
+                  if !File.exists?(domain_pdb_file)
+                    $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
+                    next
+                  end
+                  cp domain_pdb_file, subfamily_dir
+                end # domains.each
+              end # subfamilies.each
 
-                    if !File.exists?(domain_pdb_file)
-                      $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
-                      next
-                    end
-                    cp domain_pdb_file, subfamily_dir
-                  end # domains.each
-                end # subfamilies.each
-              end # (20..100).step(20)
-
-              $logger.info ">>> Generating PDB files for #{na.upcase} binding subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              $logger.info ">>> Generating PDB files for #{na.upcase}-binding subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
               ActiveRecord::Base.remove_connection
             end
           end
@@ -168,8 +161,8 @@ namespace :bipa do
     task :tem_files => [:environment] do
 
       %w[dna rna].each do |na|
-        (10..100).step(10) do |si|
-          next unless si == 90 # temporary skipping!!!
+        PID_LIST.each do |si|
+          next unless si == 80 # temporary skipping!!!
 
           rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
 
