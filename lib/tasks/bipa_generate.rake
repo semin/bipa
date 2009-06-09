@@ -360,47 +360,21 @@ namespace :bipa do
     desc "Generate ESSTs for each representative set of SCOP families"
     task :essts => [:environment] do
 
-      refresh_dir(ESST_DIR) unless RESUME
+      #refresh_dir(ESST_DIR) unless RESUME
 
       %w[dna rna].each do |na|
-        (20..100).step(20) do |si|
-          # CAUTION!!!
-          if si != 80
-            $logger.warn "!!! Sorry, skipped #{na}#{si} for the moment"
-            next
-          end
+        esst_dir  = File.join(ESST_DIR, na)
+        cwd       = pwd
+        mkdir_p esst_dir
+        chdir esst_dir
 
-          nr_dir = File.join(FAMILY_DIR, "nr#{si}", na)
+        FileList[File.join(FAMILY_DIR, "full", na, "*", "*.tem")].select { |t|
+          t.match(/(\d+)\/\1-\d+/)
+        }.each do |tem_file|
+          cp tem_file, "."
+        end
 
-          %w[16 64 std].each do |env|
-            est_dir = File.join(ESST_DIR, "nr#{si}", na, env)
-            mkdir_p est_dir
-
-            Dir.new(nr_dir).each do |dir|
-              next if dir =~ /^\./ or dir !~ /^\d+$/
-
-              tem     = File.join(nr_dir, dir, "#{dir}.tem")
-              new_tem = File.join(est_dir, "#{dir}.tem")
-              fam     = Scop.find_by_sunid(dir)
-              ali     = fam.send(:"nr#{si}_#{na}_alignment")
-
-              if ali && ali.sequences.map(&:domain).sum { |d| d.send(:"#{na}_interfaces").size } > 0
-                cp(tem, new_tem) if File.exist?(tem)
-              end
-            end
-
-#            cp("#{na.upcase}#{env.upcase}_CLASSDEF".constantize, est_dir)
-#
-#            cwd = pwd
-#            chdir est_dir
-#            cp "classdef.#{na}#{env}.dat", "classdef.dat"
-#            system "ls *.tem -1 > templates.lst"
-#            system "subst --tem-list templates.lst --weight 100 --output 0"
-#            system "subst --tem-list templates.lst --weight 100 --output 1 --outfile allmat.#{na}#{env}.prob.dat"
-#            system "subst --tem-list templates.lst --weight 100 --output 2 --outfile allmat.#{na}#{env}.log.dat"
-#            chdir cwd
-          end
-        end # (20..100).step(20)
+        chdir cwd
       end
     end # task :essts
 

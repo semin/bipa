@@ -307,32 +307,28 @@ namespace :bipa do
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
 
-          (20..100).step(20) do |si|
-            # CAUTION!!!
-            if si != 80
-              $logger.warn "!!! Sorry, skipped #{na}#{si} for the moment"
-              next
-            end
+          FileList[File.join(FAMILY_DIR, "full", na, "*")].each do |fam_dir|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-            FileList["./public/families/nr#{si}/#{na}/*"].each do |fam_dir|
-              fmanager.fork do
-                ActiveRecord::Base.establish_connection(config)
+              if fam_dir =~ /#{na}\/(\d+)/
+                sunid = $1
+              else
+                $logger.warn "!!! #{fam_dir} is not matched to a certain SCOP sunid"
+                next
+              end
 
-                if fam_dir =~ /#{na}\/(\d+)/
-                  sunid = $1
-                else
-                  $logger.warn "!!! #{fam_dir} is not matched to a certain SCOP sunid"
-                  next
-                end
+              tem_files = FileList[File.join(fam_dir, "cluster*.tem")]
 
-                tem_file = File.join(fam_dir, "baton.tem")
+              if tem_files.size < 1
+                $logger.warn "!!! Cannot find any JOY template files (e.g. cluster20-0.tem) in #{fam_dir}"
+                next
+              end
 
-                if !File.size? tem_file
-                  $logger.warn "!!! Cannot find 'baton.tem' for SCOP family, #{sunid} or it's empty"
-                  next
-                end
-
-                new_tem_file = File.join(fam_dir, "#{sunid}.tem")
+              tem_files.each do |tem_file|
+                basename      = File.basename(tem_file, ".tem")
+                clst_id       = basename.split('-')[1]
+                new_tem_file  = File.join(fam_dir, "#{sunid}-#{clst_id}.tem")
                 cp tem_file, new_tem_file
 
                 flat_file = Bio::FlatFile.auto(tem_file)
@@ -349,7 +345,7 @@ namespace :bipa do
                     hbond_tem       = []
                     whbond_tem      = []
                     vdw_contact_tem = []
-                    bipa_tem        = []
+                    na_binding_tem = []
                     db_residues     = domain.residues
                     ff_residues     = entry.data.gsub("\n", "").split("")
 
@@ -361,7 +357,7 @@ namespace :bipa do
                         hbond_tem       << "\n"
                         whbond_tem      << "\n"
                         vdw_contact_tem << "\n"
-                        bipa_tem        << "\n"
+                        na_binding_tem << "\n"
                       end
 
                       if res == "-"
@@ -369,7 +365,7 @@ namespace :bipa do
                         hbond_tem       << "-"
                         whbond_tem      << "-"
                         vdw_contact_tem << "-"
-                        bipa_tem        << "-"
+                        na_binding_tem << "-"
                         next
                       else
                         if res == db_residues[pos].one_letter_code
@@ -377,14 +373,14 @@ namespace :bipa do
                           db_residues[pos].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
                           db_residues[pos].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
                           db_residues[pos].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
-                          if bind_tem.last == "T" and !db_residues[pos].on_interface?
-                            bipa_tem << "I"
-                          elsif db_residues[pos].on_interface?
-                            bipa_tem << "i"
-                          elsif db_residues[pos].on_surface?
-                            bipa_tem << "A"
+                          if hbond_tem.last == "T"
+                            na_binding_tem << "H"
+                          elsif whbond_tem.last == "T"
+                            na_binding_tem << "W"
+                          elsif vdw_contact_tem.last == "T"
+                            na_binding_tem << "V"
                           else
-                            bipa_tem << 'a'
+                            na_binding_tem << "N"
                           end
                           pos += 1
                         else
@@ -412,14 +408,15 @@ namespace :bipa do
                       file.puts vdw_contact_tem.join + "*"
 
                       file.puts ">P1;#{entry.entry_id}"
-                      file.puts "bipa environment"
-                      file.puts bipa_tem.join + "*"
+                      file.puts "#{na.upcase}-binding type"
+                      file.puts na_binding_tem.join + "*"
                     end
                   end
                 end
-                ActiveRecord::Base.remove_connection
-                $logger.info ">>> Updating JOY template for #{na.upcase} binding NR#{si} SCOP family, #{sunid}: done"
               end
+
+              ActiveRecord::Base.remove_connection
+              $logger.info ">>> Updating JOY template for #{na.upcase}-binding SCOP family, #{sunid}: done"
             end
           end
           ActiveRecord::Base.establish_connection(config)

@@ -392,28 +392,33 @@ namespace :bipa do
     task :joy => [:environment] do
 
       %w[dna rna].each do |na|
-        fmanager = ForkManager.new(MAX_FORK)
+        cwd       = pwd
+        fmanager  = ForkManager.new(MAX_FORK)
         fmanager.manage do
-          (20..100).step(20) do |si|
-            nr_dir = File.join(FAMILY_DIR, "nr#{si}", na)
-            fmanager.fork do
-              Dir.new(nr_dir).each do |dir|
-                if dir =~ /^\./
+          %w[full nr sub].each do |cate|
+            next if cate != 'full'
+            fam_dirs = FileList[File.join(FAMILY_DIR, cate, na, "*")]
+            fam_dirs.each do |fam_dir|
+              fmanager.fork do
+                chdir fam_dir
+
+                ali_files = FileList[File.join(fam_dir, "cluster*.ali")]
+
+                if ali_files.size < 1
+                  $logger.error "!!! Cannot find BATON alignment files (e.g. cluster20-0.ali) in #{fam_dir}"
                   next
-                elsif dir =~ /^\d+$/
-                  cwd = pwd
-                  fam_dir = File.join(nr_dir, dir)
-                  chdir fam_dir
-                  if File.exists? "./baton.ali"
-                    system "joy baton.ali 1> joy.log 2>&1"
-                  else
-                    $logger.warn "Cannot find baton.ali at #{fam_dir}"
-                  end
-                  chdir cwd
-                  $logger.info "JOY with non-redundant set (#{si} pid) of SCOP Family, #{dir}: done"
                 end
+
+                ali_files.each do |ali_file|
+                  basename  = File.basename(ali_file, ".ali")
+                  clst_id   = basename.split("-")[1]
+                  system "joy #{basename} 1>joy#{clst_id} 2>&1"
+                end
+
+                chdir cwd
+                $logger.info ">>> JOY with BATON alignments in #{fam_dir}: done"
               end
-            end # fmanager.fork
+            end
           end
         end
       end

@@ -870,6 +870,7 @@ namespace :bipa do
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
+
           sunids.each_with_index do |sunid, i|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
@@ -916,7 +917,8 @@ namespace :bipa do
                       column.save!
                       pos += 1
                     else
-                      raise "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
+                      $logger.error "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
+                      exit 1
                     end
                   end
                 end # ff_residues.each_with_index
@@ -926,11 +928,11 @@ namespace :bipa do
               alignment.save!
               ActiveRecord::Base.remove_connection
               $logger.info "Importing non-redundant alignments for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-            end
-          end # fmanger.fork
+            end # fmanager.fork
+          end # sunids.each
           ActiveRecord::Base.establish_connection(config)
-        end # sunids.each
-      end # fmanager.manage
+        end # fmanager.manage
+      end # %w[dna rna].each # fmanager.manage
     end # task :alignments
 
 
@@ -1005,7 +1007,7 @@ namespace :bipa do
               end # subfam_ids.each
 
               ActiveRecord::Base.remove_connection
-              $logger.info ">>> Importing subfamily alignments of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})")
+              $logger.info ">>> Importing subfamily alignments of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             end # fmanager.fork
           end # sunids.each
 
@@ -1449,78 +1451,78 @@ namespace :bipa do
     end
 
 
-    desc "Import Refernce Alignments"
-    task :reference_alignments => [:environment] do
-
-      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
-
-      Dir.new(rep_dir).each do |fam_dir|
-        next if fam_dir =~ /^\./
-
-          FileList[File.join(rep_dir, fam_dir, "*.ref.ali")].each do |f|
-          next unless File.size? f # CAUTIONSome alingments are size 0. Don't know why yet!
-
-          $logger.info "Importing #{f} ..."
-
-          tem_sunid, tgt_sunid = File.basename(f, ".ref.ali").split(/-/)
-          ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
-          ident, align, intgp, count = 0, 0, 0, 0
-
-          ref_ali.each_site do |site|
-            if (site[0] != "-") && (site[1] != "-")
-              align += 1
-              if site[0] == site[1]
-                ident += 1
-              end
-            elsif ((site[0] == "-") && (site[1] != "-")) || ((site[0] != "-") && (site[1] == "-"))
-              intgp += 1
-            end
-            count += 1
-          end
-
-          minl = nil
-          ref_ali.each_seq do |s|
-            l = s.gsub(/-/, '').length
-            if minl.nil?
-              minl = l
-            else
-              minl = l if l < minl
-            end
-          end
-
-          mingl = nil
-          ref_ali.each_seq do |s|
-            gl = s.gsub(/^-+/, '').gsub(/-+$/,'').length
-            if mingl.nil?
-              mingl = gl
-            else
-              mingl = gl if gl < mingl
-            end
-          end
-
-          pid1 = 100 * ident.to_f / (align + intgp)
-          pid2 = 100 * ident.to_f / align
-          pid3 = 100 * ident.to_f / minl
-          pid4 = 100 * ident.to_f / mingl
-
-          family    = Scop.find_by_sunid(fam_dir)
-          alignment = Rep90Alignment.find_by_scop_id(family.id)
-          tem  = Scop.find_by_sunid(tem_sunid)
-          tgt    = Scop.find_by_sunid(tgt_sunid)
-
-          if alignment
-            alignment.reference_alignments << ReferenceAlignment.create!(:template_id => tem.id,
-                                                                         :target_id   => tgt.id,
-                                                                         :pid1        => pid1,
-                                                                         :pid2        => pid2,
-                                                                         :pid3        => pid3,
-                                                                         :pid4        => pid4)
-          else
-            raise "Cannot find alignment AR object for SCOP family, #{fam_dir}"
-          end
-          end
-      end
-    end
+#    desc "Import Refernce Alignments"
+#    task :reference_alignments => [:environment] do
+#
+#      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
+#
+#      Dir.new(rep_dir).each do |fam_dir|
+#        next if fam_dir =~ /^\./
+#
+#          FileList[File.join(rep_dir, fam_dir, "*.ref.ali")].each do |f|
+#          next unless File.size? f # CAUTIONSome alingments are size 0. Don't know why yet!
+#
+#          $logger.info "Importing #{f} ..."
+#
+#          tem_sunid, tgt_sunid = File.basename(f, ".ref.ali").split(/-/)
+#          ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
+#          ident, align, intgp, count = 0, 0, 0, 0
+#
+#          ref_ali.each_site do |site|
+#            if (site[0] != "-") && (site[1] != "-")
+#              align += 1
+#              if site[0] == site[1]
+#                ident += 1
+#              end
+#            elsif ((site[0] == "-") && (site[1] != "-")) || ((site[0] != "-") && (site[1] == "-"))
+#              intgp += 1
+#            end
+#            count += 1
+#          end
+#
+#          minl = nil
+#          ref_ali.each_seq do |s|
+#            l = s.gsub(/-/, '').length
+#            if minl.nil?
+#              minl = l
+#            else
+#              minl = l if l < minl
+#            end
+#          end
+#
+#          mingl = nil
+#          ref_ali.each_seq do |s|
+#            gl = s.gsub(/^-+/, '').gsub(/-+$/,'').length
+#            if mingl.nil?
+#              mingl = gl
+#            else
+#              mingl = gl if gl < mingl
+#            end
+#          end
+#
+#          pid1 = 100 * ident.to_f / (align + intgp)
+#          pid2 = 100 * ident.to_f / align
+#          pid3 = 100 * ident.to_f / minl
+#          pid4 = 100 * ident.to_f / mingl
+#
+#          family    = Scop.find_by_sunid(fam_dir)
+#          alignment = Rep90Alignment.find_by_scop_id(family.id)
+#          tem  = Scop.find_by_sunid(tem_sunid)
+#          tgt    = Scop.find_by_sunid(tgt_sunid)
+#
+#          if alignment
+#            alignment.reference_alignments << ReferenceAlignment.create!(:template_id => tem.id,
+#                                                                         :target_id   => tgt.id,
+#                                                                         :pid1        => pid1,
+#                                                                         :pid2        => pid2,
+#                                                                         :pid3        => pid3,
+#                                                                         :pid4        => pid4)
+#          else
+#            raise "Cannot find alignment AR object for SCOP family, #{fam_dir}"
+#          end
+#          end
+#      end
+#    end
 
 
     desc "Import Test Alignments"
