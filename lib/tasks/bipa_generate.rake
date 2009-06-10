@@ -363,15 +363,21 @@ namespace :bipa do
       #refresh_dir(ESST_DIR) unless RESUME
 
       %w[dna rna].each do |na|
-        esst_dir  = File.join(ESST_DIR, na)
+        esst_dir  = File.join(ESST_DIR, "nr", na)
         cwd       = pwd
         mkdir_p esst_dir
         chdir esst_dir
 
-        FileList[File.join(FAMILY_DIR, "full", na, "*", "*.tem")].select { |t|
+        FileList[File.join(FAMILY_DIR, "nr", na, "*", "*.tem")].select { |t|
           t.match(/(\d+)\/\1-\d+/)
         }.each do |tem_file|
           cp tem_file, "."
+        end
+
+        sh "ls -1 *.tem > tem_files.lst"
+
+        (30..80).step(10) do |weight|
+          sh "ulla -l tem_files.lst --autosigma --weight #{weight} -o ulla-#{na}-#{weight}.log"
         end
 
         chdir cwd

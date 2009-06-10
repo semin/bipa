@@ -251,7 +251,7 @@ namespace :bipa do
                 pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                 if pdb_list.size < 2
-                  $logger.warn "Only #{pdb_list.size} PDB structure detected."
+                  $logger.warn "!!! #{pdb_list.size} PDB structure detected in #{fam_dir}"
                   next
                 end
 
@@ -288,32 +288,45 @@ namespace :bipa do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          nr_dir    = File.join(FAMILY_DIR, "nr", na)
+          clst_lvl  = 20
           fmanager  = ForkManager.new(MAX_FORK)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
+
             sunids.each_with_index do |sunid, i|
               fmanager.fork do
                 ActiveRecord::Base.establish_connection(config)
-                (20..100).step(20) do |si|
-                  cwd       = pwd
-                  pre_si    = si > 20 ? si - 20 : si
-                  rep_dir   = File.join(FAMILY_DIR, "nr#{si}", na, "#{sunid}")
-                  pdb_list  = FileList[rep_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
-                  next unless pdb_list.size > 0
+                cwd       = pwd
+                fam_dir   = File.join(nr_dir, sunid.to_s)
+                pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
-                  clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{pre_si}")
-                  clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) }.compact.flatten
-                  list      = (clst_list & pdb_list).map { |p| p + ".pdb" }
-
-                  chdir(rep_dir)
-                  ENV["PDB_EXT"] = ".pdb"
-                  File.open("PDBLIST", "w") { |f| f.puts list.join("\n") }
-                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list PDBLIST 1>baton.log 2>&1"
-                  chdir(cwd)
+                if pdb_list.size < 2
+                  $logger.warn "!!! #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                  next
                 end
-                $logger.info "BATON with representative PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+
+                chdir fam_dir
+                clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{clst_lvl}")
+                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
+
+                clst_list.each_with_index do |c, ci|
+                  pdb_list_file = "cluster#{clst_lvl}-#{ci}.lst"
+                  File.open(pdb_list_file, "w") { |f| f.puts c.map { |p| p + ".pdb" }.join("\n") }
+                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
+
+                  if File.exists? "baton.ali"
+                    mv "baton.ali", "cluster#{clst_lvl}-#{ci}.ali"
+                  else
+                    $logger.error "!!! Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
+                    exit 1
+                  end
+                end
+
+                chdir cwd
+                $logger.info ">>> BATON with non-redundant set of #{na.upcase}-binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -396,7 +409,7 @@ namespace :bipa do
         fmanager  = ForkManager.new(MAX_FORK)
         fmanager.manage do
           %w[full nr sub].each do |cate|
-            next if cate != 'full'
+            next if cate != 'nr'
             fam_dirs = FileList[File.join(FAMILY_DIR, cate, na, "*")]
             fam_dirs.each do |fam_dir|
               fmanager.fork do

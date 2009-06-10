@@ -307,7 +307,7 @@ namespace :bipa do
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
 
-          FileList[File.join(FAMILY_DIR, "full", na, "*")].each do |fam_dir|
+          FileList[File.join(FAMILY_DIR, "nr", na, "*")].each do |fam_dir|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
@@ -345,7 +345,7 @@ namespace :bipa do
                     hbond_tem       = []
                     whbond_tem      = []
                     vdw_contact_tem = []
-                    na_binding_tem = []
+                    na_binding_tem  = []
                     db_residues     = domain.residues
                     ff_residues     = entry.data.gsub("\n", "").split("")
 
