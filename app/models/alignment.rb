@@ -91,18 +91,22 @@ end
 
 %w[dna rna].each do |na|
   eval <<-EVAL
-  class Full#{na.capitalize}Alignment < Alignment
-
-    belongs_to  :family,
-                :class_name   => "ScopFamily",
-                :foreign_key  => "scop_id"
-  end
-
-  class Nr#{na.capitalize}Alignment < Alignment
+  class Full#{na.capitalize}BindingFamilyAlignment < Alignment
 
     belongs_to  :family,
                 :class_name   => "ScopFamily",
                 :foreign_key  => "scop_id"
   end
   EVAL
+
+  (10..100).step(10) do |pid|
+    eval <<-EVAL
+    class Nr#{pid}#{na.capitalize}bindingFamilyAlignment < Alignment
+
+      belongs_to  :family,
+                  :class_name   => "ScopFamily",
+                  :foreign_key  => "scop_id"
+    end
+    EVAL
+  end
 end
