@@ -413,9 +413,22 @@ namespace :bipa do
 
 
     desc "Run OESpicoli and OEZap for unbound state PDB structures"
-    task :spicoli => [:environment] do
+    #task :spicoli => [:environment] do
+    task :spicoli do
+
+#      require 'fork_manager'
+#
+#      RESUME = false
+#      SPICOLI_DIR = "/BiO/Develop/bipa/public/spicoli"
+#      NACCESS_DIR = "/BiO/Develop/bipa/public/naccess"
+#      MAX_FORK = 2
 
       refresh_dir(SPICOLI_DIR) unless RESUME
+#      if File.exists? SPICOLI_DIR
+#        rm_rf SPICOLI_DIR
+#      end
+#
+#      mkdir_p SPICOLI_DIR
 
       unbound_protein_files = FileList[File.join(NACCESS_DIR, "*_aa.pdb")]
       unbound_na_files = FileList[File.join(NACCESS_DIR, "*_na.pdb")]
@@ -427,7 +440,8 @@ namespace :bipa do
           fmanager.fork do
             basename = File.basename(file, ".pdb")
             pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
-            system "python2.5 ./lib/calculate_electrostatic_potentials.py #{file} 1> #{pot_file}"
+            #system "python2.5 ./lib/calculate_electrostatic_potentials.py #{file} 1> #{pot_file}"
+            system "./lib/calculate_electrostatic_potentials #{file} 1> #{pot_file}"
 
             $logger.info ">>> Calculating electrostatic potentials for #{file}: done (#{i+1}/#{unbound_pdb_files.size})"
           end
