@@ -89,6 +89,7 @@ BLASTCLUST_DIR  = Rails.root.join("public/blastclust/")
 FAMILY_DIR      = Rails.root.join("public/families")
 ALIGNMENT_DIR   = Rails.root.join("public/alignments")
 ZAP_DIR         = Rails.root.join("public/zap")
+SPICOLI_DIR     = Rails.root.join("public/spicoli")
 GO_DIR          = Rails.root.join("public/go")
 ESST_DIR        = Rails.root.join("public/essts")
 

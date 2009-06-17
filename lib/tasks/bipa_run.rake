@@ -403,10 +403,33 @@ namespace :bipa do
                 next
               end
 
-              #sh "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
               system "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
-            $logger.info "Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+          end
+        end
+      end
+    end
+
+
+    desc "Run OESpicoli and OEZap for unbound state PDB structures"
+    task :spicoli => [:environment] do
+
+      refresh_dir(SPICOLI_DIR) unless RESUME
+
+      unbound_protein_files = FileList[File.join(NACCESS_DIR, "*_aa.pdb")]
+      unbound_na_files = FileList[File.join(NACCESS_DIR, "*_na.pdb")]
+      unbound_pdb_files = unbound_protein_files + unbound_na_files
+      fmanager = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        unbound_pdb_files.each_with_index do |file, i|
+          fmanager.fork do
+            basename = File.basename(file, ".pdb")
+            pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
+            system "python2.5 ./lib/calculate_electrostatic_potentials.py #{file} 1> #{pot_file}"
+
+            $logger.info ">>> Calculating electrostatic potentials for #{file}: done (#{i+1}/#{unbound_pdb_files.size})"
           end
         end
       end
