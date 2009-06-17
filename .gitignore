@@ -2,6 +2,8 @@
 *.swp
 *~
 *.old
+*.tar.gz
+*.tgz
 index/
 log/*.log
 log/*.pid
@@ -33,3 +35,4 @@ public/structures.html
 public/structures
 public/images/pdb
 public/images/scop
+lib/calculate_electrostatic_potentials

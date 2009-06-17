@@ -413,8 +413,8 @@ namespace :bipa do
 
 
     desc "Run OESpicoli and OEZap for unbound state PDB structures"
-    #task :spicoli => [:environment] do
-    task :spicoli do
+    task :spicoli => [:environment] do
+#    task :spicoli do
 
 #      require 'fork_manager'
 #
