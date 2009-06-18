@@ -78,7 +78,7 @@ class Scop < ActiveRecord::Base
       def #{na}_interfaces
         leaves.map(&:#{na}_interfaces).flatten.compact
       end
-      memoize :#{na}_interfaces
+      #memoize :#{na}_interfaces
     END
   end
 #
