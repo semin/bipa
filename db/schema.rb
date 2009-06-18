@@ -155,6 +155,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :tempfactor
     t.string      :element
     t.string      :charge
+    t.float       :formal_charge
+    t.float       :partial_charge
+    t.float       :atom_potential
+    t.float       :asa_potential
     t.integer     :vdw_contacts_count,        :default => 0
     t.integer     :whbonds_count,             :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0
