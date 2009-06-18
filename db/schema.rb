@@ -26,7 +26,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :description
     t.float       :resolution
     %w[dna rna].each { |na|
-      t.belongs_to  :"#{na}_subfamily"
+      (10..100).step(10) { |pid| t.belongs_to  :"nr#{pid}_#{na}_binding_subfamily" }
       t.boolean     :"rp_#{na}",    :default => false
       t.boolean     :"rpall_#{na}", :default => false
     }
@@ -155,6 +155,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :tempfactor
     t.string      :element
     t.string      :charge
+    t.float       :formal_charge
+    t.float       :partial_charge
+    t.float       :atom_potential
+    t.float       :asa_potential
     t.integer     :vdw_contacts_count,        :default => 0
     t.integer     :whbonds_count,             :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0

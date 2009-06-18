@@ -2,6 +2,8 @@
 *.swp
 *~
 *.old
+*.tar.gz
+*.tgz
 index/
 log/*.log
 log/*.pid
@@ -22,6 +24,7 @@ public/hbplus
 public/naccess
 public/zap
 public/blastclust
+public/spicoli
 public/contact.html
 public/index.html
 public/interfaces
@@ -32,4 +35,4 @@ public/structures.html
 public/structures
 public/images/pdb
 public/images/scop
-
+lib/calculate_electrostatic_potentials

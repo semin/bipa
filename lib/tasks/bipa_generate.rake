@@ -5,9 +5,9 @@ namespace :bipa do
     task :full_scop_pdb_files => [:environment] do
 
       %w[dna rna].each do |na|
-        fmanager  = ForkManager.new(MAX_FORK)
-        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         full_dir  = File.join(FAMILY_DIR, "full", na)
+        fmanager  = ForkManager.new(MAX_FORK)
 
         refresh_dir(full_dir) unless RESUME
 
@@ -18,10 +18,10 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              family      = ScopFamily.find_by_sunid(sunid)
-              family_dir  = File.join(full_dir, "#{sunid}")
+              family  = ScopFamily.find_by_sunid(sunid)
+              fam_dir = File.join(full_dir, "#{sunid}")
 
-              mkdir_p(family_dir) unless File.exists? family_dir
+              mkdir_p(fam_dir) unless File.exists? fam_dir
 
               domains = family.leaves.select(&:"rpall_#{na}")
               domains.each do |domain|
@@ -45,11 +45,11 @@ namespace :bipa do
                 end
 
                 # Generate PDB file only for the first model in NMR structure using Bio::PDB
-                File.open(File.join(family_dir, "#{domain.sunid}.pdb"), "w") do |f|
+                File.open(File.join(fam_dir, "#{domain.sunid}.pdb"), "w") do |f|
                   f.puts Bio::PDB.new(IO.read(dom_pdb)).models.first
                 end
 
-                #cp dom_pdb, File.join(family_dir, "#{domain.sunid}.pdb")
+                #cp dom_pdb, File.join(fam_dir, "#{domain.sunid}.pdb")
               end
 
               ActiveRecord::Base.remove_connection
@@ -67,7 +67,8 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         fmanager  = ForkManager.new(MAX_FORK)
-        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
         full_dir  = File.join(FAMILY_DIR, "full", na)
 
         fmanager.manage do
@@ -76,25 +77,28 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              family      = ScopFamily.find_by_sunid(sunid)
-              nr_dir      = File.join(FAMILY_DIR, "nr", na)
-              family_dir  = File.join(nr_dir, "#{sunid}")
+              family = ScopFamily.find_by_sunid(sunid)
 
-              mkdir_p family_dir
+              (10..100).step(10) do |pid|
+                nr_dir  = File.join(FAMILY_DIR, "nr#{pid}", na)
+                fam_dir = File.join(nr_dir, "#{sunid}")
 
-              subfamilies = family.send("nr_#{na}_subfamilies")
-              subfamilies.each do |subfamily|
-                domain = subfamily.representative
-                next if domain.nil?
+                mkdir_p fam_dir
 
-                domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
+                subfamilies = family.send("nr#{pid}_#{na}_binding_subfamilies")
+                subfamilies.each do |subfamily|
+                  domain = subfamily.representative
+                  next if domain.nil?
 
-                if !File.size? domain_pdb_file
-                  $logger.warn "!!! Cannot find #{domain_pdb_file}"
-                  exit 1
+                  domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
+
+                  if !File.size? domain_pdb_file
+                    $logger.warn "!!! Cannot find #{domain_pdb_file}"
+                    exit 1
+                  end
+
+                  cp domain_pdb_file, fam_dir
                 end
-
-                cp domain_pdb_file, family_dir
               end
               ActiveRecord::Base.remove_connection
             end
@@ -111,10 +115,11 @@ namespace :bipa do
     task :sub_scop_pdb_files => [:environment] do
 
       %w[dna rna].each do |na|
-        fmanager  = ForkManager.new(MAX_FORK)
-        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
         sub_dir   = File.join(FAMILY_DIR, "sub", na)
         full_dir  = File.join(FAMILY_DIR, "full", na)
+        fmanager  = ForkManager.new(MAX_FORK)
 
         refresh_dir(sub_dir) unless RESUME
 
@@ -125,27 +130,27 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              family      = ScopFamily.find_by_sunid(sunid)
-              family_dir  = File.join(sub_dir, "#{sunid}")
+              family  = ScopFamily.find_by_sunid(sunid)
+              fam_dir = File.join(sub_dir, "#{sunid}")
 
-              mkdir_p(family_dir)
+              (10..100).step(10) do |pid|
+                subfamilies = family.send("nr#{pid}_#{na}_binding_subfamilies")
+                subfamilies.each do |subfamily|
+                  subfam_dir = File.join(fam_dir, "nr#{pid}", subfamily.id.to_s)
+                  mkdir_p subfam_dir
 
-              subfamilies = family.send("#{na}_subfamilies")
-              subfamilies.each do |subfamily|
-                subfamily_dir = File.join(family_dir, subfamily.id.to_s)
-                mkdir_p subfamily_dir
+                  domains = subfamily.domains
+                  domains.each do |domain|
+                    domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
 
-                domains = subfamily.domains
-                domains.each do |domain|
-                  domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
-
-                  if !File.exists?(domain_pdb_file)
-                    $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
-                    next
-                  end
-                  cp domain_pdb_file, subfamily_dir
-                end # domains.each
-              end # subfamilies.each
+                    if !File.exists?(domain_pdb_file)
+                      $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
+                      next
+                    end
+                    cp domain_pdb_file, subfam_dir
+                  end # domains.each
+                end # subfamilies.each
+              end
 
               $logger.info ">>> Generating PDB files for #{na.upcase}-binding subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
               ActiveRecord::Base.remove_connection
@@ -161,7 +166,7 @@ namespace :bipa do
     task :tem_files => [:environment] do
 
       %w[dna rna].each do |na|
-        PID_LIST.each do |si|
+        (10..100).step(10) do |si|
           next unless si == 80 # temporary skipping!!!
 
           rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
@@ -174,12 +179,12 @@ namespace :bipa do
 
             next unless alignment
 
-            family_dir  = File.join(rep_dir, dir)
-            tem_file    = File.join(family_dir, "baton.tem")
+            fam_dir   = File.join(rep_dir, dir)
+            tem_file  = File.join(fam_dir, "baton.tem")
 
             next unless File.size? tem_file
 
-            new_tem_file = File.join(family_dir, "baton_na.tem")
+            new_tem_file = File.join(fam_dir, "baton_na.tem")
   #          cp tem_file, new_tem_file
 
             File.open(new_tem_file, "w") do |file|
@@ -363,21 +368,22 @@ namespace :bipa do
       #refresh_dir(ESST_DIR) unless RESUME
 
       %w[dna rna].each do |na|
-        esst_dir  = File.join(ESST_DIR, "nr", na)
+        esst_dir  = File.join(ESST_DIR, "nr100", na)
         cwd       = pwd
         mkdir_p esst_dir
         chdir esst_dir
 
-        FileList[File.join(FAMILY_DIR, "nr", na, "*", "*.tem")].select { |t|
-          t.match(/(\d+)\/\1-\d+/)
+        FileList[File.join(FAMILY_DIR, "nr100", na, "*", "*")].select { |t|
+          t.match(/(\d+)\/\1\.tem/)
         }.each do |tem_file|
           cp tem_file, "."
         end
 
         sh "ls -1 *.tem > tem_files.lst"
 
-        (30..80).step(10) do |weight|
-          sh "ulla -l tem_files.lst --autosigma --weight #{weight} -o ulla-#{na}-#{weight}.log"
+        (30..100).step(5) do |weight|
+          #sh "ulla -l tem_files.lst --autosigma --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
+          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
         end
 
         chdir cwd

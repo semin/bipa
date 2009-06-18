@@ -743,7 +743,8 @@ namespace :bipa do
     task :subfamilies => [:environment] do
 
       %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         fmanager  = ForkManager.new(MAX_FORK)
 
         fmanager.manage do
@@ -753,25 +754,27 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              family      = ScopFamily.find_by_sunid(sunid)
-              fam_dir     = File.join(BLASTCLUST_DIR, na, "#{sunid}")
-              subfam_file = File.join(fam_dir, "#{sunid}.cluster#{NR_PID}")
+              family  = ScopFamily.find_by_sunid(sunid)
+              fam_dir = File.join(BLASTCLUST_DIR, na, "#{sunid}")
 
-              IO.readlines(subfam_file).each do |line|
-                subfamily = "#{na.capitalize}Subfamily".constantize.new
-                members   = line.split(/\s+/)
-                members.each do |member|
-                  domain = ScopDomain.find_by_sunid(member)
-                  if domain
-                    subfamily.domains << domain
-                  else
-                    $logger.warn "!!! Cannot find SCOP domain, #{member}"
-                    exit 1
+              (10..100).step(10) do |pid|
+                subfam_file = File.join(fam_dir, "#{sunid}.cluster#{pid}")
+
+                IO.readlines(subfam_file).each do |line|
+                  subfamily = "Nr#{pid}#{na.capitalize}BindingSubfamily".constantize.new
+                  members   = line.split(/\s+/)
+                  members.each do |member|
+                    domain = ScopDomain.find_by_sunid(member)
+                    if domain
+                      subfamily.domains << domain
+                    else
+                      $logger.warn "!!! Cannot find SCOP domain, #{member}"
+                      exit 1
+                    end
                   end
+                  subfamily.family = family
+                  subfamily.save!
                 end
-                subfamily.family = family
-                subfamily.save!
-                $logger.debug ">>> Importing #{na.capitalize}Subfamily, #{subfamily.id}: done"
               end
 
               ActiveRecord::Base.remove_connection

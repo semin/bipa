@@ -8,33 +8,35 @@ end
 
 
 %w[dna rna].each do |na|
-  eval <<-END
-    class #{na.capitalize}Subfamily < Subfamily
+  (10..100).step(10) do |pid|
+    eval <<-END
+      class Nr#{pid}#{na.capitalize}BindingSubfamily < Subfamily
 
-      has_one :alignment,
-              :class_name   => "SubfamilyAlignment",
-              :foreign_key  => "subfamily_id"
+        has_one :alignment,
+                :class_name   => "SubfamilyAlignment",
+                :foreign_key  => "subfamily_id"
 
-      has_many  :domains,
-                :class_name   => "ScopDomain",
-                :foreign_key  => "#{na}_subfamily_id"
+        has_many  :domains,
+                  :class_name   => "ScopDomain",
+                  :foreign_key  => "nr#{pid}_#{na}_binding_subfamily_id"
 
-      def representative
-        rep = nil
-        domains.each do |domain|
-          next if domain.calpha_only? || domain.has_unks?
-          if domain.resolution
-            if rep && rep.resolution
-              rep = domain if domain.resolution < rep.resolution
+        def representative
+          rep = nil
+          domains.each do |domain|
+            next if domain.calpha_only? || domain.has_unks?
+            if domain.resolution
+              if rep && rep.resolution
+                rep = domain if domain.resolution < rep.resolution
+              else
+                rep = domain
+              end
             else
-              rep = domain
+              rep = domain if rep.nil?
             end
-          else
-            rep = domain if rep.nil?
           end
+          rep
         end
-        rep
       end
-    end
-  END
+    END
+  end
 end

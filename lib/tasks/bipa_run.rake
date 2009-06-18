@@ -423,7 +423,7 @@ namespace :bipa do
 #      NACCESS_DIR = "/BiO/Develop/bipa/public/naccess"
 #      MAX_FORK = 2
 
-      refresh_dir(SPICOLI_DIR) unless RESUME
+#      refresh_dir(SPICOLI_DIR) unless RESUME
 #      if File.exists? SPICOLI_DIR
 #        rm_rf SPICOLI_DIR
 #      end
@@ -437,13 +437,18 @@ namespace :bipa do
 
       fmanager.manage do
         unbound_pdb_files.each_with_index do |file, i|
-          fmanager.fork do
-            basename = File.basename(file, ".pdb")
-            pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
-            #system "python2.5 ./lib/calculate_electrostatic_potentials.py #{file} 1> #{pot_file}"
-            system "./lib/calculate_electrostatic_potentials #{file} 1> #{pot_file}"
+          basename = File.basename(file, ".pdb")
+          pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
 
-            $logger.info ">>> Calculating electrostatic potentials for #{file}: done (#{i+1}/#{unbound_pdb_files.size})"
+          if File.exists? pot_file
+            $logger.info ">>> Skip, #{file}"
+            next
+          else
+            fmanager.fork do
+              #system "python2.5 ./lib/calculate_electrostatic_potentials.py #{file} 1> #{pot_file}"
+              system "./lib/calculate_electrostatic_potentials #{file} 1> #{pot_file}"
+              $logger.info ">>> Calculating electrostatic potentials for #{file}: done (#{i+1}/#{unbound_pdb_files.size})"
+            end
           end
         end
       end

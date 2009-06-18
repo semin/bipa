@@ -28,6 +28,9 @@ require_dependency 'fugue_hit'
 require_dependency 'fugue_search'
 require_dependency 'test_alignment'
 
+# Environmental variables
+ENV["PDB_EXT"] = ".pdb" # for Baton
+
 # Constants for BIPA
 RESUME    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
 MAX_FORK  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
@@ -86,6 +89,7 @@ BLASTCLUST_DIR  = Rails.root.join("public/blastclust/")
 FAMILY_DIR      = Rails.root.join("public/families")
 ALIGNMENT_DIR   = Rails.root.join("public/alignments")
 ZAP_DIR         = Rails.root.join("public/zap")
+SPICOLI_DIR     = Rails.root.join("public/spicoli")
 GO_DIR          = Rails.root.join("public/go")
 ESST_DIR        = Rails.root.join("public/essts")
 
@@ -105,6 +109,3 @@ STD_MAT_LOG     = Rails.root.join("config/allmat.std.log.dat")
 
 ASTRAL40        = "/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa"
 BALISCORE_BIN   = "/BiO/Install/bali_score/bali_score"
-
-# environmental variables
-ENV["PDB_EXT"]  = ".pdb" # for Baton

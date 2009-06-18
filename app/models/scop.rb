@@ -252,13 +252,15 @@ class ScopFamily < Scop
               :class_name   => "Full#{na.capitalize}Alignment",
               :foreign_key  => "scop_id"
 
-    has_one   :"nr_#{na}_alignment",
-              :class_name   => "Nr#{na.capitalize}Alignment",
-              :foreign_key  => "scop_id"
+    (10..100).step(10) do |pid|
+      has_one   :"nr#{pid}_#{na}_binding_family_alignment",
+                :class_name   => "#{na.capitalize}#{pid}BindingFamilyAlignment",
+                :foreign_key  => "scop_id"
 
-    has_many  :"#{na}_subfamilies",
-              :class_name   => "#{na.capitalize}Subfamily",
-              :foreign_key  => "scop_id"
+      has_many  :"nr#{pid}_#{na}_binding_subfamilies",
+                :class_name   => "Nr#{pid}#{na.capitalize}BindingSubfamily",
+                :foreign_key  => "scop_id"
+    end
   end
 end
 
@@ -276,7 +278,11 @@ class ScopDomain < Scop
   include Bipa::ComposedOfResidues
 
   %w[dna rna].each do |na|
-    belongs_to  :"#{na}_subfamily"
+    (10..100).step(10) do |pid|
+      belongs_to  :"nr#{pid}_#{na}_binding_subfamily",
+                  :class_name   => "Nr#{pid}#{na.capitalize}BindingSubfamily",
+                  :foreign_key  => "nr#{pid}_#{na}_binding_subfamily_id"
+    end
   end
 
   has_many  :dna_interfaces,
