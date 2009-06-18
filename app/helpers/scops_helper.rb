@@ -5,14 +5,14 @@ module ScopsHelper
 
   def dssp_description(arg)
     case arg
-    when "H": "Alpha helix"
-    when "G": "3<sub>10</sub>-helix"
-    when "I": "phi-helix"
-    when "E": "extended strand"
-    when "B": "beta-bridge"
-    when "T": "Hydrogen-bonded turn"
-    when "S": "Bend"
-    when "L": "Loop"
+    when "H" then "Alpha helix"
+    when "G" then "3<sub>10</sub>-helix"
+    when "I" then "phi-helix"
+    when "E" then "extended strand"
+    when "B" then "beta-bridge"
+    when "T" then "Hydrogen-bonded turn"
+    when "S" then "Bend"
+    when "L" then "Loop"
     else
       raise "Unknown DSSP type!"
     end
