@@ -319,7 +319,7 @@ class ScopDomain < Scop
   def pdb_code
     sid[1..4].upcase
   end
-  memoize :pdb_code
+  #memoize :pdb_code
 
   def resolution
     res = residues.first.chain.model.structure.resolution
@@ -329,7 +329,7 @@ class ScopDomain < Scop
       999
     end
   end
-  memoize :resolution
+  #memoize :resolution
 
   def ranges_on_chains
     # "2hz1 A:2-124, B:1-50" => [A:2-124, B:1-50]
