@@ -3,6 +3,8 @@ namespace :bipa do
 
     include FileUtils
 
+    TRUE_SCOP_CLASSES = %w[a b c d e f g]
+
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
@@ -178,7 +180,8 @@ namespace :bipa do
       refresh_dir(BLASTCLUST_DIR) unless RESUME
 
       %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         fmanager  = ForkManager.new(MAX_FORK)
 
         fmanager.manage do
@@ -195,7 +198,7 @@ namespace :bipa do
               domains = family.leaves.select(&:"rpall_#{na}")
               domains.each do |domain|
                 if domain.to_sequence.include?("X")
-                  $logger.warn "Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
+                  $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
                   next
                 end
 
@@ -203,24 +206,25 @@ namespace :bipa do
                   f.puts ">#{domain.sunid}"
                   f.puts domain.to_sequence
                 end
-                $logger.info "Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
+                $logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
               end
 
               if File.size? fam_fasta
-                PID_LIST.each do |si|
+                (10..100).step(10) do |pid|
                   blastclust_cmd =
-                    "blastclust " +
-                    "-i #{fam_fasta} "+
-                    "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + si.to_s)} " +
-                    "-L .9 " +
-                    "-S #{si} " +
-                    "-a 2 " +
-                    "-p T"
-                    sh blastclust_cmd
+                      "blastclust " +
+                      "-i #{fam_fasta} "+
+                      "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + pid.to_s)} " +
+                      "-L .9 " +
+                      "-S #{pid} " +
+                      "-a 2 " +
+                      "-p T"
+                  sh blastclust_cmd
                 end
               end
+
               ActiveRecord::Base.remove_connection
-              $logger.info "Creating cluster files for #{na.upcase} binding SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
+              $logger.info ">>> Creating cluster files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
             end
           end
           ActiveRecord::Base.establish_connection(config)
@@ -235,10 +239,10 @@ namespace :bipa do
       task :full_scop_pdb_files => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
           full_dir  = File.join(FAMILY_DIR, "full", na)
           fmanager  = ForkManager.new(MAX_FORK)
-          clst_lvl  = 20
+          #clst_lvl  = 20
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
@@ -256,24 +260,26 @@ namespace :bipa do
                 end
 
                 chdir fam_dir
-                clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{clst_lvl}")
-                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
+                #clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{clst_lvl}")
+                #clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
 
-                clst_list.each_with_index do |c, ci|
-                  pdb_list_file = "cluster#{clst_lvl}-#{ci}.lst"
-                  File.open(pdb_list_file, "w") { |f| f.puts c.map { |p| p + ".pdb" }.join("\n") }
+                #clst_list.each_with_index do |c, ci|
+                  #pdb_list_file = "cluster#{clst_lvl}-#{ci}.lst"
+                  pdb_list_file = "pdb_files.lst"
+                  File.open(pdb_list_file, "w") { |f| f.puts pdb_list.map { |p| p + ".pdb" }.join("\n") }
                   sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
 
-                  if File.exists? "baton.ali"
-                    mv "baton.ali", "cluster#{clst_lvl}-#{ci}.ali"
-                  else
-                    $logger.error "Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
+                  #if File.exists? "baton.ali"
+                    #mv "baton.ali", "cluster#{clst_lvl}-#{ci}.ali"
+                  #else
+                  if !File.exists? "baton.ali"
+                    $logger.error "!!! Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
                     exit 1
                   end
-                end
+                #end
 
                 chdir cwd
-                $logger.info "Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info ">>> Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -287,47 +293,52 @@ namespace :bipa do
       task :nr_scop_pdb_files => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-          nr_dir    = File.join(FAMILY_DIR, "nr", na)
-          clst_lvl  = 20
+          sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+          #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          #min_pid   = 10
           fmanager  = ForkManager.new(MAX_FORK)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
 
-            sunids.each_with_index do |sunid, i|
-              fmanager.fork do
-                ActiveRecord::Base.establish_connection(config)
+            (10..100).step(10) do |pid|
+              sunids.each_with_index do |sunid, i|
+                fmanager.fork do
+                  ActiveRecord::Base.establish_connection(config)
 
-                cwd       = pwd
-                fam_dir   = File.join(nr_dir, sunid.to_s)
-                pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
+                  cwd       = pwd
+                  nr_dir    = File.join(FAMILY_DIR, "nr#{pid}", na)
+                  fam_dir   = File.join(nr_dir, sunid.to_s)
+                  pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
-                if pdb_list.size < 2
-                  $logger.warn "!!! #{pdb_list.size} PDB structure detected in #{fam_dir}"
-                  next
-                end
-
-                chdir fam_dir
-                clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{clst_lvl}")
-                clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
-
-                clst_list.each_with_index do |c, ci|
-                  pdb_list_file = "cluster#{clst_lvl}-#{ci}.lst"
-                  File.open(pdb_list_file, "w") { |f| f.puts c.map { |p| p + ".pdb" }.join("\n") }
-                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
-
-                  if File.exists? "baton.ali"
-                    mv "baton.ali", "cluster#{clst_lvl}-#{ci}.ali"
-                  else
-                    $logger.error "!!! Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
-                    exit 1
+                  if pdb_list.size < 2
+                    $logger.warn "!!! #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                    next
                   end
-                end
 
-                chdir cwd
-                $logger.info ">>> BATON with non-redundant set of #{na.upcase}-binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-                ActiveRecord::Base.remove_connection
+                  chdir fam_dir
+                  #clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{min_pid}")
+                  #clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
+
+                  #clst_list.each_with_index do |c, ci|
+                    #pdb_list_file = "cluster#{min_pid}-#{ci}.lst"
+                    pdb_list_file = "pdb_files.lst"
+                    File.open(pdb_list_file, "w") { |f| f.puts pdb_list.map { |p| p + ".pdb" }.join("\n") }
+                    sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
+
+                    #if File.exists? "baton.ali"
+                    #  mv "baton.ali", "cluster#{min_pid}-#{ci}.ali"
+                    #else
+                    if !File.exists? "baton.ali"
+                      $logger.error "!!! Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
+                      exit 1
+                    end
+                  #end
+
+                  chdir cwd
+                  $logger.info ">>> BATON with non-redundant (PID < #{pid}) set of #{na.upcase}-binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                  ActiveRecord::Base.remove_connection
+                end
               end
             end
             ActiveRecord::Base.establish_connection(config)
@@ -340,7 +351,8 @@ namespace :bipa do
       task :sub_scop_pdb_files => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
+          sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+          #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
           sub_dir   = File.join(FAMILY_DIR, "sub", na)
           fmanager  = ForkManager.new(MAX_FORK)
 
@@ -352,12 +364,12 @@ namespace :bipa do
                 cwd     = pwd
                 fam_dir = File.join(sub_dir, sunid.to_s)
 
-                FileList[fam_dir + "/*"].each do |subfam_dir|
+                FileList[fam_dir + "/nr*" + "/*"].each do |subfam_dir|
                   chdir subfam_dir
                   sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
                   chdir cwd
                 end
-                $logger.info ">>> BATON with subfamily PDB files for SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info ">>> BATON with subfamily PDB files for #{na}-binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -391,10 +403,47 @@ namespace :bipa do
                 next
               end
 
-              #sh "python ./lib/zap_atompot.py -in #{pdb_file} -grid_file #{grd_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
               system "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
-            $logger.info "Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+          end
+        end
+      end
+    end
+
+
+    desc "Run OESpicoli and OEZap for unbound state PDB structures"
+    task :spicoli => [:environment] do
+#    task :spicoli do
+
+#      require 'fork_manager'
+#
+#      RESUME = false
+#      SPICOLI_DIR = "/BiO/Develop/bipa/public/spicoli"
+#      NACCESS_DIR = "/BiO/Develop/bipa/public/naccess"
+#      MAX_FORK = 2
+
+      refresh_dir(SPICOLI_DIR) unless RESUME
+#      if File.exists? SPICOLI_DIR
+#        rm_rf SPICOLI_DIR
+#      end
+#
+#      mkdir_p SPICOLI_DIR
+
+      unbound_protein_files = FileList[File.join(NACCESS_DIR, "*_aa.pdb")]
+      unbound_na_files = FileList[File.join(NACCESS_DIR, "*_na.pdb")]
+      unbound_pdb_files = unbound_protein_files + unbound_na_files
+      fmanager = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        unbound_pdb_files.each_with_index do |file, i|
+          fmanager.fork do
+            basename = File.basename(file, ".pdb")
+            pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
+            #system "python2.5 ./lib/calculate_electrostatic_potentials.py #{file} 1> #{pot_file}"
+            system "./lib/calculate_electrostatic_potentials #{file} 1> #{pot_file}"
+
+            $logger.info ">>> Calculating electrostatic potentials for #{file}: done (#{i+1}/#{unbound_pdb_files.size})"
           end
         end
       end
@@ -408,29 +457,34 @@ namespace :bipa do
         cwd       = pwd
         fmanager  = ForkManager.new(MAX_FORK)
         fmanager.manage do
-          %w[full nr sub].each do |cate|
-            next if cate != 'nr'
-            fam_dirs = FileList[File.join(FAMILY_DIR, cate, na, "*")]
-            fam_dirs.each do |fam_dir|
-              fmanager.fork do
-                chdir fam_dir
+          fam_dirs = FileList[File.join(FAMILY_DIR, "sub", na, "*", "nr*", "*")]
+          fam_dirs.each do |fam_dir|
+            fmanager.fork do
+              chdir fam_dir
 
-                ali_files = FileList[File.join(fam_dir, "cluster*.ali")]
+              #ali_files = FileList[File.join(fam_dir, "cluster*.ali")]
+              ali_file = File.join(fam_dir, "baton.ali")
 
-                if ali_files.size < 1
-                  $logger.error "!!! Cannot find BATON alignment files (e.g. cluster20-0.ali) in #{fam_dir}"
-                  next
-                end
+              #if ali_files.size < 1
+              #  $logger.error "!!! Cannot find BATON alignment files (e.g. cluster20-0.ali) in #{fam_dir}"
+              #  next
+              #end
 
-                ali_files.each do |ali_file|
-                  basename  = File.basename(ali_file, ".ali")
-                  clst_id   = basename.split("-")[1]
-                  system "joy #{basename} 1>joy#{clst_id} 2>&1"
-                end
-
-                chdir cwd
-                $logger.info ">>> JOY with BATON alignments in #{fam_dir}: done"
+              if !File.exists? ali_file
+                $logger.error "!!! Cannot find BATON alignment file, 'baton.ali' in #{fam_dir}"
+                next
               end
+
+              #ali_files.each do |ali_file|
+              basename  = File.basename(ali_file, ".ali")
+              #clst_id   = basename.split("-")[1]
+              #system "joy #{basename} 1>joy#{clst_id} 2>&1"
+              #end
+
+              system "joy #{basename} 1>joy.log 2>&1"
+
+              chdir cwd
+              $logger.info ">>> JOY with BATON alignments in #{fam_dir}: done"
             end
           end
         end
