@@ -1,9 +1,11 @@
 class Atom < ActiveRecord::Base
 
   include Bipa::Constants
-  include Bipa::BindingNucleicAcids
+  include Bipa::NucleicAcidBinding
 
-  belongs_to  :residue
+  belongs_to  :residue,
+              :class_name   => "Residue",
+              :foreign_key  => "residue_id"
 
   has_many  :vdw_contacts,
             :dependent    => :destroy

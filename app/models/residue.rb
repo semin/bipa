@@ -14,6 +14,8 @@ class Residue < ActiveRecord::Base
   belongs_to  :chain_interface
 
   has_many  :atoms,
+            :class_name   => "Atom",
+            :foreign_key  => "residue_id",
             :dependent    => :destroy
 
   has_many  :positions

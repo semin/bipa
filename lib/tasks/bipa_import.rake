@@ -810,7 +810,7 @@ namespace :bipa do
               end
 
               ali_files.each do |ali_file|
-                alignment = family.send("full_#{na}_alignments").create
+                alignment = family.send("full_#{na}_binding_family_alignments").create
                 flat_file = Bio::FlatFile.auto(ali_file)
 
                 flat_file.each_entry do |entry|
@@ -874,65 +874,66 @@ namespace :bipa do
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
 
-          sunids.each_with_index do |sunid, i|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
+          (10..100).step(10) do |pid|
+            sunids.each_with_index do |sunid, i|
+              fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
 
-              family      = ScopFamily.find_by_sunid(sunid)
-              family_dir  = File.join(FAMILY_DIR, "nr", na, "#{family.sunid}")
-              ali_file    = File.join(family_dir, "baton.ali")
+                family      = ScopFamily.find_by_sunid(sunid)
+                family_dir  = File.join(FAMILY_DIR, "nr#{pid}", na, "#{family.sunid}")
+                ali_file    = File.join(family_dir, "baton.ali")
 
-              unless File.exists?(ali_file)
-                $logger.warn "!!! Cannot find #{ali_file} for #{na.upcase}-binding SCOP family, #{sunid}"
-                next
-              end
+                unless File.exists?(ali_file)
+                  $logger.warn "!!! Cannot find #{ali_file} for #{na.upcase}-binding SCOP family, #{sunid}"
+                  next
+                end
 
-              alignment = family.send("create_nr_#{na}_alignment")
-              flat_file = Bio::FlatFile.auto(ali_file)
+                alignment = family.send("create_nr#{pid}_#{na}_binding_family_alignment")
+                flat_file = Bio::FlatFile.auto(ali_file)
 
-              flat_file.each_entry do |entry|
-                next unless entry.seq_type == "P1"
+                flat_file.each_entry do |entry|
+                  next unless entry.seq_type == "P1"
 
-                domain          = ScopDomain.find_by_sunid(entry.entry_id)
-                db_residues     = domain.residues
-                ff_residues     = entry.data.split("")
-                sequence        = alignment.sequences.build
-                sequence.domain = domain
+                  domain          = ScopDomain.find_by_sunid(entry.entry_id)
+                  db_residues     = domain.residues
+                  ff_residues     = entry.data.split("")
+                  sequence        = alignment.sequences.build
+                  sequence.domain = domain
 
-                pos = 0
-                ff_residues.each_with_index do |res, fi|
-                  column    = alignment.columns.find_or_create_by_number(fi + 1)
-                  position  = sequence.positions.build
+                  pos = 0
+                  ff_residues.each_with_index do |res, fi|
+                    column    = alignment.columns.find_or_create_by_number(fi + 1)
+                    position  = sequence.positions.build
 
-                  if (res == "-")
-                    position.residue_name = res
-                    position.number       = fi + 1
-                    position.column       = column
-                    position.save!
-                    column.save!
-                  else
-                    if (db_residues[pos].one_letter_code == res)
-                      position.residue      = db_residues[pos]
+                    if (res == "-")
                       position.residue_name = res
                       position.number       = fi + 1
                       position.column       = column
                       position.save!
                       column.save!
-                      pos += 1
                     else
-                      $logger.error "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
-                      exit 1
+                      if (db_residues[pos].one_letter_code == res)
+                        position.residue      = db_residues[pos]
+                        position.residue_name = res
+                        position.number       = fi + 1
+                        position.column       = column
+                        position.save!
+                        column.save!
+                        pos += 1
+                      else
+                        $logger.error "Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
+                        exit 1
+                      end
                     end
-                  end
-                end # ff_residues.each_with_index
-                sequence.save!
-              end # flat_file.each_entry
-
-              alignment.save!
-              ActiveRecord::Base.remove_connection
-              $logger.info "Importing non-redundant alignments for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-            end # fmanager.fork
-          end # sunids.each
+                  end # ff_residues.each_with_index
+                  sequence.save!
+                end # flat_file.each_entry
+                alignment.save!
+                ActiveRecord::Base.remove_connection
+                $logger.info "Importing non-redundant (PID: #{pid}) alignments for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              end # fmanager.fork
+            end # sunids.each
+          end # (30..100).step(10)
           ActiveRecord::Base.establish_connection(config)
         end # fmanager.manage
       end # %w[dna rna].each # fmanager.manage
@@ -1583,7 +1584,79 @@ namespace :bipa do
         $logger.error "could not find #{usr_result}"
         exit 1
       end
-
     end
+
+
+    desc "Import Atom Charges and Potentials"
+    task :potentials => [:environment] do
+
+      fmanager = ForkManager.new(MAX_FORK)
+      pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")]
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+        pot_files.each do |pot_file|
+          pdb_code = pot_file.match(/(\S{4})\_\S{2}\.pot/)[1]
+          #next if pdb_code != '2hot'
+
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            structure = Structure.find_by_pdb_code(pdb_code.upcase)
+
+            if structure.nil?
+              $logger.error "!!! Cannot find a structure, #{pdb_code.upcase}"
+              ActiveRecord::Base.remove_connection
+              exit 1
+            end
+
+            IO.foreach(pot_file) do |line|
+              if line.start_with?('#') or line.blank?
+                next
+              end
+
+              columns = line.chomp.split(',').map(&:strip)
+              chain = structure.models[0].chains.find_by_chain_code(columns[0])
+
+              if chain.nil?
+                $logger.error "!!! Cannot find a chain, #{columns[0]} of #{pot_file}"
+                next
+#                ActiveRecord::Base.remove_connection
+#                exit 1
+              end
+
+              residue = chain.residues.find_by_residue_code_and_residue_name(columns[1], columns[2])
+
+              if residue.nil?
+                $logger.error "!!! Cannot find a residue, #{columns[1]}, #{columns[2]} of #{pot_file}"
+                next
+#                ActiveRecord::Base.remove_connection
+#                exit 1
+              end
+
+              atom = residue.atoms.find_by_atom_name(columns[4])
+
+              if atom.nil?
+                $logger.error "!!! Cannot find a atom, #{columns.join(', ')} of #{pot_file}"
+                next
+#                ActiveRecord::Base.remove_connection
+#                exit 1
+              end
+
+              atom.formal_charge  = columns[5]
+              atom.partial_charge = columns[6]
+              atom.atom_potential = columns[7]
+              atom.asa_potential  = columns[8]
+              atom.save!
+            end
+
+            ActiveRecord::Base.remove_connection
+            $logger.info ">>> Importing #{pot_file} done."
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end
+
   end
 end

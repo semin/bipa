@@ -1,5 +1,5 @@
 module Bipa
-  module BindingNucleicAcids
+  module NucleicAcidBinding
 
     def hbonding_dna_as_donor?
       hbonding_acceptors.any? { |a| a.dna? }

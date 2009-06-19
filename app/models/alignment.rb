@@ -101,7 +101,7 @@ end
 
   (10..100).step(10) do |pid|
     eval <<-EVAL
-    class Nr#{pid}#{na.capitalize}bindingFamilyAlignment < Alignment
+    class Nr#{pid}#{na.capitalize}BindingFamilyAlignment < Alignment
 
       belongs_to  :family,
                   :class_name   => "ScopFamily",

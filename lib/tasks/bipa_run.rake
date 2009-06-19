@@ -414,25 +414,13 @@ namespace :bipa do
 
     desc "Run OESpicoli and OEZap for unbound state PDB structures"
     task :spicoli => [:environment] do
-#    task :spicoli do
 
-#      require 'fork_manager'
-#
-#      RESUME = false
-#      SPICOLI_DIR = "/BiO/Develop/bipa/public/spicoli"
-#      NACCESS_DIR = "/BiO/Develop/bipa/public/naccess"
-#      MAX_FORK = 2
-
-#      refresh_dir(SPICOLI_DIR) unless RESUME
-#      if File.exists? SPICOLI_DIR
-#        rm_rf SPICOLI_DIR
-#      end
-#
-#      mkdir_p SPICOLI_DIR
+      refresh_dir(SPICOLI_DIR) unless RESUME
 
       unbound_protein_files = FileList[File.join(NACCESS_DIR, "*_aa.pdb")]
       unbound_na_files = FileList[File.join(NACCESS_DIR, "*_na.pdb")]
       unbound_pdb_files = unbound_protein_files + unbound_na_files
+      #unbound_pdb_files = unbound_na_files
       fmanager = ForkManager.new(MAX_FORK)
 
       fmanager.manage do

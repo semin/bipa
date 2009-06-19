@@ -6,7 +6,7 @@ require File.expand_path(File.dirname(__FILE__) + "/bipa/naccess")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/kdtree")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/usr")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/stats_array")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/binding_nucleic_acids")
+require File.expand_path(File.dirname(__FILE__) + "/bipa/nucleic_acid_binding")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_residues")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_atoms")
 
