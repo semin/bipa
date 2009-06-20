@@ -225,7 +225,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :asa_potential
   end
 
-  add_index :spicoli, :atom_id
+  add_index :potentials, :atom_id
 
 
   # 'vdw_contacts' table

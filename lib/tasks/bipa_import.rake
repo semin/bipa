@@ -1674,7 +1674,7 @@ namespace :bipa do
             Potential.import(potentials)
             #Potential.import_with_load_data_infile(col_names, values, :local => false)
             ActiveRecord::Base.remove_connection
-            $logger.info ">>> Importing #{pot_file} done."
+            $logger.info ">>> Importing #{pot_file} done. (#{i + 1}/#{pot_files.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
