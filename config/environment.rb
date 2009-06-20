@@ -15,7 +15,7 @@ Rails::Initializer.run do |config|
   config.gem 'narray'
   config.gem 'andand'
   config.gem 'fork_manager'
-  #config.gem 'ar-extensions'
+  config.gem 'ar-extensions'
   #config.gem 'simple_memoize'
   config.gem 'composite_primary_keys'
   config.gem 'RubyInline', :lib => 'inline'

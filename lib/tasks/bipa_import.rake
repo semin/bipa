@@ -1591,17 +1591,18 @@ namespace :bipa do
     task :potentials => [:environment] do
 
       fmanager = ForkManager.new(MAX_FORK)
-      pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")]
+      aa_pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")].sort
+      na_pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")].sort
+      pot_files = aa_pot_files + na_pot_files
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
-        pot_files.each do |pot_file|
+
+        pot_files.each_with_index do |pot_file, i|
           pdb_code = pot_file.match(/(\S{4})\_\S{2}\.pot/)[1]
-          #next if pdb_code != '2hot'
 
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
-
             structure = Structure.find_by_pdb_code(pdb_code.upcase)
 
             if structure.nil?
@@ -1610,19 +1611,27 @@ namespace :bipa do
               exit 1
             end
 
+#            col_names = [ :atom_id,
+#                          :formal_charge,
+#                          :partial_charge,
+#                          :atom_potential,
+#                          :asa_potential ]
+#            values  = []
+
+            potentials = []
+
             IO.foreach(pot_file) do |line|
               if line.start_with?('#') or line.blank?
                 next
               end
 
               columns = line.chomp.split(',').map(&:strip)
-              chain = structure.models[0].chains.find_by_chain_code(columns[0])
+              model   = structure.models[0]
+              chain   = model.chains.find_by_chain_code(columns[0])
 
               if chain.nil?
                 $logger.error "!!! Cannot find a chain, #{columns[0]} of #{pot_file}"
                 next
-#                ActiveRecord::Base.remove_connection
-#                exit 1
               end
 
               residue = chain.residues.find_by_residue_code_and_residue_name(columns[1], columns[2])
@@ -1630,8 +1639,6 @@ namespace :bipa do
               if residue.nil?
                 $logger.error "!!! Cannot find a residue, #{columns[1]}, #{columns[2]} of #{pot_file}"
                 next
-#                ActiveRecord::Base.remove_connection
-#                exit 1
               end
 
               atom = residue.atoms.find_by_atom_name(columns[4])
@@ -1639,17 +1646,33 @@ namespace :bipa do
               if atom.nil?
                 $logger.error "!!! Cannot find a atom, #{columns.join(', ')} of #{pot_file}"
                 next
-#                ActiveRecord::Base.remove_connection
-#                exit 1
               end
 
-              atom.formal_charge  = columns[5]
-              atom.partial_charge = columns[6]
-              atom.atom_potential = columns[7]
-              atom.asa_potential  = columns[8]
-              atom.save!
+              # Uncomment following lines if you want to use import_with_load_data_in_file
+#              values << [
+#                  atom.id,
+#                  columns[5],
+#                  columns[6],
+#                  columns[7],
+#                  columns[8]
+#              ]
+
+#              atom.create_potential(:formal_charge   => columns[5],
+#                                    :partial_charge  => columns[6],
+#                                    :atom_potential  => columns[7],
+#                                    :asa_potential   => columns[8])
+
+              potentials << Potential.new(:atom_id        => atom,
+                                          :formal_charge  => columns[5],
+                                          :partial_charge => columns[6],
+                                          :unbound_asa    => columns[7],
+                                          :atom_potential => columns[8],
+                                          :asa_potential  => columns[9])
             end
 
+            #Potential.import(potentials, :validate => false)
+            Potential.import(potentials)
+            #Potential.import_with_load_data_infile(col_names, values, :local => false)
             ActiveRecord::Base.remove_connection
             $logger.info ">>> Importing #{pot_file} done."
           end

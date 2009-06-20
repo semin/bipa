@@ -155,10 +155,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :tempfactor
     t.string      :element
     t.string      :charge
-    t.float       :formal_charge
-    t.float       :partial_charge
-    t.float       :atom_potential
-    t.float       :asa_potential
     t.integer     :vdw_contacts_count,        :default => 0
     t.integer     :whbonds_count,             :default => 0
     t.integer     :hbonds_as_donor_count,     :default => 0
@@ -217,16 +213,19 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :naccess, :atom_id
 
 
-  # 'zap' table
-  create_table :zap, :force => true do |t|
+  # 'potentials' table
+  create_table :potentials, :force => true do |t|
     t.belongs_to  :atom
-    t.float       :radius
+    t.float       :unbound_asa
+    t.float       :bound_asa
+    t.float       :delta_asa
     t.float       :formal_charge
     t.float       :partial_charge
-    t.float       :potential
+    t.float       :atom_potential
+    t.float       :asa_potential
   end
 
-  add_index :zap, :atom_id
+  add_index :spicoli, :atom_id
 
 
   # 'vdw_contacts' table
