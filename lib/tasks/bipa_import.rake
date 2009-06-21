@@ -1592,8 +1592,9 @@ namespace :bipa do
 
       fmanager = ForkManager.new(MAX_FORK)
       aa_pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")].sort
-      na_pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")].sort
-      pot_files = aa_pot_files + na_pot_files
+      na_pot_files = FileList[File.join(SPICOLI_DIR, "*_na.pot")].sort
+      #pot_files = aa_pot_files + na_pot_files
+      pot_files = na_pot_files
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -1610,13 +1611,6 @@ namespace :bipa do
               ActiveRecord::Base.remove_connection
               exit 1
             end
-
-#            col_names = [ :atom_id,
-#                          :formal_charge,
-#                          :partial_charge,
-#                          :atom_potential,
-#                          :asa_potential ]
-#            values  = []
 
             potentials = []
 
@@ -1648,20 +1642,6 @@ namespace :bipa do
                 next
               end
 
-              # Uncomment following lines if you want to use import_with_load_data_in_file
-#              values << [
-#                  atom.id,
-#                  columns[5],
-#                  columns[6],
-#                  columns[7],
-#                  columns[8]
-#              ]
-
-#              atom.create_potential(:formal_charge   => columns[5],
-#                                    :partial_charge  => columns[6],
-#                                    :atom_potential  => columns[7],
-#                                    :asa_potential   => columns[8])
-
               potentials << Potential.new(:atom_id        => atom,
                                           :formal_charge  => columns[5],
                                           :partial_charge => columns[6],
@@ -1672,7 +1652,6 @@ namespace :bipa do
 
             #Potential.import(potentials, :validate => false)
             Potential.import(potentials)
-            #Potential.import_with_load_data_infile(col_names, values, :local => false)
             ActiveRecord::Base.remove_connection
             $logger.info ">>> Importing #{pot_file} done. (#{i + 1}/#{pot_files.size})"
           end
