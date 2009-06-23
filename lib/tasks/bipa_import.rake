@@ -955,60 +955,67 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family      = ScopFamily.find_by_sunid(sunid)
-              rep_dir     = File.join(FAMILY_DIR, "sub", na, sunid.to_s)
-              subfam_ids  = Dir[rep_dir + "/*"].map { |d| d.match(/(\d+)$/)[1] }
+              subfam_dir  = File.join(FAMILY_DIR, "sub", na, sunid.to_s)
 
-              subfam_ids.each do |subfam_id|
-                ali_file = File.join(rep_dir, subfam_id, "baton.ali")
+              (10..100).step(10) do |pid|
+                subfam_ids  = FileList[File.join(subfam_dir, "nr#{pid}", "*")].map { |d| d.match(/nr\d+\/(\d+)/)[1] }
 
-                unless File.exists?(ali_file)
-                  $logger.warn "!!! Cannot find #{ali_file} for Subfamily, #{subfam_id} of #{na.upcase}-binding SCOP family, #{sunid}"
-                  next
-                end
+                subfam_ids.each do |subfam_id|
+                  ali_file = File.join(subfam_dir, subfam_id, "baton.ali")
 
-                alignment = Subfamily.find(subfam_id).create_alignment
-                flat_file = Bio::FlatFile.auto(ali_file)
+                  unless File.exists?(ali_file)
+                    $logger.warn "!!! Cannot find #{ali_file} in #{subfam_dir}"
+                    next
+                  end
 
-                flat_file.each_entry do |entry|
-                  next unless entry.seq_type == "P1"
+                  #alignment = Subfamily.find(subfam_id).create_alignment
+                  klass = "Nr#{pid}#{na.capitalize}BindingSubfamily".constantize
+                  alignment = klass.find(subfam_id).create_alignment
+                  flat_file = Bio::FlatFile.auto(ali_file)
 
-                  domain          = ScopDomain.find_by_sunid(entry.entry_id)
-                  db_residues     = domain.residues
-                  ff_residues     = entry.data.split("")
-                  sequence        = alignment.sequences.build
-                  sequence.domain = domain
+                  flat_file.each_entry do |entry|
+                    next unless entry.seq_type == "P1"
 
-                  pos = 0
+                    domain          = ScopDomain.find_by_sunid(entry.entry_id)
+                    db_residues     = domain.residues
+                    ff_residues     = entry.data.split("")
+                    sequence        = alignment.sequences.build
+                    sequence.domain = domain
 
-                  ff_residues.each_with_index do |res, fi|
-                    column    = alignment.columns.find_or_create_by_number(fi + 1)
-                    position  = sequence.positions.build
+                    puts "Found #{domain.sunid}"
 
-                    if (res == "-")
-                      position.residue_name = res
-                      position.number       = fi + 1
-                      position.column       = column
-                      position.save!
-                      column.save!
-                    else
-                      if (db_residues[pos].one_letter_code == res)
-                        position.residue      = db_residues[pos]
-                        position.residue_name = res
-                        position.number       = fi + 1
-                        position.column       = column
-                        position.save!
-                        column.save!
-                        pos += 1
-                      else
-                        $logger.error "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
-                        exit 1
-                      end
-                    end
-                  end # ff_residues.each_with_index
-                  sequence.save!
-                end # flat_file.each_entry
-                alignment.save!
-              end # subfam_ids.each
+#                    pos = 0
+#
+#                    ff_residues.each_with_index do |res, fi|
+#                      column    = alignment.columns.find_or_create_by_number(fi + 1)
+#                      position  = sequence.positions.build
+#
+#                      if (res == "-")
+#                        position.residue_name = res
+#                        position.number       = fi + 1
+#                        position.column       = column
+#                        position.save!
+#                        column.save!
+#                      else
+#                        if (db_residues[pos].one_letter_code == res)
+#                          position.residue      = db_residues[pos]
+#                          position.residue_name = res
+#                          position.number       = fi + 1
+#                          position.column       = column
+#                          position.save!
+#                          column.save!
+#                          pos += 1
+#                        else
+#                          $logger.error "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
+#                          exit 1
+#                        end
+#                      end
+#                    end # ff_residues.each_with_index
+#                    sequence.save!
+                  end # flat_file.each_entry
+#                  alignment.save!
+                end # subfam_ids.each
+              end # (10..100).step(10)
 
               ActiveRecord::Base.remove_connection
               $logger.info ">>> Importing subfamily alignments of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
@@ -1593,8 +1600,7 @@ namespace :bipa do
       fmanager = ForkManager.new(MAX_FORK)
       aa_pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")].sort
       na_pot_files = FileList[File.join(SPICOLI_DIR, "*_na.pot")].sort
-      #pot_files = aa_pot_files + na_pot_files
-      pot_files = na_pot_files
+      pot_files = aa_pot_files + na_pot_files
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
