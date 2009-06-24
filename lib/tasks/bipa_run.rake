@@ -366,7 +366,7 @@ namespace :bipa do
 
                 FileList[fam_dir + "/nr*" + "/*"].each do |subfam_dir|
                   chdir subfam_dir
-                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
+                  system "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
                   chdir cwd
                 end
                 $logger.info ">>> BATON with subfamily PDB files for #{na}-binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"

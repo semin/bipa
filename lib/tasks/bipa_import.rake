@@ -953,23 +953,21 @@ namespace :bipa do
           sunids.each_with_index do |sunid, i|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
-
               family      = ScopFamily.find_by_sunid(sunid)
               subfam_dir  = File.join(FAMILY_DIR, "sub", na, sunid.to_s)
 
               (10..100).step(10) do |pid|
-                subfam_ids  = FileList[File.join(subfam_dir, "nr#{pid}", "*")].map { |d| d.match(/nr\d+\/(\d+)/)[1] }
+                subfam_ids = Dir[File.join(subfam_dir, "nr#{pid}", "*")].map { |d| d.match(/nr\d+\/(\d+)/)[1] }
 
                 subfam_ids.each do |subfam_id|
-                  ali_file = File.join(subfam_dir, subfam_id, "baton.ali")
+                  ali_file    = File.join(subfam_dir, "nr#{pid}", subfam_id, "baton.ali")
 
                   unless File.exists?(ali_file)
-                    $logger.warn "!!! Cannot find #{ali_file} in #{subfam_dir}"
+                    $logger.warn "!!! Cannot find #{ali_file}"
                     next
                   end
 
-                  #alignment = Subfamily.find(subfam_id).create_alignment
-                  klass = "Nr#{pid}#{na.capitalize}BindingSubfamily".constantize
+                  klass     = "Nr#{pid}#{na.capitalize}BindingSubfamily".constantize
                   alignment = klass.find(subfam_id).create_alignment
                   flat_file = Bio::FlatFile.auto(ali_file)
 
@@ -979,41 +977,38 @@ namespace :bipa do
                     domain          = ScopDomain.find_by_sunid(entry.entry_id)
                     db_residues     = domain.residues
                     ff_residues     = entry.data.split("")
-                    sequence        = alignment.sequences.build
+                    sequence        = alignment.sequences.create
                     sequence.domain = domain
+                    pos             = 0
 
-                    puts "Found #{domain.sunid}"
+                    ff_residues.each_with_index do |res, fi|
+                      column    = alignment.columns.find_or_create_by_number(fi + 1)
+                      position  = sequence.positions.create
 
-#                    pos = 0
-#
-#                    ff_residues.each_with_index do |res, fi|
-#                      column    = alignment.columns.find_or_create_by_number(fi + 1)
-#                      position  = sequence.positions.build
-#
-#                      if (res == "-")
-#                        position.residue_name = res
-#                        position.number       = fi + 1
-#                        position.column       = column
-#                        position.save!
-#                        column.save!
-#                      else
-#                        if (db_residues[pos].one_letter_code == res)
-#                          position.residue      = db_residues[pos]
-#                          position.residue_name = res
-#                          position.number       = fi + 1
-#                          position.column       = column
-#                          position.save!
-#                          column.save!
-#                          pos += 1
-#                        else
-#                          $logger.error "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
-#                          exit 1
-#                        end
-#                      end
-#                    end # ff_residues.each_with_index
-#                    sequence.save!
+                      if (res == "-")
+                        position.residue_name = res
+                        position.number       = fi + 1
+                        position.column       = column
+                        position.save!
+                        column.save!
+                      else
+                        if (db_residues[pos].one_letter_code == res)
+                          position.residue      = db_residues[pos]
+                          position.residue_name = res
+                          position.number       = fi + 1
+                          position.column       = column
+                          position.save!
+                          column.save!
+                          pos += 1
+                        else
+                          $logger.error "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}"
+                          exit 1
+                        end
+                      end
+                    end # ff_residues.each_with_index
+                    sequence.save!
                   end # flat_file.each_entry
-#                  alignment.save!
+                  alignment.save!
                 end # subfam_ids.each
               end # (10..100).step(10)
 
