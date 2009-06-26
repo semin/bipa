@@ -802,15 +802,22 @@ namespace :bipa do
 
               family    = ScopFamily.find_by_sunid(sunid)
               fam_dir   = File.join(FAMILY_DIR, "full", na, sunid.to_s)
-              ali_files = FileList[fam_dir + "/cluster*.ali*"]
+              ali_file  = File.join(fam_dir, "baton.ali")
+#              ali_files = FileList[fam_dir + "/cluster*.ali*"]
 
-              if ali_files.size < 1
-                $logger.error "Cannot find any Baton alignment files (e.g. baton.ali0)"
-                exit 1
+              unless File.exists? ali_file
+                $logger.warn "!!! Cannot find Baton alignment file, 'baton.ali' in #{fam_dir}"
+                next
               end
 
-              ali_files.each do |ali_file|
-                alignment = family.send("full_#{na}_binding_family_alignments").create
+#              if ali_files.size < 1
+#                $logger.error "Cannot find any Baton alignment files (e.g. baton.ali0)"
+#                exit 1
+#              end
+
+#              ali_files.each do |ali_file|
+#                alignment = family.send("full_#{na}_binding_family_alignments").create
+                alignment = family.send("create_full_#{na}_binding_family_alignment")
                 flat_file = Bio::FlatFile.auto(ali_file)
 
                 flat_file.each_entry do |entry|
@@ -852,10 +859,10 @@ namespace :bipa do
                   sequence.save!
                 end # flat_file.each_entry
                 alignment.save!
-              end
+#              end
 
               ActiveRecord::Base.remove_connection
-              $logger.info ">>> Importing full alignments of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              $logger.info ">>> Importing full alignment of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             end # fmanger.fork
           end
           ActiveRecord::Base.establish_connection(config)

@@ -248,9 +248,13 @@ class ScopFamily < Scop
 
   %w[dna rna].each do |na|
 
-    has_many  :"full_#{na}_binding_family_alignments",
-              :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
-              :foreign_key  => "scop_id"
+#    has_many  :"full_#{na}_binding_family_alignments",
+#              :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
+#              :foreign_key  => "scop_id"
+
+    has_one :"full_#{na}_binding_family_alignment",
+            :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
+            :foreign_key  => "scop_id"
 
     (10..100).step(10) do |pid|
       has_one   :"nr#{pid}_#{na}_binding_family_alignment",
