@@ -382,10 +382,12 @@ namespace :bipa do
         sh "ls -1 *.tem > tem_files.lst"
 
         (30..100).step(5) do |weight|
-          #sh "ulla -l tem_files.lst --autosigma --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
-          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
-          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --autosigma --weight #{weight} --output 1 -o ulla-#{na}-#{weight}.prb"
-          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --autosigma --weight #{weight} --output 2 -o ulla-#{na}-#{weight}.log"
+#          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
+#          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 1 -o ulla-#{na}-#{weight}.prb"
+#          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 2 -o ulla-#{na}-#{weight}.log"
+          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
+          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 1 -o ulla-#{na}-#{weight}.prb"
+          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 2 -o ulla-#{na}-#{weight}.log"
         end
 
         chdir cwd
