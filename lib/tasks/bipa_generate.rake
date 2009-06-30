@@ -534,5 +534,21 @@ namespace :bipa do
       end
     end
 
+
+    desc "Generate non-redundant protein-DNA/RNA chain set for training"
+    task :nr_chains => [:environment] do
+
+      index = 0
+      structures = Structure.untainted.max_resolution(3.0)
+      structures.each do |structure|
+        structure.aa_chains.each do |chain|
+          if (chain.residues.size > 30) && (chain.interface_residues.size > 0)
+            index += 1
+            puts "#{index}: #{structure.pdb_code}_#{chain.chain_code}"
+          end
+        end
+      end
+    end
+
   end
 end

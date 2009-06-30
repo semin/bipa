@@ -15,7 +15,7 @@ namespace :bipa do
         ftp.chdir "/pub/databases/rcsb/pdb-remediated/"
         ftp.gettextfile("./derived_data/pdb_entry_type.txt", File.join(PDB_DIR, "pdb_entry_type.txt"))
 
-        $logger.info "Downloading pdb_entry_type.txt file: done"
+        $logger.info ">>> Downloading pdb_entry_type.txt file: done"
 
         IO.foreach(File.join(PDB_DIR, "pdb_entry_type.txt")) do |line|
           pdb_code, entry_type, exp_method = line.split(/\s+/)
@@ -23,7 +23,7 @@ namespace :bipa do
           if entry_type == "prot-nuc"
             ftp.getbinaryfile("./data/structures/all/pdb/pdb#{pdb_code}.ent.gz", File.join(PDB_DIR, "#{pdb_code}.pdb.gz"))
 
-            $logger.info("Downloading #{pdb_code}: done")
+            $logger.info ">>> Downloading #{pdb_code}: done"
           end
         end
       end
@@ -58,14 +58,14 @@ namespace :bipa do
 
             if File.size?(pdb_file)
               system "gzip -cd #{pdb_file} > #{File.join(PDB_DIR, pdb_code + '.pdb')}"
-              $logger.info "Unzipping #{pdb_file} (#{i + 1}/#{pna_complexes.size}): done"
+              $logger.info ">>> Unzipping #{pdb_file} (#{i + 1}/#{pna_complexes.size}): done"
             else
               missings << pdb_code
             end
           end
         end
       end
-      $logger.info "Total: #{pna_complexes.size - missings.size} files.\n" + "Missing: #{missings.size} files"
+      $logger.info ">>> Total: #{pna_complexes.size - missings.size} files.\n" + "Missing: #{missings.size} files"
     end
 
 
@@ -74,8 +74,8 @@ namespace :bipa do
 
       refresh_dir SCOP_DIR
 
-      require "open-uri"
-      require "hpricot"
+#      require "open-uri"
+#      require "hpricot"
 
       links = Hash.new(0)
 
@@ -101,24 +101,12 @@ namespace :bipa do
 
       refresh_dir GO_DIR
 
-      # Download GO.obo file from GO Web
-      require "open-uri"
-
       File.open(File.join(GO_DIR, 'gene_ontology_edit.obo'), 'w') do |f|
         f.puts open(GO_OBO_URI).read
         $logger.info ">>> Downloading #{GO_OBO_URI}: done"
       end
 
       # Download GO-PDB mapping file from EBI
-#      require "net/ftp"
-#
-#      Net::FTP.open("ftp.ebi.ac.uk") do |ftp|
-#        ftp.login "anonymous"
-#        ftp.chdir "/pub/databases/GO/goa/PDB/"
-#        ftp.getbinaryfile("./gene_association.goa_pdb.gz", File.join(GO_DIR, "gene_association.goa_pdb.gz"))
-#
-#        $logger.info ">>> Downloading gene_association.goa_pdb.gz: done"
-#      end
       system "wget ftp://ftp.ebi.ac.uk/pub/databases/GO/goa/PDB/gene_association.goa_pdb.gz -P#{GO_DIR}"
       $logger.info ">>> Downloading gene_association.goa_pdb.gz: done"
 
@@ -132,7 +120,7 @@ namespace :bipa do
 
 
     desc "Fetch NCBI taxonomy files"
-    task :taxonomy => [:environment] do
+    task :ncbi_taxonomy => [:environment] do
 
       refresh_dir TAXONOMY_DIR
 

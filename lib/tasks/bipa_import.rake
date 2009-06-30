@@ -54,7 +54,7 @@ namespace :bipa do
           parent_scop = Scop.find_by_sunid(parent_sunid)
           current_scop.move_to_child_of(parent_scop)
         end
-        $logger.info "Importing SCOP, #{self_sunid}: done (#{i + 1})"
+        $logger.info ">>> Importing SCOP, #{self_sunid}: done (#{i + 1})"
       end
     end # task :scop
 
@@ -89,7 +89,7 @@ namespace :bipa do
         }
       end
 
-      pdb_files = FileList[PDB_DIR+"/*.pdb"].sort
+      pdb_files = Dir[PDB_DIR + "/*.pdb"].sort
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -171,7 +171,7 @@ namespace :bipa do
                 elsif bio_residue.na?
                   residue = chain.send("na_residues").create(residue_params(bio_residue))
                 else
-                  raise "Error: #{bio_residue} is a unknown type of standard residue!"
+                  $logger.warn "!!! #{bio_residue} is a unknown type of standard residue!"
                 end
                 bio_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
               end
@@ -184,13 +184,14 @@ namespace :bipa do
 
             Atom.import(atoms, :validate => false)
             structure.save!
-            $logger.info "Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})"
+
+            $logger.info ">>> Importing #{pdb_file}: done (#{i + 1}/#{pdb_files.size})"
 
             # Associate residues with SCOP domains
             domains = ScopDomain.find_all_by_pdb_code(pdb_code)
 
             if domains.empty?
-              $logger.warn "No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_files.size})"
+              $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_files.size})"
             else
               domains.each do |domain|
                 structure.models.first.aa_residues.each do |residue|
@@ -200,7 +201,7 @@ namespace :bipa do
                   end
                 end
               end
-              $logger.info "Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_files.size}): done"
+              $logger.info "!!! Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_files.size}): done"
             end
             ActiveRecord::Base.remove_connection
           end
