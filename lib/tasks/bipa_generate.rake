@@ -538,16 +538,28 @@ namespace :bipa do
     desc "Generate non-redundant protein-DNA/RNA chain set for training"
     task :nr_chains => [:environment] do
 
-      index = 0
-      structures = Structure.untainted.max_resolution(3.0)
+      dna_set     = File.open(Rails.root.join("public/dna_set.fasta"), 'w')
+      rna_set     = File.open(Rails.root.join("public/rna_set.fasta"), 'w')
+      structures  = Structure.untainted.max_resolution(3.0)
+
       structures.each do |structure|
         structure.aa_chains.each do |chain|
-          if (chain.residues.size > 30) && (chain.interface_residues.size > 0)
-            index += 1
-            puts "#{index}: #{structure.pdb_code}_#{chain.chain_code}"
+          aa_residues = chain.aa_residues
+          if aa_residues.size > 30
+            if (residue_size = chain.dna_binding_residues.size) > 0
+              dna_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
+              dna_set.puts aa_residues.map(&:one_letter_code).join('')
+            end
+            if (residue_size = chain.rna_binding_residues.size) > 0
+              rna_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
+              rna_set.puts aa_residues.map(&:one_letter_code).join('')
+            end
           end
         end
       end
+
+      dna_set.close
+      rna_set.close
     end
 
   end
