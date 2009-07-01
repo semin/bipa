@@ -89,7 +89,7 @@ namespace :bipa do
         }
       end
 
-      pdb_files = Dir[PDB_DIR + "/*.pdb"].sort
+      pdb_files = FileList[PDB_DIR.join("*.pdb").to_s].sort
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do

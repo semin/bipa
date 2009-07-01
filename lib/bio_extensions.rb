@@ -57,7 +57,7 @@ module Bio
     end
 
     def resolution
-      remark(2).select {|r| r.respond_to? :resolution}[0].resolution
+      remark(2)[0].comment.match(/(\S+)\s+angstrom/i).andand[1]
     end
 
     def exp_method
