@@ -13,6 +13,7 @@ tmp/**/*
 db/sphinx
 config/*.sphinx.conf
 config/database.yml
+lib/calculate_electrostatic_potentials
 public/pdb
 public/scop
 public/families
@@ -35,4 +36,4 @@ public/structures.html
 public/structures
 public/images/pdb
 public/images/scop
-lib/calculate_electrostatic_potentials
+public/*.fasta
