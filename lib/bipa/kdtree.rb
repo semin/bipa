@@ -1,5 +1,5 @@
 module Bipa
-  class Kdnode
+  class KDNode
 
     attr_reader   :point
     attr_accessor :left, :right
@@ -11,7 +11,7 @@ module Bipa
     end
   end
 
-  class Kdtree
+  class KDTree
 
     def initialize
       @root       = nil
@@ -22,7 +22,7 @@ module Bipa
     def insert(point)
       depth = 0
       if @root.nil?
-        @root = Kdnode.new(point)
+        @root = KDNode.new(point)
       else
         current_node = @root
         begin
@@ -38,9 +38,9 @@ module Bipa
           depth += 1
         end while (current_node != nil)
         if ordinate1 > ordinate2
-          tmp_node.right = Kdnode.new(point)
+          tmp_node.right = KDNode.new(point)
         else
-          tmp_node.left = Kdnode.new(point)
+          tmp_node.left = KDNode.new(point)
         end
       end
     end

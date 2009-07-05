@@ -535,31 +535,189 @@ namespace :bipa do
     end
 
 
-    desc "Generate non-redundant protein-DNA/RNA chain set for training"
+    desc "Generate non-redundant protein-DNA/RNA chain sets for Nabal training"
     task :nr_chains => [:environment] do
 
-      dna_set     = File.open(Rails.root.join("public/dna_set.fasta"), 'w')
-      rna_set     = File.open(Rails.root.join("public/rna_set.fasta"), 'w')
+      dna_set     = File.open(Rails.root.join("tmp/dna_set.fasta"), 'w')
+      rna_set     = File.open(Rails.root.join("tmp/rna_set.fasta"), 'w')
       structures  = Structure.untainted.max_resolution(3.0)
 
-      structures.each do |structure|
+      structures.each_with_index do |structure, i|
         structure.aa_chains.each do |chain|
-          aa_residues = chain.aa_residues
-          if aa_residues.size > 30
-            if (residue_size = chain.dna_binding_residues.size) > 0
+          if (chain.aa_residues.size > 30) && ((residue_size = chain.residues.on_interface.size) > 0)
+            if structure.dna_chains.size > 0
               dna_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
-              dna_set.puts aa_residues.map(&:one_letter_code).join('')
+              dna_set.puts chain.aa_residues.map(&:one_letter_code).join('')
             end
-            if (residue_size = chain.rna_binding_residues.size) > 0
+            if structure.rna_chains.size > 0
               rna_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
-              rna_set.puts aa_residues.map(&:one_letter_code).join('')
+              rna_set.puts chain.aa_residues.map(&:one_letter_code).join('')
             end
           end
         end
+
+        $logger.info ">>> Detecting DNA/RNA-binding chain(s) from #{structure.pdb_code}: done (#{i+1}/#{structures.size})"
       end
 
       dna_set.close
       rna_set.close
+
+      # Run blastclust to make non-redundant protein-DNA/RNA chain sets
+      cwd = pwd
+      chdir Rails.root.join("tmp")
+      sh "blastclust -i dna_set.fasta -o dna_set.cluster25 -L .9 -b F -p T -S 25"
+      sh "blastclust -i rna_set.fasta -o rna_set.cluster25 -L .9 -b F -p T -S 25"
+      chdir cwd
+
+      $logger.info ">> Running blastclust for non-redundant protein-DNA/RNA chain sets: done"
+    end
+
+
+    desc "Generate lists of non-redundant protein-DNA/RNA chain sets"
+    task :nr_chain_lists => [:environment] do
+
+      dna_set = Rails.root.join("tmp", "dna_set.cluster25")
+      rna_set = Rails.root.join("tmp", "rna_set.cluster25")
+
+      [dna_set, rna_set].each do |cluster|
+        $logger.error "!!! #{cluster} does not exist" unless File.exists? cluster
+        list_file = Rails.root.join("tmp", File.basename(cluster, ".cluster25") + ".list")
+
+        File.open(list_file, "w") do |list|
+          IO.foreach(cluster) do |line|
+            unless line.empty?
+              rep = line.chomp.split(/\s+/).sort { |x, y|
+                x.split("_").last.to_i <=> y.split("_").last.to_i
+              }.last
+              pdb_code = rep.split("_")[0]
+              chain_code = rep.split("_")[1]
+              list.puts "#{pdb_code}_#{chain_code}"
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Generate PSSMs for each of non-redundant protein-DNA/RNA chain sets"
+    task :pssms => [:environment] do
+
+      dna_list  = Rails.root.join("tmp", "dna_set.list")
+      rna_list  = Rails.root.join("tmp", "rna_set.list")
+      blast_db  = Rails.root.join("tmp", "nr100_24Jun09.clean.fasta")
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        [dna_list, rna_list].each do |list|
+          IO.foreach(list) do |line|
+            fmanager.fork do
+              ActiveRecord::Base.establish_connection(config)
+
+              stem        = line.chomp
+              pdb_code    = stem.split("_").first
+              chain_code  = stem.split("_").last
+              structure   = Structure.find_by_pdb_code(pdb_code.upcase)
+              chain       = structure.models[0].chains.find_by_chain_code(chain_code)
+              aa_residues = chain.aa_residues
+
+              # create input fasta file
+              File.open(Rails.root.join("tmp", "#{stem}.fasta"), "w") do |fasta|
+                fasta.puts ">#{stem}"
+                fasta.puts aa_residues.map(&:one_letter_code).join('')
+              end
+
+              # run PSI-Blast against NR100 and generate PSSMs
+              cwd = pwd
+              chdir Rails.root.join("tmp")
+              system "blastpgp -i #{stem}.fasta -d #{blast_db} -e 0.01 -h 0.01 -j 5 -m 7 -o #{stem}.blast.xml -a 1 -C #{stem}.asnt -Q #{stem}.pssm -u 1 -J T -W 2"
+              chdir cwd
+
+              $logger.info ">>> Running PSI-Blast for #{stem}.pdb to get PSSMs: done"
+              ActiveRecord::Base.remove_connection
+            end
+          end
+        end
+        ActiveRecord::Base.establish_connection(config)
+      end
+    end
+
+
+    desc "Generate vectorized input features for Nabal traning & testing"
+    task :input_features => [:environment] do
+
+      require "facets"
+
+      dna_list    = Rails.root.join("tmp", "dna_set.list")
+      rna_list    = Rails.root.join("tmp", "rna_set.list")
+      window_size = 7
+      radius      = window_size / 2
+
+      [dna_list, rna_list].each do |list|
+        $logger.error "!!! #{list} does not exist" unless File.exists? list
+        feature_file = Rails.root.join("tmp", File.basename(list, ".list") + ".features")
+
+        File.open(feature_file, 'w') do |feature|
+          IO.foreach(list) do |line|
+            unless line.empty?
+              stem        = line.chomp
+              pdb_code    = stem.split("_").first
+              chain_code  = stem.split("_").last
+              structure   = Structure.find_by_pdb_code(pdb_code.upcase)
+              chain       = structure.models[0].chains.find_by_chain_code(chain_code)
+              aa_residues = chain.aa_residues
+              aa_atoms    = chain.aa_atoms
+
+              # read PSSM file
+              pssms     = []
+              pssm_file = Rails.root.join("tmp", "#{stem}.pssm")
+              $logger.error "!!! #{pssm_file} does not exits" unless File.exists? pssm_file
+
+              IO.foreach(pssm_file) do |line|
+                line.chomp!.strip!
+                if line =~ /^\d+\s+\w+/
+                  columns = line.split(/\s+/)
+                  pssms << columns[2..21]
+                end
+              end
+
+              # build atom KDTree
+#              kdtree      = Bipa::KDTree.new
+#              aa_atoms.each { |a| kdtree.insert(a) }
+
+              aa_residues.each_with_index do |residue, i|
+                # binding activily label
+                label = residue.on_interface? ? '+1' : '-1'
+
+                # sequence features
+                seq_features = (-radius..radius).map { |distance|
+                  if (i + distance) >= 0 and aa_residues[i + distance]
+                    aa_residues[i + distance].array20
+                  else
+                    AaResidue::ZeroArray20
+                  end
+                }.flatten
+
+                # PSSM features
+                pssm_features = (-radius..radius).map { |distance|
+                  if (i + distance) >= 0 and pssms[i + distance]
+                    pssms[i + distance]
+                  else
+                    AaResidue::ZeroArray20
+                  end
+                }.flatten
+
+                # Concatenate all the input features into total_features
+                total_features = seq_features + pssm_features
+
+                # Create libSVM input feature file
+                feature.puts label + " " + total_features.map_with_index { |f, i| "#{i + 1}:#{f}" }.join(' ')
+              end
+            end
+          end
+        end
+      end
     end
 
   end

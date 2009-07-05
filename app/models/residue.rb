@@ -147,6 +147,8 @@ end
 
 class AaResidue < StdResidue
 
+  ZeroArray20 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
   belongs_to  :domain_interface,
               :class_name   => "DomainInterface",
               :foreign_key  => "domain_interface_id"
@@ -165,6 +167,31 @@ class AaResidue < StdResidue
 
   delegate :sse, :to => :dssp
 
+
+  def array20
+    case residue_name
+    when /ALA/i then [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /CYS/i then [0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /ASP/i then [0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /GLU/i then [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /PHE/i then [0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /GLY/i then [0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /HIS/i then [0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /ILE/i then [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]
+    when /LYS/i then [0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]
+    when /LEU/i then [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0]
+    when /MET/i then [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0]
+    when /ASN/i then [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]
+    when /PRO/i then [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]
+    when /GLN/i then [0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0]
+    when /ARG/i then [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0]
+    when /SER/i then [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0]
+    when /THR/i then [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]
+    when /VAL/i then [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]
+    when /TRP/i then [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]
+    when /TYR/i then [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]
+    end
+  end
 
   def positive_phi?
     (dssp.phi > 0 and dssp.phi != 360.0) rescue false

@@ -6,7 +6,6 @@ module Bipa
     def residues
       raise "#residues has to be implemented in your class"
     end
-    #memoize :residues
 
     def sorted_residues
       residues.sort_by { |r|
