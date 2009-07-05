@@ -1,6 +1,7 @@
 class Structure < ActiveRecord::Base
 
   include Bipa::ComposedOfResidues
+  extend ActiveSupport::Memoizable
 
   has_many  :models,
             :dependent  => :destroy

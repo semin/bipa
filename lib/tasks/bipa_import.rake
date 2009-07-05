@@ -406,7 +406,7 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code)
-            kdtree    = Bipa::Kdtree.new
+            kdtree    = Bipa::KDTree.new
             columns   = [:atom_id, :vdw_contacting_atom_id, :distance]
             values    = []
 
