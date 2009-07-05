@@ -155,7 +155,7 @@ namespace :bipa do
 
       refresh_dir DSSP_DIR
 
-      pdb_files = FileList[File.join(PDB_DIR, "*.pdb")]
+      pdb_files = FileList[PDB_DIR.join("*.pdb")]
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
@@ -164,10 +164,39 @@ namespace :bipa do
             cwd = pwd
             chdir DSSP_DIR
             pdb_code = File.basename(pdb_file, '.pdb')
-            sh "#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err"
+            system "#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err"
             chdir cwd
 
-            $logger.info "Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
+            $logger.info ">>> Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
+          end
+        end
+      end
+    end
+
+
+    desc "Run OESpicoli and OEZap for unbound state PDB structures"
+    task :spicoli => [:environment] do
+
+      refresh_dir(SPICOLI_DIR) unless RESUME
+
+      unbound_protein_files = FileList[NACCESS_DIR.join("*_aa.pdb")]
+      unbound_na_files      = FileList[NACCESS_DIR.join("*_na.pdb")]
+      unbound_pdb_files     = unbound_protein_files + unbound_na_files
+
+      fmanager = ForkManager.new(MAX_FORK)
+      fmanager.manage do
+        unbound_pdb_files.each_with_index do |file, i|
+          basename = File.basename(file, ".pdb")
+          pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
+
+          if File.exists? pot_file
+            $logger.info ">>> Skip, #{file}"
+            next
+          else
+            fmanager.fork do
+              system "./lib/calculate_electrostatic_potentials #{file} 1> #{pot_file}"
+              $logger.info ">>> Calculating electrostatic potentials for #{file}: done (#{i+1}/#{unbound_pdb_files.size})"
+            end
           end
         end
       end
@@ -406,37 +435,6 @@ namespace :bipa do
               system "python ./lib/zap_atompot.py -in #{pdb_file} -calc_type remove_self -atomtable 1> #{zap_file} 2> #{err_file}"
             end
             $logger.info ">>> Running ZAP on #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
-          end
-        end
-      end
-    end
-
-
-    desc "Run OESpicoli and OEZap for unbound state PDB structures"
-    task :spicoli => [:environment] do
-
-      refresh_dir(SPICOLI_DIR) unless RESUME
-
-      unbound_protein_files = FileList[File.join(NACCESS_DIR, "*_aa.pdb")]
-      unbound_na_files = FileList[File.join(NACCESS_DIR, "*_na.pdb")]
-      unbound_pdb_files = unbound_protein_files + unbound_na_files
-      #unbound_pdb_files = unbound_na_files
-      fmanager = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        unbound_pdb_files.each_with_index do |file, i|
-          basename = File.basename(file, ".pdb")
-          pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
-
-          if File.exists? pot_file
-            $logger.info ">>> Skip, #{file}"
-            next
-          else
-            fmanager.fork do
-              #system "python2.5 ./lib/calculate_electrostatic_potentials.py #{file} 1> #{pot_file}"
-              system "./lib/calculate_electrostatic_potentials #{file} 1> #{pot_file}"
-              $logger.info ">>> Calculating electrostatic potentials for #{file}: done (#{i+1}/#{unbound_pdb_files.size})"
-            end
           end
         end
       end

@@ -265,7 +265,7 @@ namespace :bipa do
             Naccess.import_with_load_data_infile(columns, values, :local => false)
             ActiveRecord::Base.remove_connection
 
-            $logger.info "Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -1599,13 +1599,13 @@ namespace :bipa do
 
 
     desc "Import Atom Charges and Potentials"
-    task :potentials => [:environment] do
+    task :spicoli => [:environment] do
+
+      aa_pot_files  = FileList[SPICOLI_DIR.join("*_aa.pot")].sort
+      na_pot_files  = FileList[SPICOLI_DIR.join("*_na.pot")].sort
+      pot_files     = aa_pot_files + na_pot_files
 
       fmanager = ForkManager.new(MAX_FORK)
-      aa_pot_files = FileList[File.join(SPICOLI_DIR, "*_aa.pot")].sort
-      na_pot_files = FileList[File.join(SPICOLI_DIR, "*_na.pot")].sort
-      pot_files = aa_pot_files + na_pot_files
-
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
 
@@ -1614,6 +1614,7 @@ namespace :bipa do
 
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
+
             structure = Structure.find_by_pdb_code(pdb_code.upcase)
 
             if structure.nil?
