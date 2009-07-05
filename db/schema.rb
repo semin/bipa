@@ -31,9 +31,6 @@ ActiveRecord::Schema.define(:version => 1) do
       t.boolean     :"rpall_#{na}", :default => false
     }
     t.boolean     :rpall, :default => false
-    #(2..10).step(2) { |i| t.boolean :"rs#{i}", :default => false }
-    #t.boolean     :rs,    :default => false
-    #t.boolean     :rsall, :default => false
   end
 
   add_index :scop, :sunid

@@ -54,8 +54,9 @@ namespace :bipa do
           parent_scop = Scop.find_by_sunid(parent_sunid)
           current_scop.move_to_child_of(parent_scop)
         end
-        $logger.info ">>> Importing SCOP, #{self_sunid}: done (#{i + 1})"
+        #$logger.info ">>> Importing SCOP, #{self_sunid}: done (#{i + 1})"
       end
+      $logger.info ">>> Importing SCOP: done"
     end # task :scop
 
 
@@ -201,7 +202,7 @@ namespace :bipa do
                   end
                 end
               end
-              $logger.info "!!! Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_files.size}): done"
+              $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_files.size}): done"
             end
             ActiveRecord::Base.remove_connection
           end

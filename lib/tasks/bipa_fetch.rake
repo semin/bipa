@@ -74,8 +74,8 @@ namespace :bipa do
 
       refresh_dir SCOP_DIR
 
-#      require "open-uri"
-#      require "hpricot"
+      require "open-uri"
+      require "hpricot"
 
       links = Hash.new(0)
 

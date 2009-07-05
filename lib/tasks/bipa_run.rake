@@ -77,7 +77,7 @@ namespace :bipa do
             chdir cwd
             rm_rf work_dir
 
-            $logger.info "Running HBPlus on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
+            $logger.info ">>> Running HBPlus on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end
@@ -109,7 +109,7 @@ namespace :bipa do
 
             if (pdb_obj.models.first.aa_chains.empty? ||
                 pdb_obj.models.first.na_chains.empty?)
-              $logger.warn "SKIP: #{pdb_file} HAS NO AMINO ACID CHAIN OR NUCLEIC ACID CHAIN"
+              $logger.warn "!!! SKIP: #{pdb_file} HAS NO AMINO ACID CHAIN OR NUCLEIC ACID CHAIN"
               next
             end
 
@@ -143,7 +143,7 @@ namespace :bipa do
             chdir cwd
             rm_r work_dir
 
-            $logger.info "Running NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
+            $logger.info ">>> Running NACCESS: #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
           end
         end
       end
