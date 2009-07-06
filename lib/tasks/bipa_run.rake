@@ -179,15 +179,13 @@ namespace :bipa do
 
       refresh_dir(SPICOLI_DIR) unless RESUME
 
-      unbound_protein_files = FileList[NACCESS_DIR.join("*_aa.pdb")]
-      unbound_na_files      = FileList[NACCESS_DIR.join("*_na.pdb")]
-      unbound_pdb_files     = unbound_protein_files + unbound_na_files
+      unbound_pdb_files = FileList[NACCESS_DIR.join("*a.pdb").to_s]
 
       fmanager = ForkManager.new(MAX_FORK)
       fmanager.manage do
         unbound_pdb_files.each_with_index do |file, i|
           basename = File.basename(file, ".pdb")
-          pot_file = File.join(SPICOLI_DIR, "#{basename}.pot")
+          pot_file = SPICOLI_DIR.join("#{basename}.pot")
 
           if File.exists? pot_file
             $logger.info ">>> Skip, #{file}"
