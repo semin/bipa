@@ -279,7 +279,7 @@ namespace :bipa do
                 ActiveRecord::Base.establish_connection(config)
                 cwd       = pwd
                 fam_dir   = full_dir.join(sunid.to_s)
-                pdb_files = Dir[fam_dir.join("*.pdb")]
+                pdb_files = Dir[fam_dir.join("*.pdb").to_s]
 
                 if pdb_files.size < 2
                   $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
@@ -319,16 +319,20 @@ namespace :bipa do
             config = ActiveRecord::Base.remove_connection
 
             (10..100).step(10) do |pid|
+
+              # temporary filter!
+              next if pid < 90
+
               sunids.each_with_index do |sunid, i|
                 fmanager.fork do
                   ActiveRecord::Base.establish_connection(config)
 
                   cwd       = pwd
                   fam_dir   = FAMILY_DIR.join("nr#{pid}", na, sunid.to_s)
-                  pdb_files = Dir[fam_dir.join("*.pdb")]
+                  pdb_files = Dir[fam_dir.join("*.pdb").to_s]
 
                   if pdb_files.size < 2
-                    $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{fam_dir}"
                     ActiveRecord::Base.remove_connection
                     next
                   end
@@ -373,8 +377,11 @@ namespace :bipa do
                 fam_dir = FAMILY_DIR.join("sub", na, sunid.to_s)
 
                 Dir[fam_dir.join("nr*", "*")].each do |subfam_dir|
-                  pdb_files = Dir[subfam_dir.join("*.pdb")]
 
+                  #temporary filter!!!
+                  next if subfam_dir !~ /nr100/ or subfam_dir !~ /nr90/
+
+                  pdb_files = Dir[subfam_dir.join("*.pdb").to_s]
                   if pdb_files.size < 2
                     $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{subfam_dir}"
                     next
