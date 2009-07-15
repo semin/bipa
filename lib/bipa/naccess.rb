@@ -1,12 +1,12 @@
 module Bipa
   class Naccess
-    
+
     attr_reader :atom_asa, :atom_radius
 
     def initialize(file_str)
       @atom_asa     = {}
       @atom_radius  = {}
-      file_str.each do |line|
+      file_str.split("\n").each do |line|
         if line =~ /^ATOM/
           atom_asa[line[6..10].to_i]    = line[54..61].to_f
           atom_radius[line[6..10].to_i] = line[62..67].to_f

@@ -4,24 +4,18 @@ class Scop < ActiveRecord::Base
 
   cattr_reader :version
 
-  @@version = "1.73"
+  @@version = "1.75"
 
   set_table_name :scop
 
   acts_as_nested_set
 
-  named_scope :"rpall", :conditions => { :"rpall" => true }
-
   %w[dna rna].each do |na|
-    named_scope :"rpall_#{na}", :conditions => { :"rpall_#{na}" => true }
+    named_scope :"reg_#{na}", :conditions => { :"reg_#{na}" => true }
 
-    ((20..100).step(20).to_a << "all").each do |identity|
-      named_scope :"rp#{identity}_#{na}", :conditions => { :"rp#{identity}_#{na}" => true }
+    (10..100).step(10) do |pid|
+      named_scope :"rep#{pid}_#{na}", :conditions => { :"rep#{pid}_#{na}" => true }
     end
-  end
-
-  ((2..10).step(2).to_a << "all").each do |resolution|
-    named_scope :"rs#{resolution}", :conditions => { :"rs#{resolution}" => true }
   end
 
   define_index do

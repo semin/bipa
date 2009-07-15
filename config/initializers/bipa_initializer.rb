@@ -38,7 +38,7 @@ NR_PID    = 80
 FULL_PID  = 20
 
 EPSILON                           = 1.0E-6
-MAX_VDW_DISTANCE                  = 3.9
+MAX_VDW_DISTANCE                  = 5.0
 MIN_INTERFACE_RESIDUE_DELTA_ASA   = 1.0
 MIN_SURFACE_RESIDUE_ASA           = 0.1
 MIN_SURFACE_RESIDUE_RELATIVE_ASA  = 0.07

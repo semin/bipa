@@ -5,7 +5,8 @@ namespace :bipa do
     task :full_scop_pdb_files => [:environment] do
 
       %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+        #sunids    = ScopFamily.send("reg_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         full_dir  = File.join(FAMILY_DIR, "full", na)
         fmanager  = ForkManager.new(MAX_FORK)
 
@@ -21,9 +22,9 @@ namespace :bipa do
               family  = ScopFamily.find_by_sunid(sunid)
               fam_dir = File.join(full_dir, "#{sunid}")
 
-              mkdir_p(fam_dir) unless File.exists? fam_dir
+              mkdir_p fam_dir
 
-              domains = family.leaves.select(&:"rpall_#{na}")
+              domains = family.leaves.select(&:"reg_#{na}")
               domains.each do |domain|
                 if domain.calpha_only?
                   $logger.warn "!!! SCOP domain, #{domain.sunid} is C-alpha only structure"
@@ -40,7 +41,7 @@ namespace :bipa do
                 dom_pdb   = File.join(SCOP_PDB_DIR, dom_sid[2..3], "#{dom_sid}.ent")
 
                 if !File.size? dom_pdb
-                  $logger.warn "!!! Cannot find #{dom_pdb} file"
+                  $logger.warn "!!! Cannot find #{dom_pdb}"
                   exit 1
                 end
 
@@ -53,7 +54,7 @@ namespace :bipa do
               end
 
               ActiveRecord::Base.remove_connection
-              $logger.info ">>> Generating full set of PDB files for #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              $logger.info ">>> Generating full set of PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             end
           end
           ActiveRecord::Base.establish_connection(config)
@@ -66,10 +67,10 @@ namespace :bipa do
     task :nr_scop_pdb_files => [:environment] do
 
       %w[dna rna].each do |na|
-        fmanager  = ForkManager.new(MAX_FORK)
-        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+        #sunids    = ScopFamily.send("reg_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         full_dir  = File.join(FAMILY_DIR, "full", na)
+        fmanager  = ForkManager.new(MAX_FORK)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -103,7 +104,7 @@ namespace :bipa do
               ActiveRecord::Base.remove_connection
             end
 
-            $logger.info ">>> Generating non-redundant PDB files for #{na.upcase} binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+            $logger.info ">>> Generating non-redundant PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             ActiveRecord::Base.establish_connection(config)
           end
         end
@@ -115,8 +116,8 @@ namespace :bipa do
     task :sub_scop_pdb_files => [:environment] do
 
       %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid)
+        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid)
+        #sunids    = ScopFamily.send("reg_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         sub_dir   = File.join(FAMILY_DIR, "sub", na)
         full_dir  = File.join(FAMILY_DIR, "full", na)
         fmanager  = ForkManager.new(MAX_FORK)
@@ -144,13 +145,13 @@ namespace :bipa do
                     domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
 
                     if !File.exists?(domain_pdb_file)
-                      $logger.warn ">>> SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
+                      $logger.warn "!!! SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
                       next
                     end
                     cp domain_pdb_file, subfam_dir
                   end # domains.each
                 end # subfamilies.each
-              end
+              end # (10..100).step(10)
 
               $logger.info ">>> Generating PDB files for #{na.upcase}-binding subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
               ActiveRecord::Base.remove_connection

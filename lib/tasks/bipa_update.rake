@@ -248,23 +248,25 @@ namespace :bipa do
 
 
 
-    desc "Update 'rpXXX' columns of 'scop' table"
-    task :scop_rp => [:environment] do
+    desc "Update 'repPID_NA' columns of 'scop' table"
+    task :scop_rep => [:environment] do
 
       %w[dna rna].each do |na|
-        klass = "#{na.capitalize}Subfamily".constantize
-        klass.all.each do |subfamily|
-          rep = subfamily.representative
-          unless rep.nil?
-            rep.send("rp_#{na}=", true)
-            rep.save!
-            rep.ancestors.each do |anc|
-              anc.send("rp_#{na}=", true)
-              anc.save!
+        (10..100).step(10) do |pid|
+          klass = "Nr#{pid}#{na.capitalize}BindingSubfamily".constantize
+          klass.all.each do |subfamily|
+            rep = subfamily.representative
+            unless rep.nil?
+              rep.send("rep#{pid}_#{na}=", true)
+              rep.save!
+              rep.ancestors.each do |anc|
+                anc.send("rep#{pid}_#{na}=", true)
+                anc.save!
+              end
+              $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done"
+            else
+              $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id}"
             end
-            $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done"
-          else
-            $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id}"
           end
         end
       end
@@ -539,6 +541,7 @@ namespace :bipa do
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
+
           interfaces.each_with_index do |interface, i|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
@@ -587,8 +590,9 @@ namespace :bipa do
                   end
                 end
               end
+
               interface.save!
-              $logger.info ">>> Updating seondary fields of 'interfaces' table for #{interface.class}, #{interface.id}: done (#{i+1}/#{interfaces.size})"
+              $logger.info ">>> Updating secondary fields for #{interface.class}, #{interface.id}: done (#{i+1}/#{interfaces.size})"
               ActiveRecord::Base.remove_connection
             end
           end
