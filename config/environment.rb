@@ -75,8 +75,6 @@ end
 # for will_paginate plugin
 WillPaginate.enable_named_scope
 
-RakeFileUtils.verbose false
-
 REL_URL_ROOT =  ActionController::Base.relative_url_root ?
                 ActionController::Base.relative_url_root.to_s : ''
 

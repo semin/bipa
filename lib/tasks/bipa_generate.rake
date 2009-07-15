@@ -538,53 +538,42 @@ namespace :bipa do
     desc "Generate non-redundant protein-DNA/RNA chain sets for Nabal training"
     task :nr_chains => [:environment] do
 
-      dna_set     = File.open(Rails.root.join("tmp/dna_set.fasta"), 'w')
-      rna_set     = File.open(Rails.root.join("tmp/rna_set.fasta"), 'w')
-      structures  = Structure.untainted.max_resolution(3.0)
+      structures = Structure.untainted.max_resolution(3.0)
 
-      structures.each_with_index do |structure, i|
-        structure.aa_chains.each do |chain|
-          if (chain.aa_residues.size > 30) && ((residue_size = chain.residues.on_interface.size) > 0)
-            if structure.dna_chains.size > 0
-              dna_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
-              dna_set.puts chain.aa_residues.map(&:one_letter_code).join('')
+      %[dna rna].each do |na|
+        File.open(Rails.root.join("tmp/#{na}_set.fasta"), 'w') do |na_set|
+          structures.each_with_index do |structure, i|
+            structure.aa_chains.each do |chain|
+              if (chain.aa_residues.size > 30) && ((residue_size = chain.send("#{na}_binding_interface_residues").size) > 0)
+                na_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
+                na_set.puts chain.aa_residues.map(&:one_letter_code).join('')
+              end
             end
-            if structure.rna_chains.size > 0
-              rna_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
-              rna_set.puts chain.aa_residues.map(&:one_letter_code).join('')
-            end
+            $logger.info ">>> Detecting #{na.upcase}-binding chain(s) from #{structure.pdb_code}: done (#{i+1}/#{structures.size})"
           end
         end
 
-        $logger.info ">>> Detecting DNA/RNA-binding chain(s) from #{structure.pdb_code}: done (#{i+1}/#{structures.size})"
+        # Run blastclust to make non-redundant protein-DNA/RNA chain sets
+        cwd = pwd
+        chdir Rails.root.join("tmp")
+        sh "blastclust -i #{na}_set.fasta -o #{na}_set.cluster25 -L .9 -b F -p T -S 25"
+        chdir cwd
+
+        $logger.info ">> Running blastclust for non-redundant protein-#{na.upcase} chain sets: done"
       end
-
-      dna_set.close
-      rna_set.close
-
-      # Run blastclust to make non-redundant protein-DNA/RNA chain sets
-      cwd = pwd
-      chdir Rails.root.join("tmp")
-      sh "blastclust -i dna_set.fasta -o dna_set.cluster25 -L .9 -b F -p T -S 25"
-      sh "blastclust -i rna_set.fasta -o rna_set.cluster25 -L .9 -b F -p T -S 25"
-      chdir cwd
-
-      $logger.info ">> Running blastclust for non-redundant protein-DNA/RNA chain sets: done"
     end
 
 
     desc "Generate lists of non-redundant protein-DNA/RNA chain sets"
     task :nr_chain_lists => [:environment] do
 
-      dna_set = Rails.root.join("tmp", "dna_set.cluster25")
-      rna_set = Rails.root.join("tmp", "rna_set.cluster25")
-
-      [dna_set, rna_set].each do |cluster|
-        $logger.error "!!! #{cluster} does not exist" unless File.exists? cluster
-        list_file = Rails.root.join("tmp", File.basename(cluster, ".cluster25") + ".list")
+      %w[dna rna].each do |na|
+        na_set = Rails.root.join("tmp", "#{na}_set.cluster25")
+        $logger.error "!!! #{na_set} does not exist" unless File.exists? na_set
+        list_file = Rails.root.join("tmp", File.basename(na_set, ".cluster25") + ".list")
 
         File.open(list_file, "w") do |list|
-          IO.foreach(cluster) do |line|
+          IO.foreach(na_set) do |line|
             unless line.empty?
               rep = line.chomp.split(/\s+/).sort { |x, y|
                 x.split("_").last.to_i <=> y.split("_").last.to_i
@@ -602,16 +591,16 @@ namespace :bipa do
     desc "Generate PSSMs for each of non-redundant protein-DNA/RNA chain sets"
     task :pssms => [:environment] do
 
-      dna_list  = Rails.root.join("tmp", "dna_set.list")
-      rna_list  = Rails.root.join("tmp", "rna_set.list")
-      blast_db  = Rails.root.join("tmp", "nr100_24Jun09.clean.fasta")
-      fmanager  = ForkManager.new(MAX_FORK)
+      blast_db = Rails.root.join("tmp", "nr100_24Jun09.clean.fasta")
+      fmanager = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
 
-        [dna_list, rna_list].each do |list|
-          IO.foreach(list) do |line|
+        %w[dna rna].each do |na|
+          na_list  = Rails.root.join("tmp", "#{na}_set.list")
+
+          IO.foreach(na_list) do |line|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
@@ -634,7 +623,7 @@ namespace :bipa do
               system "blastpgp -i #{stem}.fasta -d #{blast_db} -e 0.01 -h 0.01 -j 5 -m 7 -o #{stem}.blast.xml -a 1 -C #{stem}.asnt -Q #{stem}.pssm -u 1 -J T -W 2"
               chdir cwd
 
-              $logger.info ">>> Running PSI-Blast for #{stem}.pdb to get PSSMs: done"
+              $logger.info ">>> Running PSI-Blast for #{stem}.pdb from #{na.upcase} set: done"
               ActiveRecord::Base.remove_connection
             end
           end
@@ -647,72 +636,115 @@ namespace :bipa do
     desc "Generate vectorized input features for Nabal traning & testing"
     task :input_features => [:environment] do
 
-      require "facets"
+      require 'facets'
 
-      dna_list    = Rails.root.join("tmp", "dna_set.list")
-      rna_list    = Rails.root.join("tmp", "rna_set.list")
       window_size = 7
       radius      = window_size / 2
 
-      [dna_list, rna_list].each do |list|
-        $logger.error "!!! #{list} does not exist" unless File.exists? list
-        feature_file = Rails.root.join("tmp", File.basename(list, ".list") + ".features")
+      %w[dna rna].each do |na|
+        na_stem = "#{na}_set"
+        na_list = Rails.root.join("tmp", "#{na_stem}.list")
 
-        File.open(feature_file, 'w') do |feature|
-          IO.foreach(list) do |line|
-            unless line.empty?
-              stem        = line.chomp
-              pdb_code    = stem.split("_").first
-              chain_code  = stem.split("_").last
-              structure   = Structure.find_by_pdb_code(pdb_code.upcase)
-              chain       = structure.models[0].chains.find_by_chain_code(chain_code)
-              aa_residues = chain.aa_residues
-              aa_atoms    = chain.aa_atoms
+        unless File.exists? na_list
+          $logger.error "!!! Cannot find #{na_list}"
+          exit 1
+        end
 
-              # read PSSM file
-              pssms     = []
-              pssm_file = Rails.root.join("tmp", "#{stem}.pssm")
-              $logger.error "!!! #{pssm_file} does not exits" unless File.exists? pssm_file
+        # read ESST files
+        esst_file = Rails.root.join("tmp", "essts", na, "ulla-#{na}-60.log")
 
-              IO.foreach(pssm_file) do |line|
-                line.chomp!.strip!
-                if line =~ /^\d+\s+\w+/
-                  columns = line.split(/\s+/)
-                  pssms << columns[2..21]
+        unless File.exists? esst_file
+          $logger.error "!!! Cannot find #{esst_file}"
+          exit 1
+        end
+
+        essts = Bipa::Essts.new(esst_file).essts
+
+        # divide traning and test sets
+        # here, we use leave-one-out cross-validation
+        total_set = IO.readlines(na_list)
+
+        total_set.combination(1).each_with_index do |test_set, i|
+          train_set = total_set - test_set
+
+          %w[train test].each do |set_type|
+            feature_file  = Rails.root.join("tmp", "#{na_stem}.#{set_type}#{i}")
+            current_set   = set_type == 'train' ? train_set : test_set
+
+            File.open(feature_file, 'w') do |feature|
+              current_set.each do |entry|
+                entry_stem      = entry.chomp
+                pdb_code        = entry_stem.split("_").first
+                chain_code      = entry_stem.split("_").last
+                structure       = Structure.find_by_pdb_code(pdb_code.upcase)
+                chain           = structure.models[0].chains.find_by_chain_code(chain_code)
+                aa_residues     = chain.aa_residues
+                nab_residues    = chain.send("#{na}_binding_interface_residues")
+                nanb_residues   = aa_residues - nab_residues
+
+                # balance NA-binding and NA-non-binding residue numbers
+                if nanb_residues.size > nab_residues.size
+                  snanb_residues  = []
+                  nab_residues.size.times do
+                    res = nanb_residues[rand(nanb_residues.size)]
+                    snanb_residues << res
+                    nanb_residues.delete(res)
+                  end
+                  nanb_residues = snanb_residues
                 end
-              end
 
-              # build atom KDTree
-#              kdtree      = Bipa::KDTree.new
-#              aa_atoms.each { |a| kdtree.insert(a) }
+                # read PSSM file
+                pssms     = []
+                pssm_file = Rails.root.join("tmp", "#{entry_stem}.pssm")
+                $logger.error "!!! #{pssm_file} does not exits" unless File.exists? pssm_file
 
-              aa_residues.each_with_index do |residue, i|
-                # binding activily label
-                label = residue.on_interface? ? '+1' : '-1'
-
-                # sequence features
-                seq_features = (-radius..radius).map { |distance|
-                  if (i + distance) >= 0 and aa_residues[i + distance]
-                    aa_residues[i + distance].array20
-                  else
-                    AaResidue::ZeroArray20
+                IO.foreach(pssm_file) do |line|
+                  line.chomp!.strip!
+                  if line =~ /^\d+\s+\w+/
+                    columns = line.split(/\s+/)
+                    pssms << NVector[*columns[2..21].map { |c| Float(c) }]
                   end
-                }.flatten
+                end
 
-                # PSSM features
-                pssm_features = (-radius..radius).map { |distance|
-                  if (i + distance) >= 0 and pssms[i + distance]
-                    pssms[i + distance]
-                  else
-                    AaResidue::ZeroArray20
-                  end
-                }.flatten
+                # create libSVM train file
+                sel_residues = nab_residues + nanb_residues
+                sel_residues.each_with_index do |residue, i|
+                  # binding activily label
+                  label = residue.on_interface? ? '+1' : '-1'
 
-                # Concatenate all the input features into total_features
-                total_features = seq_features + pssm_features
+                  # sequence features
+                  seq_features = (-radius..radius).map { |distance|
+                    if (i + distance) >= 0 and aa_residues[i + distance]
+                      aa_residues[i + distance].array20
+                    else
+                      AaResidue::ZeroArray20
+                    end
+                  }.flatten
 
-                # Create libSVM input feature file
-                feature.puts label + " " + total_features.map_with_index { |f, i| "#{i + 1}:#{f}" }.join(' ')
+                  # PSSM features
+                  pssm_features = (-radius..radius).map { |distance|
+                    if (i + distance) >= 0 and pssms[i + distance]
+                      pssms[i + distance].to_a.map { |p| 1 / (1 + 1.0 / Math::E**-p) }
+                    else
+                      AaResidue::ZeroArray20
+                    end
+                  }.flatten
+
+  #                # Distances between PSSM and corresponding ESST columns
+  #                esst_features = essts.map { |esst|
+  #                  (pssms[i] - esst.column(residue.one_letter_code)).to_a.map { |p| 1 / (1 + 1.0 / Math::E**-p) }
+  #                }.flatten
+  #
+  #                # build atom KDTree
+  #                kdtree      = Bipa::KDTree.new
+  #                aa_atoms.each { |a| kdtree.insert(a) }
+
+                  # Concatenate all the input features into total_features
+                  total_features = seq_features + pssm_features
+
+                  # Create libSVM input feature file
+                  feature.puts label + " " + total_features.map_with_index { |f, i| "#{i + 1}:#{f}" }.join(' ')
+                end
               end
             end
           end
