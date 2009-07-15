@@ -140,7 +140,7 @@ namespace :bipa do
             )
 
             # Create empty atoms array for massive importing Atom AREs
-            atoms = Array.new
+            atoms = []
 
             bio_model.each do |bio_chain|
               chain_code = bio_chain.chain_id.blank? ? nil : bio_chain.chain_id
@@ -222,21 +222,21 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
             structure           = Structure.find_by_pdb_code(pdb_code.upcase)
-            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
-            unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
-            unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
+            bound_asa_file      = NACCESS_DIR.join("#{pdb_code}_co.asa")
+            unbound_aa_asa_file = NACCESS_DIR.join("#{pdb_code}_aa.asa")
+            unbound_na_asa_file = NACCESS_DIR.join("#{pdb_code}_na.asa")
 
             if (!File.size?(bound_asa_file)       ||
                 !File.size?(unbound_aa_asa_file)  ||
                 !File.size?(unbound_na_asa_file))
-              $logger.warn "Skipped #{pdb_code}: no NACCESS result file"
+              $logger.warn "!!! Skipped #{pdb_code}: no NACCESS result file"
               structure.no_naccess = true
               structure.save!
+              ActiveRecord::Base.remove_connection
               next
             end
 
@@ -250,8 +250,6 @@ namespace :bipa do
             %w[aa_atoms na_atoms].each do |atoms|
               structure.send(atoms).each do |atom|
                 next if !bound_atom_asa.has_key?(atom.atom_code) || !unbound_aa_atom_asa.has_key?(atom.atom_code)
-
-                # Uncomment following lines if you want to use import_with_load_data_in_file
                 values << [
                   atom.id,
                   unbound_aa_atom_asa[atom.atom_code],
@@ -262,10 +260,9 @@ namespace :bipa do
               end
             end
 
-            Naccess.import_with_load_data_infile(columns, values, :local => false)
+            Naccess.import(columns, values)
             ActiveRecord::Base.remove_connection
-
-            $logger.info ">>> Importing #{pdb_code}.asa to 'naccess': done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{pdb_code}.asa: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -276,51 +273,6 @@ namespace :bipa do
     desc "Import DSSP results to BIPA"
     task :dssp => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code).map(&:downcase)
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            structure = Structure.find_by_pdb_code(pdb_code.upcase)
-            dssp_file = File.join(DSSP_DIR, "#{pdb_code}.dssp")
-            dssps     = Array.new
-
-            unless File.size?(dssp_file)
-              $logger.warn "Skipped #{pdb_code}: no DSSP result file"
-              structure.no_dssp = true
-              structure.save!
-              next
-            end
-
-            dssp_residues = Bipa::Dssp.new(IO.read(dssp_file)).residues
-
-            structure.models.first.aa_residues.each do |residue|
-              key = residue.residue_code.to_s +
-                (residue.icode.blank? ? '' : residue.icode) +
-                residue.chain.chain_code
-
-              residue.create_dssp(dssp_residues[key].to_hash) if dssp_residues.has_key?(key)
-            end
-
-            ActiveRecord::Base.remove_connection
-
-            $logger.info "Importing #{pdb_code}.dssp to 'dssp': done (#{i + 1}/#{pdb_codes.size})"
-          end
-        end
-        ActiveRecord::Base.establish_connection(config)
-      end
-    end
-
-
-    desc "Import OpenEYE ZAP results to BIPA"
-    task :zap => [:environment] do
-
       pdb_codes = Structure.all.map(&:pdb_code).map(&:downcase)
       fmanager  = ForkManager.new(MAX_FORK)
 
@@ -328,62 +280,31 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure   = Structure.find_by_pdb_code(pdb_code.upcase)
-            ZapAtom     = Struct.new(:radius, :formal_charge, :partial_charge, :potential)
-            aa_zap_file = File.join(ZAP_DIR, "#{pdb_code}_aa.zap")
-            na_zap_file = File.join(ZAP_DIR, "#{pdb_code}_na.zap")
-            aa_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_aa.err")
-            na_zap_err  = File.join(ZAP_DIR, "#{pdb_code}_na.err")
-            zap_atoms   = Hash.new
-            zaps        = Array.new
-            tainted_zap = false
+            structure = Structure.find_by_pdb_code(pdb_code.upcase)
+            dssp_file = DSSP_DIR.join("#{pdb_code}.dssp")
 
-            if (!File.size?(aa_zap_file)  ||
-                !File.size?(na_zap_file)  ||
-                File.size?(aa_zap_err)    ||
-                File.size?(na_zap_err))
-              $logger.warn "Skipped #{pdb_code}: no ZAP result file"
-              structure.no_zap = true
+            unless File.size?(dssp_file)
+              $logger.warn "!!! Skipped #{pdb_code}: no DSSP result file"
+              structure.no_dssp = true
               structure.save!
+              ActiveRecord::Base.remove_connection
               next
             end
 
-            IO.foreach(aa_zap_file) do |line|
-              z = line.chomp.split(/\s+/)
-              unless z.size == 7
-                tainted_zap = true
-                break
-              end
-              zap_atoms[z[1].to_i] = ZapAtom.new(z[3].to_f, z[4].to_f, z[5].to_f, z[6].to_f)
+            dssp_residues = Bipa::Dssp.new(IO.read(dssp_file)).residues
+
+            structure.models.first.aa_residues.each do |residue|
+              key = residue.residue_code.to_s +
+                    (residue.icode.blank? ? '' : residue.icode) +
+                    residue.chain.chain_code
+              residue.create_dssp(dssp_residues[key].to_hash) if dssp_residues.has_key?(key)
             end
 
-            IO.foreach(na_zap_file) do |line|
-              z = line.chomp.split(/\s+/)
-              unless z.size == 7
-                tainted_zap = true
-                break
-              end
-              zap_atoms[z[1].to_i] = ZapAtom.new(z[3].to_f, z[4].to_f, z[5].to_f, z[6].to_f)
-            end
-
-            if tainted_zap
-              $logger.warn "Skipped #{pdb_code}: abnormal ZAP results"
-              structure.no_zap = true
-              structure.save!
-              next
-            end
-
-            structure.atoms.each do |atom|
-              zaps << atom.build_zap(zap_atoms[atom.atom_code].to_hash) if zap_atoms.has_key?(atom.atom_code)
-            end
-
-            Zap.import(zaps, :validate => false)
             ActiveRecord::Base.remove_connection
-            $logger.info "Importing 'zap' for #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{pdb_code}.dssp: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -391,89 +312,29 @@ namespace :bipa do
     end
 
 
-    desc "Import van der Waals Contacts"
-    task :vdw_contacts => [:environment] do
-
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            structure = Structure.find_by_pdb_code(pdb_code)
-            kdtree    = Bipa::KDTree.new
-            columns   = [:atom_id, :vdw_contacting_atom_id, :distance]
-            values    = []
-
-            structure.atoms.each { |a| kdtree.insert(a) }
-
-            aa_atoms = structure.aa_atoms
-            na_atoms = structure.na_atoms
-
-            na_atoms.each do |na_atom|
-              neighbor_atoms = kdtree.neighbors(na_atom, MAX_VDW_DISTANCE).map(&:point)
-              neighbor_atoms.each do |neighbor_atom|
-                if neighbor_atom.aa?
-                  dist = na_atom - neighbor_atom
-                  if (!Hbond.exists?(:donor_id => neighbor_atom.id, :acceptor_id => na_atom.id) &&
-                      !Hbond.exists?(:donor_id => na_atom.id, :acceptor_id => neighbor_atom.id))
-                    values << [neighbor_atom.id, na_atom.id, dist]
-                  end
-                end
-              end
-            end
-
-            VdwContact.import_with_load_data_infile(columns, values, :local => false)
-            ActiveRecord::Base.remove_connection
-
-            $logger.info "Importing #{values.size} van der Waals contacts in #{pdb_code} to 'vdw_contacts' table: done (#{i + 1}/#{pdb_codes.size})"
-          end
-          ActiveRecord::Base.establish_connection(config)
-        end
-      end
-    end
-
-
     desc "Import HBPlus results into BIPA"
     task :hbplus => [:environment] do
 
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
+      pdb_codes = Structure.all.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
             structure   = Structure.find_by_pdb_code(pdb_code)
             hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
             bipa_hbonds = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
-            columns     = [
-              :donor_id,
-              :acceptor_id,
-              :da_distance,
-              :category,
-              :gap,
-              :ca_distance,
-              :dha_angle,
-              :ha_distance,
-              :haaa_angle,
-              :daaa_angle
-            ]
-            values      = []
+            hbpluses    = []
 
             if !File.size?(hbplus_file) || bipa_hbonds.empty?
-              $logger.warn "Skipped #{pdb_code}: (maybe) C-alpha only structure"
+              $logger.warn "!!! Skipped #{pdb_code}: C-alpha only structure maybe?"
               structure.no_hbplus = true
               structure.save!
+              ActiveRecord::Base.remove_connection
               next
             end
 
@@ -486,7 +347,7 @@ namespace :bipa do
                 if hbond.donor.residue_name =~ /CSS/
                   donor_residue.ss = true
                   donor_residue.save!
-                  $logger.info "*** Disulfide bonding cysteine found"
+                  $logger.info ">>> Disulfide bonding cysteine found in #{pdb_code}"
                 end
 
                 acceptor_chain   = structure.models.first.chains.find_by_chain_code(hbond.acceptor.chain_code)
@@ -496,37 +357,36 @@ namespace :bipa do
                 if hbond.acceptor.residue_name =~ /CSS/
                   acceptor_residue.ss = true
                   acceptor_residue.save!
-                  $logger.info "Disulfide bonding cysteine found!"
+                  $logger.info ">>> Disulfide bonding cysteine found in #{pdb_code}"
                 end
               rescue
-                $logger.warn "Cannot find hbplus: #{hbond.donor} <=> #{hbond.acceptor} in #{pdb_code}"
+                $logger.warn "!!! Cannot find hbplus: #{hbond.donor} <=> #{hbond.acceptor} in #{pdb_code}"
                 next
               else
                 if donor_atom && acceptor_atom
                   if Hbplus.exists?(:donor_id => donor_atom.id, :acceptor_id => acceptor_atom.id)
-                    $logger.warn "Skipped hbplus: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}"
+                    $logger.warn "!!! Skipped hbplus: #{donor_atom.id} <=> #{acceptor_atom.id} in #{pdb_code}"
                     next
                   else
-                    values << [
-                      donor_atom.id,
-                      acceptor_atom.id,
-                      hbond.da_distance,
-                      hbond.category,
-                      hbond.gap,
-                      hbond.ca_distance,
-                      hbond.dha_angle,
-                      hbond.ha_distance,
-                      hbond.haaa_angle,
-                      hbond.daaa_angle
-                    ]
+                    hbpluses << Hbplus.new(
+                      :donor_id     => donor_atom.id,
+                      :acceptor_id  => acceptor_atom.id,
+                      :da_distance  => hbond.da_distance,
+                      :category     => hbond.category,
+                      :gap          => hbond.gap,
+                      :ca_distance  => hbond.ca_distance,
+                      :dha_angle    => hbond.dha_angle,
+                      :ha_distance  => hbond.ha_distance,
+                      :haaa_angle   => hbond.haaa_angle,
+                      :daaa_angle   => hbond.daaa_angle)
                   end
                 end
               end
             end
 
-            Hbplus.import_with_load_data_infile(columns, values, :local => false)
+            Hbplus.import(hbpluses)
             ActiveRecord::Base.remove_connection
-            $logger.info "Importing #{values.size} hbonds in #{pdb_code.downcase}.hb2 to 'hbplus' table: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{pdb_code.downcase}.hb2: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
@@ -544,13 +404,12 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
-            structure = Structure.find_by_pdb_code(pdb_code)
             columns   = [:donor_id, :acceptor_id, :hbplus_id]
             values    = []
+            structure = Structure.find_by_pdb_code(pdb_code)
 
             structure.hbplus_as_donor.each do |hbplus|
               if ((hbplus.donor.aa? && hbplus.acceptor.na?) ||
@@ -559,10 +418,9 @@ namespace :bipa do
               end
             end
 
-            Hbond.import_with_load_data_infile(columns, values, :local => false) unless values.empty?
+            Hbond.import(columns, values)
             ActiveRecord::Base.remove_connection
-
-            $logger.info "Importing #{values.size} hbonds in #{pdb_code} into 'hbonds' table: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{values.size} hbonds in #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)
@@ -573,8 +431,6 @@ namespace :bipa do
     desc "Import Water-mediated hydrogen bonds"
     task :whbonds => [:environment] do
 
-      require "facets/array"
-
       pdb_codes = Structure.untainted.map(&:pdb_code)
       fmanager  = ForkManager.new(MAX_FORK)
 
@@ -582,7 +438,6 @@ namespace :bipa do
         config = ActiveRecord::Base.remove_connection
 
         pdb_codes.each_with_index do |pdb_code, i|
-
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
 
@@ -630,14 +485,60 @@ namespace :bipa do
               end
             end
 
-            Whbond.import_with_load_data_infile(columns, values, :local => false) unless values.empty?
+            Whbond.import(columns, values)
             ActiveRecord::Base.remove_connection
-
-            $logger.info "Importing #{values.size} water-mediated hbonds in #{pdb_code} to 'whbonds' table: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Importing #{values.size} water-mediated hbonds in #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
       end # fmanager.manage
+    end
+
+
+    desc "Import van der Waals Contacts"
+    task :vdw_contacts => [:environment] do
+
+      pdb_codes = Structure.all.map(&:pdb_code)
+      fmanager  = ForkManager.new(MAX_FORK)
+
+      fmanager.manage do
+        config = ActiveRecord::Base.remove_connection
+
+        pdb_codes.each_with_index do |pdb_code, i|
+          fmanager.fork do
+            ActiveRecord::Base.establish_connection(config)
+
+            structure = Structure.find_by_pdb_code(pdb_code)
+            kdtree    = Bipa::KDTree.new
+            columns   = [:atom_id, :vdw_contacting_atom_id, :distance]
+            values    = []
+
+            structure.atoms.each { |a| kdtree.insert(a) }
+
+            aa_atoms = structure.aa_atoms
+            na_atoms = structure.na_atoms
+
+            na_atoms.each do |na_atom|
+              neighbor_atoms = kdtree.neighbors(na_atom, MAX_VDW_DISTANCE).map(&:point)
+              neighbor_atoms.each do |neighbor_atom|
+                if neighbor_atom.aa?
+                  dist = na_atom - neighbor_atom
+                  values << [neighbor_atom.id, na_atom.id, dist]
+#                  if (!Hbond.exists?(:donor_id => neighbor_atom.id, :acceptor_id => na_atom.id) &&
+#                      !Hbond.exists?(:donor_id => na_atom.id, :acceptor_id => neighbor_atom.id))
+#                    values << [neighbor_atom.id, na_atom.id, dist]
+#                  end
+                end
+              end
+            end
+
+            VdwContact.import(columns, values)
+            ActiveRecord::Base.remove_connection
+            $logger.info ">>> Importing #{values.size} van der Waals contacts in #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+          end
+          ActiveRecord::Base.establish_connection(config)
+        end
+      end
     end
 
 
@@ -649,6 +550,7 @@ namespace :bipa do
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
+
         pdb_codes.each_with_index do |pdb_code, i|
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
@@ -659,7 +561,7 @@ namespace :bipa do
                 iface_found = false
 
                 if domain.send("#{na}_interfaces").size > 0
-                  $logger.warn "#{domain.sid} has a already detected #{na} interface"
+                  $logger.warn "!!! #{domain.sid} has a already detected #{na} interface"
                   iface_found = true
                   next
                 end
@@ -670,16 +572,14 @@ namespace :bipa do
                   iface.residues << domain.send("#{na}_binding_interface_residues")
                   iface.save!
                   iface_found = true
-                  $logger.info "#{domain.sid} has a #{na} interface"
+                  $logger.info ">>> #{domain.sid} has a #{na} interface"
                 end
 
                 if iface_found == true
-                  domain.rpall = true
-                  domain.send("rpall_#{na}=", true)
+                  domain.send("reg_#{na}=", true)
                   domain.save!
                   domain.ancestors.each do |anc|
-                    anc.rpall = true
-                    anc.send("rpall_#{na}=", true)
+                    anc.send("reg_#{na}=", true)
                     anc.save!
                   end
                 end
@@ -687,7 +587,7 @@ namespace :bipa do
             end # domains.each
 
             ActiveRecord::Base.remove_connection
-            $logger.info "Extracting domain interfaces from #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
+            $logger.info ">>> Detecting domain interfaces in #{pdb_code}: done (#{i + 1}/#{pdb_codes.size})"
           end # fmanager.fork
         end # pdb_codes.each_with_index
         ActiveRecord::Base.establish_connection(config)
@@ -710,7 +610,6 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code)
-
             structure.chains.each do |chain|
               dna_residues = chain.dna_binding_interface_residues
               rna_residues = chain.rna_binding_interface_residues
@@ -718,21 +617,21 @@ namespace :bipa do
               if dna_residues.length > 0
                 (chain.dna_interface = ChainDnaInterface.new).residues << dna_residues
                 chain.save!
-                puts "#{pdb_code}: #{chain.chain_code} has an dna interface"
+                $logger.info ">>> #{pdb_code}_#{chain.chain_code} has a DNA interface"
               end
 
               if rna_residues.length > 0
                 (chain.rna_interface = ChainRnaInterface.new).residues << rna_residues
                 chain.save!
-                puts "#{pdb_code}: #{chain.chain_code} has an rna interface"
+                $logger.info ">>> #{pdb_code}_#{chain.chain_code} has a RNA interface"
               end
 
               if dna_residues.length == 0 && rna_residues.length == 0
-                puts "#{pdb_code}: #{chain.chain_code} has no interface"
+                $logger.info ">>> #{pdb_code}_#{chain.chain_code} has no interface"
               end
             end
 
-            puts "Importing 'Chain Interfaces' from #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
+            $logger.info ">>> Importing chain interfaces in #{pdb_code} (#{i + 1}/#{pdb_codes.size}): done"
             ActiveRecord::Base.remove_connection
           end
         end
@@ -745,8 +644,8 @@ namespace :bipa do
     task :subfamilies => [:environment] do
 
       %w[dna rna].each do |na|
-        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+        #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         fmanager  = ForkManager.new(MAX_FORK)
 
         fmanager.manage do

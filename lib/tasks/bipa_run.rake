@@ -207,8 +207,8 @@ namespace :bipa do
       refresh_dir(BLASTCLUST_DIR) unless RESUME
 
       %w[dna rna].each do |na|
-        #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-        sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+        sunids    = ScopFamily.send(:"reg_#{na}").map(&:sunid).sort
+        #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
         fmanager  = ForkManager.new(MAX_FORK)
 
         fmanager.manage do
@@ -222,7 +222,7 @@ namespace :bipa do
               fam_fasta = File.join(fam_dir, "#{sunid}.fa")
               mkdir_p fam_dir
 
-              domains = family.leaves.select(&:"rpall_#{na}")
+              domains = family.leaves.select(&:"reg_#{na}")
               domains.each do |domain|
                 if domain.to_sequence.include?("X")
                   $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
@@ -233,7 +233,7 @@ namespace :bipa do
                   f.puts ">#{domain.sunid}"
                   f.puts domain.to_sequence
                 end
-                $logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
+                #$logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
               end
 
               if File.size? fam_fasta
@@ -260,6 +260,143 @@ namespace :bipa do
     end
 
 
+    namespace :salign do
+
+      desc "Run SALIGN for each SCOP family"
+      task :full_scop => [:environment] do
+
+        %w[dna rna].each do |na|
+          sunids    = ScopFamily.send(:"reg_#{na}").map(&:sunid).sort
+          #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+          full_dir  = FAMILY_DIR.join("full", na)
+          fmanager  = ForkManager.new(MAX_FORK)
+
+          fmanager.manage do
+            config = ActiveRecord::Base.remove_connection
+
+            sunids.each_with_index do |sunid, i|
+              fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
+                cwd       = pwd
+                fam_dir   = full_dir.join(sunid.to_s)
+                pdb_files = Dir[fam_dir.join("*.pdb")]
+
+                if pdb_files.size < 2
+                  $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                  ActiveRecord::Base.remove_connection
+                  next
+                end
+
+                chdir fam_dir
+                system "salign *.pdb 1>salign.stdout 2>salign.stderr"
+
+                if !File.exists? "salign.ali"
+                  $logger.error "!!! Cannot find SALIGN result file, salign.ali for #{na}-binding SCOP family, #{sunid}"
+                  ActiveRecord::Base.remove_connection
+                  exit 1
+                end
+
+                chdir cwd
+                $logger.info ">>> SALIGN with full set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                ActiveRecord::Base.remove_connection
+              end
+            end
+            ActiveRecord::Base.establish_connection(config)
+          end
+        end
+      end
+
+
+      desc "Run SALIGN for representative PDB files for each SCOP Family"
+      task :rep_scop => [:environment] do
+
+        %w[dna rna].each do |na|
+          sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+          fmanager  = ForkManager.new(MAX_FORK)
+
+          fmanager.manage do
+            config = ActiveRecord::Base.remove_connection
+
+            (10..100).step(10) do |pid|
+              sunids.each_with_index do |sunid, i|
+                fmanager.fork do
+                  ActiveRecord::Base.establish_connection(config)
+
+                  cwd       = pwd
+                  fam_dir   = FAMILY_DIR.join("nr#{pid}", na, sunid.to_s)
+                  pdb_files = Dir[fam_dir.join("*.pdb")]
+
+                  if pdb_files.size < 2
+                    $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                    ActiveRecord::Base.remove_connection
+                    next
+                  end
+
+                  chdir fam_dir
+                  system "salign *.pdb 1>salign.stdout 2>salign.stderr"
+
+                  if !File.exists? "salign.ali"
+                    $logger.error "!!! Cannot run SALIGN with PDB files in #{fam_dir}. Should check why ..."
+                    ActiveRecord::Base.remove_connection
+                    exit 1
+                  end
+
+                  chdir cwd
+                  $logger.info ">>> SALIGN with non-redundant (PID < #{pid}) set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                  ActiveRecord::Base.remove_connection
+                end
+              end
+            end
+            ActiveRecord::Base.establish_connection(config)
+          end
+        end
+      end
+
+
+      desc "Run SALIGN for each subfamilies of SCOP families"
+      task :sub_scop => [:environment] do
+
+        %w[dna rna].each do |na|
+          sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
+          fmanager  = ForkManager.new(MAX_FORK)
+
+          fmanager.manage do
+            config = ActiveRecord::Base.remove_connection
+
+            sunids.each_with_index do |sunid, i|
+              fmanager.fork do
+                ActiveRecord::Base.establish_connection(config)
+
+                cwd     = pwd
+                fam_dir = FAMILY_DIR.join("sub", na, sunid.to_s)
+
+                Dir[fam_dir.join("nr*", "*")].each do |subfam_dir|
+                  pdb_files = Dir[subfam_dir.join("*.pdb")]
+
+                  if pdb_files.size < 2
+                    $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{subfam_dir}"
+                    next
+                  end
+
+                  chdir subfam_dir
+                  system "salign *.pdb 1>salign.stdout 2>salign.stderr"
+                  chdir cwd
+                end
+
+                $logger.info ">>> SALIGN with subfamily PDB files for #{na}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                ActiveRecord::Base.remove_connection
+              end
+            end
+            ActiveRecord::Base.establish_connection(config)
+          end
+        end
+      end
+
+    end # namespace :salign
+
+
     namespace :baton do
 
       desc "Run Baton for each SCOP family"
@@ -269,7 +406,6 @@ namespace :bipa do
           sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
           full_dir  = File.join(FAMILY_DIR, "full", na)
           fmanager  = ForkManager.new(MAX_FORK)
-          #clst_lvl  = 20
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
@@ -282,31 +418,24 @@ namespace :bipa do
                 pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                 if pdb_list.size < 2
-                  $logger.warn "!!! #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                  $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                  ActiveRecord::Base.remove_connection
                   next
                 end
 
                 chdir fam_dir
-                #clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{clst_lvl}")
-                #clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
+                pdb_list_file = "pdb_files.lst"
+                File.open(pdb_list_file, "w") { |f| f.puts pdb_list.map { |p| p + ".pdb" }.join("\n") }
+                system "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
 
-                #clst_list.each_with_index do |c, ci|
-                  #pdb_list_file = "cluster#{clst_lvl}-#{ci}.lst"
-                  pdb_list_file = "pdb_files.lst"
-                  File.open(pdb_list_file, "w") { |f| f.puts pdb_list.map { |p| p + ".pdb" }.join("\n") }
-                  sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
-
-                  #if File.exists? "baton.ali"
-                    #mv "baton.ali", "cluster#{clst_lvl}-#{ci}.ali"
-                  #else
-                  if !File.exists? "baton.ali"
-                    $logger.error "!!! Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
-                    exit 1
-                  end
-                #end
+                if !File.exists? "baton.ali"
+                  $logger.error "!!! Cannot find Baton result file, baton.ali for #{na}-binding SCOP family, #{sunid}"
+                  ActiveRecord::Base.remove_connection
+                  exit 1
+                end
 
                 chdir cwd
-                $logger.info ">>> Baton with full set of #{na.upcase} binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info ">>> Baton with full set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -334,36 +463,28 @@ namespace :bipa do
                   ActiveRecord::Base.establish_connection(config)
 
                   cwd       = pwd
-                  nr_dir    = File.join(FAMILY_DIR, "nr#{pid}", na)
-                  fam_dir   = File.join(nr_dir, sunid.to_s)
-                  pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
+                  fam_dir   = File.join(FAMILY_DIR, "nr#{pid}", na, sunid.to_s)
+                  pdb_list  = Dir[fam_dir.join("*.pdb")].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                   if pdb_list.size < 2
-                    $logger.warn "!!! #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                    $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
+                    ActiveRecord::Base.remove_connection
                     next
                   end
 
                   chdir fam_dir
-                  #clst_file = File.join(BLASTCLUST_DIR, na, sunid.to_s, "#{sunid}.cluster#{min_pid}")
-                  #clst_list = IO.readlines(clst_file).map { |l| l.chomp.split(/\s+/) & pdb_list }.select { |l| l.size > 1 }
+                  pdb_list_file = "pdb_files.lst"
+                  File.open(pdb_list_file, "w") { |f| f.puts pdb_list.map { |p| p + ".pdb" }.join("\n") }
+                  system "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
 
-                  #clst_list.each_with_index do |c, ci|
-                    #pdb_list_file = "cluster#{min_pid}-#{ci}.lst"
-                    pdb_list_file = "pdb_files.lst"
-                    File.open(pdb_list_file, "w") { |f| f.puts pdb_list.map { |p| p + ".pdb" }.join("\n") }
-                    sh "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout -list #{pdb_list_file} 1>baton.log 2>&1"
-
-                    #if File.exists? "baton.ali"
-                    #  mv "baton.ali", "cluster#{min_pid}-#{ci}.ali"
-                    #else
-                    if !File.exists? "baton.ali"
-                      $logger.error "!!! Cannot find Baton result file, baton.ali for NA: #{na}, SunID: #{sunid}, Cluster ID: #{ci}"
-                      exit 1
-                    end
-                  #end
+                  if !File.exists? "baton.ali"
+                    $logger.error "!!! Cannot find Baton result file, baton.ali for #{na}-binding SCOP family, #{sunid}"
+                    ActiveRecord::Base.remove_connection
+                    exit 1
+                  end
 
                   chdir cwd
-                  $logger.info ">>> BATON with non-redundant (PID < #{pid}) set of #{na.upcase}-binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                  $logger.info ">>> BATON with non-redundant (PID < #{pid}) set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                   ActiveRecord::Base.remove_connection
                 end
               end
@@ -380,23 +501,32 @@ namespace :bipa do
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
           #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-          sub_dir   = File.join(FAMILY_DIR, "sub", na)
           fmanager  = ForkManager.new(MAX_FORK)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
+
             sunids.each_with_index do |sunid, i|
               fmanager.fork do
                 ActiveRecord::Base.establish_connection(config)
-                cwd     = pwd
-                fam_dir = File.join(sub_dir, sunid.to_s)
 
-                FileList[fam_dir + "/nr*" + "/*"].each do |subfam_dir|
+                cwd     = pwd
+                fam_dir = File.join(FAMILY_DIR, "sub", na, sunid.to_s)
+
+                Dir[fam_dir.join("nr*", "*")].each do |subfam_dir|
+                  pdb_files = Dir[subfam_dir.join("*.pdb")]
+
+                  if pdb_files.size < 2
+                    $logger.warn "!!! Only #{pdb_file.size} PDB structure detected in #{subfam_dir}"
+                    next
+                  end
+
                   chdir subfam_dir
                   system "Baton -input /BiO/Install/Baton/data/baton.prm.current -features -pdbout -matrixout *.pdb 1>baton.log 2>&1"
                   chdir cwd
                 end
-                $logger.info ">>> BATON with subfamily PDB files for #{na}-binding SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+
+                $logger.info ">>> BATON with subfamily PDB files for #{na}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
