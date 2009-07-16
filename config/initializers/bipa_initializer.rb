@@ -92,6 +92,7 @@ ZAP_DIR         = Rails.root.join("public/zap")
 SPICOLI_DIR     = Rails.root.join("public/spicoli")
 GO_DIR          = Rails.root.join("public/go")
 ESST_DIR        = Rails.root.join("public/essts")
+FIGURE_DIR      = Rails.root.join("public/figures")
 
 DNA16_CLASSDEF  = Rails.root.join("config/classdef.dna16.dat")
 DNA64_CLASSDEF  = Rails.root.join("config/classdef.dna64.dat")

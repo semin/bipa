@@ -247,7 +247,6 @@ namespace :bipa do
     end
 
 
-
     desc "Update 'repPID_NA' columns of 'scop' table"
     task :scop_rep => [:environment] do
 

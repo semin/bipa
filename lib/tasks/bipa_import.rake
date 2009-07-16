@@ -773,7 +773,7 @@ namespace :bipa do
 
 
     desc "Import representative alignments for each SCOP Family"
-    task :nr_alignments => [:environment] do
+    task :rep_alignments => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort

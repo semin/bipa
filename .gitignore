@@ -4,6 +4,7 @@
 *.old
 *.tar.gz
 *.tgz
+*.input
 index/
 log/*.log
 log/*.pid
@@ -34,6 +35,7 @@ public/scops
 public/alignments
 public/structures.html
 public/structures
+public/figures
 public/images/pdb
 public/images/scop
 public/*.fasta

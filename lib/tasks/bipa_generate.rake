@@ -63,8 +63,8 @@ namespace :bipa do
     end
 
 
-    desc "Generate non-redundant set of PDB files for each SCOP Family"
-    task :nr_scop_pdb_files => [:environment] do
+    desc "Generate representative set of PDB files for each SCOP Family"
+    task :rep_scop_pdb_files => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -400,6 +400,7 @@ namespace :bipa do
     task :profiles => [:environment] do
 
       (20..100).step(20) do |si|
+        #temporary filter!!!
         next if si != 90
 
         %w[dna rna].each do |na|
@@ -420,38 +421,58 @@ namespace :bipa do
     desc "Generate PNG figure for each PDB file"
     task :structure_figures => [:environment] do
 
-      cwd = pwd
-      chdir PDB_DIR
+      mkdir_p FIGURE_DIR
 
-      Dir.new(PDB_DIR).each do |file|
-        next if file =~ /^\./ or file !~ /\.pdb$/
-        stem = file.match(/(\S{4})\.pdb/)[1]
-        system  "molauto -notitle -nice #{stem}.pdb | " +
-                "molscript -r | " +
-                "perl -pi -e 's/^0 0 0\s+background.*$/1 1 1      background colour\n/g' | " +
-                "render -png #{stem}_100.png -size100x100"
+      pdb_files = Dir[PDB_DIR.join("*.pdb").to_s]
+      pdb_files.each_with_index do |pdb_file, i|
+        stem = File.basename(pdb_file, ".pdb")
+
+        mol_input       = `molauto -notitle -nice #{pdb_file}`.split("\n")
+        mol_input[4,0]  = "background grey 1;"
+
+        input   = Rails.root.join("tmp", "#{stem}.input")
+        fig500  = FIGURE_DIR.join("#{stem}_500.png")
+        fig100  = FIGURE_DIR.join("#{stem}_100.png")
+
+        File.open(input, "w") { |f| f.puts mol_input.join("\n") }
+        system  "molscript -r < #{input} | " +
+                "render -png #{fig500} -size500x500; rm #{input}"
+        system  "convert #{fig500} -resize 100x100 #{fig100}"
       end
-
-      chdir cwd
     end
 
 
     desc "Generate PNG figure for each SCOP domain file"
     task :domain_figures => [:environment] do
 
-      cwd = pwd
-      chdir SCOP_DIR
+      mkdir_p FIGURE_DIR
 
-      Dir.new(SCOP_DIR).each do |file|
-        next if file =~ /^\./ or file !~ /\.pdb$/
-        stem = file.match(/(\S+)\.pdb/)[1]
-        system  "molauto -notitle -nice #{stem}.pdb | " +
-                "molscript -r | " +
-                "perl -pi -e 's/^0 0 0\s+background.*$/1 1 1      background colour\n/g' | " +
-                "render -png #{stem}_100.png -size 100x100"
+      pdb_files = Dir[PDB_DIR.join("*.pdb").to_s]
+      pdb_files.each_with_index do |pdb_file, i|
+        pdb_code  = File.basename(pdb_file, ".pdb")
+        structure = Structure.find_by_pdb_code(pdb_code.upcase)
+
+        structure.domains.each do |domain|
+          first_res = domain.residues.first
+          last_res  = domain.residues.last
+          from      = first_res.chain.chain_code + first_res.residue_code.to_s
+          to        = last_res.chain.chain_code + last_res.residue_code.to_s
+
+          mol_input       = `molauto -notitle -nice #{pdb_file}`.split("\n")
+          mol_input[4,0]  = "  background grey 1;"
+          mol_input[10]   = "  set colourparts on, residuecolour amino-acids grey 1;"
+          mol_input[11,0] = "  set residuecolour from #{from} to #{to} rainbow;"
+
+          stem    = domain.sunid
+          input   = Rails.root.join("tmp", "#{stem}.input")
+          fig500  = FIGURE_DIR.join("#{stem}_500.png")
+          fig100  = FIGURE_DIR.join("#{stem}_100.png")
+
+          File.open(input, "w") { |f| f.puts mol_input.join("\n") }
+          system "molscript -r < #{input} | render -png #{fig500} -size500x500; rm #{input}"
+          system "convert #{fig500} -resize 100x100 #{fig100}"
+        end
       end
-
-      chdir cwd
     end
 
 

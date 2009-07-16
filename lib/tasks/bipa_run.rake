@@ -319,9 +319,8 @@ namespace :bipa do
             config = ActiveRecord::Base.remove_connection
 
             (10..100).step(10) do |pid|
-
               # temporary filter!
-              next if pid < 90
+              next unless pid == 80 #or pid == 90 or pid == 100
 
               sunids.each_with_index do |sunid, i|
                 fmanager.fork do
@@ -376,14 +375,17 @@ namespace :bipa do
                 cwd     = pwd
                 fam_dir = FAMILY_DIR.join("sub", na, sunid.to_s)
 
-                Dir[fam_dir.join("nr*", "*")].each do |subfam_dir|
-
+                Dir[fam_dir.join("nr*", "*").to_s].each do |subfam_dir|
                   #temporary filter!!!
-                  next if subfam_dir !~ /nr100/ or subfam_dir !~ /nr90/
+                  next unless (subfam_dir =~ /nr100/ or subfam_dir =~ /nr90/ or subfam_dir =~ /nr80/)
 
-                  pdb_files = Dir[subfam_dir.join("*.pdb").to_s]
+                  pdb_files = Dir[File.join(subfam_dir, "*.pdb")]
                   if pdb_files.size < 2
-                    $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{subfam_dir}"
+                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{subfam_dir}"
+                    next
+                  end
+
+                  if File.exists?(File.join(subfam_dir, "salign.ali")) and File.exists?(File.join(subfam_dir, "salign.pap"))
                     next
                   end
 
@@ -392,7 +394,7 @@ namespace :bipa do
                   chdir cwd
                 end
 
-                $logger.info ">>> SALIGN with subfamily PDB files for #{na}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info ">>> SALIGN with subfamily PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -407,7 +409,7 @@ namespace :bipa do
     namespace :baton do
 
       desc "Run Baton for each SCOP family"
-      task :full_scop_pdb_files => [:environment] do
+      task :full_scop => [:environment] do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
@@ -453,7 +455,7 @@ namespace :bipa do
 
 
       desc "Run Baton for representative PDB files for each SCOP Family"
-      task :nr_scop_pdb_files => [:environment] do
+      task :rep_scop => [:environment] do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
@@ -503,7 +505,7 @@ namespace :bipa do
 
 
       desc "Run Baton for each subfamilies of SCOP families"
-      task :sub_scop_pdb_files => [:environment] do
+      task :sub_scop => [:environment] do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
