@@ -418,7 +418,7 @@ namespace :bipa do
     end
 
 
-    desc "Generate PNG figure for each PDB file"
+    desc "Generate a figure for each PDB structure"
     task :structure_figures => [:environment] do
 
       mkdir_p FIGURE_DIR
@@ -428,21 +428,44 @@ namespace :bipa do
         stem = File.basename(pdb_file, ".pdb")
 
         mol_input       = `molauto -notitle -nice #{pdb_file}`.split("\n")
-        mol_input[4,0]  = "background grey 1;"
+        mol_input[5,0]  = "background grey 1;"
 
         input   = Rails.root.join("tmp", "#{stem}.input")
         fig500  = FIGURE_DIR.join("#{stem}_500.png")
         fig100  = FIGURE_DIR.join("#{stem}_100.png")
 
         File.open(input, "w") { |f| f.puts mol_input.join("\n") }
-        system  "molscript -r < #{input} | " +
-                "render -png #{fig500} -size500x500; rm #{input}"
-        system  "convert #{fig500} -resize 100x100 #{fig100}"
+        system "molscript -r < #{input} | render -png #{fig500} -size500x500; rm #{input}"
+        system "convert #{fig500} -resize 100x100 #{fig100}"
       end
     end
 
 
-    desc "Generate PNG figure for each SCOP domain file"
+    desc "Generate a figure for each SCOP domain only"
+    task :domain_only_figures => [:environment] do
+
+      mkdir_p FIGURE_DIR
+
+      scop_files = Dir[FAMILY_DIR.join("full", "*", "*", "*.pdb").to_s]
+      scop_files.each_with_index do |scop_file, i|
+        stem = File.basename(scop_file, ".pdb")
+
+        mol_input       = `molauto -notitle -nice #{scop_file}`.split("\n")
+        mol_input[5,0]  = "  background grey 1;"
+
+        input   = Rails.root.join("tmp", "#{stem}.molinput")
+        fig5    = FIGURE_DIR.join("#{stem}_5.png") # molscript cannot hangle a long input file name
+        fig500  = FIGURE_DIR.join("#{stem}_only_500.png")
+        fig100  = FIGURE_DIR.join("#{stem}_only_100.png")
+
+        File.open(input, "w") { |f| f.puts mol_input.join("\n") }
+        system "molscript -r < #{input} | render -png #{fig5} -size500x500; rm #{input}; mv #{fig5} #{fig500}"
+        system "convert #{fig500} -resize 100x100 #{fig100}"
+      end
+    end
+
+
+    desc "Generate a figure for each SCOP domain"
     task :domain_figures => [:environment] do
 
       mkdir_p FIGURE_DIR
@@ -459,7 +482,7 @@ namespace :bipa do
           to        = last_res.chain.chain_code + last_res.residue_code.to_s
 
           mol_input       = `molauto -notitle -nice #{pdb_file}`.split("\n")
-          mol_input[4,0]  = "  background grey 1;"
+          mol_input[5,0]  = "  background grey 1;"
           mol_input[10]   = "  set colourparts on, residuecolour amino-acids grey 1;"
           mol_input[11,0] = "  set residuecolour from #{from} to #{to} rainbow;"
 
