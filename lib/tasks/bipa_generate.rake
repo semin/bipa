@@ -425,17 +425,22 @@ namespace :bipa do
 
       pdb_files = Dir[PDB_DIR.join("*.pdb").to_s]
       pdb_files.each_with_index do |pdb_file, i|
-        stem = File.basename(pdb_file, ".pdb")
+        stem    = File.basename(pdb_file, ".pdb")
+        input   = Rails.root.join("tmp", "#{stem}.input")
+        fig5    = FIGURE_DIR.join("#{stem}_5.png") # molscript cannot hangle a long input file name
+        fig500  = FIGURE_DIR.join("#{stem}_500.png")
+        fig100  = FIGURE_DIR.join("#{stem}_100.png")
+
+        if File.size?(fig500) && File.size?(fig100)
+          $logger.warn "!!! Skipped PDB structure, #{stem}, figures are already created"
+          next
+        end
 
         mol_input       = `molauto -notitle -nice #{pdb_file}`.split("\n")
         mol_input[5,0]  = "background grey 1;"
 
-        input   = Rails.root.join("tmp", "#{stem}.input")
-        fig500  = FIGURE_DIR.join("#{stem}_500.png")
-        fig100  = FIGURE_DIR.join("#{stem}_100.png")
-
         File.open(input, "w") { |f| f.puts mol_input.join("\n") }
-        system "molscript -r < #{input} | render -png #{fig500} -size500x500; rm #{input}"
+        system "molscript -r < #{input} | render -png #{fig5} -size500x500; rm #{input}; mv #{fig5} #{fig500}"
         system "convert #{fig500} -resize 100x100 #{fig100}"
       end
     end
@@ -448,15 +453,19 @@ namespace :bipa do
 
       scop_files = Dir[FAMILY_DIR.join("full", "*", "*", "*.pdb").to_s]
       scop_files.each_with_index do |scop_file, i|
-        stem = File.basename(scop_file, ".pdb")
-
-        mol_input       = `molauto -notitle -nice #{scop_file}`.split("\n")
-        mol_input[5,0]  = "  background grey 1;"
-
+        stem    = File.basename(scop_file, ".pdb")
         input   = Rails.root.join("tmp", "#{stem}.molinput")
         fig5    = FIGURE_DIR.join("#{stem}_5.png") # molscript cannot hangle a long input file name
         fig500  = FIGURE_DIR.join("#{stem}_only_500.png")
         fig100  = FIGURE_DIR.join("#{stem}_only_100.png")
+
+        if File.size?(fig500) && File.size?(fig100)
+          $logger.warn "!!! Skipped SCOP domain, #{stem}, figures are already created"
+          next
+        end
+
+        mol_input       = `molauto -notitle -nice #{scop_file}`.split("\n")
+        mol_input[5,0]  = "  background grey 1;"
 
         File.open(input, "w") { |f| f.puts mol_input.join("\n") }
         system "molscript -r < #{input} | render -png #{fig5} -size500x500; rm #{input}; mv #{fig5} #{fig500}"
@@ -476,6 +485,17 @@ namespace :bipa do
         structure = Structure.find_by_pdb_code(pdb_code.upcase)
 
         structure.domains.each do |domain|
+          stem    = domain.sunid
+          input   = Rails.root.join("tmp", "#{stem}.input")
+          fig5    = FIGURE_DIR.join("#{stem}_5.png") # molscript cannot hangle a long input file name
+          fig500  = FIGURE_DIR.join("#{stem}_500.png")
+          fig100  = FIGURE_DIR.join("#{stem}_100.png")
+
+          if File.size?(fig500) && File.size?(fig100)
+            $logger.warn "!!! Skipped SCOP domain, #{domain.sunid}, figures are already created"
+            next
+          end
+
           first_res = domain.residues.first
           last_res  = domain.residues.last
           from      = first_res.chain.chain_code + first_res.residue_code.to_s
@@ -486,13 +506,8 @@ namespace :bipa do
           mol_input[10]   = "  set colourparts on, residuecolour amino-acids grey 1;"
           mol_input[11,0] = "  set residuecolour from #{from} to #{to} rainbow;"
 
-          stem    = domain.sunid
-          input   = Rails.root.join("tmp", "#{stem}.input")
-          fig500  = FIGURE_DIR.join("#{stem}_500.png")
-          fig100  = FIGURE_DIR.join("#{stem}_100.png")
-
           File.open(input, "w") { |f| f.puts mol_input.join("\n") }
-          system "molscript -r < #{input} | render -png #{fig500} -size500x500; rm #{input}"
+          system "molscript -r < #{input} | render -png #{fig5} -size500x500; rm #{input}; mv #{fig5} #{fig500}"
           system "convert #{fig500} -resize 100x100 #{fig100}"
         end
       end
