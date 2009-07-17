@@ -1500,8 +1500,8 @@ namespace :bipa do
     desc "Import Atom Charges and Potentials"
     task :spicoli => [:environment] do
 
-      aa_pot_files  = FileList[SPICOLI_DIR.join("*_aa.pot")].sort
-      na_pot_files  = FileList[SPICOLI_DIR.join("*_na.pot")].sort
+      aa_pot_files  = Dir[SPICOLI_DIR.join("*_aa.pot").to_s].sort
+      na_pot_files  = Dir[SPICOLI_DIR.join("*_na.pot").to_s].sort
       pot_files     = aa_pot_files + na_pot_files
 
       fmanager = ForkManager.new(MAX_FORK)
@@ -1513,9 +1513,7 @@ namespace :bipa do
 
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
-
             structure = Structure.find_by_pdb_code(pdb_code.upcase)
-
             if structure.nil?
               $logger.error "!!! Cannot find a structure, #{pdb_code.upcase}"
               ActiveRecord::Base.remove_connection
@@ -1560,7 +1558,6 @@ namespace :bipa do
                                           :asa_potential  => columns[9])
             end
 
-            #Potential.import(potentials, :validate => false)
             Potential.import(potentials)
             ActiveRecord::Base.remove_connection
             $logger.info ">>> Importing #{pot_file} done. (#{i + 1}/#{pot_files.size})"

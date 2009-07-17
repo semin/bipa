@@ -484,6 +484,11 @@ namespace :bipa do
         pdb_code  = File.basename(pdb_file, ".pdb")
         structure = Structure.find_by_pdb_code(pdb_code.upcase)
 
+        if structure.nil?
+          $logger.error "!!! Cannot find #{pdb_code.upcase} in BIPA"
+          next
+        end
+
         structure.domains.each do |domain|
           stem    = domain.sunid
           input   = Rails.root.join("tmp", "#{stem}.input")
