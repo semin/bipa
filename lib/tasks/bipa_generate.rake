@@ -6,7 +6,7 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        full_dir  = File.join(configatron.family_dir, "full", na)
+        full_dir  = configatron.family_dir.join("full", na)
         fmanager  = ForkManager.new(configatron.max_fork)
 
         refresh_dir(full_dir) unless configatron.resume
@@ -19,7 +19,7 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = File.join(full_dir, "#{sunid}")
+              fam_dir = full_dir.join("#{sunid}")
 
               mkdir_p fam_dir
 
@@ -37,7 +37,7 @@ namespace :bipa do
 
                 dom_sid   = domain.sid.gsub(/^g/, "d")
                 dom_sunid = domain.sunid
-                dom_pdb   = File.join(configatron.scop_pdb_dir, dom_sid[2..3], "#{dom_sid}.ent")
+                dom_pdb   = configatron.scop_pdb_dir.join(dom_sid[2..3], "#{dom_sid}.ent")
 
                 if !File.size? dom_pdb
                   $logger.warn "!!! Cannot find #{dom_pdb}"
@@ -45,11 +45,9 @@ namespace :bipa do
                 end
 
                 # Generate PDB file only for the first model in NMR structure using Bio::PDB
-                File.open(File.join(fam_dir, "#{domain.sunid}.pdb"), "w") do |f|
+                File.open(fam_dir.join("#{domain.sunid}.pdb"), "w") do |f|
                   f.puts Bio::PDB.new(IO.read(dom_pdb)).models.first
                 end
-
-                #cp dom_pdb, File.join(fam_dir, "#{domain.sunid}.pdb")
               end
 
               ActiveRecord::Base.remove_connection
@@ -67,29 +65,29 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        full_dir  = File.join(configatron.family_dir, "full", na)
+        full_dir  = configatron.family_dir.join("full", na)
         fmanager  = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
+
           sunids.each_with_index do |sunid, i|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
               family = ScopFamily.find_by_sunid(sunid)
 
-              configatron.rep_pids do |pid|
-                nr_dir  = File.join(configatron.family_dir, "nr#{pid}", na)
-                fam_dir = File.join(nr_dir, "#{sunid}")
-
+              configatron.rep_pids.each do |pid|
+                rep_dir = configatron.family_dir.join("rep#{pid}", na)
+                fam_dir = rep_dir.join(sunid.to_s)
                 mkdir_p fam_dir
 
-                subfamilies = family.send("nr#{pid}_#{na}_binding_subfamilies")
+                subfamilies = family.send("sub#{pid}_#{na}_binding_subfamilies")
                 subfamilies.each do |subfamily|
                   domain = subfamily.representative
                   next if domain.nil?
 
-                  domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
+                  domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
 
                   if !File.size? domain_pdb_file
                     $logger.warn "!!! Cannot find #{domain_pdb_file}"
@@ -101,8 +99,7 @@ namespace :bipa do
               end
               ActiveRecord::Base.remove_connection
             end
-
-            $logger.info ">>> Generating non-redundant PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+            $logger.info ">>> Generating representative PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
             ActiveRecord::Base.establish_connection(config)
           end
         end
@@ -114,7 +111,7 @@ namespace :bipa do
     task :sub_scop_pdb_files => [:environment] do
 
       %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid)
+        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
         sub_dir   = configatron.family_dir.join("sub", na)
         full_dir  = configatron.family_dir.join("full", na)
         fmanager  = ForkManager.new(configatron.max_fork)
@@ -131,15 +128,15 @@ namespace :bipa do
               family  = ScopFamily.find_by_sunid(sunid)
               fam_dir = sub_dir.join("#{sunid}")
 
-              configatron.rep_pids do |pid|
-                subfamilies = family.send("nr#{pid}_#{na}_binding_subfamilies")
+              configatron.rep_pids.each do |pid|
+                subfamilies = family.send("sub#{pid}_#{na}_binding_subfamilies")
                 subfamilies.each do |subfamily|
-                  subfam_dir = fam_dir.join("nr#{pid}", subfamily.id.to_s)
+                  subfam_dir = fam_dir.join("rep#{pid}", subfamily.id.to_s)
                   mkdir_p subfam_dir
 
                   domains = subfamily.domains
                   domains.each do |domain|
-                    domain_pdb_file = File.join(full_dir, sunid.to_s, domain.sunid.to_s + '.pdb')
+                    domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
 
                     if !File.exists?(domain_pdb_file)
                       $logger.warn "!!! SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"

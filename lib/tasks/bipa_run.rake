@@ -1,8 +1,6 @@
 namespace :bipa do
   namespace :run do
 
-    include FileUtils
-
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
@@ -285,16 +283,26 @@ namespace :bipa do
                   next
                 end
 
-                chdir fam_dir
-                system "salign *.pdb 1>salign.stdout 2>salign.stderr"
+                # single linkage clustering using TM-score
+                clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a)
+                clusters.each_with_index do |group, gi|
+                  if group.size < 2
+                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in group, #{gi} in #{subfam_dir}"
+                    next
+                  end
 
-                if !File.exists? "salign.ali"
-                  $logger.error "!!! Cannot find SALIGN result file, salign.ali for #{na}-binding SCOP family, #{sunid}"
-                  ActiveRecord::Base.remove_connection
-                  exit 1
+                  if File.exists?(File.join(subfam_dir, "salign#{gi}.ali")) and File.exists?(File.join(subfam_dir, "salign#{gi}.pap"))
+                    $logger.warn "!!! Skipped group, #{gi} in #{subfam_dir}"
+                    next
+                  end
+
+                  chdir subfam_dir
+                  system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
+                  system "mv salign.ali salign#{gi}.ali"
+                  system "mv salign.pap salign#{gi}.pap"
+                  chdir cwd
                 end
 
-                chdir cwd
                 $logger.info ">>> SALIGN with full set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
@@ -322,7 +330,7 @@ namespace :bipa do
 
                   cwd       = pwd
                   fam_dir   = configatron.family_dir.join("rep#{pid}", na, sunid.to_s)
-                  pdb_files = Dir[fam_dir.join("*.pdb").to_s]
+                  pdb_files = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
 
                   if pdb_files.size < 2
                     $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{fam_dir}"
@@ -330,16 +338,26 @@ namespace :bipa do
                     next
                   end
 
-                  chdir fam_dir
-                  system "salign *.pdb 1>salign.stdout 2>salign.stderr"
+                  # single linkage clustering using TM-score
+                  clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a, `which TMalign`.chomp)
+                  clusters.each_with_index do |group, gi|
+                    if group.size < 2
+                      $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in group, #{gi} in #{subfam_dir}"
+                      next
+                    end
 
-                  if !File.exists? "salign.ali"
-                    $logger.error "!!! Cannot run SALIGN with PDB files in #{fam_dir}. Should check why ..."
-                    ActiveRecord::Base.remove_connection
-                    exit 1
+                    if File.exists?(File.join(subfam_dir, "salign#{gi}.ali")) and File.exists?(File.join(subfam_dir, "salign#{gi}.pap"))
+                      $logger.warn "!!! Skipped group, #{gi} in #{subfam_dir}"
+                      next
+                    end
+
+                    chdir subfam_dir
+                    system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
+                    system "mv salign.ali salign#{gi}.ali"
+                    system "mv salign.pap salign#{gi}.pap"
+                    chdir cwd
                   end
 
-                  chdir cwd
                   $logger.info ">>> SALIGN with non-redundant (PID < #{pid}) set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                   ActiveRecord::Base.remove_connection
                 end
@@ -368,17 +386,16 @@ namespace :bipa do
                 cwd     = pwd
                 fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
 
-                Dir[fam_dir.join("nr*", "*").to_s].each do |subfam_dir|
-                  #temporary filter!!!
-                  next unless (subfam_dir =~ /nr100/ or subfam_dir =~ /nr90/ or subfam_dir =~ /nr80/)
-
+                Dir[fam_dir.join("nr100", "*").to_s].each do |subfam_dir|
                   pdb_files = Dir[File.join(subfam_dir, "*.pdb")]
+
                   if pdb_files.size < 2
                     $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{subfam_dir}"
                     next
                   end
 
                   if File.exists?(File.join(subfam_dir, "salign.ali")) and File.exists?(File.join(subfam_dir, "salign.pap"))
+                    $logger.warn "!!! Skipped #{subfam_dir}"
                     next
                   end
 

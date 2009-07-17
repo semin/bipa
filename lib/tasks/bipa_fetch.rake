@@ -1,8 +1,6 @@
 namespace :bipa do
   namespace :fetch do
 
-    include FileUtils
-
     desc "Download protein-nucleic acid complexes from PDB ftp"
     task :pdb_remote => [:environment] do
 

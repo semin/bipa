@@ -10,8 +10,11 @@ require 'rake/rdoctask'
 require 'tasks/rails'
 
 Rake.application.options.trace = true
-
 Rake.application.instance_variable_get(:@tasks).delete("db:schema:dump")
 namespace(:db) { namespace(:schema) { task(:dump) { puts "Schema dump disabled" } } }
 
 RakeFileUtils.verbose(false)
+include FileUtils
+
+$logger = Logger.new(STDOUT)
+

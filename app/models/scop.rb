@@ -13,7 +13,7 @@ class Scop < ActiveRecord::Base
   %w[dna rna].each do |na|
     named_scope :"reg_#{na}", :conditions => { :"reg_#{na}" => true }
 
-    (10..100).step(10) do |pid|
+    configatron.rep_pids.each do |pid|
       named_scope :"rep#{pid}_#{na}", :conditions => { :"rep#{pid}_#{na}" => true }
     end
   end
@@ -241,14 +241,9 @@ end
 class ScopFamily < Scop
 
   %w[dna rna].each do |na|
-
     has_many  :"full_#{na}_binding_family_alignments",
               :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
               :foreign_key  => "scop_id"
-
-#    has_one :"full_#{na}_binding_family_alignment",
-#            :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
-#            :foreign_key  => "scop_id"
 
     configatron.rep_pids.each do |pid|
       has_many  :"rep#{pid}_#{na}_binding_family_alignments",
@@ -276,7 +271,7 @@ class ScopDomain < Scop
   include Bipa::ComposedOfResidues
 
   %w[dna rna].each do |na|
-    (10..100).step(10) do |pid|
+    configatron.rep_pids.each  do |pid|
       belongs_to  :"sub#{pid}_#{na}_binding_subfamily",
                   :class_name   => "Sub#{pid}#{na.capitalize}BindingSubfamily",
                   :foreign_key  => "sub#{pid}_#{na}_binding_subfamily_id"

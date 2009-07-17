@@ -655,14 +655,14 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = File.join(configatron.blastclust_dir, na, "#{sunid}")
+              fam_dir = configatron.blastclust_dir.join(na, sunid)
 
               configatron.rep_pids.each do |pid|
-                subfam_file = File.join(fam_dir, "#{sunid}.cluster#{pid}")
+                subfam_file = fam_dir.join("#{sunid}.cluster#{pid}")
 
-                IO.readlines(subfam_file).each do |line|
-                  subfamily = "Sub#{pid}#{na.capitalize}BindingSubfamily".constantize.new
-                  members   = line.split(/\s+/)
+                IO.foreach(subfam_file) do |line|
+                  subfamily = family.send("sub#{pid}_#{na}_binding_subfamilies").build
+                  members   = line.chomp.split(/\s+/)
                   members.each do |member|
                     domain = ScopDomain.find_by_sunid(member)
                     if domain
@@ -672,7 +672,7 @@ namespace :bipa do
                       exit 1
                     end
                   end
-                  subfamily.family = family
+                  #subfamily.family = family
                   subfamily.save!
                 end
               end

@@ -215,8 +215,6 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :potentials, :force => true do |t|
     t.belongs_to  :atom
     t.float       :unbound_asa
-    t.float       :bound_asa
-    t.float       :delta_asa
     t.float       :formal_charge
     t.float       :partial_charge
     t.float       :atom_potential

@@ -1,10 +1,6 @@
 namespace :bipa do
   namespace :update do
 
-    require "logger"
-
-    $logger = Logger.new(STDOUT)
-
 
     desc "Update ASA related fields of the 'atoms' table"
     task :asa => [:environment] do
@@ -228,9 +224,9 @@ namespace :bipa do
                 anc.send("rep#{pid}_#{na}=", true)
                 anc.save!
               end
-              $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done"
+              $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id} at PID, #{pid}: done"
             else
-              $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id}"
+              $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id} at PID, #{pid}"
             end
           end
         end
@@ -243,7 +239,6 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         fmanager = ForkManager.new(configatron.max_fork)
-
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
 
@@ -265,7 +260,7 @@ namespace :bipa do
                 next
               end
 
-              new_tem_file  = File.join(fam_dir, "#{sunid}.tem")
+              new_tem_file = fam_dir.join("#{sunid}.tem")
               cp tem_file, new_tem_file
 
               flat_file = Bio::FlatFile.auto(tem_file)

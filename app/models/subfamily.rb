@@ -8,8 +8,8 @@ end
 
 
 %w[dna rna].each do |na|
-  (10..100).step(10) do |pid|
-    eval <<-END
+  configatron.rep_pids.each do |pid|
+    eval <<-EVAL
       class Sub#{pid}#{na.capitalize}BindingSubfamily < Subfamily
 
         has_one :alignment,
@@ -37,6 +37,6 @@ end
           rep
         end
       end
-    END
+    EVAL
   end
 end

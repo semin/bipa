@@ -118,13 +118,13 @@ configatron.min_interface_atom_delta_asa      = 0.1
 configatron.min_surface_atom_asa              = 0.1
 
 configatron.pdb_src         = :remote
-configatron.pdb_mirror_dir  = "~/BiO/Mirror/PDB"
+configatron.pdb_mirror_dir  = Pathname.new("~/BiO/Mirror/PDB").expand_path
 configatron.pdb_entry_file  = "./derived_data/pdb_entry_type.txt"
 configatron.pdb_dir         = Rails.root.join("public/pdb")
 
 configatron.scop_uri        = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
 configatron.scop_dir        = Rails.root.join("public/scop")
-configatron.scop_pdb_dir    = "~/BiO/Store/SCOP/pdbstyle"
+configatron.scop_pdb_dir    = Pathname.new("~/BiO/Store/SCOP/pdbstyle").expand_path
 configatron.true_scop_classes = %w[a b c d e f g]
 
 configatron.prescop_uri     = "http://www.mrc-lmb.cam.ac.uk/agm/pre-scop/parseable/"
@@ -136,26 +136,26 @@ configatron.taxonomy_dir    = Rails.root.join("public/taxonomy")
 
 configatron.go_obo_uri      = "http://www.geneontology.org/ontology/gene_ontology_edit.obo"
 
-configatron.hbplus_bin      = "~/BiO/Install/hbplus/hbplus"
-configatron.clean_bin       = "~/BiO/Install/hbplus/clean"
-configatron.hbadd_bin       = "~/BiO/Install/hbadd/hdadd"
+configatron.hbplus_bin      = Pathname.new("~/BiO/Install/hbplus/hbplus").expand_path
+configatron.clean_bin       = Pathname.new("~/BiO/Install/hbplus/clean").expand_path
+configatron.hbadd_bin       = Pathname.new("~/BiO/Install/hbadd/hdadd").expand_path
 configatron.hbplus_dir      = Rails.root.join("public/hbplus")
 
-configatron.naccess_bin     = "~/BiO/Install/naccess/naccess"
-configatron.naccess_vdw     = "~/BiO/Install/naccess/vdw.radii"
-configatron.naccess_std     = "~/BiO/Install/naccess/standard.data"
+configatron.naccess_bin     = Pathname.new("~/BiO/Install/naccess/naccess").expand_path
+configatron.naccess_vdw     = Pathname.new("~/BiO/Install/naccess/vdw.radii").expand_path
+configatron.naccess_std     = Pathname.new("~/BiO/Install/naccess/standard.data").expand_path
 configatron.naccess_dir     = Rails.root.join("public/naccess")
 
-configatron.dssp_bin        = "~/BiO/Install/dssp/dsspcmbi"
+configatron.dssp_bin        = Pathname.new("~/BiO/Install/dssp/dsspcmbi").expand_path
 configatron.dssp_dir        = Rails.root.join("public/dssp")
 
-configatron.joy_bin         = "~/BiO/Install/joy/joy"
+configatron.joy_bin         = Pathname.new("~/BiO/Install/joy/joy").expand_path
 configatron.joy_dir         = Rails.root.join("public/joy")
 
-configatron.baton_bin       = "~/BiO/Install/Baton/bin/Baton"
+configatron.baton_bin       = Pathname.new("~/BiO/Install/Baton/bin/Baton").expand_path
 configatron.baton_dir       = Rails.root.join("public/baton")
 
-configatron.blastclust_bin  = "/usr/bin/blastclust"
+configatron.blastclust_bin  = Pathname.new("/usr/bin/blastclust")
 configatron.blastclust_dir  = Rails.root.join("public/blastclust/")
 
 configatron.family_dir      = Rails.root.join("public/families")
@@ -166,8 +166,8 @@ configatron.go_dir          = Rails.root.join("public/go")
 configatron.esst_dir        = Rails.root.join("public/essts")
 configatron.figure_dir      = Rails.root.join("public/figures")
 
-configatron.astral40        = "~/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa"
-configatron.baliscore_bin   = "~/BiO/Install/bali_score/bali_score"
+configatron.astral40        = Pathname.new("~/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa").expand_path
+configatron.baliscore_bin   = Pathname.new("~/BiO/Install/bali_score/bali_score").expand_path
 configatron.rel_url_root    = ActionController::Base.relative_url_root ? ActionController::Base.relative_url_root.to_s : ''
 
 # for will_paginate plugin
