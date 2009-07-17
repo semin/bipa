@@ -10,7 +10,7 @@ namespace :bipa do
     task :asa => [:environment] do
 
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -23,9 +23,9 @@ namespace :bipa do
             structure = Structure.find_by_pdb_code(pdb_code)
 
             # Load NACCESS results for every atom in the structure
-            bound_asa_file      = File.join(NACCESS_DIR, "#{pdb_code}_co.asa")
-            unbound_aa_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_aa.asa")
-            unbound_na_asa_file = File.join(NACCESS_DIR, "#{pdb_code}_na.asa")
+            bound_asa_file      = configatron.naccess_dir.join("#{pdb_code}_co.asa")
+            unbound_aa_asa_file = configatron.naccess_dir.join("#{pdb_code}_aa.asa")
+            unbound_na_asa_file = configatron.naccess_dir.join("#{pdb_code}_na.asa")
 
             bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
             unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
@@ -64,7 +64,7 @@ namespace :bipa do
     task :potential => [:environment] do
 
       pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -80,7 +80,7 @@ namespace :bipa do
 
             %w[aa na].each do |mol|
               eval <<-END
-                #{mol}_zap_file   = File.join(ZAP_DIR, "#{pdb_code}_#{mol}.zap")
+                #{mol}_zap_file   = configatron.zap_dir.join("#{pdb_code}_#{mol}.zap")
                 #{mol}_zap_atoms  = Hash.new
 
                 IO.foreach(#{mol}_zap_file) do |line|
@@ -109,40 +109,6 @@ namespace :bipa do
         ActiveRecord::Base.establish_connection(config)
       end # fmanager.manage
     end # task :asa
-
-
-    desc "Update chain's mole_code, molecule fields"
-    task :chain => [:environment] do
-      structures = Structure.find(:all)
-
-      structures.each do |structure|
-        pdb_bio   = Bio::PDB.new(IO.read("./public/pdb/#{structure.pdb_code.downcase}.pdb"))
-        mol_codes = {}
-        molecules = {}
-        mol_id    = nil
-        molecule  = nil
-
-        pdb_bio.record("COMPND")[0].compound.each do |key, value|
-          case
-          when key == "MOL_ID"
-            mol_id = value
-          when key == "MOLECULE"
-            molecule = value
-          when key == "CHAIN"
-            mol_codes[value] = mol_id
-            molecules[value] = molecule
-          end
-        end
-
-        structure.models.first.chains.each do |chain|
-          c = chain.chain_code
-          chain.mol_code = mol_codes[c] ? mol_codes[c] : nil
-          chain.molecule = molecules[c] ? molecules[c] : nil
-          puts "#{chain.mol_code}: #{chain.molecule}"
-          #chain.save!
-        end
-      end
-    end
 
 
     desc "Update 'chains_count' column of 'models' table"
@@ -217,7 +183,7 @@ namespace :bipa do
 
     desc "Update 'vdw_contacts_count' column of 'atoms' table"
     task :atoms_vdw_contacts_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, vdw_contacts_count", :per_page => 10000) do |atom|
+      Atom.find_each(:select => "id, vdw_contacts_count", :per_page => 10000) do |atom|
         atom.update_attribute :vdw_contacts_count, atom.vdw_contacts.length
       end
     end
@@ -225,7 +191,7 @@ namespace :bipa do
 
     desc "Update 'whbonds_count' column of 'atoms' table"
     task :atoms_whbonds_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, whbonds_count", :per_page => 10000) do |atom|
+      Atom.find_each(:select => "id, whbonds_count", :per_page => 10000) do |atom|
         atom.update_attribute :whbonds_count, atom.whbonds.length
       end
     end
@@ -233,7 +199,7 @@ namespace :bipa do
 
     desc "Update 'hbonds_as_donor_count' column of 'atoms' table"
     task :atoms_hbonds_as_donor_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, hbonds_as_donor_count", :per_page => 10000) do |atom|
+      Atom.find_each(:select => "id, hbonds_as_donor_count", :per_page => 10000) do |atom|
         atom.update_attribute :hbonds_as_donor_count, atom.hbonds_as_donor.length
       end
     end
@@ -241,7 +207,7 @@ namespace :bipa do
 
     desc "Update 'hbonds_as_acceptor_count' column of 'atoms' table"
     task :atoms_hbonds_as_acceptor_count => [:environment] do
-      Atom.find_all_in_chunks(:select => "id, hbonds_as_acceptor_count", :per_page => 10000) do |atom|
+      Atom.find_each(:select => "id, hbonds_as_acceptor_count", :per_page => 10000) do |atom|
         atom.update_attribute :hbonds_as_acceptor_count, atom.hbonds_as_acceptor.length
       end
     end
@@ -251,8 +217,8 @@ namespace :bipa do
     task :scop_rep => [:environment] do
 
       %w[dna rna].each do |na|
-        (10..100).step(10) do |pid|
-          klass = "Nr#{pid}#{na.capitalize}BindingSubfamily".constantize
+        configatron.rep_pids.each do |pid|
+          klass = "Sub#{pid}#{na.capitalize}BindingSubfamily".constantize
           klass.all.each do |subfamily|
             rep = subfamily.representative
             unless rep.nil?
@@ -272,44 +238,16 @@ namespace :bipa do
     end
 
 
-#    desc "Update 'rsXXX' columns of 'scops' table"
-#    task :scop_rs => [:environment] do
-#
-#      domains = ScopDomain.nrall
-#      domains.each_with_index do |domain, i|
-#        domain.rs2    = true if domain.resolution < 2
-#        domain.rs4    = true if domain.resolution < 4
-#        domain.rs6    = true if domain.resolution < 6
-#        domain.rs8    = true if domain.resolution < 8
-#        domain.rs10   = true if domain.resolution < 10
-#        domain.rsall  = true if domain.resolution < 1000
-#        domain.save!
-#
-#        domain.ancestors.each do |ancestor|
-#          ancestor.rs2    = true if domain.rs2    == true
-#          ancestor.rs4    = true if domain.rs4    == true
-#          ancestor.rs6    = true if domain.rs6    == true
-#          ancestor.rs8    = true if domain.rs8    == true
-#          ancestor.rs10   = true if domain.rs10   == true
-#          ancestor.rsall  = true if domain.rsall  == true
-#          ancestor.save!
-#        end
-#
-#        $logger.info ">>> Updating resolution info of #{domain.id} : done (#{i+1}/#{domains.size})"
-#      end
-#    end
-
-
     desc "Update JOY templates to include atomic interaction information"
     task :joy_templates => [:environment] do
 
       %w[dna rna].each do |na|
-        fmanager = ForkManager.new(MAX_FORK)
+        fmanager = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
 
-          FileList["#{FAMILY_DIR}/nr100/#{na}/*"].each do |fam_dir|
+          Dir[configatron.family_dir.join("nr100", na, "*")].each do |fam_dir|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
@@ -435,7 +373,7 @@ namespace :bipa do
     task :filter_vdw_contacts => [:environment] do
       i = 0
       puts "Remove hbonds from vdw_contacts"
-      Hbond.find_all_in_chunks do |hbond|
+      Hbond.find_each do |hbond|
         vdw_contact1 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
         vdw_contact2 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.acceptor, hbond.donor)
         if vdw_contact1
@@ -455,7 +393,7 @@ namespace :bipa do
 
       interfaces  = DomainInterface.all
       total       = interfaces.size
-      fmanager    = ForkManager.new(MAX_FORK)
+      fmanager    = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         interfaces.each_with_index do |interface, i|
@@ -478,34 +416,11 @@ namespace :bipa do
     end
 
 
-    desc "Update rpall_dna, rpall_rna of 'scop' table"
-    task :scop_rpall_na => [:environment] do
-
-      # supposed to be updated when importing domain_interfaces!!!
-
-      domains = ScopDomain.rpall
-      domains.each_with_index do |domain, i|
-        %w[dna rna].each do |na|
-          if domain.send("#{na}_interfaces").size > 0
-            domain.send("rpall_#{na}=", true)
-            domain.save!
-            domain.ancestors.each do |anc|
-              anc.rpall = true
-              anc.send("rpall_#{na}=", true)
-              anc.save!
-            end
-          end
-        end
-        $logger.info ">>> Updating SCOP domain's rpall_dna, rpall_rna: done (#{i + 1}/#{domains.count})"
-      end
-    end
-
-
     desc "Update ASA related fields for 'residues' table"
     task :residues_asa => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -536,7 +451,7 @@ namespace :bipa do
       %w[dna rna].each do |na|
         na_residues = (na.match(/dna/i) ? "NucleicAcids::Dna::Residues::STANDARD" : "NucleicAcids::Rna::Residues::STANDARD").constantize
         interfaces  = "Domain#{na.capitalize}Interface".constantize.all
-        fmanager    = ForkManager.new(MAX_FORK)
+        fmanager    = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -611,7 +526,7 @@ namespace :bipa do
                                             AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
                                             Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
       total      = (interfaces.count ** 2 - interfaces.count) / 2
-      fmanager   = ForkManager.new(MAX_FORK)
+      fmanager   = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         0.upto(interfaces.count - 2) do |i|
@@ -651,7 +566,7 @@ namespace :bipa do
 
       seqs      = Sequence.all
       total     = seqs.size
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         seqs.each_with_index do |seq, i|
@@ -679,7 +594,7 @@ namespace :bipa do
 
       chains    = AaChain.all
       total     = chains.size
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         chains.each_with_index do |chain, i|

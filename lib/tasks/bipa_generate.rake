@@ -6,11 +6,10 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        #sunids    = ScopFamily.send("reg_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-        full_dir  = File.join(FAMILY_DIR, "full", na)
-        fmanager  = ForkManager.new(MAX_FORK)
+        full_dir  = File.join(configatron.family_dir, "full", na)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
-        refresh_dir(full_dir) unless RESUME
+        refresh_dir(full_dir) unless configatron.resume
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -38,7 +37,7 @@ namespace :bipa do
 
                 dom_sid   = domain.sid.gsub(/^g/, "d")
                 dom_sunid = domain.sunid
-                dom_pdb   = File.join(SCOP_PDB_DIR, dom_sid[2..3], "#{dom_sid}.ent")
+                dom_pdb   = File.join(configatron.scop_pdb_dir, dom_sid[2..3], "#{dom_sid}.ent")
 
                 if !File.size? dom_pdb
                   $logger.warn "!!! Cannot find #{dom_pdb}"
@@ -68,9 +67,8 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        #sunids    = ScopFamily.send("reg_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-        full_dir  = File.join(FAMILY_DIR, "full", na)
-        fmanager  = ForkManager.new(MAX_FORK)
+        full_dir  = File.join(configatron.family_dir, "full", na)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -80,8 +78,8 @@ namespace :bipa do
 
               family = ScopFamily.find_by_sunid(sunid)
 
-              (10..100).step(10) do |pid|
-                nr_dir  = File.join(FAMILY_DIR, "nr#{pid}", na)
+              configatron.rep_pids do |pid|
+                nr_dir  = File.join(configatron.family_dir, "nr#{pid}", na)
                 fam_dir = File.join(nr_dir, "#{sunid}")
 
                 mkdir_p fam_dir
@@ -117,12 +115,11 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid)
-        #sunids    = ScopFamily.send("reg_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-        sub_dir   = File.join(FAMILY_DIR, "sub", na)
-        full_dir  = File.join(FAMILY_DIR, "full", na)
-        fmanager  = ForkManager.new(MAX_FORK)
+        sub_dir   = configatron.family_dir.join("sub", na)
+        full_dir  = configatron.family_dir.join("full", na)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
-        refresh_dir(sub_dir) unless RESUME
+        refresh_dir(sub_dir) unless configatron.resume
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -132,12 +129,12 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = File.join(sub_dir, "#{sunid}")
+              fam_dir = sub_dir.join("#{sunid}")
 
-              (10..100).step(10) do |pid|
+              configatron.rep_pids do |pid|
                 subfamilies = family.send("nr#{pid}_#{na}_binding_subfamilies")
                 subfamilies.each do |subfamily|
-                  subfam_dir = File.join(fam_dir, "nr#{pid}", subfamily.id.to_s)
+                  subfam_dir = fam_dir.join("nr#{pid}", subfamily.id.to_s)
                   mkdir_p subfam_dir
 
                   domains = subfamily.domains
@@ -151,7 +148,7 @@ namespace :bipa do
                     cp domain_pdb_file, subfam_dir
                   end # domains.each
                 end # subfamilies.each
-              end # (10..100).step(10)
+              end # configatron.rep_pids
 
               $logger.info ">>> Generating PDB files for #{na.upcase}-binding subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
               ActiveRecord::Base.remove_connection
@@ -167,10 +164,9 @@ namespace :bipa do
     task :tem_files => [:environment] do
 
       %w[dna rna].each do |na|
-        (10..100).step(10) do |si|
-          next unless si == 80 # temporary skipping!!!
+        configatron.rep_pids.each do |si|
 
-          rep_dir = File.join(ALIGNMENT_DIR, "rep#{si}")
+          rep_dir = configatron.alignment_dir.join("rep#{si}")
 
           Dir.new(rep_dir).each do |dir|
             next if dir =~ /^\./
@@ -366,15 +362,15 @@ namespace :bipa do
     desc "Generate ESSTs for each representative set of SCOP families"
     task :essts => [:environment] do
 
-      #refresh_dir(ESST_DIR) unless RESUME
+      #refresh_dir(configatron.esst_dir) unless configatron.resume
 
       %w[dna rna].each do |na|
-        esst_dir  = File.join(ESST_DIR, "nr100", na)
+        esst_dir  = File.join(configatron.esst_dir, "nr100", na)
         cwd       = pwd
         mkdir_p esst_dir
         chdir esst_dir
 
-        FileList[File.join(FAMILY_DIR, "nr100", na, "*", "*")].select { |t|
+        FileList[File.join(configatron.family_dir, "nr100", na, "*", "*")].select { |t|
           t.match(/(\d+)\/\1\.tem/)
         }.each do |tem_file|
           cp tem_file, "."
@@ -406,7 +402,7 @@ namespace :bipa do
         %w[dna rna].each do |na|
           %w[16 64 std].each do |env|
             cwd     = pwd
-            est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
+            est_dir = File.join(configatron.esst_dir, "rep#{si}", "#{na}#{env}")
 
             chdir esst_dir
             cp "allmat.#{na}#{env}.log.dat", "allmat.dat.log"
@@ -421,15 +417,15 @@ namespace :bipa do
     desc "Generate a figure for each PDB structure"
     task :structure_figures => [:environment] do
 
-      mkdir_p FIGURE_DIR
+      mkdir_p configatron.figure_dir
 
-      pdb_files = Dir[PDB_DIR.join("*.pdb").to_s]
+      pdb_files = Dir[configatron.pdb_dir.join("*.pdb").to_s]
       pdb_files.each_with_index do |pdb_file, i|
         stem    = File.basename(pdb_file, ".pdb")
         input   = Rails.root.join("tmp", "#{stem}.input")
-        fig5    = FIGURE_DIR.join("#{stem}_5.png") # molscript cannot hangle a long input file name
-        fig500  = FIGURE_DIR.join("#{stem}_500.png")
-        fig100  = FIGURE_DIR.join("#{stem}_100.png")
+        fig5    = configatron.figure_dir.join("#{stem}_5.png") # molscript cannot hangle a long input file name
+        fig500  = configatron.figure_dir.join("#{stem}_500.png")
+        fig100  = configatron.figure_dir.join("#{stem}_100.png")
 
         if File.size?(fig500) && File.size?(fig100)
           $logger.warn "!!! Skipped PDB structure, #{stem}, figures are already created"
@@ -449,15 +445,15 @@ namespace :bipa do
     desc "Generate a figure for each SCOP domain only"
     task :domain_only_figures => [:environment] do
 
-      mkdir_p FIGURE_DIR
+      mkdir_p configatron.figure_dir
 
-      scop_files = Dir[FAMILY_DIR.join("full", "*", "*", "*.pdb").to_s]
+      scop_files = Dir[configatron.family_dir.join("full", "*", "*", "*.pdb").to_s]
       scop_files.each_with_index do |scop_file, i|
         stem    = File.basename(scop_file, ".pdb")
         input   = Rails.root.join("tmp", "#{stem}.molinput")
-        fig5    = FIGURE_DIR.join("#{stem}_5.png") # molscript cannot hangle a long input file name
-        fig500  = FIGURE_DIR.join("#{stem}_only_500.png")
-        fig100  = FIGURE_DIR.join("#{stem}_only_100.png")
+        fig5    = configatron.figure_dir.join("#{stem}_5.png") # molscript cannot hangle a long input file name
+        fig500  = configatron.figure_dir.join("#{stem}_only_500.png")
+        fig100  = configatron.figure_dir.join("#{stem}_only_100.png")
 
         if File.size?(fig500) && File.size?(fig100)
           $logger.warn "!!! Skipped SCOP domain, #{stem}, figures are already created"
@@ -477,9 +473,9 @@ namespace :bipa do
     desc "Generate a figure for each SCOP domain"
     task :domain_figures => [:environment] do
 
-      mkdir_p FIGURE_DIR
+      mkdir_p configatron.figure_dir
 
-      pdb_files = Dir[PDB_DIR.join("*.pdb").to_s]
+      pdb_files = Dir[configatron.pdb_dir.join("*.pdb").to_s]
       pdb_files.each_with_index do |pdb_file, i|
         pdb_code  = File.basename(pdb_file, ".pdb")
         structure = Structure.find_by_pdb_code(pdb_code.upcase)
@@ -492,9 +488,9 @@ namespace :bipa do
         structure.domains.each do |domain|
           stem    = domain.sunid
           input   = Rails.root.join("tmp", "#{stem}.input")
-          fig5    = FIGURE_DIR.join("#{stem}_5.png") # molscript cannot hangle a long input file name
-          fig500  = FIGURE_DIR.join("#{stem}_500.png")
-          fig100  = FIGURE_DIR.join("#{stem}_100.png")
+          fig5    = configatron.figure_dir.join("#{stem}_5.png") # molscript cannot hangle a long input file name
+          fig500  = configatron.figure_dir.join("#{stem}_500.png")
+          fig100  = configatron.figure_dir.join("#{stem}_100.png")
 
           if File.size?(fig500) && File.size?(fig100)
             $logger.warn "!!! Skipped SCOP domain, #{domain.sunid}, figures are already created"
@@ -523,7 +519,7 @@ namespace :bipa do
     task :interfaces_flat_file => [:environment] do
 
       File.open("./tmp/interfaces.csv", "w") do |file|
-        Interface.find_all_in_chunks do |int|
+        Interface.find_each do |int|
           begin
             file.puts [
               int.id,
@@ -545,7 +541,7 @@ namespace :bipa do
     task :interface_similarities_dump_file => [:environment] do
 
       InterfaceStruct = Struct.new(:int_id, :asa, :polarity, :shape_descriptors, :res_composition, :sse_composition)
-      interfaces      = Array.new
+      interfaces      = []
 
       IO.foreach("./tmp/interfaces.csv") do |line|
         elements = line.chomp.split(",")
@@ -558,7 +554,7 @@ namespace :bipa do
       end
 
       total_count = interfaces.size
-      fmanager    = ForkManager.new(MAX_FORK)
+      fmanager    = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         File.open("./tmp/interface_similarities.csv", "w") do |file|
@@ -593,7 +589,7 @@ namespace :bipa do
     task :interface_descriptor_file => [:environment] do
 
       File.open("./tmp/interface_descriptors.txt", "w") do |file|
-        DomainInterface.find_all_in_chunks do |int|
+        DomainInterface.find_each do |int|
           file.puts [int.id, *int.shape_descriptors].join(", ") if int.interface_atoms.size > 3
         end
       end
@@ -657,7 +653,7 @@ namespace :bipa do
     task :pssms => [:environment] do
 
       blast_db = Rails.root.join("tmp", "nr100_24Jun09.clean.fasta")
-      fmanager = ForkManager.new(MAX_FORK)
+      fmanager = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection

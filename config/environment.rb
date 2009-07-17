@@ -125,6 +125,7 @@ configatron.pdb_dir         = Rails.root.join("public/pdb")
 configatron.scop_uri        = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
 configatron.scop_dir        = Rails.root.join("public/scop")
 configatron.scop_pdb_dir    = "~/BiO/Store/SCOP/pdbstyle"
+configatron.true_scop_classes = %w[a b c d e f g]
 
 configatron.prescop_uri     = "http://www.mrc-lmb.cam.ac.uk/agm/pre-scop/parseable/"
 configatron.prescop_dir     = Rails.root.join("public/pre-scop")

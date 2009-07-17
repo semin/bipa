@@ -4,8 +4,8 @@ namespace :bipa do
     desc "Import SCOP datasets"
     task :scop => [:environment] do
 
-      hie_file = Dir[File.join(SCOP_DIR, '*hie*scop*')][0]
-      des_file = Dir[File.join(SCOP_DIR, '*des*scop*')][0]
+      hie_file = Dir[configatron.scop_dir.join('*hie*scop*')][0]
+      des_file = Dir[configatron.scop_dir.join('*des*scop*')][0]
 
       # Create a hash for description of scop entries,
       # and set a description for 'root' scop entry with sunid, '0'
@@ -90,8 +90,8 @@ namespace :bipa do
         }
       end
 
-      pdb_files = FileList[PDB_DIR.join("*.pdb").to_s].sort
-      fmanager  = ForkManager.new(MAX_FORK)
+      pdb_files = Dir[configatron.pdb_dir.join("*.pdb").to_s].sort
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -216,7 +216,7 @@ namespace :bipa do
     task :naccess => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code).map(&:downcase)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -226,9 +226,9 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure           = Structure.find_by_pdb_code(pdb_code.upcase)
-            bound_asa_file      = NACCESS_DIR.join("#{pdb_code}_co.asa")
-            unbound_aa_asa_file = NACCESS_DIR.join("#{pdb_code}_aa.asa")
-            unbound_na_asa_file = NACCESS_DIR.join("#{pdb_code}_na.asa")
+            bound_asa_file      = configatron.naccess_dir.join("#{pdb_code}_co.asa")
+            unbound_aa_asa_file = configatron.naccess_dir.join("#{pdb_code}_aa.asa")
+            unbound_na_asa_file = configatron.naccess_dir.join("#{pdb_code}_na.asa")
 
             if (!File.size?(bound_asa_file)       ||
                 !File.size?(unbound_aa_asa_file)  ||
@@ -274,7 +274,7 @@ namespace :bipa do
     task :dssp => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code).map(&:downcase)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -284,7 +284,7 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.find_by_pdb_code(pdb_code.upcase)
-            dssp_file = DSSP_DIR.join("#{pdb_code}.dssp")
+            dssp_file = configatron.dssp_dir.join("#{pdb_code}.dssp")
 
             unless File.size?(dssp_file)
               $logger.warn "!!! Skipped #{pdb_code}: no DSSP result file"
@@ -316,7 +316,7 @@ namespace :bipa do
     task :hbplus => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -326,7 +326,7 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure   = Structure.find_by_pdb_code(pdb_code)
-            hbplus_file = File.join(HBPLUS_DIR, "#{pdb_code.downcase}.hb2")
+            hbplus_file = File.join(configatron.hbplus_dir, "#{pdb_code.downcase}.hb2")
             bipa_hbonds = Bipa::Hbplus.new(IO.read(hbplus_file)).hbonds
             hbpluses    = []
 
@@ -398,7 +398,7 @@ namespace :bipa do
     task :hbonds => [:environment] do
 
       pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -432,7 +432,7 @@ namespace :bipa do
     task :whbonds => [:environment] do
 
       pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -499,7 +499,7 @@ namespace :bipa do
     task :vdw_contacts => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -519,7 +519,7 @@ namespace :bipa do
             na_atoms = structure.na_atoms
 
             na_atoms.each do |na_atom|
-              neighbor_atoms = kdtree.neighbors(na_atom, MAX_VDW_DISTANCE).map(&:point)
+              neighbor_atoms = kdtree.neighbors(na_atom, configatron.max_vdw_distance).map(&:point)
               neighbor_atoms.each do |neighbor_atom|
                 if neighbor_atom.aa?
                   dist = na_atom - neighbor_atom
@@ -546,7 +546,7 @@ namespace :bipa do
     task :domain_interfaces => [:environment] do
 
       pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -599,7 +599,7 @@ namespace :bipa do
     task :chain_interfaces => [:environment] do
 
       pdb_codes = Structure.untainted.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -645,8 +645,7 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-        fmanager  = ForkManager.new(MAX_FORK)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -656,7 +655,7 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = File.join(BLASTCLUST_DIR, na, "#{sunid}")
+              fam_dir = File.join(configatron.blastclust_dir, na, "#{sunid}")
 
               configatron.rep_pids.each do |pid|
                 subfam_file = File.join(fam_dir, "#{sunid}.cluster#{pid}")
@@ -693,7 +692,7 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-        fmanager  = ForkManager.new(MAX_FORK)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -702,7 +701,7 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family    = ScopFamily.find_by_sunid(sunid)
-              fam_dir   = File.join(FAMILY_DIR, "full", na, sunid.to_s)
+              fam_dir   = File.join(configatron.family_dir, "full", na, sunid.to_s)
               ali_file  = File.join(fam_dir, "baton.ali")
 #              ali_files = FileList[fam_dir + "/cluster*.ali*"]
 
@@ -777,7 +776,7 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-        fmanager  = ForkManager.new(MAX_FORK)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -788,7 +787,7 @@ namespace :bipa do
                 ActiveRecord::Base.establish_connection(config)
 
                 family      = ScopFamily.find_by_sunid(sunid)
-                family_dir  = File.join(FAMILY_DIR, "nr#{pid}", na, "#{family.sunid}")
+                family_dir  = File.join(configatron.family_dir, "nr#{pid}", na, "#{family.sunid}")
                 ali_file    = File.join(family_dir, "baton.ali")
 
                 unless File.exists?(ali_file)
@@ -853,7 +852,7 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-        fmanager  = ForkManager.new(MAX_FORK)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -862,7 +861,7 @@ namespace :bipa do
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
               family      = ScopFamily.find_by_sunid(sunid)
-              subfam_dir  = File.join(FAMILY_DIR, "sub", na, sunid.to_s)
+              subfam_dir  = File.join(configatron.family_dir, "sub", na, sunid.to_s)
 
               (10..100).step(10) do |pid|
                 subfam_ids = Dir[File.join(subfam_dir, "nr#{pid}", "*")].map { |d| d.match(/nr\d+\/(\d+)/)[1] }
@@ -934,7 +933,7 @@ namespace :bipa do
     desc "Import GO data into 'go_terms' and 'go_relationships' tables"
     task :go_terms => [:environment] do
 
-      obo_file  = File.join(GO_DIR, "gene_ontology_edit.obo")
+      obo_file  = File.join(configatron.go_dir, "gene_ontology_edit.obo")
       obo_obj   = Bipa::Obo.new(IO.read(obo_file))
 
       obo_obj.terms.each do |go_id, term|
@@ -977,7 +976,7 @@ namespace :bipa do
     desc "Import GOA-PDB data into 'goa_pdbs' table"
     task :goa => [:environment] do
 
-      goa_pdb_file = File.join(GO_DIR, "gene_association.goa_pdb")
+      goa_pdb_file = File.join(configatron.go_dir, "gene_association.goa_pdb")
 
       IO.foreach(goa_pdb_file) do |line|
         line_arr = line.chomp.split(/\t/)
@@ -1018,7 +1017,7 @@ namespace :bipa do
     task :taxonomic_nodes => [:environment] do
       ActiveRecord::Base.connection.execute(
         <<-SQL
-          LOAD DATA INFILE "#{File.join(RAILS_ROOT, './public/taxonomy/nodes.dmp')}"
+          LOAD DATA INFILE "#{Rail.root.join('/public/taxonomy/nodes.dmp')}"
           IGNORE INTO TABLE taxonomic_nodes
           FIELDS TERMINATED BY '\t|\t'
           LINES  TERMINATED BY '\t|\n';
@@ -1065,7 +1064,7 @@ namespace :bipa do
     task :taxonomic_names => [:environment] do
       ActiveRecord::Base.connection.execute(
         <<-SQL
-          LOAD DATA INFILE "#{File.join(RAILS_ROOT, './public/taxonomy/names.dmp')}"
+          LOAD DATA INFILE "#{Rails.root.join('./public/taxonomy/names.dmp')}"
           IGNORE INTO TABLE taxonomic_names
           FIELDS TERMINATED BY '\t|\t'
           LINES  TERMINATED BY '\t|\n'
@@ -1099,7 +1098,7 @@ namespace :bipa do
       (10..100).step(10) do |si|
         next unless si == 90
 
-        rep_dir       = File.join(ESST_DIR, "rep#{si}")
+        rep_dir       = File.join(configatron.esst_dir, "rep#{si}")
         na_esst_dir   = File.join(rep_dir, "na")
         std_esst_dir  = File.join(rep_dir, "std")
 
@@ -1188,7 +1187,7 @@ namespace :bipa do
     desc "Import Fugue profiles"
     task :profiles => [:environment] do
       (10..100).step(10) do |si|
-        rep_dir       = File.join(ESST_DIR, "rep#{si}")
+        rep_dir       = File.join(configatron.esst_dir, "rep#{si}")
         na_esst_dir   = File.join(rep_dir, "na")
         std_esst_dir  = File.join(rep_dir, "std")
 
@@ -1316,7 +1315,7 @@ namespace :bipa do
     task :fugue_hits => [:environment] do
 
       (10..100).step(10) do |si|
-        rep_dir       = File.join(ESST_DIR, "rep#{si}")
+        rep_dir       = File.join(configatron.esst_dir, "rep#{si}")
         na_esst_dir   = File.join(rep_dir, "na")
         std_esst_dir  = File.join(rep_dir, "std")
 
@@ -1500,11 +1499,11 @@ namespace :bipa do
     desc "Import Atom Charges and Potentials"
     task :spicoli => [:environment] do
 
-      aa_pot_files  = Dir[SPICOLI_DIR.join("*_aa.pot").to_s].sort
-      na_pot_files  = Dir[SPICOLI_DIR.join("*_na.pot").to_s].sort
+      aa_pot_files  = Dir[configatron.spicoli_dir.join("*_aa.pot").to_s].sort
+      na_pot_files  = Dir[configatron.spicoli_dir.join("*_na.pot").to_s].sort
       pot_files     = aa_pot_files + na_pot_files
 
-      fmanager = ForkManager.new(MAX_FORK)
+      fmanager = ForkManager.new(configatron.max_fork)
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
 

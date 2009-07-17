@@ -5,7 +5,7 @@ namespace :bipa do
     task :residues_scop => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)
-      fmanager  = ForkManager.new(MAX_FORK)
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
@@ -42,7 +42,7 @@ namespace :bipa do
 
       cnt = 0
 
-      AaResidue.find_all_in_chunks do |aa|
+      AaResidue.find_each do |aa|
         res_map = ResMap.find(
           :first,
           :conditions => {
@@ -70,7 +70,7 @@ namespace :bipa do
 
       cnt = 0
 
-      AaResidue.find_all_in_chunks do |aa|
+      AaResidue.find_each do |aa|
         residue_map = ResidueMap.find(
           :first,
           :conditions => {

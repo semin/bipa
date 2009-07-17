@@ -3,15 +3,13 @@ namespace :bipa do
 
     include FileUtils
 
-    TRUE_SCOP_CLASSES = %w[a b c d e f g]
-
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
-      refresh_dir HBPLUS_DIR
+      refresh_dir configatron.hbplust_dir
 
-      pdb_files = FileList[File.join(PDB_DIR, "*.pdb")]
-      fmanager  = ForkManager.new(MAX_FORK)
+      pdb_files = Dir[File.join(configatron.pdb_dir, "*.pdb")]
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
 
@@ -20,7 +18,7 @@ namespace :bipa do
           fmanager.fork do
             cwd       = pwd
             pdb_code  = File.basename(pdb_file, ".pdb")
-            work_dir  = File.join(HBPLUS_DIR, pdb_code)
+            work_dir  = File.join(configatron.hbplust_dir, pdb_code)
 
             mkdir_p work_dir
             chdir work_dir
@@ -92,10 +90,10 @@ namespace :bipa do
       # 2) nucleic acid only,
       # 3) and protein-nucleic acid complex
 
-      refresh_dir NACCESS_DIR
+      refresh_dir configatron.naccess_dir
 
-      pdb_files = FileList[File.join(PDB_DIR, "*.pdb")].sort
-      fmanager  = ForkManager.new(MAX_FORK)
+      pdb_files = Dir[File.join(configatron.pdb_dir, "*.pdb")].sort
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
 
@@ -105,7 +103,7 @@ namespace :bipa do
             cwd       = pwd
             pdb_code  = File.basename(pdb_file, ".pdb")
             pdb_obj   = Bio::PDB.new(IO.read(pdb_file))
-            work_dir  = File.join(NACCESS_DIR, pdb_code)
+            work_dir  = File.join(configatron.naccess_dir, pdb_code)
 
             if (pdb_obj.models.first.aa_chains.empty? ||
                 pdb_obj.models.first.na_chains.empty?)
@@ -153,18 +151,18 @@ namespace :bipa do
     desc "Run DSSP on each PDB file"
     task :dssp => [:environment] do
 
-      refresh_dir DSSP_DIR
+      refresh_dir configatron.dssp_dir
 
-      pdb_files = FileList[PDB_DIR.join("*.pdb")]
-      fmanager  = ForkManager.new(MAX_FORK)
+      pdb_files = Dir[configatron.pdb_dir.join("*.pdb")]
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         pdb_files.each_with_index do |pdb_file, i|
           fmanager.fork do
             cwd = pwd
-            chdir DSSP_DIR
+            chdir configatron.dssp_dir
             pdb_code = File.basename(pdb_file, '.pdb')
-            system "#{DSSP_BIN} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err"
+            system "#{configatron.dssp_bin} #{pdb_file} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err"
             chdir cwd
 
             $logger.info ">>> Running DSSP on #{pdb_file} (#{i + 1}/#{pdb_files.size}): done"
@@ -177,15 +175,15 @@ namespace :bipa do
     desc "Run OESpicoli and OEZap for unbound state PDB structures"
     task :spicoli => [:environment] do
 
-      refresh_dir(SPICOLI_DIR) unless RESUME
+      refresh_dir(configatron.spicoli_dir) unless configatron.resume
 
-      unbound_pdb_files = FileList[NACCESS_DIR.join("*a.pdb").to_s]
+      unbound_pdb_files = Dir[configatron.naccess_dir.join("*a.pdb").to_s]
 
-      fmanager = ForkManager.new(MAX_FORK)
+      fmanager = ForkManager.new(configatron.max_fork)
       fmanager.manage do
         unbound_pdb_files.each_with_index do |file, i|
           basename = File.basename(file, ".pdb")
-          pot_file = SPICOLI_DIR.join("#{basename}.pot")
+          pot_file = configatron.spicoli_dir.join("#{basename}.pot")
 
           if File.exists? pot_file
             $logger.info ">>> Skip, #{file}"
@@ -204,12 +202,11 @@ namespace :bipa do
     desc "Run blastclust for each SCOP family"
     task :blastclust => [:environment] do
 
-      refresh_dir(BLASTCLUST_DIR) unless RESUME
+      refresh_dir(configatron.blastclust_dir) unless configatron.resume
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send(:"reg_#{na}").map(&:sunid).sort
-        #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-        fmanager  = ForkManager.new(MAX_FORK)
+        fmanager  = ForkManager.new(configatron.max_fork)
 
         fmanager.manage do
           config = ActiveRecord::Base.remove_connection
@@ -218,7 +215,7 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family    = ScopFamily.find_by_sunid(sunid)
-              fam_dir   = BLASTCLUST_DIR.join(na, "#{sunid}")
+              fam_dir   = configatron.blastclust_dir.join(na, "#{sunid}")
               fam_fasta = fam_dir.join("#{sunid}.fa")
               mkdir_p fam_dir
 
@@ -269,9 +266,8 @@ namespace :bipa do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send(:"reg_#{na}").map(&:sunid).sort
-          #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-          full_dir  = FAMILY_DIR.join("full", na)
-          fmanager  = ForkManager.new(MAX_FORK)
+          full_dir  = configatron.family_dir.join("full", na)
+          fmanager  = ForkManager.new(configatron.max_fork)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
@@ -314,19 +310,18 @@ namespace :bipa do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-          fmanager  = ForkManager.new(MAX_FORK)
+          fmanager  = ForkManager.new(configatron.max_fork)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
 
-            REP_PIDS.each do |pid|
+            configatron.rep_pids.each do |pid|
               sunids.each_with_index do |sunid, i|
                 fmanager.fork do
                   ActiveRecord::Base.establish_connection(config)
 
                   cwd       = pwd
-                  fam_dir   = FAMILY_DIR.join("rep#{pid}", na, sunid.to_s)
+                  fam_dir   = configatron.family_dir.join("rep#{pid}", na, sunid.to_s)
                   pdb_files = Dir[fam_dir.join("*.pdb").to_s]
 
                   if pdb_files.size < 2
@@ -361,8 +356,7 @@ namespace :bipa do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          #sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-          fmanager  = ForkManager.new(MAX_FORK)
+          fmanager  = ForkManager.new(configatron.max_fork)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
@@ -372,7 +366,7 @@ namespace :bipa do
                 ActiveRecord::Base.establish_connection(config)
 
                 cwd     = pwd
-                fam_dir = FAMILY_DIR.join("sub", na, sunid.to_s)
+                fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
 
                 Dir[fam_dir.join("nr*", "*").to_s].each do |subfam_dir|
                   #temporary filter!!!
@@ -411,9 +405,9 @@ namespace :bipa do
       task :full_scop => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-          full_dir  = File.join(FAMILY_DIR, "full", na)
-          fmanager  = ForkManager.new(MAX_FORK)
+          sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          full_dir  = File.join(configatron.family_dir, "full", na)
+          fmanager  = ForkManager.new(configatron.max_fork)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
@@ -423,7 +417,7 @@ namespace :bipa do
                 ActiveRecord::Base.establish_connection(config)
                 cwd       = pwd
                 fam_dir   = File.join(full_dir, sunid.to_s)
-                pdb_list  = FileList[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
+                pdb_list  = Dir[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                 if pdb_list.size < 2
                   $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
@@ -457,10 +451,8 @@ namespace :bipa do
       task :rep_scop => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-          #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-          #min_pid   = 10
-          fmanager  = ForkManager.new(MAX_FORK)
+          sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          fmanager  = ForkManager.new(configatron.max_fork)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
@@ -471,7 +463,7 @@ namespace :bipa do
                   ActiveRecord::Base.establish_connection(config)
 
                   cwd       = pwd
-                  fam_dir   = File.join(FAMILY_DIR, "nr#{pid}", na, sunid.to_s)
+                  fam_dir   = File.join(configatron.family_dir, "nr#{pid}", na, sunid.to_s)
                   pdb_list  = Dir[fam_dir.join("*.pdb")].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                   if pdb_list.size < 2
@@ -507,9 +499,8 @@ namespace :bipa do
       task :sub_scop => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("rpall_#{na}").select { |sf| TRUE_SCOP_CLASSES.include?(sf.sccs[0].chr) }.map(&:sunid).sort
-          #sunids    = ScopFamily.send("rpall_#{na}").map(&:sunid).sort
-          fmanager  = ForkManager.new(MAX_FORK)
+          sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          fmanager  = ForkManager.new(configatron.max_fork)
 
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
@@ -519,7 +510,7 @@ namespace :bipa do
                 ActiveRecord::Base.establish_connection(config)
 
                 cwd     = pwd
-                fam_dir = File.join(FAMILY_DIR, "sub", na, sunid.to_s)
+                fam_dir = File.join(configatron.family_dir, "sub", na, sunid.to_s)
 
                 Dir[fam_dir.join("nr*", "*")].each do |subfam_dir|
                   pdb_files = Dir[subfam_dir.join("*.pdb")]
@@ -549,19 +540,19 @@ namespace :bipa do
     desc "Run ZAP for each SCOP Domain PDB file"
     task :zap => [:environment] do
 
-      refresh_dir(ZAP_DIR) unless RESUME
+      refresh_dir(configatron.zip_dir) unless configatron.resume
 
-      pdb_codes = FileList[NACCESS_DIR + "/*_aa.asa"].map { |f| f.match(/(\S{4})_aa/)[1] }.sort
-      fmanager  = ForkManager.new(MAX_FORK)
+      pdb_codes = Dir[configatron.naccess_dir.join("*_aa.asa")].map { |f| f.match(/(\S{4})_aa/)[1] }.sort
+      fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
         pdb_codes.each_with_index do |pdb_code, i|
           fmanager.fork do
             [pdb_code + "_aa", pdb_code + "_na"].each do |pdb_stem|
-              zap_file = File.join(ZAP_DIR, pdb_stem + '.zap')
-              grd_file = File.join(ZAP_DIR, pdb_stem + '.grd')
-              err_file = File.join(ZAP_DIR, pdb_stem + '.err')
-              pdb_file = File.join(NACCESS_DIR, pdb_stem + '.pdb')
+              zap_file = configatron.zip_dir(pdb_stem + '.zap')
+              grd_file = configatron.zip_dir(pdb_stem + '.grd')
+              err_file = configatron.zip_dir(pdb_stem + '.err')
+              pdb_file = configatron.naccess_dir(pdb_stem + '.pdb')
 
               if File.size? zap_file
                 $logger.warn "Skipped, #{pdb_code}: ZAP results files are already there!"
@@ -582,14 +573,14 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         cwd       = pwd
-        fmanager  = ForkManager.new(MAX_FORK)
+        fmanager  = ForkManager.new(configatron.max_fork)
         fmanager.manage do
-          fam_dirs = FileList[File.join(FAMILY_DIR, "sub", na, "*", "nr*", "*")]
+          fam_dirs = Dir[File.join(configatron.family_dir, "sub", na, "*", "nr*", "*")]
           fam_dirs.each do |fam_dir|
             fmanager.fork do
               chdir fam_dir
 
-              #ali_files = FileList[File.join(fam_dir, "cluster*.ali")]
+              #ali_files = Dir[File.join(fam_dir, "cluster*.ali")]
               ali_file = File.join(fam_dir, "baton.ali")
 
               #if ali_files.size < 1
@@ -627,12 +618,12 @@ namespace :bipa do
 
         %w[dna rna].each do |na|
           %w[16 32 std].each do |env|
-            est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
+            est_dir = File.join(configatron.esst_dir, "rep#{si}", "#{na}#{env}")
             seq     = ASTRAL40
             cwd     = pwd
             chdir dir
 
-            FileList[est_dir + "/*.fug"].each_with_index do |fug, i|
+            Dir[est_dir + "/*.fug"].each_with_index do |fug, i|
               sunid = File.basename(fug, ".fug")
               $logger.info "fugueprf: #{sunid} ..."
               system "fugueprf -seq #{seq} -prf #{fug} -o #{sunid}.hit > #{sunid}.frt"
@@ -653,12 +644,12 @@ namespace :bipa do
         %w[dna rna].each do |na|
           %w[16 32 std].each do |env|
             cwd     = pwd
-            est_dir = File.join(ESST_DIR, "rep#{si}", "#{na}#{env}")
+            est_dir = File.join(configatron.esst_dir, "rep#{si}", "#{na}#{env}")
             master  = nil
 
             chdir est_dir
 
-            FileList["./*.tem"].each do |tem_file|
+            Dir["./*.tem"].each do |tem_file|
               fam_sunid = File.basename(tem_file, "*.tem")
               fam_ali   = Scop.find_by_sunid(fam_sunid).send(:"rep#{si}_alignment")
               domains   = fam_ali.sequences.map(&:domain)
@@ -827,18 +818,18 @@ namespace :bipa do
 
                   system "fugueali -seq #{sunid}.ali -prf #{temp}.na.fug -y -o #{temp}-#{sunid}.na.fug.ali"
                   system "mview -in pir -out msf #{temp}-#{sunid}.na.fug.ali > #{temp}-#{sunid}.na.fug.msf"
-                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.na.fug.msf > #{temp}-#{sunid}.na.fug.bb"
+                  system "#{configatron.baliscore_bin} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.na.fug.msf > #{temp}-#{sunid}.na.fug.bb"
 
                   system "fugueali -seq #{sunid}.ali -prf #{temp}.std.fug -y -o #{temp}-#{sunid}.std.fug.ali"
                   system "mview -in pir -out msf #{temp}-#{sunid}.std.fug.ali > #{temp}-#{sunid}.std.fug.msf"
-                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.std.fug.msf > #{temp}-#{sunid}.std.fug.bb"
+                  system "#{configatron.baliscore_bin} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.std.fug.msf > #{temp}-#{sunid}.std.fug.bb"
 
                   system "needle -asequence #{temp}.ali -bsequence #{sunid}.ali -aformat msf -outfile #{temp}-#{sunid}.ndl.msf -gapopen 10.0 -gapextend 0.5"
-                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.ndl.msf > #{temp}-#{sunid}.ndl.bb"
+                  system "#{configatron.baliscore_bin} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.ndl.msf > #{temp}-#{sunid}.ndl.bb"
 
                   system "cat #{temp}.ali #{sunid}.ali > #{temp}-#{sunid}.ali"
                   system "clustalw2 -INFILE=#{temp}-#{sunid}.ali -ALIGN -OUTFILE=#{temp}-#{sunid}.clt.msf -OUTPUT=GCG"
-                  system "#{BALISCORE_BIN} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.clt.msf > #{temp}-#{sunid}.clt.bb"
+                  system "#{configatron.baliscore_bin} #{temp}-#{sunid}.ref.msf #{temp}-#{sunid}.clt.msf > #{temp}-#{sunid}.clt.bb"
                 end
               end
             end
