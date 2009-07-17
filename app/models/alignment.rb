@@ -84,8 +84,8 @@ end
 class SubfamilyAlignment < Alignment
 
   belongs_to  :subfamily,
-    :class_name   => "Subfamily",
-    :foreign_key  => "subfamily_id"
+              :class_name   => "Subfamily",
+              :foreign_key  => "subfamily_id"
 end
 
 
@@ -99,9 +99,9 @@ end
   end
   EVAL
 
-  (10..100).step(10) do |pid|
+  configatron.rep_pids.each do |pid|
     eval <<-EVAL
-    class Nr#{pid}#{na.capitalize}BindingFamilyAlignment < Alignment
+    class Rep#{pid}#{na.capitalize}BindingFamilyAlignment < Alignment
 
       belongs_to  :family,
                   :class_name   => "ScopFamily",

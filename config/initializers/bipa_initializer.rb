@@ -34,8 +34,7 @@ ENV["PDB_EXT"] = ".pdb" # for Baton
 # Constants for BIPA
 RESUME    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
 MAX_FORK  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
-NR_PID    = 80
-FULL_PID  = 20
+REP_PIDS  = (100..100).step(10)
 
 EPSILON                           = 1.0E-6
 MAX_VDW_DISTANCE                  = 5.0

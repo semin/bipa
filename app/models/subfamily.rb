@@ -10,7 +10,7 @@ end
 %w[dna rna].each do |na|
   (10..100).step(10) do |pid|
     eval <<-END
-      class Nr#{pid}#{na.capitalize}BindingSubfamily < Subfamily
+      class Sub#{pid}#{na.capitalize}BindingSubfamily < Subfamily
 
         has_one :alignment,
                 :class_name   => "SubfamilyAlignment",
@@ -18,7 +18,7 @@ end
 
         has_many  :domains,
                   :class_name   => "ScopDomain",
-                  :foreign_key  => "nr#{pid}_#{na}_binding_subfamily_id"
+                  :foreign_key  => "sub#{pid}_#{na}_binding_subfamily_id"
 
         def representative
           rep = nil

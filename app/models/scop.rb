@@ -242,21 +242,21 @@ class ScopFamily < Scop
 
   %w[dna rna].each do |na|
 
-#    has_many  :"full_#{na}_binding_family_alignments",
-#              :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
-#              :foreign_key  => "scop_id"
+    has_many  :"full_#{na}_binding_family_alignments",
+              :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
+              :foreign_key  => "scop_id"
 
-    has_one :"full_#{na}_binding_family_alignment",
-            :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
-            :foreign_key  => "scop_id"
+#    has_one :"full_#{na}_binding_family_alignment",
+#            :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
+#            :foreign_key  => "scop_id"
 
-    (10..100).step(10) do |pid|
-      has_one   :"nr#{pid}_#{na}_binding_family_alignment",
-                :class_name   => "Nr#{pid}#{na.capitalize}BindingFamilyAlignment",
+    configatron.rep_pids.each do |pid|
+      has_many  :"rep#{pid}_#{na}_binding_family_alignments",
+                :class_name   => "Rep#{pid}#{na.capitalize}BindingFamilyAlignment",
                 :foreign_key  => "scop_id"
 
-      has_many  :"nr#{pid}_#{na}_binding_subfamilies",
-                :class_name   => "Nr#{pid}#{na.capitalize}BindingSubfamily",
+      has_many  :"sub#{pid}_#{na}_binding_subfamilies",
+                :class_name   => "Sub#{pid}#{na.capitalize}BindingSubfamily",
                 :foreign_key  => "scop_id"
     end
   end
@@ -277,9 +277,9 @@ class ScopDomain < Scop
 
   %w[dna rna].each do |na|
     (10..100).step(10) do |pid|
-      belongs_to  :"nr#{pid}_#{na}_binding_subfamily",
-                  :class_name   => "Nr#{pid}#{na.capitalize}BindingSubfamily",
-                  :foreign_key  => "nr#{pid}_#{na}_binding_subfamily_id"
+      belongs_to  :"sub#{pid}_#{na}_binding_subfamily",
+                  :class_name   => "Sub#{pid}#{na.capitalize}BindingSubfamily",
+                  :foreign_key  => "sub#{pid}_#{na}_binding_subfamily_id"
     end
   end
 

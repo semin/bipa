@@ -658,11 +658,11 @@ namespace :bipa do
               family  = ScopFamily.find_by_sunid(sunid)
               fam_dir = File.join(BLASTCLUST_DIR, na, "#{sunid}")
 
-              (10..100).step(10) do |pid|
+              configatron.rep_pids.each do |pid|
                 subfam_file = File.join(fam_dir, "#{sunid}.cluster#{pid}")
 
                 IO.readlines(subfam_file).each do |line|
-                  subfamily = "Nr#{pid}#{na.capitalize}BindingSubfamily".constantize.new
+                  subfamily = "Sub#{pid}#{na.capitalize}BindingSubfamily".constantize.new
                   members   = line.split(/\s+/)
                   members.each do |member|
                     domain = ScopDomain.find_by_sunid(member)

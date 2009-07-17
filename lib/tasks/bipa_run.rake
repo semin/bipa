@@ -218,8 +218,8 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family    = ScopFamily.find_by_sunid(sunid)
-              fam_dir   = File.join(BLASTCLUST_DIR, na, "#{sunid}")
-              fam_fasta = File.join(fam_dir, "#{sunid}.fa")
+              fam_dir   = BLASTCLUST_DIR.join(na, "#{sunid}")
+              fam_fasta = fam_dir.join("#{sunid}.fa")
               mkdir_p fam_dir
 
               domains = family.leaves.select(&:"reg_#{na}")
@@ -237,16 +237,18 @@ namespace :bipa do
               end
 
               if File.size? fam_fasta
-                (10..100).step(10) do |pid|
+                configatron.rep_pids.each do |pid|
                   blastclust_cmd =
                       "blastclust " +
                       "-i #{fam_fasta} "+
-                      "-o #{File.join(fam_dir, family.sunid.to_s + '.cluster' + pid.to_s)} " +
+                      "-o #{fam_dir.join(family.sunid.to_s + '.cluster' + pid.to_s)} " +
                       "-L .9 " +
                       "-S #{pid} " +
                       "-a 2 " +
-                      "-p T"
-                  sh blastclust_cmd
+                      "-p T " +
+                      "1> #{fam_dir.join('blastclust' + pid.to_s + '.stdout')} " +
+                      "2> #{fam_dir.join('blastclust' + pid.to_s + '.stderr')}"
+                  system blastclust_cmd
                 end
               end
 
@@ -318,16 +320,13 @@ namespace :bipa do
           fmanager.manage do
             config = ActiveRecord::Base.remove_connection
 
-            (10..100).step(10) do |pid|
-              # temporary filter!
-              next unless pid == 80 #or pid == 90 or pid == 100
-
+            REP_PIDS.each do |pid|
               sunids.each_with_index do |sunid, i|
                 fmanager.fork do
                   ActiveRecord::Base.establish_connection(config)
 
                   cwd       = pwd
-                  fam_dir   = FAMILY_DIR.join("nr#{pid}", na, sunid.to_s)
+                  fam_dir   = FAMILY_DIR.join("rep#{pid}", na, sunid.to_s)
                   pdb_files = Dir[fam_dir.join("*.pdb").to_s]
 
                   if pdb_files.size < 2
