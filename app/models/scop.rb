@@ -56,7 +56,7 @@ class Scop < ActiveRecord::Base
   end
 
   def scop_domains
-    leaves.select(&:rpall)
+    leaves.select { |l| l.reg_dna or l.reg_rna }
   end
 
   def html_sunid_link
@@ -239,7 +239,6 @@ end
 
 
 class ScopFamily < Scop
-
   %w[dna rna].each do |na|
     has_many  :"full_#{na}_binding_family_alignments",
               :class_name   => "Full#{na.capitalize}BindingFamilyAlignment",
@@ -250,8 +249,8 @@ class ScopFamily < Scop
                 :class_name   => "Rep#{pid}#{na.capitalize}BindingFamilyAlignment",
                 :foreign_key  => "scop_id"
 
-      has_many  :"sub#{pid}_#{na}_binding_subfamilies",
-                :class_name   => "Sub#{pid}#{na.capitalize}BindingSubfamily",
+      has_many  :"red#{pid}_#{na}_binding_subfamilies",
+                :class_name   => "Red#{pid}#{na.capitalize}BindingSubfamily",
                 :foreign_key  => "scop_id"
     end
   end
@@ -272,9 +271,7 @@ class ScopDomain < Scop
 
   %w[dna rna].each do |na|
     configatron.rep_pids.each  do |pid|
-      belongs_to  :"sub#{pid}_#{na}_binding_subfamily",
-                  :class_name   => "Sub#{pid}#{na.capitalize}BindingSubfamily",
-                  :foreign_key  => "sub#{pid}_#{na}_binding_subfamily_id"
+      belongs_to  :"red#{pid}_#{na}_binding_subfamily"
     end
   end
 

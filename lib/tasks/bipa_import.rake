@@ -655,25 +655,28 @@ namespace :bipa do
               ActiveRecord::Base.establish_connection(config)
 
               family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = configatron.blastclust_dir.join(na, sunid)
+              fam_dir = configatron.blastclust_dir.join(na, sunid.to_s)
 
               configatron.rep_pids.each do |pid|
                 subfam_file = fam_dir.join("#{sunid}.cluster#{pid}")
 
                 IO.foreach(subfam_file) do |line|
-                  subfamily = family.send("sub#{pid}_#{na}_binding_subfamilies").build
-                  members   = line.chomp.split(/\s+/)
-                  members.each do |member|
-                    domain = ScopDomain.find_by_sunid(member)
-                    if domain
-                      subfamily.domains << domain
-                    else
-                      $logger.warn "!!! Cannot find SCOP domain, #{member}"
-                      exit 1
+                  members = line.chomp.split(/\s+/)
+
+                  if !members.nil? and !members.empty?
+                    subfamily = family.send("red#{pid}_#{na}_binding_subfamilies").build
+                    members.each do |member|
+                      domain = ScopDomain.find_by_sunid(member)
+                      if domain
+                        subfamily.domains << domain
+                      else
+                        $logger.warn "!!! Cannot find SCOP domain, #{member}"
+                        exit 1
+                      end
                     end
+                    #subfamily.family = family
+                    subfamily.save!
                   end
-                  #subfamily.family = family
-                  subfamily.save!
                 end
               end
 

@@ -10,15 +10,14 @@ end
 %w[dna rna].each do |na|
   configatron.rep_pids.each do |pid|
     eval <<-EVAL
-      class Sub#{pid}#{na.capitalize}BindingSubfamily < Subfamily
+      class Red#{pid}#{na.capitalize}BindingSubfamily < Subfamily
 
         has_one :alignment,
-                :class_name   => "SubfamilyAlignment",
-                :foreign_key  => "subfamily_id"
+                :class_name   => :SubfamilyAlignment,
+                :foreign_key  => :subfamily_id
 
         has_many  :domains,
-                  :class_name   => "ScopDomain",
-                  :foreign_key  => "sub#{pid}_#{na}_binding_subfamily_id"
+                  :class_name   => :ScopDomain
 
         def representative
           rep = nil
