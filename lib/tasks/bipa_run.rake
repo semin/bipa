@@ -385,7 +385,7 @@ namespace :bipa do
                 cwd     = pwd
                 fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
 
-                Dir[fam_dir.join("nr100", "*").to_s].each do |subfam_dir|
+                Dir[fam_dir.join("red100", "*").to_s].each do |subfam_dir|
                   pdb_files = Dir[File.join(subfam_dir, "*.pdb")]
 
                   if pdb_files.size < 2
@@ -403,7 +403,7 @@ namespace :bipa do
                   chdir cwd
                 end
 
-                $logger.info ">>> SALIGN with subfamily PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info ">>> SALIGN with subfamilies of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
