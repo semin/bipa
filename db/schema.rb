@@ -27,7 +27,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :resolution
     %w[dna rna].each { |na|
       configatron.rep_pids.each { |pid|
-        t.belongs_to  :"sub#{pid}_#{na}_binding_subfamily"
+        t.belongs_to  :"red#{pid}_#{na}_binding_subfamily"
         t.boolean     :"rep#{pid}_#{na}", :default => false # for representative memebers
       }
       t.boolean :"reg_#{na}", :default => false # for registered members

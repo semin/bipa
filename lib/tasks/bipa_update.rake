@@ -214,7 +214,7 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         configatron.rep_pids.each do |pid|
-          klass = "Sub#{pid}#{na.capitalize}BindingSubfamily".constantize
+          klass = "Red#{pid}#{na.capitalize}BindingSubfamily".constantize
           klass.all.each do |subfamily|
             rep = subfamily.representative
             unless rep.nil?

@@ -275,7 +275,7 @@ namespace :bipa do
                 ActiveRecord::Base.establish_connection(config)
                 cwd       = pwd
                 fam_dir   = full_dir.join(sunid.to_s)
-                pdb_files = Dir[fam_dir.join("*.pdb").to_s]
+                pdb_files = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
 
                 if pdb_files.size < 2
                   $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
@@ -284,19 +284,19 @@ namespace :bipa do
                 end
 
                 # single linkage clustering using TM-score
+                chdir fam_dir
                 clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a)
                 clusters.each_with_index do |group, gi|
                   if group.size < 2
-                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in group, #{gi} in #{subfam_dir}"
+                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in group, #{gi} in #{fam_dir}"
                     next
                   end
 
-                  if File.exists?(File.join(subfam_dir, "salign#{gi}.ali")) and File.exists?(File.join(subfam_dir, "salign#{gi}.pap"))
-                    $logger.warn "!!! Skipped group, #{gi} in #{subfam_dir}"
+                  if File.exists?(File.join(fam_dir, "salign#{gi}.ali")) and File.exists?(File.join(fam_dir, "salign#{gi}.pap"))
+                    $logger.warn "!!! Skipped group, #{gi} in #{fam_dir}"
                     next
                   end
 
-                  chdir subfam_dir
                   system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
                   system "mv salign.ali salign#{gi}.ali"
                   system "mv salign.pap salign#{gi}.pap"
@@ -339,26 +339,25 @@ namespace :bipa do
                   end
 
                   # single linkage clustering using TM-score
-                  clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a, `which TMalign`.chomp)
+                  chdir fam_dir
+                  clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a)
                   clusters.each_with_index do |group, gi|
                     if group.size < 2
-                      $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in group, #{gi} in #{subfam_dir}"
+                      $logger.warn "!!! Only #{group.size} PDB structure detected in group, #{gi} in #{fam_dir}"
                       next
                     end
 
-                    if File.exists?(File.join(subfam_dir, "salign#{gi}.ali")) and File.exists?(File.join(subfam_dir, "salign#{gi}.pap"))
-                      $logger.warn "!!! Skipped group, #{gi} in #{subfam_dir}"
+                    if File.exists?(File.join(fam_dir, "salign#{gi}.ali")) and File.exists?(File.join(fam_dir, "salign#{gi}.pap"))
+                      $logger.warn "!!! Skipped group, #{gi} in #{fam_dir}"
                       next
                     end
 
-                    chdir subfam_dir
                     system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
                     system "mv salign.ali salign#{gi}.ali"
                     system "mv salign.pap salign#{gi}.pap"
-                    chdir cwd
+                    $logger.info ">>> SALIGN with group, #{gi} from representative (PID: #{pid}) set of #{na.upcase}-binding SCOP family, #{sunid}: done"
                   end
-
-                  $logger.info ">>> SALIGN with non-redundant (PID < #{pid}) set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                  chdir cwd
                   ActiveRecord::Base.remove_connection
                 end
               end

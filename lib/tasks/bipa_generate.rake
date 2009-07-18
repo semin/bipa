@@ -2,7 +2,7 @@ namespace :bipa do
   namespace :generate do
 
     desc "Generate full set of PDB files for each SCOP family"
-    task :full_scop_pdb_files => [:environment] do
+    task :full_scop_pdbs => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -61,7 +61,7 @@ namespace :bipa do
 
 
     desc "Generate representative set of PDB files for each SCOP Family"
-    task :rep_scop_pdb_files => [:environment] do
+    task :rep_scop_pdbs => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -82,7 +82,7 @@ namespace :bipa do
                 fam_dir = rep_dir.join(sunid.to_s)
                 mkdir_p fam_dir
 
-                subfamilies = family.send("sub#{pid}_#{na}_binding_subfamilies")
+                subfamilies = family.send("red#{pid}_#{na}_binding_subfamilies")
                 subfamilies.each do |subfamily|
                   domain = subfamily.representative
                   next if domain.nil?
@@ -108,7 +108,7 @@ namespace :bipa do
 
 
     desc "Generate PDB files for each Subfamily of each SCOP Family"
-    task :sub_scop_pdb_files => [:environment] do
+    task :sub_scop_pdbs => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -129,9 +129,9 @@ namespace :bipa do
               fam_dir = sub_dir.join("#{sunid}")
 
               configatron.rep_pids.each do |pid|
-                subfamilies = family.send("sub#{pid}_#{na}_binding_subfamilies")
+                subfamilies = family.send("red#{pid}_#{na}_binding_subfamilies")
                 subfamilies.each do |subfamily|
-                  subfam_dir = fam_dir.join("rep#{pid}", subfamily.id.to_s)
+                  subfam_dir = fam_dir.join("red#{pid}", subfamily.id.to_s)
                   mkdir_p subfam_dir
 
                   domains = subfamily.domains
