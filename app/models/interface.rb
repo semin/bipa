@@ -121,26 +121,22 @@ class DomainInterface < Interface
   def calculate_residue_percentage_of(res)
     result = 100.0 * delta_asa_of_residue(res) / delta_asa rescue 0
   end
-  #memoize :calculate_residue_frequency_of
 
   def calculate_residue_propensity_of(res)
     result = ((delta_asa_of_residue(res) / delta_asa) /
               (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
-  #memoize :calculate_residue_propensity_of
 
   def calculate_sse_percentage_of(sse)
     result = 100.0 * delta_asa_of_sse(sse) / delta_asa rescue 0
   end
-  #memoize :calculate_sse_percentage_of
 
   def calculate_sse_propensity_of(sse)
     result = ((delta_asa_of_sse(sse) / delta_asa) /
               (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
     result.to_f.nan? ? 1 : result
   end
-  #memoize :calculate_sse_propensity_of
 
   def calculate_frequency_of_hbond_between(aa, na)
     sum = 0
@@ -158,7 +154,6 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_hbond_between
 
   def calculate_frequency_of_whbond_between(aa, na)
     sum = 0
@@ -170,7 +165,6 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_whbond_between
 
   def calculate_frequency_of_vdw_contact_between(aa, na)
     sum = 0
@@ -182,7 +176,6 @@ class DomainInterface < Interface
     end
     sum - calculate_frequency_of_hbond_between(aa, na)
   end
-  #memoize :calculate_frequency_of_vdw_contact_between
 
   def calculate_frequency_of_hbond_between_sugar_and_(aa)
     sum = 0
@@ -196,7 +189,6 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_hbond_between_sugar_and_
 
   def calculate_frequency_of_whbond_between_sugar_and_(aa)
     sum = 0
@@ -206,7 +198,6 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_whbond_between_sugar_and_
 
   def calculate_frequency_of_vdw_contact_between_sugar_and_(aa)
     sum = 0
@@ -216,7 +207,6 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_vdw_contact_between_sugar_and_
 
   def calculate_frequency_of_hbond_between_phosphate_and_(aa)
     sum = 0
@@ -230,7 +220,6 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_hbond_between_phosphate_and_
 
   def calculate_frequency_of_whbond_between_phosphate_and_(aa)
     sum = 0
@@ -240,7 +229,6 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_whbond_between_phosphate_and_
 
   def calculate_frequency_of_vdw_contact_between_phosphate_and_(aa)
     sum = 0
@@ -250,22 +238,18 @@ class DomainInterface < Interface
     end
     sum
   end
-  #memoize :calculate_frequency_of_vdw_contact_between_phosphate_and_
 
   def calculate_frequency_of_hbond_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + calculate_frequency_of_hbond_between(r, na) }
   end
-  #memoize :calculate_frequency_of_hbond_between_amino_acids_and_
 
   def calculate_frequency_of_whbond_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + calculate_frequency_of_whbond_between(r, na) }
   end
-  #memoize :calculate_frequency_of_whbond_between_amino_acids_and_
 
   def calculate_frequency_of_vdw_contact_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + calculate_frequency_of_vdw_contact_between(r, na) }
   end
-  #memoize :calculate_frequency_of_vdw_contact_between_amino_acids_and_
 
 
   def calculate_polarity
@@ -278,7 +262,6 @@ class DomainInterface < Interface
     end
     result
   end
-  #memoize :calculate_polarity
 
   def residue_percentage_google_chart_url
     data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_percentage_of(r) }
@@ -346,7 +329,6 @@ class DomainDnaInterface < DomainInterface
         sum += calculate_frequency_of_hbond_between_sugar_and_(aa)
         sum += calculate_frequency_of_hbond_between_phosphate_and_(aa)
       end
-      #memoize :calculate_frequency_of_#{intact}_between_nucleic_acids_and_
     END
   end
 end # class DomainDnaInterface
@@ -364,7 +346,6 @@ class DomainRnaInterface < DomainInterface
         sum += calculate_frequency_of_hbond_between_sugar_and_(aa)
         sum += calculate_frequency_of_hbond_between_phosphate_and_(aa)
       end
-      #memoize :calculate_frequency_of_#{intact}_between_nucleic_acids_and_
     END
   end
 end # class DomainRnaInterface

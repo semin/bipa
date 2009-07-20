@@ -53,12 +53,10 @@ class Structure < ActiveRecord::Base
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }
   end
-  #memoize :residues
 
   def domains
     aa_chains.inject([]) { |s, a| s.concat(a.domains) }
   end
-  #memoize :domains
 
   def rcsb_image_link_80
     "http://www.rcsb.org/pdb/images/#{pdb_code.downcase}_bio_r_80.jpg"
