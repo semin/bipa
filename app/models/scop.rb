@@ -270,6 +270,10 @@ class ScopDomain < Scop
             :class_name   => "Residue",
             :foreign_key  => "scop_id"
 
+  has_many  :aa_residues,
+            :class_name   => "AaResidue",
+            :foreign_key  => "scop_id"
+
   has_many  :chains,
             :through      => :residues,
             :uniq         => true

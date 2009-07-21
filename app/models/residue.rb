@@ -245,14 +245,12 @@ class Residue < ActiveRecord::Base
   end
 end # class Residue
 
-
 class StdResidue < Residue
 
   has_many  :atoms,
             :class_name   => "StdAtom",
             :foreign_key  => "residue_id"
 end
-
 
 class HetResidue < Residue
 
@@ -261,18 +259,14 @@ class HetResidue < Residue
             :foreign_key  => "residue_id"
 end
 
-
 class AaResidue < StdResidue
 end
-
 
 class NaResidue < StdResidue
 end
 
-
 class DnaResidue < NaResidue
 end
-
 
 class RnaResidue < NaResidue
 end
