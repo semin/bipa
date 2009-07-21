@@ -121,5 +121,4 @@ class Structure < ActiveRecord::Base
   def rcsb_html_link
     "http://www.rcsb.org/pdb/explore.do?structureId=#{pdb_code}"
   end
-
 end

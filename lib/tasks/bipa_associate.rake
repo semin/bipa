@@ -9,6 +9,7 @@ namespace :bipa do
 
       fmanager.manage do
         config = ActiveRecord::Base.remove_connection
+
         pdb_codes.each_with_index do |pdb_code, i|
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
@@ -18,18 +19,21 @@ namespace :bipa do
 
             if domains.empty?
               $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
-            else
-              domains.each do |domain|
-                structure.models.first.residues.each do |residue|
-                  if domain.include? residue
-                    residue.domain = domain
-                    residue.save!
-                  end
+              ActiveRecord::Base.remove_connection
+              next
+            end
+
+            domains.each do |domain|
+              structure.models.first.residues.each do |residue|
+                if domain.include? residue
+                  residue.domain = domain
+                  residue.save!
                 end
               end
-              $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_codes.size}): done"
             end
+
             ActiveRecord::Base.remove_connection
+            $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_codes.size}): done"
           end
         end
         ActiveRecord::Base.establish_connection(config)

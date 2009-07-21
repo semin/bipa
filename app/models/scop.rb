@@ -302,6 +302,10 @@ class ScopDomain < Scop
     end
   end
 
+  def sorted_seq
+    sorted_residues.map(&:one_letter_code).join
+  end
+
   def ranges_on_chains
     # "2hz1 A:2-124, B:1-50" => [A:2-124, B:1-50]
     description.gsub(/^\S{4}\s+/, '').gsub(/\s+/, '').split(',')

@@ -3,9 +3,9 @@ module Bipa
 
     include Bipa::ComposedOfAtoms
 
-    def residues
-      raise "#residues has to be implemented in your class"
-    end
+#    def residues
+#      raise "#residues has to be implemented in your class"
+#    end
 
     def sorted_residues
       residues.sort_by { |r|

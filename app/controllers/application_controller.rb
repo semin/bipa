@@ -1,23 +1,6 @@
 # Filters added to this controller apply to all controllers in the application.
 # Likewise, all the methods added will be available for all controllers.
 
-## STI dependency
-#require_dependency "scop"
-#require_dependency "atom"
-#require_dependency "chain"
-#require_dependency "residue"
-#require_dependency "interface"
-#require_dependency "subfamily"
-#require_dependency "alignment"
-#require_dependency "go_relationship"
-#require_dependency "gloria"
-#require_dependency "mmcif"
-#require_dependency "requiem"
-#require_dependency "esst"
-#require_dependency "fugue_hit"
-#require_dependency "fugue_search"
-#require_dependency "test_alignment"
-#
 class ApplicationController < ActionController::Base
 
   helper :all # include all helpers, all the time

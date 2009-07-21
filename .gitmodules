@@ -7,9 +7,6 @@
 [submodule "vendor/plugins/auto_migrations"]
 	path = vendor/plugins/auto_migrations
 	url = git://github.com/pjhyett/auto_migrations.git
-[submodule "vendor/plugins/import_with_load_data_in_file"]
-	path = vendor/plugins/import_with_load_data_in_file
-	url = git://github.com/paolodona/import_with_load_data_in_file.git
 [submodule "vendor/plugins/quick_scopes"]
 	path = vendor/plugins/quick_scopes
 	url = git://github.com/internuity/quick_scopes.git

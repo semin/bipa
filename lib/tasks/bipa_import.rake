@@ -122,7 +122,7 @@ namespace :bipa do
             ActiveRecord::Base.establish_connection(config)
 
             structure = Structure.create!(
-              :pdb_code       => bio_pdb.accession,
+              :pdb_code       => bio_pdb.entry_id,
               :classification => bio_pdb.classification,
               :title          => bio_pdb.definition,
               :exp_method     => bio_pdb.exp_method,
@@ -726,7 +726,7 @@ namespace :bipa do
                 flat_file.each_entry do |entry|
                   next unless entry.seq_type == "P1"
 
-                  domain          = ScopDomain.find_by_sunid(entry.accession)
+                  domain          = ScopDomain.find_by_sunid(entry.entry_id)
                   db_residues     = domain.residues
                   ff_residues     = entry.data.split("")
                   sequence        = alignment.sequences.build
@@ -794,7 +794,7 @@ namespace :bipa do
                 ali_files = Dir[fam_dir.join("salign*.ali").to_s]
 
                 if ali_files.nil? or ali_files.size < 1
-                  $logger.warn "!!! Cannot find alignment files (e.g. salign0.ali) in #{fam_dir}"
+                  $logger.warn "!!! Cannot find alignment files in #{fam_dir}"
                   ActiveRecord::Base.remove_connection
                   next
                 end
@@ -806,13 +806,13 @@ namespace :bipa do
                   flat_file.each_entry do |entry|
                     next if entry.seq_type != "P1"
 
-                    domain          = ScopDomain.find_by_sunid(File.basename(entry.accession, ".pdb"))
-                    db_residues     = domain.sorted_residues
+                    domain          = ScopDomain.find_by_sunid(File.basename(entry.entry_id, ".pdb"))
+                    db_residues     = domain.aa_residues
                     ff_residues     = entry.seq.split("")
                     sequence        = alignment.sequences.create
                     sequence.domain = domain
+                    pos             = 0
 
-                    pos = 0
                     ff_residues.each_with_index do |res, fi|
                       column    = alignment.columns.find_or_create_by_number(fi + 1)
                       position  = sequence.positions.build
@@ -823,8 +823,7 @@ namespace :bipa do
                         position.column       = column
                         position.save!
                         column.save!
-                      else
-                        if (db_residues[pos].one_letter_code == res)
+                      elsif (db_residues[pos].one_letter_code == res)
                           position.residue      = db_residues[pos]
                           position.residue_name = res
                           position.number       = fi + 1
@@ -832,10 +831,8 @@ namespace :bipa do
                           position.save!
                           column.save!
                           pos += 1
-                        else
-                          $logger.warn "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
-                          #exit 1
-                        end
+                      else
+                        $logger.warn "!!! Mismatch at #{pos}, between #{res} and #{db_residues[pos].one_letter_code} of #{domain.sid}, #{domain.sunid}"
                       end
                     end # ff_residues.each_with_index
                     sequence.save!
@@ -888,7 +885,7 @@ namespace :bipa do
                   flat_file.each_entry do |entry|
                     next unless entry.seq_type == "P1"
 
-                    domain          = ScopDomain.find_by_sunid(entry.accession)
+                    domain          = ScopDomain.find_by_sunid(entry.entry_id)
                     db_residues     = domain.residues
                     ff_residues     = entry.data.split("")
                     sequence        = alignment.sequences.create
