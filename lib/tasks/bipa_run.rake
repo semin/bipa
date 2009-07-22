@@ -641,7 +641,10 @@ namespace :bipa do
                   next
                 end
 
-                system "joy salign.ali 1>joy.stdout 2>joy.stderr"
+                basename      = File.basename(ali_file, ".ali")
+                mod_ali_file  = "#{basename}_mod.ali"
+                File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
+                system "joy #{mod_ali_file} 1>joy.stdout 2>joy.stderr"
                 chdir cwd
                 $logger.info ">>> JOY with an alignment in #{subfam_dir}: done"
               end
