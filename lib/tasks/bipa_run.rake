@@ -584,46 +584,73 @@ namespace :bipa do
     end
 
 
-    desc "Run JOY for each SCOP family alignment"
-    task :joy => [:environment] do
+    namespace :joy do
 
-      %w[dna rna].each do |na|
-        cwd       = pwd
-        fmanager  = ForkManager.new(configatron.max_fork)
-        fmanager.manage do
-          fam_dirs = Dir[File.join(configatron.family_dir, "sub", na, "*", "nr*", "*")]
-          fam_dirs.each do |fam_dir|
-            fmanager.fork do
-              chdir fam_dir
+      desc "Run JOY for representative SCOP family alignments"
+      task :rep_alignments => [:environment] do
 
-              #ali_files = Dir[File.join(fam_dir, "cluster*.ali")]
-              ali_file = File.join(fam_dir, "baton.ali")
+        %w[dna rna].each do |na|
+          cwd       = pwd
+          fmanager  = ForkManager.new(configatron.max_fork)
 
-              #if ali_files.size < 1
-              #  $logger.error "!!! Cannot find BATON alignment files (e.g. cluster20-0.ali) in #{fam_dir}"
-              #  next
-              #end
+          fmanager.manage do
+            configatron.rep_pids.each do |pid|
+              fam_dirs = Dir[configatron.family_dir.join("rep#{pid}", na, "*").to_s]
+              fam_dirs.each do |fam_dir|
+                fmanager.fork do
+                  chdir fam_dir
+                  ali_files = Dir[File.join(fam_dir, "salign*.ali").to_s]
 
-              if !File.exists? ali_file
-                $logger.error "!!! Cannot find BATON alignment file, 'baton.ali' in #{fam_dir}"
-                next
+                  if ali_files.nil? or ali_files.size < 1
+                    $logger.error "!!! Cannot find alignment files in #{fam_dir}"
+                    next
+                  end
+
+                  ali_files.each do |ali_file|
+                    basename      = File.basename(ali_file, ".ali")
+                    cluster_id    = basename.match(/salign(\d+)/)[1]
+                    mod_ali_file  = "#{basename}_mod.ali"
+                    File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
+                    system "joy #{mod_ali_file} 1>joy#{cluster_id}.stdout 2>#{cluster_id}.stderr"
+                  end
+
+                  chdir cwd
+                  $logger.info ">>> JOY with alignments in #{fam_dir}: done"
+                end
               end
-
-              #ali_files.each do |ali_file|
-              basename  = File.basename(ali_file, ".ali")
-              #clst_id   = basename.split("-")[1]
-              #system "joy #{basename} 1>joy#{clst_id} 2>&1"
-              #end
-
-              system "joy #{basename} 1>joy.log 2>&1"
-
-              chdir cwd
-              $logger.info ">>> JOY with BATON alignments in #{fam_dir}: done"
             end
           end
         end
       end
-    end
+
+
+      desc "Run JOY for SCOP subfamily alignments"
+      task :sub_alignments => [:environment] do
+        %w[dna rna].each do |na|
+          cwd       = pwd
+          fmanager  = ForkManager.new(configatron.max_fork)
+          fmanager.manage do
+            subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red*", "*").to_s]
+            subfam_dirs.each do |subfam_dir|
+              fmanager.fork do
+                chdir subfam_dir
+                ali_file = File.join(subfam_dir, "salign.ali")
+
+                if !File.exists? ali_file
+                  $logger.error "!!! Cannot find an alignment file in #{subfam_dir}"
+                  next
+                end
+
+                system "joy salign.ali 1>joy.stdout 2>joy.stderr"
+                chdir cwd
+                $logger.info ">>> JOY with an alignment in #{subfam_dir}: done"
+              end
+            end
+          end
+        end
+      end
+
+    end # namespace :joy
 
 
     desc "Run fugueprf for each profiles of all non-redundant sets of SCOP families"
