@@ -17,10 +17,6 @@ module Bipa
       }
     end
 
-    def to_sequence
-      residues.map(&:one_letter_code).join
-    end
-
     def atoms
       residues.inject([]) { |s, r| s.concat(r.atoms) }
     end

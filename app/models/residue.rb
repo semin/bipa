@@ -3,17 +3,99 @@ class Residue < ActiveRecord::Base
   include Bipa::Constants
   include Bipa::ComposedOfAtoms
 
-  belongs_to  :chain,
-              :class_name   => "Chain",
-              :foreign_key  => "chain_id"
+  belongs_to  :chain
 
   belongs_to  :domain,
               :class_name   => "ScopDomain",
               :foreign_key  => "scop_id"
 
-  belongs_to  :domain_interface,
-              :class_name   => "DomainInterface",
-              :foreign_key  => "domain_interface_id"
+  belongs_to  :domain_interface
+
+  belongs_to  :chain_interface
+
+  has_many  :atoms,
+            :class_name   => "Atom",
+            :foreign_key  => "residue_id",
+            :dependent    => :destroy
+
+  has_many  :positions
+
+  #named_scope :on_interface, {:conditions => ['domain_interface_id IS NOT NULL'] }
+
+  # this is for regular 'residue' types except 'AaResidue',
+  # which has its own definition of surface residue
+  def on_surface?
+    surface_atoms.size > 0
+  end
+
+  # this is for regular 'residue' types except 'AaResidue',
+  # which has its own definition of 'interface residue'
+  def on_interface?
+    interface_atoms.size > 0
+  end
+
+  def buried?
+    !on_surface?
+  end
+
+  def aa?
+    is_a?(AaResidue)
+  end
+
+  def na?
+    is_a?(NaResidue)
+  end
+
+  def dna?
+    is_a?(DnaResidue)
+  end
+
+  def rna?
+    is_a?(RnaResidue)
+  end
+
+  def het?
+    is_a?(HetResidue)
+  end
+
+  def water?
+    residue_name == "HOH"
+  end
+
+  def justified_residue_name
+    residue_name.rjust(3)
+  end
+
+  def justified_residue_code
+    residue_code.to_s.rjust(4, '0')
+  end
+
+  %w[unbound bound delta].each do |state|
+    class_eval <<-EVAL
+      def calculate_#{state}_asa
+        atoms.inject(0) { |s, a|
+        !a.#{state}_asa.nil? ? s + a.#{state}_asa : s
+        } rescue 0
+      end
+    EVAL
+  end
+end # class Residue
+
+class StdResidue < Residue
+
+  has_many  :atoms,
+            :class_name   => "StdAtom",
+            :foreign_key  => "residue_id"
+end
+
+class HetResidue < Residue
+
+  has_many  :atoms,
+            :class_name   => "HetAtom",
+            :foreign_key  => "residue_id"
+end
+
+class AaResidue < StdResidue
 
   belongs_to  :res_map,
               :class_name   => "ResMap",
@@ -28,15 +110,6 @@ class Residue < ActiveRecord::Base
           :foreign_key  => "residue_id"
 
   delegate :sse, :to => :dssp
-
-  has_many  :atoms,
-            :class_name   => "Atom",
-            :foreign_key  => "residue_id",
-            :dependent    => :destroy
-
-  has_many  :positions
-
-  named_scope :on_interface, {:conditions => ['domain_interface_id IS NOT NULL'] }
 
   ZeroArray20 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
@@ -137,60 +210,8 @@ class Residue < ActiveRecord::Base
     "<span class='#{css_class.join(' ')}'>#{res_code}</span>"
   end
 
-  # this is for regular 'residue' types except 'AaResidue',
-  # which has its own definition of surface residue
-  def on_surface?
-    surface_atoms.size > 0
-  end
-
-  # this is for regular 'residue' types except 'AaResidue',
-  # which has its own definition of 'interface residue'
-  def on_interface?
-    interface_atoms.size > 0
-  end
-
-  def buried?
-    !on_surface?
-  end
-
-  def aa?
-    is_a?(AaResidue)
-  end
-
-  def na?
-    is_a?(NaResidue)
-  end
-
-  def dna?
-    is_a?(DnaResidue)
-  end
-
-  def rna?
-    is_a?(RnaResidue)
-  end
-
-  def het?
-    is_a?(HetResidue)
-  end
-
-  def water?
-    residue_name == "HOH"
-  end
-
-  def justified_residue_name
-    residue_name.rjust(3)
-  end
-
-  def justified_residue_code
-    residue_code.to_s.rjust(4, '0')
-  end
-
-  %w(unbound bound delta).each do |state|
+  %w[unbound bound delta].each do |state|
     class_eval <<-EVAL
-      def calculate_#{state}_asa
-        atoms.inject(0) { |s, a| !a.#{state}_asa.nil? ? s + a.#{state}_asa : s } rescue 0
-      end
-
       def relative_#{state}_asa
         if AminoAcids::Residues::STANDARD.include?(residue_name)
             self[:#{state}_asa] / AminoAcids::Residues::STANDARD_ASA[residue_name]
@@ -203,11 +224,15 @@ class Residue < ActiveRecord::Base
 
   def variations
     ins_code = icode.nil? ? '' : icode
-    var2pdbs = Variation2PDB.find(:all,
-                                  :conditions => {:pdb          => chain.model.structure.pdb_code,
-                                                  :pdb_chain_id => chain.chain_code,
-                                                  :pdb_res_num  => residue_code,
-                                                  :pdb_ins_code => ins_code })
+    var2pdbs = Variation2PDB.find(
+      :all,
+      :conditions => {
+        :pdb => chain.model.structure.pdb_code,
+        :pdb_chain_id => chain.chain_code,
+        :pdb_res_num  => residue_code,
+        :pdb_ins_code => ins_code
+      }
+    )
     var2pdbs.map { |vp| vp.variation }
   end
 
@@ -235,32 +260,19 @@ class Residue < ActiveRecord::Base
     })
 
     if resmap
-      Feature.find(:all,
-                   :conditions => ['acc = ? and start = ? and end = ?',
-                                   resmap.uniprot,
-                                   resmap.uniprot_res_num,
-                                   resmap.uniprot_res_num])
+      Feature.find(
+        :all,
+        :conditions => [
+          'acc = ? and start = ? and end = ?',
+          resmap.uniprot,
+          resmap.uniprot_res_num,
+          resmap.uniprot_res_num
+        ]
+      )
     else
       []
     end
   end
-end # class Residue
-
-class StdResidue < Residue
-
-  has_many  :atoms,
-            :class_name   => "StdAtom",
-            :foreign_key  => "residue_id"
-end
-
-class HetResidue < Residue
-
-  has_many  :atoms,
-            :class_name   => "HetAtom",
-            :foreign_key  => "residue_id"
-end
-
-class AaResidue < StdResidue
 end
 
 class NaResidue < StdResidue

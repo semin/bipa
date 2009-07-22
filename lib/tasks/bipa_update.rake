@@ -234,82 +234,76 @@ namespace :bipa do
     end
 
 
-    desc "Update JOY templates to include atomic interaction information"
-    task :joy_templates => [:environment] do
+    desc "Update JOY templates for alignments"
+    task :joy_tems => [:environment] do
 
       %w[dna rna].each do |na|
         fmanager = ForkManager.new(configatron.max_fork)
         fmanager.manage do
-          config = ActiveRecord::Base.remove_connection
+          config      = ActiveRecord::Base.remove_connection
+          fam_dirs    = Dir[configatron.family_dir.join("rep*", na, "*").to_s]
+          subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red*", "*").to_s]
+          dirs        = fam_dirs + subfam_dirs
 
-          Dir[configatron.family_dir.join("nr100", na, "*")].each do |fam_dir|
+          dirs.each do |dir|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              if fam_dir =~ /#{na}\/(\d+)/
-                sunid = $1.to_i
-              else
-                $logger.error "!!! #{fam_dir} is not matched to a certain SCOP sunid"
-                exit 1
-              end
+              tem_files = Dir[File.join(dir, "salign*_mod.tem").to_s]
 
-              tem_file = File.join(fam_dir, "baton.tem")
-
-              if !File.exists? tem_file
-                $logger.warn "!!! Cannot find JOY template file (e.g. baton.tem) in #{fam_dir}"
+              if tem_files.nil? or tem_files.size < 1
+                $logger.warn "!!! Cannot find JOY template file(s) in #{dir}"
+                ActiveRecord::Base.remove_connection
                 next
               end
 
-              new_tem_file = fam_dir.join("#{sunid}.tem")
-              cp tem_file, new_tem_file
+              tem_files.each do |tem_file|
+                basename      = File.basename(tem_file, ".tem")
+                new_tem_file  = File.join(dir, "#{basename}_na.tem")
+                cp tem_file, new_tem_file
 
-              flat_file = Bio::FlatFile.auto(tem_file)
-              flat_file.each_entry do |entry|
-                if entry.seq_type == "P1" and entry.definition == "sequence"
-                  domain = ScopDomain.find_by_sunid(entry.entry_id)
+                flat_file = Bio::FlatFile.auto(tem_file)
+                flat_file.each_entry do |entry|
+                  if entry.seq_type == "P1" and entry.definition == "sequence"
+                    domain = ScopDomain.find_by_sunid(entry.entry_id)
 
-                  if domain.nil?
-                    $logger.warn "!!! Cannot find #{entry.entry_id} from BIPA"
-                    exit
-                  end
-
-                  tainted         = false
-                  bind_tem        = []
-                  hbond_tem       = []
-                  whbond_tem      = []
-                  vdw_contact_tem = []
-                  na_binding_tem  = []
-                  db_residues     = domain.residues
-                  ff_residues     = entry.data.gsub("\n", "").split("")
-
-                  pos = 0
-
-                  ff_residues.each_with_index do |res, fi|
-                    if fi != 0 and fi % 75 == 0
-                      bind_tem        << "\n"
-                      hbond_tem       << "\n"
-                      whbond_tem      << "\n"
-                      vdw_contact_tem << "\n"
-                      na_binding_tem  << "\n"
+                    if domain.nil?
+                      $logger.warn "!!! Cannot find #{entry.entry_id} of #{tem_file} from BIPA"
+                      next
                     end
 
-                    if res == "-"
-                      bind_tem        << "-"
-                      hbond_tem       << "-"
-                      whbond_tem      << "-"
-                      vdw_contact_tem << "-"
-                      na_binding_tem  << "-"
-                      next
-                    else
-                      if db_residues[pos].nil?
-                        $logger.error "!!! Missing residue at #{pos} of SCOP domain, #{entry.entry_id} in #{fam_dir}: supposed to be #{res}"
-                        tainted = true
-                        break
-                      elsif res == db_residues[pos].one_letter_code
-                        db_residues[pos].send("binding_#{na}?")         ? bind_tem        << "T" : bind_tem         << "F"
-                        db_residues[pos].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
-                        db_residues[pos].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
-                        db_residues[pos].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
+                    tainted         = false
+                    bind_tem        = []
+                    hbond_tem       = []
+                    whbond_tem      = []
+                    vdw_contact_tem = []
+                    na_binding_tem  = []
+                    db_residues     = domain.aa_residues
+                    ff_residues     = entry.seq.split("")
+
+                    di = 0
+                    ff_residues.each_with_index do |res, fi|
+                      break if fi >= db_residues.size
+
+                      if fi != 0 and fi % 75 == 0
+                        bind_tem        << "\n"
+                        hbond_tem       << "\n"
+                        whbond_tem      << "\n"
+                        vdw_contact_tem << "\n"
+                        na_binding_tem  << "\n"
+                      end
+
+                      if (res == "-")
+                        bind_tem        << "-"
+                        hbond_tem       << "-"
+                        whbond_tem      << "-"
+                        vdw_contact_tem << "-"
+                        na_binding_tem  << "-"
+                      elsif (db_residues[di].one_letter_code == res)
+                        db_residues[di].send("binding_#{na}?")         ? bind_tem        << "T" : bind_tem         << "F"
+                        db_residues[di].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
+                        db_residues[di].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
+                        db_residues[di].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
                         if hbond_tem.last == "T"
                           na_binding_tem << "H"
                         elsif whbond_tem.last == "T"
@@ -319,16 +313,18 @@ namespace :bipa do
                         else
                           na_binding_tem << "N"
                         end
-                        pos += 1
+                        di += 1
                       else
-                        $logger.error "!!! Unmatched residues at #{pos} of SCOP domain, #{entry.entry_id} in #{fam_dir}: #{db_residues[pos].one_letter_code} <=> #{res}"
-                        tainted = true
-                        break
+                        bind_tem        << "X"
+                        hbond_tem       << "X"
+                        whbond_tem      << "X"
+                        vdw_contact_tem << "X"
+                        na_binding_tem  << "X"
+                        $logger.warn  "!!! Unmatched residue at #{di} in #{domain.sid} in #{fam_dir}: " +
+                                      "BIPA: #{db_residues[di].one_letter_code} <=> TEM: #{res}"
                       end
                     end
-                  end
 
-                  unless tainted
                     File.open(new_tem_file, "a") do |file|
                       file.puts ">P1;#{entry.entry_id}"
                       file.puts "#{na.upcase} interface"
@@ -355,7 +351,7 @@ namespace :bipa do
               end
 
               ActiveRecord::Base.remove_connection
-              $logger.info ">>> Updating JOY template for #{na.upcase}-binding SCOP family, #{sunid}: done"
+              $logger.info ">>> Updating JOY template(s) in #{dir}: done"
             end
           end
           ActiveRecord::Base.establish_connection(config)
