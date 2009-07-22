@@ -81,15 +81,15 @@ class Atom < ActiveRecord::Base
             :allow_nil => true
 
   named_scope :surface, lambda { |*args|
-    { :conditions => ["unbound_asa > ?", (args.first || MIN_SURFACE_ATOM_ASA)] }
+    { :conditions => ["unbound_asa > ?", (args.first || configatron.min_surface_atom_asa)] }
   }
 
   named_scope :buried, lambda { |*args|
-    { :conditions => ["unbound_asa <= ?", (args.first || MIN_SURFACE_ATOM_ASA)] }
+    { :conditions => ["unbound_asa <= ?", (args.first || configatron.min_surface_atom_asa)] }
   }
 
   named_scope :interface, lambda { |*args|
-    { :conditions => ["delta_asa > ?", (args.first || MIN_INTERFACE_ATOM_DELTA_ASA)] }
+    { :conditions => ["delta_asa > ?", (args.first || configatron.min_interface_atom_delta_asa)] }
   }
 
   named_scope :polar, lambda { |*args|
@@ -98,7 +98,7 @@ class Atom < ActiveRecord::Base
 
   # ASA related
   def on_surface?
-    naccess ? (unbound_asa > MIN_SURFACE_ATOM_ASA) : false
+    naccess ? (unbound_asa > configatron.min_surface_atom_asa) : false
   end
 
   def buried?
@@ -106,7 +106,7 @@ class Atom < ActiveRecord::Base
   end
 
   def on_interface?
-    naccess ? (delta_asa > MIN_INTERFACE_ATOM_DELTA_ASA) : false
+    naccess ? (delta_asa > configatron.min_interface_atom_delta_asa) : false
   end
 
   def polar?
@@ -234,7 +234,6 @@ class Atom < ActiveRecord::Base
         }
     C_CODE
   end
-
 end # class Atom
 
 class StdAtom < Atom

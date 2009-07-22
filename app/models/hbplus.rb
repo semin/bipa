@@ -1,7 +1,5 @@
 class Hbplus < ActiveRecord::Base
 
-  include ImportWithLoadDataInFile
-
   belongs_to  :donor,
               :class_name   => "Atom",
               :foreign_key  => "donor_id"

@@ -82,7 +82,7 @@ class Residue < ActiveRecord::Base
   end
 
   def on_surface?
-    relative_unbound_asa >= MIN_SURFACE_RESIDUE_RELATIVE_ASA
+    relative_unbound_asa >= configatron.min_surface_residue_relative_asa
   end
 
   def buried?
@@ -90,7 +90,7 @@ class Residue < ActiveRecord::Base
   end
 
   def on_interface?
-    delta_asa >= MIN_INTERFACE_RESIDUE_DELTA_ASA
+    delta_asa >= configatron.min_interface_residue_delta_asa
   end
 
   def disulfide_bond?
@@ -136,6 +136,7 @@ class Residue < ActiveRecord::Base
                end
     "<span class='#{css_class.join(' ')}'>#{res_code}</span>"
   end
+
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?
