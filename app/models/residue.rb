@@ -20,8 +20,6 @@ class Residue < ActiveRecord::Base
 
   has_many  :positions
 
-  #named_scope :on_interface, {:conditions => ['domain_interface_id IS NOT NULL'] }
-
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?
@@ -221,31 +219,31 @@ class AaResidue < StdResidue
     EVAL
   end
 
-  def variations
-    ins_code = icode.nil? ? '' : icode
-    var2pdbs = Variation2PDB.find(
-      :all,
-      :conditions => {
-        :pdb => chain.model.structure.pdb_code,
-        :pdb_chain_id => chain.chain_code,
-        :pdb_res_num  => residue_code,
-        :pdb_ins_code => ins_code
-      }
-    )
-    var2pdbs.map { |vp| vp.variation }
-  end
-
-  def nssnps
-    variations.select { |v| v.non_synonymous? }
-  end
-
-  def ssnps
-    variations.select { |v| v.synonymous? }
-  end
-
-  def disease_nssnps
-    nssnps.select { |v| v.omims.size > 0 }
-  end
+#  def variations
+#    ins_code = icode.nil? ? '' : icode
+#    var2pdbs = Variation2PDB.find(
+#      :all,
+#      :conditions => {
+#        :pdb => chain.model.structure.pdb_code,
+#        :pdb_chain_id => chain.chain_code,
+#        :pdb_res_num  => residue_code,
+#        :pdb_ins_code => ins_code
+#      }
+#    )
+#    var2pdbs.map { |vp| vp.variation }
+#  end
+#
+#  def nssnps
+#    variations.select { |v| v.non_synonymous? }
+#  end
+#
+#  def ssnps
+#    variations.select { |v| v.synonymous? }
+#  end
+#
+#  def disease_nssnps
+#    nssnps.select { |v| v.omims.size > 0 }
+#  end
 
   def uniprot_features
     # temporary remedy for during Gloria.ResMap downtime
