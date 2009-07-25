@@ -583,11 +583,12 @@ namespace :bipa do
 
 
     desc "Generate a dump file for interface atom coordiantes"
-    task :interface_descriptor_file => [:environment] do
+    task :usrfile => [:environment] do
 
       File.open("./tmp/interface_descriptors.txt", "w") do |file|
         DomainInterface.find_each do |int|
           file.puts [int.id, *int.shape_descriptors].join(", ") if int.interface_atoms.size > 3
+          $logger.info ">>> Generating USR descriptors for #{int.class}, #{int.id}: done"
         end
       end
     end
