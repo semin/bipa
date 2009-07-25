@@ -2,27 +2,45 @@ module Bipa
   module NucleicAcidBinding
 
     def hbonding_dna_as_donor?
-      hbonding_acceptors.any? { |a| a.dna? }
+      if respond_to?(:hbonds_dna_as_donor_count) && !hbonds_dna_as_donor_count.nil?
+        hbonds_dna_as_donor_count > 0
+      else
+        hbonding_acceptors.any? { |a| a.dna? }
+      end
     end
 
     def hbonding_dna_as_acceptor?
-      hbonding_donors.any? { |a| a.dna? }
+      if respond_to?(:hbonds_dna_as_acceptor_count) && !hbonds_dna_as_acceptor_count.nil?
+        hbonds_dna_as_acceptor_count > 0
+      else
+        hbonding_acceptors.any? { |a| a.dna? }
+      end
     end
 
     def hbonding_dna?
-      hbonding_dna_base? || hbonding_dna_sugar? || hbonding_dna_phosphate?
+      hbonding_dna_as_donor? || hbonding_dna_as_acceptor?
+      #hbonding_dna_base? || hbonding_dna_sugar? || hbonding_dna_phosphate?
     end
 
     def hbonding_rna_as_donor?
-      hbonding_acceptors.any? { |a| a.rna? }
+      if respond_to?(:hbonds_rna_as_donor_count) && !hbonds_rna_as_donor_count.nil?
+        hbonds_rna_as_donor_count > 0
+      else
+        hbonding_acceptors.any? { |a| a.rna? }
+      end
     end
 
     def hbonding_rna_as_acceptor?
-      hbonding_donors.any? { |a| a.rna? }
+      if respond_to?(:hbonds_rna_as_acceptor_count) && !hbonds_rna_as_acceptor_count.nil?
+        hbonds_rna_as_acceptor_count > 0
+      else
+        hbonding_acceptors.any? { |a| a.rna? }
+      end
     end
 
     def hbonding_rna?
-      hbonding_rna_base? || hbonding_rna_sugar? || hbonding_rna_phosphate?
+      hbonding_rna_as_donor? || hbonding_rna_as_acceptor?
+      #hbonding_rna_base? || hbonding_rna_sugar? || hbonding_rna_phosphate?
     end
 
     def hbonding_na?
@@ -30,11 +48,19 @@ module Bipa
     end
 
     def whbonding_dna?
-      whbonding_dna_base? || whbonding_dna_sugar? || whbonding_dna_phosphate?
+      if respond_to?(:whbonds_dna_count) && !whbonds_dna_count.nil?
+        whbonds_dna_count > 0
+      else
+        whbonding_dna_base? || whbonding_dna_sugar? || whbonding_dna_phosphate?
+      end
     end
 
     def whbonding_rna?
-      whbonding_rna_base? || whbonding_rna_sugar? || whbonding_rna_phosphate?
+      if respond_to?(:whbonds_rna_count) && !whbonds_rna_count.nil?
+        whbonds_rna_count > 0
+      else
+        whbonding_rna_base? || whbonding_rna_sugar? || whbonding_rna_phosphate?
+      end
     end
 
     def whbonding_na?
@@ -42,11 +68,19 @@ module Bipa
     end
 
     def vdw_contacting_dna?
-      vdw_contacting_dna_base? || vdw_contacting_dna_sugar? || vdw_contacting_dna_phosphate?
+      if respond_to?(:vdw_contacts_dna_count) && !vdw_contacts_dna_count.nil?
+        vdw_contacts_dna_count > 0
+      else
+        vdw_contacting_dna_base? || vdw_contacting_dna_sugar? || vdw_contacting_dna_phosphate?
+      end
     end
 
     def vdw_contacting_rna?
-      vdw_contacting_rna_base? || vdw_contacting_rna_sugar? || vdw_contacting_rna_phosphate?
+      if respond_to?(:vdw_contacts_rna_count) && !vdw_contacts_rna_count.nil?
+        vdw_contacts_rna_count > 0
+      else
+        vdw_contacting_rna_base? || vdw_contacting_rna_sugar? || vdw_contacting_rna_phosphate?
+      end
     end
 
     def vdw_contacting_na?

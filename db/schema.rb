@@ -88,7 +88,6 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :chain_code
     t.integer     :mol_code
     t.string      :molecule,  :default => ""
-    t.boolean     :tainted
     t.text        :cssed_sequence
   end
 
@@ -98,7 +97,6 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index :chains, :chain_code
   add_index :chains, :model_id
-  add_index :chains, :tainted
 
 
   # 'resdiues' table
@@ -116,11 +114,13 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :unbound_asa
     t.float       :bound_asa
     t.float       :delta_asa
-    t.boolean     :ss,                    :default => nil
-    t.integer     :hbonds_as_donor_count,    :default => nil
-    t.integer     :hbonds_as_acceptor_count, :default => nil
-    t.integer     :whbonds_count,            :default => nil
-    t.integer     :vdw_contacts_count,       :default => nil
+    t.boolean     :ss, :default => nil
+    %w[dna rna].each do |na|
+      t.integer     :"hbonds_#{na}_as_donor_count",     :default => nil
+      t.integer     :"hbonds_#{na}_as_acceptor_count",  :default => nil
+      t.integer     :"whbonds_#{na}_count",             :default => nil
+      t.integer     :"vdw_contacts_#{na}_count",        :default => nil
+    end
   end
 
   add_index :residues, :chain_id
@@ -153,10 +153,12 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :tempfactor
     t.string      :element
     t.string      :charge
-    t.integer     :vdw_contacts_count,        :default => 0
-    t.integer     :whbonds_count,             :default => 0
-    t.integer     :hbonds_as_donor_count,     :default => 0
-    t.integer     :hbonds_as_acceptor_count,  :default => 0
+    %w[dna rna].each do |na|
+      t.integer     :"hbonds_#{na}_as_donor_count",     :default => nil
+      t.integer     :"hbonds_#{na}_as_acceptor_count",  :default => nil
+      t.integer     :"whbonds_#{na}_count",             :default => nil
+      t.integer     :"vdw_contacts_#{na}_count",        :default => nil
+    end
   end
 
   add_index :atoms, :residue_id

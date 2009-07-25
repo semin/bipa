@@ -74,7 +74,7 @@ class Residue < ActiveRecord::Base
     class_eval <<-EVAL
       def calculate_#{state}_asa
         atoms.inject(0) { |s, a|
-        !a.#{state}_asa.nil? ? s + a.#{state}_asa : s
+          !a.#{state}_asa.nil? ? s + a.#{state}_asa : s
         } rescue 0
       end
     EVAL
@@ -185,8 +185,7 @@ class AaResidue < StdResidue
 
     css_class << (on_surface? ? "on_surface" : "buried")
 
-    if ((hbonding_dna? || whbonding_dna? || vdw_contacting_dna?) &&
-        (hbonding_rna? || whbonding_rna? || vdw_contacting_rna?))
+    if binding_dna? && binding_rna?
       css_class << "binding_both"
     else
       css_class << "hbonding_dna"       if hbonding_dna?

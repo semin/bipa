@@ -70,7 +70,6 @@ module Bipa
       END
     end
 
-
     def variation_mapped_residues
       residues.select { |r| r.variations.size > 0 }
     end

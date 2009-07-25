@@ -1,182 +1,6 @@
 namespace :bipa do
   namespace :update do
 
-
-    desc "Update ASA related fields of the 'atoms' table"
-    task :asa => [:environment] do
-
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
-      fmanager  = ForkManager.new(configatron.max_fork)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            structure = Structure.find_by_pdb_code(pdb_code)
-
-            # Load NACCESS results for every atom in the structure
-            bound_asa_file      = configatron.naccess_dir.join("#{pdb_code}_co.asa")
-            unbound_aa_asa_file = configatron.naccess_dir.join("#{pdb_code}_aa.asa")
-            unbound_na_asa_file = configatron.naccess_dir.join("#{pdb_code}_na.asa")
-
-            bound_atom_asa      = Bipa::Naccess.new(IO.read(bound_asa_file)).atom_asa
-            unbound_aa_atom_asa = Bipa::Naccess.new(IO.read(unbound_aa_asa_file)).atom_asa
-            unbound_na_atom_asa = Bipa::Naccess.new(IO.read(unbound_na_asa_file)).atom_asa
-
-            structure.aa_atoms.each do |atom|
-              if (bound_atom_asa[atom.atom_code] &&
-                  unbound_aa_atom_asa[atom.atom_code])
-                atom.bound_asa    = bound_atom_asa[atom.atom_code]
-                atom.unbound_asa  = unbound_aa_atom_asa[atom.atom_code]
-                atom.delta_asa    = atom.unbound_asa - atom.bound_asa
-                atom.save!
-              end
-            end
-
-            structure.na_atoms.each do |atom|
-              if (bound_atom_asa[atom.atom_code] &&
-                  unbound_na_atom_asa[atom.atom_code])
-                atom.bound_asa    = bound_atom_asa[atom.atom_code]
-                atom.unbound_asa  = unbound_na_atom_asa[atom.atom_code]
-                atom.delta_asa    = atom.unbound_asa - atom.bound_asa
-                atom.save!
-              end
-            end
-
-            $logger.info("Updating ASAs of #{pdb_file}: done (#{i + 1}/#{pdb_codes.size})")
-            ActiveRecord::Base.remove_connection
-          end # fmanager.fork
-        end # pdb_codes.each_with_index
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end # task :asa
-
-
-    desc "Update electrostatic potential related fields of the 'atoms' table"
-    task :potential => [:environment] do
-
-      pdb_codes = Structure.find(:all, :select => "pdb_code").map(&:pdb_code)
-      fmanager  = ForkManager.new(configatron.max_fork)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-
-        pdb_codes.each_with_index do |pdb_code, i|
-
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-
-            structure = Structure.find_by_pdb_code(pdb_code)
-            ZapAtom   = Struct.new(:index, :serial, :symbol, :radius,
-                                   :formal_charge, :partial_charge, :potential)
-
-            %w[aa na].each do |mol|
-              eval <<-END
-                #{mol}_zap_file   = configatron.zap_dir.join("#{pdb_code}_#{mol}.zap")
-                #{mol}_zap_atoms  = Hash.new
-
-                IO.foreach(#{mol}_zap_file) do |line|
-                  elems = line.chomp.split(/\\s+/)
-                  next unless elems.size == 7
-                  zap = ZapAtom.new(elems)
-                  #{mol}_zap_atoms[zap[:serial]] = zap
-                end
-
-                structure.#{mol}_atoms.each do |atom|
-                  next unless #{mol}_zap_atoms[atom.atom_code]
-                  zap_atom            = #{mol}_zap_atoms[atom.atom_code]
-                  atom.radius         = zap_atom[:radius]
-                  atom.formal_charge  = zap_atom[:formal_charge]
-                  atom.partial_charge = zap_atom[:partial_charge]
-                  atom.potential      = zap_atom[:potential]
-                  atom.save!
-                end
-              END
-            end
-
-            $logger.info("Updating ASAs of #{pdb_file}: done (#{i + 1}/#{pdb_codes.size})")
-            ActiveRecord::Base.remove_connection
-          end # fmanager.fork
-        end # pdb_codes.each_with_index
-        ActiveRecord::Base.establish_connection(config)
-      end # fmanager.manage
-    end # task :asa
-
-
-    desc "Update 'chains_count' column of 'models' table"
-    task :models_chains_count => [:environment] do
-      models = Model.find(:all)
-      models.each_with_index do |model, i|
-        model.update_attribute :chains_count, model.chains.length
-        $logger.info("Updating 'chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
-      end
-    end
-
-
-    desc "Update 'aa_chains_count' column of 'models' table"
-    task :models_aa_chains_count => [:environment] do
-      models = Model.find(:all)
-      models.each_with_index do |model, i|
-        model.update_attribute :aa_chains_count, model.aa_chains.length
-        $logger.info("Updating 'aa_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
-      end
-    end
-
-
-    desc "Update 'na_chains_count' column of 'models' table"
-    task :models_na_chains_count => [:environment] do
-      models = Model.find(:all)
-      models.each_with_index do |model, i|
-        model.update_attribute :na_chains_count, model.na_chains.length
-        $logger.info("Updating 'na_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
-      end
-    end
-
-
-    desc "Update 'dna_chains_count' column of 'models' table"
-    task :models_dna_chains_count => [:environment] do
-      models = Model.find(:all)
-      models.each_with_index do |model, i|
-        model.update_attribute :dna_chains_count, model.dna_chains.length
-        $logger.info("Updating 'dna_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
-      end
-    end
-
-
-    desc "Update 'rna_chains_count' column of 'models' table"
-    task :models_rna_chains_count => [:environment] do
-      models = Model.find(:all)
-      models.each_with_index do |model, i|
-        model.update_attribute :rna_chains_count, model.rna_chains.length
-        $logger.info("Updating 'rna_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
-      end
-    end
-
-
-    desc "Update 'hna_chains_count' column of 'models' table"
-    task :models_hna_chains_count => [:environment] do
-      models = Model.find(:all)
-      models.each_with_index do |model, i|
-        model.update_attribute :hna_chains_count, model.hna_chains.length
-        $logger.info("Updating 'hna_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
-      end
-    end
-
-
-    desc "Update 'pseudo_chains_count' column of 'models' table"
-    task :models_pseudo_chains_count => [:environment] do
-      models = Model.find(:all)
-      models.each_with_index do |model, i|
-        model.update_attribute :pseudo_chains_count, model.pseudo_chains.length
-        $logger.info("Updating 'pseudo_chains_count' column of 'models' table, #{model.id}: done (#{i+1}/#{models.size})")
-      end
-    end
-
-
     desc "Update 'vdw_contacts_count' column of 'atoms' table"
     task :atoms_vdw_contacts_count => [:environment] do
       Atom.find_each(:select => "id, vdw_contacts_count", :per_page => 10000) do |atom|
@@ -234,175 +58,37 @@ namespace :bipa do
     end
 
 
-    desc "Update JOY templates for alignments"
-    task :joy_tems => [:environment] do
-
-      %w[dna rna].each do |na|
-        fmanager = ForkManager.new(configatron.max_fork)
-        fmanager.manage do
-          config      = ActiveRecord::Base.remove_connection
-          fam_dirs    = Dir[configatron.family_dir.join("rep*", na, "*").to_s]
-          subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red*", "*").to_s]
-          dirs        = fam_dirs + subfam_dirs
-
-          dirs.each do |dir|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
-
-              tem_files = Dir[File.join(dir, "salign*_mod.tem").to_s]
-
-              if tem_files.nil? or tem_files.size < 1
-                $logger.warn "!!! Cannot find JOY template file(s) in #{dir}"
-                ActiveRecord::Base.remove_connection
-                next
-              end
-
-              tem_files.each do |tem_file|
-                basename      = File.basename(tem_file, ".tem")
-                new_tem_file  = File.join(dir, "#{basename}_na.tem")
-                cp tem_file, new_tem_file
-
-                flat_file = Bio::FlatFile.auto(tem_file)
-                flat_file.each_entry do |entry|
-                  if entry.seq_type == "P1" and entry.definition == "sequence"
-                    domain = ScopDomain.find_by_sunid(entry.entry_id)
-
-                    if domain.nil?
-                      $logger.warn "!!! Cannot find #{entry.entry_id} of #{tem_file} from BIPA"
-                      next
-                    end
-
-                    tainted         = false
-                    bind_tem        = []
-                    hbond_tem       = []
-                    whbond_tem      = []
-                    vdw_contact_tem = []
-                    na_binding_tem  = []
-                    db_residues     = domain.aa_residues
-                    ff_residues     = entry.seq.split("")
-
-                    di = 0
-                    ff_residues.each_with_index do |res, fi|
-                      break if fi >= db_residues.size
-
-                      if fi != 0 and fi % 75 == 0
-                        bind_tem        << "\n"
-                        hbond_tem       << "\n"
-                        whbond_tem      << "\n"
-                        vdw_contact_tem << "\n"
-                        na_binding_tem  << "\n"
-                      end
-
-                      if (res == "-")
-                        bind_tem        << "-"
-                        hbond_tem       << "-"
-                        whbond_tem      << "-"
-                        vdw_contact_tem << "-"
-                        na_binding_tem  << "-"
-                      elsif (db_residues[di].one_letter_code == res)
-                        db_residues[di].send("binding_#{na}?")         ? bind_tem        << "T" : bind_tem         << "F"
-                        db_residues[di].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
-                        db_residues[di].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
-                        db_residues[di].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
-                        if hbond_tem.last == "T"
-                          na_binding_tem << "H"
-                        elsif whbond_tem.last == "T"
-                          na_binding_tem << "W"
-                        elsif vdw_contact_tem.last == "T"
-                          na_binding_tem << "V"
-                        else
-                          na_binding_tem << "N"
-                        end
-                        di += 1
-                      else
-                        bind_tem        << "X"
-                        hbond_tem       << "X"
-                        whbond_tem      << "X"
-                        vdw_contact_tem << "X"
-                        na_binding_tem  << "X"
-                        $logger.warn  "!!! Unmatched residue at #{di} in #{domain.sid} in #{fam_dir}: " +
-                                      "BIPA: #{db_residues[di].one_letter_code} <=> TEM: #{res}"
-                      end
-                    end
-
-                    File.open(new_tem_file, "a") do |file|
-                      file.puts ">P1;#{entry.entry_id}"
-                      file.puts "#{na.upcase} interface"
-                      file.puts bind_tem.join + "*"
-
-                      file.puts ">P1;#{entry.entry_id}"
-                      file.puts "hydrogen bond to #{na.upcase}"
-                      file.puts hbond_tem.join + "*"
-
-                      file.puts ">P1;#{entry.entry_id}"
-                      file.puts "water-mediated hydrogen bond to #{na.upcase}"
-                      file.puts whbond_tem.join + "*"
-
-                      file.puts ">P1;#{entry.entry_id}"
-                      file.puts "van der Waals contact to #{na.upcase}"
-                      file.puts vdw_contact_tem.join + "*"
-
-                      file.puts ">P1;#{entry.entry_id}"
-                      file.puts "#{na.upcase}-binding type"
-                      file.puts na_binding_tem.join + "*"
-                    end
-                  end
-                end
-              end
-
-              ActiveRecord::Base.remove_connection
-              $logger.info ">>> Updating JOY template(s) in #{dir}: done"
-            end
-          end
-          ActiveRecord::Base.establish_connection(config)
-        end
-      end
+    desc "Update atoms' DNA/RNA interaction counts"
+    task :atoms_intcounts => [:environment] do
     end
 
 
-    desc "Filter 'vdw_contacts' table not to contain any hbonds or whbonds"
-    task :filter_vdw_contacts => [:environment] do
-      i = 0
-      puts "Remove hbonds from vdw_contacts"
-      Hbond.find_each do |hbond|
-        vdw_contact1 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
-        vdw_contact2 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.acceptor, hbond.donor)
-        if vdw_contact1
-          VdwContact.destroy(vdw_contact1)
-          $logger.info ">>> Destroyed vdw contact, #{vdw_contact1.id} (#{i += 1})"
-        end
-        if vdw_contact2
-          VdwContact.destroy(vdw_contact2)
-          $logger.info ">>> Destroyed vdw contact, #{vdw_contact2.id} (#{i += 1})"
-        end
-      end
-    end
+    desc "Update residues' DNA/RNA interaction counts"
+    task :residues_intcounts => [:environment] do
 
-
-    desc "Update DNA/RNA interactibility for all residues"
-    task :atomic_bonds_count => [:environment] do
-
-      interfaces  = DomainInterface.all
-      total       = interfaces.size
-      fmanager    = ForkManager.new(configatron.max_fork)
+      interface_ids = DomainInterface.all.map(&:id)
+      fmanager      = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
-        interfaces.each_with_index do |interface, i|
-          config = ActiveRecord::Base.remove_connection
+        config = ActiveRecord::Base.remove_connection
+        interface_ids.each_with_index do |id, i|
           fmanager.fork do
             ActiveRecord::Base.establish_connection(config)
-            interface.residues.each do |aa|
-              aa.hbonds_as_donor_count    = aa.hbonds_as_donor.length
-              aa.hbonds_as_acceptor_count = aa.hbonds_as_acceptor.length
-              aa.whbonds_count            = aa.whbonds.length
-              aa.vdw_contacts_count       = aa.vdw_contacts.length
-              aa.save!
+            interface = DomainInterface.find(id)
+            %w[dna rna].each do |na|
+              interface.residues.each do |aa|
+                aa.send("hbonds_#{na}_as_donor_count=",     aa.hbonds_as_donor.select { |b| b.acceptor.send("#{na}?") }.size)
+                aa.send("hbonds_#{na}_as_acceptor_count=",  aa.hbonds_as_acceptor.select { |b| b.donor.send("#{na}?") }.size)
+                aa.send("whbonds_#{na}_count=",             aa.whbonds.select { |b| b.whbonding_atom.send("#{na}?") }.size)
+                aa.send("vdw_contacts_#{na}_count=",        aa.vdw_contacts.select { |b| b.vdw_contacting_atom.send("#{na}?") }.size)
+                aa.save!
+              end
             end
             ActiveRecord::Base.remove_connection
           end
-          ActiveRecord::Base.establish_connection(config)
-          $logger.info "Counting atomic interactions for residues of Interface, #{interface.id}: done (#{i+1}/#{total})"
+          $logger.info ">>> Counting atomic interactions for residues of Interface, #{id}: done (#{i+1}/#{interface_ids.size})"
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -410,7 +96,7 @@ namespace :bipa do
     desc "Update ASA related fields for 'residues' table"
     task :residues_asa => [:environment] do
 
-      pdb_codes = Structure.all.map(&:pdb_code)
+      pdb_codes = Structure.all.map(&:pdb_code).reverse
       fmanager  = ForkManager.new(configatron.max_fork)
 
       fmanager.manage do
@@ -507,6 +193,144 @@ namespace :bipa do
     end
 
 
+    desc "Update JOY templates for alignments"
+    task :joytems => [:environment] do
+
+      config = ActiveRecord::Base.remove_connection
+
+      %w[dna rna].each do |na|
+        fam_dirs    = Dir[configatron.family_dir.join("rep*", na, "*").to_s]
+        subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red*", "*").to_s]
+        dirs        = fam_dirs + subfam_dirs
+
+        dirs.forkify(configatron.max_fork) do |dir|
+          ActiveRecord::Base.establish_connection(config)
+
+          tem_files = Dir[File.join(dir, "salign*_mod.tem").to_s]
+
+          if tem_files.nil? or tem_files.size < 1
+            $logger.warn "!!! Cannot find JOY template file(s) in #{dir}"
+            ActiveRecord::Base.remove_connection
+            next
+          end
+
+          tem_files.each do |tem_file|
+            basename      = File.basename(tem_file, ".tem")
+            new_tem_file  = File.join(dir, "#{basename}_na.tem")
+            cp tem_file, new_tem_file
+
+            flat_file = Bio::FlatFile.auto(tem_file)
+            flat_file.each_entry do |entry|
+              if entry.seq_type == "P1" and entry.definition == "sequence"
+                domain = ScopDomain.find_by_sunid(entry.entry_id)
+
+                if domain.nil?
+                  $logger.warn "!!! Cannot find #{entry.entry_id} of #{tem_file} from BIPA"
+                  next
+                end
+
+                bind_tem        = []
+                hbond_tem       = []
+                whbond_tem      = []
+                vdw_contact_tem = []
+                na_binding_tem  = []
+                db_residues     = domain.aa_residues
+                ff_residues     = entry.seq.split("")
+
+                di = 0
+                ff_residues.each_with_index do |res, fi|
+                  break if fi >= db_residues.size
+
+                  if fi != 0 and fi % 75 == 0
+                    bind_tem        << "\n"
+                    hbond_tem       << "\n"
+                    whbond_tem      << "\n"
+                    vdw_contact_tem << "\n"
+                    na_binding_tem  << "\n"
+                  end
+
+                  if (res == "-")
+                    bind_tem        << "-"
+                    hbond_tem       << "-"
+                    whbond_tem      << "-"
+                    vdw_contact_tem << "-"
+                    na_binding_tem  << "-"
+                  elsif (db_residues[di].one_letter_code == res)
+                    db_residues[di].send("binding_#{na}?")         ? bind_tem        << "T" : bind_tem         << "F"
+                    db_residues[di].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
+                    db_residues[di].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
+                    db_residues[di].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
+                    if hbond_tem.last == "T"
+                      na_binding_tem << "H"
+                    elsif whbond_tem.last == "T"
+                      na_binding_tem << "W"
+                    elsif vdw_contact_tem.last == "T"
+                      na_binding_tem << "V"
+                    else
+                      na_binding_tem << "N"
+                    end
+                    di += 1
+                  else
+                    bind_tem        << "X"
+                    hbond_tem       << "X"
+                    whbond_tem      << "X"
+                    vdw_contact_tem << "X"
+                    na_binding_tem  << "X"
+                    $logger.warn  "!!! Unmatched residue at #{di} in #{domain.sid} in #{dir}: " +
+                                      "BIPA: #{db_residues[di].one_letter_code} <=> TEM: #{res}"
+                  end
+                end
+
+                File.open(new_tem_file, "a") do |file|
+                  file.puts ">P1;#{entry.entry_id}"
+                  file.puts "#{na.upcase} interface"
+                  file.puts bind_tem.join + "*"
+
+                  file.puts ">P1;#{entry.entry_id}"
+                  file.puts "hydrogen bond to #{na.upcase}"
+                  file.puts hbond_tem.join + "*"
+
+                  file.puts ">P1;#{entry.entry_id}"
+                  file.puts "water-mediated hydrogen bond to #{na.upcase}"
+                  file.puts whbond_tem.join + "*"
+
+                  file.puts ">P1;#{entry.entry_id}"
+                  file.puts "van der Waals contact to #{na.upcase}"
+                  file.puts vdw_contact_tem.join + "*"
+
+                  file.puts ">P1;#{entry.entry_id}"
+                  file.puts "#{na.upcase}-binding type"
+                  file.puts na_binding_tem.join + "*"
+                end
+              end
+            end
+          end
+          $logger.info ">>> Updating JOY template(s) in #{dir}: done"
+          ActiveRecord::Base.remove_connection
+        end
+      end
+      ActiveRecord::Base.establish_connection(config)
+    end
+
+
+    desc "Filter 'vdw_contacts' table not to contain any hbonds or whbonds"
+    task :filter_vdw_contacts => [:environment] do
+      i = 0
+      Hbond.find_each do |hbond|
+        vdw_contact1 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.donor, hbond.acceptor)
+        vdw_contact2 = VdwContact.find_by_atom_id_and_vdw_contacting_atom_id(hbond.acceptor, hbond.donor)
+        if vdw_contact1
+          VdwContact.destroy(vdw_contact1)
+          $logger.info ">>> Destroyed vdw contact, #{vdw_contact1.id} (#{i += 1})"
+        end
+        if vdw_contact2
+          VdwContact.destroy(vdw_contact2)
+          $logger.info ">>> Destroyed vdw contact, #{vdw_contact2.id} (#{i += 1})"
+        end
+      end
+    end
+
+
     desc "Update interface_distances table"
     task :interface_similarities => [:environment] do
 
@@ -552,161 +376,55 @@ namespace :bipa do
     end
 
 
-    desc "Update cssed_sequence for all Sequece"
+    desc "Update cssed_sequence for all sequences"
     task :sequences_cssed_sequence => [:environment] do
 
-      seqs      = Sequence.all
-      total     = seqs.size
-      fmanager  = ForkManager.new(configatron.max_fork)
+      seq_ids = Sequence.all.map(&:id)
+      config  = ActiveRecord::Base.remove_connection
 
-      fmanager.manage do
-        seqs.each_with_index do |seq, i|
-          unless seq.cssed_sequence.nil?
-            $logger.info ">>> Skipped Sequence, #{seq.id} (#{i+1}/#{total})"
-            next
-          end
+      seq_ids.forkify(configatron.max_fork) do |id|
+        ActiveRecord::Base.establish_connection(config)
 
-          config = ActiveRecord::Base.remove_connection
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-            seq.cssed_sequence = seq.formatted_sequence
-            seq.save!
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Updating cssed_sequence of Sequence, #{seq.id}: done (#{i+1}/#{total})"
-          end
-          ActiveRecord::Base.establish_connection(config)
+        seq = Sequence.find(id)
+
+        unless seq.cssed_sequence.nil?
+          $logger.info ">>> Skipped Sequence, #{seq.id}"
+          ActiveRecord::Base.remove_connection
+          next
         end
+
+        seq.cssed_sequence = seq.formatted_sequence
+        seq.save!
+        $logger.info ">>> Updating cssed_sequence of Sequence, #{seq.id}: done"
+        ActiveRecord::Base.remove_connection
       end
+      ActiveRecord::Base.establish_connection(config)
     end
 
 
-    desc "Update cssed_sequence for all Sequece"
+    desc "Update cssed_sequence for all chains"
     task :chains_cssed_sequence => [:environment] do
 
-      chains    = AaChain.all
-      total     = chains.size
-      fmanager  = ForkManager.new(configatron.max_fork)
+      chn_ids = AaChain.all.map(&:id)
+      config  = ActiveRecord::Base.remove_connection
 
-      fmanager.manage do
-        chains.each_with_index do |chain, i|
-          unless chain.cssed_sequence.nil?
-            $logger.info ">>> Skipped Chain, #{chain.id} (#{i+1}/#{total})"
-            next
-          end
+      chn_ids.forkify(configatron.max_fork) do |id|
+        ActiveRecord::Base.establish_connection(config)
 
-          config = ActiveRecord::Base.remove_connection
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-            chain.cssed_sequence = chain.formatted_sequence
-            chain.save!
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Updating cssed_sequence of Chain, #{chain.id}: done (#{i+1}/#{total})"
-          end
-          ActiveRecord::Base.establish_connection(config)
+        chn = AaChain.find(id)
+
+        unless chn.cssed_sequence.nil?
+          $logger.info ">>> Skipped Chain, #{chn.id}"
+          ActiveRecord::Base.remove_connection
+          next
         end
+
+        chn.cssed_sequence = chn.formatted_sequence
+        chn.save!
+        $logger.info ">>> Updating cssed_sequence of Chain, #{chn.id}: done"
+        ActiveRecord::Base.remove_connection
       end
-    end
-
-
-    desc "Update interface_distances table 2"
-    task :interface_similarities2 => [:environment] do
-
-      include Bipa::Constants
-
-      rep_interfaces = []
-
-      families = ScopFamily.rsall
-      families.each_with_index do |family, fam_index|
-        %w[dna rna].each do |na|
-          subfamilies = family.send("nr80_#{na}_subfamilies")
-          subfamilies.each do |subfamily|
-            rep_domain = subfamily.representative
-            rep_interface = rep_domain.send("#{na}_interfaces").find(:first,
-                                                                     :select => "id, asa, polarity," +
-                                                                     AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
-                                                                     Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
-
-            if rep_domain && rep_interface
-              rep_interfaces << rep_interface
-            end
-
-            interfaces = []
-
-            subfamily.domains.each do |domain|
-              interfaces << domain.send("#{na}_interfaces").find(:first,
-                                                                 :select => "id, asa, polarity," +
-                                                                 AminoAcids::Residues::STANDARD.map { |a| "residue_propensity_of_#{a.downcase}" }.join(",") + "," +
-                                                                 Sses::ALL.map { |s| "sse_propensity_of_#{s.downcase}" }.join(","))
-            end
-
-            # for intra-subfamily interfaces
-            if interfaces.size > 0
-              total = (interfaces.count ** 2 - interfaces.count) / 2
-
-              0.upto(interfaces.count - 2) do |i|
-                (i + 1).upto(interfaces.count - 1) do |j|
-                  index = j + (interfaces.count * i) - (1..i+1).inject { |s,e| s + e }
-                  if InterfaceSimilarity.find_by_interface_id_and_similar_interface_id(interfaces[i].id, interfaces[j].id)
-                    #$logger.info ">>> Skipped interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{index}/#{total})"
-                    next
-                  else
-                    #config = ActiveRecord::Base.remove_connection
-                    #fmanager.fork do
-                    #  ActiveRecord::Base.establish_connection(config)
-                    is                                = InterfaceSimilarity.new
-                    is.interface                      = interfaces[i]
-                    is.interface_target               = interfaces[j]
-                    is.similarity_in_usr              = interfaces[i].shape_similarity_with(interfaces[j]) rescue 0.0
-                    is.similarity_in_asa              = (interfaces[i][:asa] - interfaces[j][:asa]).abs.to_similarity
-                    is.similarity_in_polarity         = (interfaces[i][:polarity] - interfaces[j][:polarity]).abs.to_similarity
-                    is.similarity_in_res_composition  = NMath::sqrt((interfaces[i].residue_propensity_vector - interfaces[j].residue_propensity_vector)**2).to_similarity
-                    is.similarity_in_sse_composition  = NMath::sqrt((interfaces[i].sse_propensity_vector - interfaces[j].sse_propensity_vector)**2).to_similarity
-                    is.similarity_in_all              = [is.similarity_in_usr, is.similarity_in_asa, is.similarity_in_polarity, is.similarity_in_res_composition, is.similarity_in_sse_composition].to_stats_array.mean
-                    is.save!
-
-                    #$logger.info ">>> Updating intra-subfamily (#{subfamily.id}) interface distances between interface #{interfaces[i].id} and #{interfaces[j].id}: done (#{index}/#{total})"
-                    #  ActiveRecord::Base.remove_connection
-                  end
-                  #ActiveRecord::Base.establish_connection(config)
-                end
-              end
-            end
-          end
-          $logger.info ">>> Updating intra-subfamily interface distances for #{na.upcase}-binding SCOP family, #{family.sunid}: done"
-        end
-        $logger.info ">>> Updating intra-subfamily interface distances for SCOP family, #{family.sunid}: done (#{fam_index + 1}/#{families.count})"
-      end
-
-      # for inter-family representative interfaces
-      total = (rep_interfaces.count ** 2 - rep_interfaces.count) / 2
-
-      0.upto(rep_interfaces.count - 2) do |i|
-        (i + 1).upto(rep_interfaces.count - 1) do |j|
-          index = j + (rep_interfaces.count * i) - (1..i+1).inject { |s,e| s + e }
-          if InterfaceSimilarity.find_by_interface_id_and_similar_interface_id(rep_interfaces[i].id, rep_interfaces[j].id)
-            #$logger.info ">>> Skipped interface distances between interface #{rep_interfaces[i].id} and #{rep_interfaces[j].id}: done (#{index}/#{total})"
-            next
-          else
-            #config = ActiveRecord::Base.remove_connection
-            #fmanager.fork do
-            #  ActiveRecord::Base.establish_connection(config)
-            is                                = InterfaceSimilarity.new
-            is.interface                      = rep_interfaces[i]
-            is.interface_target               = rep_interfaces[j]
-            is.similarity_in_usr              = rep_interfaces[i].shape_similarity_with(rep_interfaces[j]) rescue 0.0
-            is.similarity_in_asa              = (rep_interfaces[i][:asa] - rep_interfaces[j][:asa]).abs.to_similarity
-            is.similarity_in_polarity         = (rep_interfaces[i][:polarity] - rep_interfaces[j][:polarity]).abs.to_similarity
-            is.similarity_in_res_composition  = NMath::sqrt((rep_interfaces[i].residue_propensity_vector - rep_interfaces[j].residue_propensity_vector)**2).to_similarity
-            is.similarity_in_sse_composition  = NMath::sqrt((rep_interfaces[i].sse_propensity_vector - rep_interfaces[j].sse_propensity_vector)**2).to_similarity
-            is.similarity_in_all              = [is.similarity_in_usr, is.similarity_in_asa, is.similarity_in_polarity, is.similarity_in_res_composition, is.similarity_in_sse_composition].to_stats_array.mean
-            is.save!
-
-            $logger.info ">>> Updating inter-subfamily representative interface distances between interface #{rep_interfaces[i].id} and #{rep_interfaces[j].id}: done (#{index}/#{total})"
-            #  ActiveRecord::Base.remove_connection
-          end
-          #ActiveRecord::Base.establish_connection(config)
-        end
-      end
+      ActiveRecord::Base.establish_connection(config)
     end
 
   end
