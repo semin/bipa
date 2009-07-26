@@ -114,6 +114,10 @@ class DomainInterface < Interface
     end
   end
 
+  def calculate_asa
+    residues.inject(0) { |s, r| s + r.delta_asa }
+  end
+
   def calculate_percent_asa
     100.0 * self[:asa] / domain.unbound_asa rescue 0
   end

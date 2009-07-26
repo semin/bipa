@@ -112,16 +112,16 @@
   <% if @scop.dna_interfaces.size > 0 %>
     <tr>
       <td class="title">DNA<br />Binding<br />
-        <% if @dna_nr_family_alignment %>
-          (<%= link_to "Jalview", jalview_alignment_path(@dna_nr_family_alignment) %>)
+        <% if @dna_rep_family_alignment %>
+          (<%= link_to "Jalview", jalview_alignment_path(@dna_rep_family_alignment) %>)
         <% end %>
       </td>
       <td colspan=4 class="alignment">
-        <% if @dna_nr_family_alignment %>
+        <% if @dna_rep_family_alignment %>
           <div class="alignment">
-            <%= @dna_nr_family_alignment.ruler_with_margin %>
+            <%= @dna_rep_family_alignment.ruler_with_margin %>
             <%= render  :partial => "/alignments/sequence",
-              :collection => @dna_nr_family_alignment.sequences,
+              :collection => @dna_rep_family_alignment.sequences,
               :locals => { :myself => @scop.sid, :representative => @dna_subfamily.representative.sid } %>
           </div>
         <% else %>
@@ -137,11 +137,11 @@
     <tr>
       <td class="title">RNA<br />Binding</td> 
       <td colspan=4 class="alignment">
-        <% if @rna_nr_family_alignment %>
+        <% if @rna_rep_family_alignment %>
           <div class="alignment">
-            <%= @rna_nr_family_alignment.ruler_with_margin %>
+            <%= @rna_rep_family_alignment.ruler_with_margin %>
             <%= render  :partial => "/alignments/sequence",
-              :collection => @rna_nr_family_alignment.sequences,
+              :collection => @rna_rep_family_alignment.sequences,
               :locals => { :myself => @scop.sid, :representative => @rna_subfamily.representative.sid } %>
           </div>
         <% else %>

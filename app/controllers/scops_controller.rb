@@ -14,12 +14,12 @@ class ScopsController < ApplicationController
     @scop = Scop.find(params[:id])
 
     if @scop.is_a? ScopDomain
-      @dna_subfamily = @scop.andand.nr80_dna_subfamily
-      @rna_subfamily = @scop.andand.nr80_rna_subfamily
+      @dna_subfamily = @scop.andand.red100_dna_binding_subfamily
+      @rna_subfamily = @scop.andand.red100_rna_binding_subfamily
       @dna_subfamily_alignment = @dna_subfamily.andand.alignment
       @rna_subfamily_alignment = @rna_subfamily.andand.alignment
-      @dna_nr_family_alignment = @scop.scop_family.andand.nr80_dna_alignment
-      @rna_nr_family_alignment = @scop.scop_family.andand.nr80_rna_alignment
+      @dna_rep_family_alignments = @scop.scop_family.andand.rep100_dna_binding_family_alignments
+      @rna_rep_family_alignments = @scop.scop_family.andand.rep100_rna_binding_family_alignments
 
       respond_to do |format|
         format.html

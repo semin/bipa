@@ -67,7 +67,11 @@ class Scop < ActiveRecord::Base
     "http://scop.mrc-lmb.cam.ac.uk/scop/search.cgi?sccs=#{sccs}"
   end
 
-  %w(dna rna).each do |na|
+  def registered?
+    reg_dna or reg_rna
+  end
+
+  %w[dna rna].each do |na|
     class_eval <<-END
       def #{na}_interfaces
         leaves.map(&:#{na}_interfaces).flatten.compact
@@ -253,7 +257,7 @@ class ScopDomain < Scop
   include Bipa::ComposedOfResidues
 
   %w[dna rna].each do |na|
-    configatron.rep_pids.each  do |pid|
+    configatron.rep_pids.each do |pid|
       belongs_to  :"red#{pid}_#{na}_binding_subfamily"
     end
   end
@@ -380,10 +384,18 @@ class ScopDomain < Scop
   end
 
   def big_image
-    "/images/scop/#{sunid}_500.png"
+    "/figures/#{sunid}_500.png"
+  end
+
+  def big_solo_image
+    "/figures/#{sunid}_solo_500.png"
   end
 
   def small_image
-    "/images/scop/#{sunid}_100.png"
+    "/figures/#{sunid}_100.png"
+  end
+
+  def small_solo_image
+    "/figures/#{sunid}_solo_100.png"
   end
 end

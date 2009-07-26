@@ -63,49 +63,49 @@
           <% end %>
         </td>
         <td align="center">
-          <% if domain.rpall %>
+          <% if domain.registered? %>
             <%= link_to domain.sid, scop_path(domain) %>
           <% else %>
             <%= domain.sid %>
           <% end %>
         </td>
         <td align="center">
-          <% if domain.scop_species.rpall %>
+          <% if domain.registered? %>
             <%= link_to domain.scop_species.description, scop_path(domain.scop_species) %>
           <% else %>
             <%= domain.scop_species.description %>
           <% end %>
         </td>
         <td align="center">
-          <% if domain.scop_protein.rpall %>
+          <% if domain.scop_protein.registered? %>
             <%= link_to domain.scop_protein.description, scop_path(domain.scop_protein) %>
           <% else %>
             <%= domain.scop_protein.description %>
           <% end %>
         </td>
         <td align="center">
-          <% if domain.scop_family.rpall %>
+          <% if domain.scop_family.registered? %>
             <%= link_to domain.scop_family.description, scop_path(domain.scop_family) %>
           <% else %>
             <%= domain.scop_family.description %>
           <% end %>
         </td>
         <td align="center">
-          <% if domain.scop_superfamily.rpall %>
+          <% if domain.scop_superfamily.registered? %>
             <%= link_to domain.scop_superfamily.description, scop_path(domain.scop_superfamily) %>
           <% else %>
             <%= domain.scop_superfamily.description %>
           <% end %>
         </td>
         <td align="center">
-          <% if domain.scop_fold.rpall %>
+          <% if domain.scop_fold.registered? %>
             <%= link_to domain.scop_fold.description, scop_path(domain.scop_fold) %>
           <% else %>
             <%= domain.scop_fold.description %>
           <% end %>
         </td>
         <td align="center">
-          <% if domain.scop_class.rpall %>
+          <% if domain.scop_class.registered? %>
             <%= link_to domain.scop_class.description, scop_path(domain.scop_class) %>
           <% else %>
             <%= domain.scop_class.description %>
