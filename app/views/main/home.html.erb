@@ -37,19 +37,17 @@
       <th>Protein-DNA Complexes</th>
       <td>1469</td>
     </tr>
-
     <tr>
       <th>Protein-RNA Complexes</th>
       <td>651</td>
     </tr>
     <tr>
       <th>DNA-binding SCOP domains</th>
-      <td>2946</td>
-
+      <td><%= ScopDomain.reg_dna.count %></td>
     </tr>
     <tr>
       <th>RNA-binding SCOP domains</th>
-      <td>3323</td>
+      <td><%= ScopDomain.reg_rna.count %></td>
     </tr>
   </table>
 
