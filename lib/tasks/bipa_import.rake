@@ -1462,15 +1462,19 @@ namespace :bipa do
 
 
     desc "Import USR Results"
-    task :interface_similarities => [:environment] do
+    task :usrs => [:environment] do
 
-      usr_result = "./tmp/interface_similarities.txt"
+      usr       = configatron.usr_res
+      host      = Rails.configuration.database_configuration[Rails.env]['host']
+      database  = Rails.configuration.database_configuration[Rails.env]['database']
 
-      if File.exists? usr_result
-        system "mysqlimport -h 192.168.1.1 -psemin --local --fields-terminated-by='\\t' --lines-terminated-by='\\n' BIPA_devel #{usr_result}"
-        $logger.info "Importing #{usr_result} done."
+      if File.exists? usr
+        system  "mysqlimport -h #{host} " +
+                "-psemin --local --fields-terminated-by='\\t' --lines-terminated-by='\\n' " +
+                "#{database} #{usr}"
+        $logger.info ">>> Importing #{usr} done."
       else
-        $logger.error "could not find #{usr_result}"
+        $logger.error "!!! Could not find #{usr}"
         exit 1
       end
     end

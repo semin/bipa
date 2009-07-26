@@ -146,6 +146,9 @@ Rails::Initializer.run do |config|
     configatron.astral40        = Pathname.new("~/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa").expand_path
     configatron.baliscore_bin   = Pathname.new("~/BiO/Install/bali_score/bali_score").expand_path
     configatron.rel_url_root    = ActionController::Base.relative_url_root ? ActionController::Base.relative_url_root.to_s : ''
+    configatron.usr_bin         = Rails.root.join("bin", "usr")
+    configatron.usr_des         = Rails.root.join("tmp", "usr_descriptors.txt")
+    configatron.usr_res         = Rails.root.join("tmp", "interface_similarities.txt")
 
     # for custom libraries in RAILS_ROOT/lib
     require 'matrix'

@@ -886,9 +886,9 @@ namespace :bipa do
     end
 
 
-    desc "Run usr with ./tmp/interface_descriptors.txt file"
+    desc "Calculate USR similarities using pre-calculated descriptors"
     task :usrc => [:environment] do
-      system "./bin/usr < ./tmp/interface_descriptors.txt > ./tmp/interface_similarities.txt"
+      system "#{configatron.usr_bin} < #{configatron.usr_des} > #{configatron.usr_res}"
       $logger.info ">>> Running usr done."
     end
 
