@@ -253,156 +253,86 @@ namespace :bipa do
 
     namespace :salign do
 
-      desc "Run SALIGN for each SCOP family"
-      task :full_scop => [:environment] do
-
-        %w[dna rna].each do |na|
-          sunids    = ScopFamily.send(:"reg_#{na}").map(&:sunid).sort
-          full_dir  = configatron.family_dir.join("full", na)
-          fmanager  = ForkManager.new(configatron.max_fork)
-
-          fmanager.manage do
-            config = ActiveRecord::Base.remove_connection
-
-            sunids.each_with_index do |sunid, i|
-              fmanager.fork do
-                ActiveRecord::Base.establish_connection(config)
-                cwd       = pwd
-                fam_dir   = full_dir.join(sunid.to_s)
-                pdb_files = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
-
-                if pdb_files.size < 2
-                  $logger.warn "!!! Only #{pdb_list.size} PDB structure detected in #{fam_dir}"
-                  ActiveRecord::Base.remove_connection
-                  next
-                end
-
-                # single linkage clustering using TM-score
-                chdir fam_dir
-                clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a)
-                clusters.each_with_index do |group, gi|
-                  if group.size < 2
-                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in group, #{gi} in #{fam_dir}"
-                    next
-                  end
-
-                  if File.exists?(File.join(fam_dir, "salign#{gi}.ali")) and File.exists?(File.join(fam_dir, "salign#{gi}.pap"))
-                    $logger.warn "!!! Skipped group, #{gi} in #{fam_dir}"
-                    next
-                  end
-
-                  system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
-                  system "mv salign.ali salign#{gi}.ali"
-                  system "mv salign.pap salign#{gi}.pap"
-                  chdir cwd
-                end
-
-                $logger.info ">>> SALIGN with full set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-                ActiveRecord::Base.remove_connection
-              end
-            end
-            ActiveRecord::Base.establish_connection(config)
-          end
-        end
-      end
-
-
       desc "Run SALIGN for representative PDB files for each SCOP Family"
-      task :rep_scop => [:environment] do
+      task :repscop => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          fmanager  = ForkManager.new(configatron.max_fork)
+          sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          config = ActiveRecord::Base.remove_connection
 
-          fmanager.manage do
-            config = ActiveRecord::Base.remove_connection
-
-            configatron.rep_pids.each do |pid|
-              sunids.each_with_index do |sunid, i|
-                fmanager.fork do
-                  ActiveRecord::Base.establish_connection(config)
-
-                  cwd       = pwd
-                  fam_dir   = configatron.family_dir.join("rep#{pid}", na, sunid.to_s)
-                  pdb_files = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
-
-                  if pdb_files.size < 2
-                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{fam_dir}"
-                    ActiveRecord::Base.remove_connection
-                    next
-                  end
-
-                  # single linkage clustering using TM-score
-                  chdir fam_dir
-                  clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a)
-                  clusters.each_with_index do |group, gi|
-                    if group.size < 2
-                      $logger.warn "!!! Only #{group.size} PDB structure detected in group, #{gi} in #{fam_dir}"
-                      next
-                    end
-
-                    if File.exists?(File.join(fam_dir, "salign#{gi}.ali")) and File.exists?(File.join(fam_dir, "salign#{gi}.pap"))
-                      $logger.warn "!!! Skipped group, #{gi} in #{fam_dir}"
-                      next
-                    end
-
-                    system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
-                    system "mv salign.ali salign#{gi}.ali"
-                    system "mv salign.pap salign#{gi}.pap"
-                    $logger.info ">>> SALIGN with group, #{gi} from representative (PID: #{pid}) set of #{na.upcase}-binding SCOP family, #{sunid}: done"
-                  end
-                  chdir cwd
-                  ActiveRecord::Base.remove_connection
-                end
-              end
-            end
+          sunids.forkify(configatron.max_fork) do |sunid|
             ActiveRecord::Base.establish_connection(config)
+            cwd       = pwd
+            fam_dir   = configatron.family_dir.join("rep", na, sunid.to_s)
+            pdb_files = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
+
+            if pdb_files.size < 2
+              $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{fam_dir}"
+              ActiveRecord::Base.remove_connection
+              next
+            end
+
+            # single linkage clustering using TM-score
+            chdir fam_dir
+            clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a)
+            clusters.each_with_index do |group, gi|
+              if group.size < 2
+                $logger.warn "!!! Only #{group.size} PDB structure detected in group, #{gi} in #{fam_dir}"
+                next
+              end
+
+              if File.exists?(File.join(fam_dir, "salign#{gi}.ali")) and File.exists?(File.join(fam_dir, "salign#{gi}.pap"))
+                $logger.warn "!!! Skipped group, #{gi} in #{fam_dir}"
+                next
+              end
+
+              system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
+              system "mv salign.ali salign#{gi}.ali"
+              system "mv salign.pap salign#{gi}.pap"
+              $logger.info ">>> SALIGN with group, #{gi} from representative set of #{na.upcase}-binding SCOP family, #{sunid}: done"
+            end
+            chdir cwd
+            ActiveRecord::Base.remove_connection
           end
+          ActiveRecord::Base.establish_connection(config)
         end
       end
 
 
       desc "Run SALIGN for each subfamilies of SCOP families"
-      task :sub_scop => [:environment] do
+      task :subscop => [:environment] do
 
         %w[dna rna].each do |na|
-          sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          fmanager  = ForkManager.new(configatron.max_fork)
+          sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          config = ActiveRecord::Base.remove_connection
 
-          fmanager.manage do
-            config = ActiveRecord::Base.remove_connection
-
-            sunids.each_with_index do |sunid, i|
-              fmanager.fork do
-                ActiveRecord::Base.establish_connection(config)
-
-                cwd     = pwd
-                fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
-
-                Dir[fam_dir.join("red100", "*").to_s].each do |subfam_dir|
-                  pdb_files = Dir[File.join(subfam_dir, "*.pdb")]
-
-                  if pdb_files.size < 2
-                    $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{subfam_dir}"
-                    next
-                  end
-
-                  if File.exists?(File.join(subfam_dir, "salign.ali")) and File.exists?(File.join(subfam_dir, "salign.pap"))
-                    $logger.warn "!!! Skipped #{subfam_dir}"
-                    next
-                  end
-
-                  chdir subfam_dir
-                  system "salign *.pdb 1>salign.stdout 2>salign.stderr"
-                  chdir cwd
-                end
-
-                $logger.info ">>> SALIGN with subfamilies of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-                ActiveRecord::Base.remove_connection
-              end
-            end
+          sunids.forkify(configatron.max_fork) do |sunid, i|
             ActiveRecord::Base.establish_connection(config)
+            cwd     = pwd
+            fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
+
+            Dir[fam_dir.join("*").to_s].each do |subfam_dir|
+              pdb_files = Dir[File.join(subfam_dir, "*.pdb")]
+
+              if pdb_files.size < 2
+                $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{subfam_dir}"
+                next
+              end
+
+              if File.exists?(File.join(subfam_dir, "salign.ali")) and File.exists?(File.join(subfam_dir, "salign.pap"))
+                $logger.warn "!!! Skipped #{subfam_dir}"
+                next
+              end
+
+              chdir subfam_dir
+              system "salign *.pdb 1>salign.stdout 2>salign.stderr"
+              chdir cwd
+            end
+
+            $logger.info ">>> SALIGN with subfamilies of #{na.upcase}-binding SCOP family, #{sunid}: done"
+            ActiveRecord::Base.remove_connection
           end
+          ActiveRecord::Base.establish_connection(config)
         end
       end
 

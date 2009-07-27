@@ -125,7 +125,7 @@ namespace :bipa do
           fam_dir = sub_dir.join("#{sunid}")
           subfamilies = family.send("#{na}_binding_subfamilies")
           subfamilies.each do |subfamily|
-            subfam_dir = fam_dir.join("red", subfamily.id.to_s)
+            subfam_dir = fam_dir.join(subfamily.id.to_s)
             mkdir_p subfam_dir
 
             domains = subfamily.domains
@@ -221,7 +221,7 @@ namespace :bipa do
 
 
     desc "Generate a figure for each PDB structure"
-    task :structure_figures => [:environment] do
+    task :pdbfig => [:environment] do
 
       mkdir_p configatron.figure_dir
 
@@ -249,7 +249,7 @@ namespace :bipa do
 
 
     desc "Generate a figure for each SCOP domain only"
-    task :domain_only_figures => [:environment] do
+    task :domsolofig => [:environment] do
 
       mkdir_p configatron.figure_dir
 
@@ -277,7 +277,7 @@ namespace :bipa do
 
 
     desc "Generate a figure for each SCOP domain"
-    task :domain_figures => [:environment] do
+    task :domfig => [:environment] do
 
       mkdir_p configatron.figure_dir
 
