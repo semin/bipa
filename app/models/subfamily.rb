@@ -4,38 +4,35 @@ class Subfamily < ActiveRecord::Base
               :class_name   => "ScopFamily",
               :foreign_key  => "scop_id"
 
+  has_one :alignment,
+          :class_name   => :SubfamilyAlignment,
+          :foreign_key  => :subfamily_id
+
+  has_many  :domains,
+            :class_name   => :ScopDomain
+
+  def representative
+    rep = nil
+    domains.each do |domain|
+      next if domain.calpha_only? || domain.has_unks?
+      if domain.resolution
+        if rep && rep.resolution
+          rep = domain if domain.resolution < rep.resolution
+        else
+          rep = domain
+        end
+      else
+        rep = domain if rep.nil?
+      end
+    end
+    rep
+  end
 end
 
 
 %w[dna rna].each do |na|
-  configatron.rep_pids.each do |pid|
-    eval <<-EVAL
-      class Red#{pid}#{na.capitalize}BindingSubfamily < Subfamily
-
-        has_one :alignment,
-                :class_name   => :SubfamilyAlignment,
-                :foreign_key  => :subfamily_id
-
-        has_many  :domains,
-                  :class_name   => :ScopDomain
-
-        def representative
-          rep = nil
-          domains.each do |domain|
-            next if domain.calpha_only? || domain.has_unks?
-            if domain.resolution
-              if rep && rep.resolution
-                rep = domain if domain.resolution < rep.resolution
-              else
-                rep = domain
-              end
-            else
-              rep = domain if rep.nil?
-            end
-          end
-          rep
-        end
-      end
-    EVAL
-  end
+  eval <<-EVAL
+    class #{na.capitalize}BindingSubfamily < Subfamily
+    end
+  EVAL
 end

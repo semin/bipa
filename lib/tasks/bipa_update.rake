@@ -26,35 +26,31 @@ namespace :bipa do
     end
 
 
-    desc "Update atoms' DNA/RNA interaction counts"
-    task :atoms_intcounts => [:environment] do
-    end
+    desc "Update atoms' and residues' DNA/RNA interaction counts"
+    task :intcounts => [:environment] do
 
-
-    desc "Update residues' DNA/RNA interaction counts"
-    task :residues_intcounts => [:environment] do
-
-      interface_ids = DomainInterface.all.map(&:id)
-      fmanager      = ForkManager.new(configatron.max_fork)
-
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
-        interface_ids.each_with_index do |id, i|
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
-            interface = DomainInterface.find(id)
-            %w[dna rna].each do |na|
-              interface.residues.each do |aa|
-                aa.send("hbonds_#{na}_as_donor_count=",     aa.hbonds_as_donor.select { |b| b.acceptor.send("#{na}?") }.size)
-                aa.send("hbonds_#{na}_as_acceptor_count=",  aa.hbonds_as_acceptor.select { |b| b.donor.send("#{na}?") }.size)
-                aa.send("whbonds_#{na}_count=",             aa.whbonds.select { |b| b.whbonding_atom.send("#{na}?") }.size)
-                aa.send("vdw_contacts_#{na}_count=",        aa.vdw_contacts.select { |b| b.vdw_contacting_atom.send("#{na}?") }.size)
-                aa.save!
-              end
+      AaResidue.find_in_batches do |group|
+        ids     = group.map(&:id)
+        config  = ActiveRecord::Base.remove_connection
+        ids.forkify(configatron.max_fork) do |id|
+          ActiveRecord::Base.establish_connection(config)
+          aar = AaResidue.find(id)
+          %w[dna rna].each do |na|
+            aar.atoms.each do |atom|
+              atom.send("hbonds_#{na}_as_donor_count=",     atom.hbonds_as_donor.select { |b| b.acceptor.send("#{na}?") }.size)
+              atom.send("hbonds_#{na}_as_acceptor_count=",  atom.hbonds_as_acceptor.select { |b| b.donor.send("#{na}?") }.size)
+              atom.send("whbonds_#{na}_count=",             atom.whbonds.select { |b| b.whbonding_atom.send("#{na}?") }.size)
+              atom.send("vdw_contacts_#{na}_count=",        atom.vdw_contacts.select { |b| b.vdw_contacting_atom.send("#{na}?") }.size)
+              atom.save!
             end
-            ActiveRecord::Base.remove_connection
+#            aar.send("hbonds_#{na}_as_donor_count=",    aar.atoms.sum(:"hbonds_#{na}_as_donor_count"))
+#            aar.send("hbonds_#{na}_as_acceptor_count=", aar.atoms.sum(:"hbonds_#{na}_as_acceptor_count"))
+#            aar.send("whbonds_#{na}_count=",            aar.atoms.sum(:"whbonds_#{na}_count"))
+#            aar.send("vdw_contacts_#{na}_count=",       aar.atoms.sum(:"vdw_contacts_#{na}_count"))
+#            aar.save!
           end
-          $logger.info ">>> Counting atomic interactions for residues of Interface, #{id}: done (#{i+1}/#{interface_ids.size})"
+          $logger.info ">>> Counting atomic interactions for #{aar.class}, #{id}: done"
+          ActiveRecord::Base.remove_connection
         end
         ActiveRecord::Base.establish_connection(config)
       end

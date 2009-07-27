@@ -80,32 +80,23 @@ class Alignment < ActiveRecord::Base
   end
 end
 
-
 class SubfamilyAlignment < Alignment
 
-  belongs_to  :subfamily
+  belongs_to :subfamily
 
 end
 
-
 %w[dna rna].each do |na|
   eval <<-EVAL
-  class Full#{na.capitalize}BindingFamilyAlignment < Alignment
+  class #{na.capitalize}BindingFamilyAlignment < Alignment
 
     belongs_to  :family,
                 :class_name   => "ScopFamily",
                 :foreign_key  => "scop_id"
+    
+    has_many  :subfamilies,
+              :class_name   => "Subfamily",
+              :foreign_key  => "family_alignment_id"
   end
   EVAL
-
-  configatron.rep_pids.each do |pid|
-    eval <<-EVAL
-    class Rep#{pid}#{na.capitalize}BindingFamilyAlignment < Alignment
-
-      belongs_to  :family,
-                  :class_name   => "ScopFamily",
-                  :foreign_key  => "scop_id"
-    end
-    EVAL
-  end
 end

@@ -203,56 +203,50 @@ namespace :bipa do
       refresh_dir(configatron.blastclust_dir) unless configatron.resume
 
       %w[dna rna].each do |na|
-        sunids    = ScopFamily.send(:"reg_#{na}").map(&:sunid).sort
-        fmanager  = ForkManager.new(configatron.max_fork)
+        sunids = ScopFamily.send(:"reg_#{na}").map(&:sunid).sort
+        config = ActiveRecord::Base.remove_connection
 
-        fmanager.manage do
-          config = ActiveRecord::Base.remove_connection
-          sunids.each_with_index do |sunid, i|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
+        sunids.forkify(configatron.max_fork) do |sunid|
+          ActiveRecord::Base.establish_connection(config)
 
-              family    = ScopFamily.find_by_sunid(sunid)
-              fam_dir   = configatron.blastclust_dir.join(na, "#{sunid}")
-              fam_fasta = fam_dir.join("#{sunid}.fa")
-              mkdir_p fam_dir
+          family    = ScopFamily.find_by_sunid(sunid)
+          fam_dir   = configatron.blastclust_dir.join(na, "#{sunid}")
+          fam_fasta = fam_dir.join("#{sunid}.fa")
+          mkdir_p fam_dir
 
-              domains = family.leaves.select(&:"reg_#{na}")
-              domains.each do |domain|
-                if domain.to_sequence.include?("X")
-                  $logger.warn "!!! Skipped: SCOP domain, #{domain.sunid} has some unknown residues!"
-                  next
-                end
+          domains = family.leaves.select(&:"reg_#{na}")
+          domains.each do |domain|
+            seq = domain.to_sequence
+            if (seq.count('X') / seq.length.to_f) > 0.5
+              $logger.warn  "!!! Skipped: SCOP domain, #{domain.sunid} has " +
+                            "too many unknown residues (more than half)!"
+              next
+            end
 
-                File.open(fam_fasta, "a") do |f|
-                  f.puts ">#{domain.sunid}"
-                  f.puts domain.to_sequence
-                end
-                #$logger.info ">>> Adding #{domain.sunid} to #{na} binding, SCOP family #{sunid} fasta"
-              end
-
-              if File.size? fam_fasta
-                configatron.rep_pids.each do |pid|
-                  blastclust_cmd =
-                      "blastclust " +
-                      "-i #{fam_fasta} "+
-                      "-o #{fam_dir.join(family.sunid.to_s + '.cluster' + pid.to_s)} " +
-                      "-L .9 " +
-                      "-S #{pid} " +
-                      "-a 2 " +
-                      "-p T " +
-                      "1> #{fam_dir.join('blastclust' + pid.to_s + '.stdout')} " +
-                      "2> #{fam_dir.join('blastclust' + pid.to_s + '.stderr')}"
-                  system blastclust_cmd
-                end
-              end
-
-              ActiveRecord::Base.remove_connection
-              $logger.info ">>> Creating cluster files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i+1}/#{sunids.size})"
+            File.open(fam_fasta, "a") do |f|
+              f.puts ">#{domain.sunid}"
+              f.puts seq
             end
           end
-          ActiveRecord::Base.establish_connection(config)
+
+          if File.size? fam_fasta
+            blastclust_cmd =
+                      "blastclust " +
+                      "-i #{fam_fasta} "+
+                      "-o #{fam_dir.join(family.sunid.to_s + '.cluster')} " +
+                      "-L .9 " +
+                      "-S 100 " +
+                      "-a 2 " +
+                      "-p T " +
+                      "1> #{fam_dir.join('blastclust.stdout')} " +
+                      "2> #{fam_dir.join('blastclust.stderr')}"
+            system blastclust_cmd
+          end
+
+          $logger.info ">>> Clustering #{na.upcase}-binding SCOP family, #{sunid}: done"
+          ActiveRecord::Base.remove_connection
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -590,35 +584,28 @@ namespace :bipa do
       task :rep_alignments => [:environment] do
 
         %w[dna rna].each do |na|
-          cwd       = pwd
-          fmanager  = ForkManager.new(configatron.max_fork)
+          cwd = pwd
+          fam_dirs = Dir[configatron.family_dir.join("rep", na, "*").to_s]
+          fam_dirs.forkify(configatron.max_fork) do |fam_dir|
+            ali_files = Dir[File.join(fam_dir, "salign*.ali").to_s]
 
-          fmanager.manage do
-            configatron.rep_pids.each do |pid|
-              fam_dirs = Dir[configatron.family_dir.join("rep#{pid}", na, "*").to_s]
-              fam_dirs.each do |fam_dir|
-                fmanager.fork do
-                  chdir fam_dir
-                  ali_files = Dir[File.join(fam_dir, "salign*.ali").to_s]
-
-                  if ali_files.nil? or ali_files.size < 1
-                    $logger.error "!!! Cannot find alignment files in #{fam_dir}"
-                    next
-                  end
-
-                  ali_files.each do |ali_file|
-                    basename      = File.basename(ali_file, ".ali")
-                    cluster_id    = basename.match(/salign(\d+)/)[1]
-                    mod_ali_file  = "#{basename}_mod.ali"
-                    File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
-                    system "joy #{mod_ali_file} 1>joy#{cluster_id}.stdout 2>#{cluster_id}.stderr"
-                  end
-
-                  chdir cwd
-                  $logger.info ">>> JOY with alignments in #{fam_dir}: done"
-                end
-              end
+            if ali_files.nil? or ali_files.size < 1
+              $logger.error "!!! Cannot find alignment files in #{fam_dir}"
+              next
             end
+
+            chdir fam_dir
+
+            ali_files.each do |ali_file|
+              basename      = File.basename(ali_file, ".ali")
+              cluster_id    = basename.match(/salign(\d+)/)[1]
+              mod_ali_file  = "#{basename}_mod.ali"
+              File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
+              system "joy #{mod_ali_file} 1>joy#{cluster_id}.stdout 2>joy#{cluster_id}.stderr"
+            end
+
+            chdir cwd
+            $logger.info ">>> JOY with alignments in #{fam_dir}: done"
           end
         end
       end
@@ -627,28 +614,24 @@ namespace :bipa do
       desc "Run JOY for SCOP subfamily alignments"
       task :sub_alignments => [:environment] do
         %w[dna rna].each do |na|
-          cwd       = pwd
-          fmanager  = ForkManager.new(configatron.max_fork)
-          fmanager.manage do
-            subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red*", "*").to_s]
-            subfam_dirs.each do |subfam_dir|
-              fmanager.fork do
-                chdir subfam_dir
-                ali_file = File.join(subfam_dir, "salign.ali")
+          cwd         = pwd
+          subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red", "*").to_s]
+          subfam_dirs.forkify(configatron.max_fork) do |subfam_dir|
+            ali_file = File.join(subfam_dir, "salign.ali")
 
-                if !File.exists? ali_file
-                  $logger.error "!!! Cannot find an alignment file in #{subfam_dir}"
-                  next
-                end
-
-                basename      = File.basename(ali_file, ".ali")
-                mod_ali_file  = "#{basename}_mod.ali"
-                File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
-                system "joy #{mod_ali_file} 1>joy.stdout 2>joy.stderr"
-                chdir cwd
-                $logger.info ">>> JOY with an alignment in #{subfam_dir}: done"
-              end
+            if !File.exists? ali_file
+              $logger.error "!!! Cannot find an alignment file in #{subfam_dir}"
+              next
             end
+
+            chdir subfam_dir
+
+            basename      = File.basename(ali_file, ".ali")
+            mod_ali_file  = "#{basename}_mod.ali"
+            File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
+            system "joy #{mod_ali_file} 1>joy.stdout 2>joy.stderr"
+            chdir cwd
+            $logger.info ">>> JOY with an alignment in #{subfam_dir}: done"
           end
         end
       end

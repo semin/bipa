@@ -640,52 +640,41 @@ namespace :bipa do
     end
 
 
-    desc "Import Subfamilies for each SCOP family"
+    desc "Import subfamilies"
     task :subfamilies => [:environment] do
 
       %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        fmanager  = ForkManager.new(configatron.max_fork)
+        sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+        config = ActiveRecord::Base.remove_connection
 
-        fmanager.manage do
-          config = ActiveRecord::Base.remove_connection
+        sunids.forkify(configatron.max_fork) do |sunid|
+          ActiveRecord::Base.establish_connection(config)
 
-          sunids.each_with_index do |sunid, i|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
+          family      = ScopFamily.find_by_sunid(sunid)
+          fam_dir     = configatron.blastclust_dir.join(na, sunid.to_s)
+          subfam_file = fam_dir.join("#{sunid}.cluster")
 
-              family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = configatron.blastclust_dir.join(na, sunid.to_s)
+          IO.foreach(subfam_file) do |line|
+            members = line.chomp.split(/\s+/)
 
-              configatron.rep_pids.each do |pid|
-                subfam_file = fam_dir.join("#{sunid}.cluster#{pid}")
-
-                IO.foreach(subfam_file) do |line|
-                  members = line.chomp.split(/\s+/)
-
-                  if !members.nil? and !members.empty?
-                    subfamily = family.send("red#{pid}_#{na}_binding_subfamilies").build
-                    members.each do |member|
-                      domain = ScopDomain.find_by_sunid(member)
-                      if domain
-                        subfamily.domains << domain
-                      else
-                        $logger.warn "!!! Cannot find SCOP domain, #{member}"
-                        exit 1
-                      end
-                    end
-                    #subfamily.family = family
-                    subfamily.save!
-                  end
+            if !members.nil? and !members.empty?
+              subfamily = family.send("#{na}_binding_subfamilies").build
+              members.each do |member|
+                domain = ScopDomain.find_by_sunid(member)
+                if domain
+                  subfamily.domains << domain
+                else
+                  $logger.warn "!!! Cannot find SCOP domain, #{member}"
                 end
               end
-
-              ActiveRecord::Base.remove_connection
-              $logger.info ">>> Importing subfamilies for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              subfamily.save!
             end
           end
-          ActiveRecord::Base.establish_connection(config)
+
+          $logger.info ">>> Importing subfamilies for #{na.upcase}-binding SCOP family, #{sunid}: done"
+          ActiveRecord::Base.remove_connection
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 

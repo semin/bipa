@@ -82,7 +82,7 @@ Rails::Initializer.run do |config|
     ENV["PDB_EXT"] = ".pdb" # for Baton
 
     # Configuration (Constants) for BIPA
-    configatron.rep_pids  = (100..100).step(10)
+    configatron.rep_pid   = 100
     configatron.resume    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
     configatron.max_fork  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
 

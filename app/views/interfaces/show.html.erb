@@ -1,5 +1,5 @@
 <div class="main_title blue_link">
-  <%= @interface.class.to_s.match(/DNA/i) ? "DNA" : "RNA" %> Interface of SCOP domain, <%= link_to @interface.domain.sid, scop_path(@interface.domain) %> (<%= @interface.sccs %>)
+  <%= @interface.interface_to %> Interface of SCOP domain, <%= link_to @interface.domain.sid, scop_path(@interface.domain) %> (<%= @interface.sccs %>)
 </div>
 
 <table id="interface_table" class="bipa">
@@ -76,22 +76,32 @@
   </tr>
   <% @interface.residues.each do |res| %>
     <tr>
-      <td class="cell_text">  <%= res.chain.chain_code %></td>
-      <td class="cell_number"><%= res.residue_code %></td>
-      <td class="cell_text">  <%= res.residue_name%></td>
-      <td class="cell_text">  <%= res.dssp.andand.sse %></td>
-      <td class="cell_number"><%= "%.2f" % res.delta_asa %></td>
-      <td class="cell_number"><%= res[:hbonds_as_donor_count] + res[:hbonds_as_acceptor_count] %></td>
-      <td class="cell_number"><%= res[:whbonds_count] %></td>
-      <td class="cell_number"><%= res[:vdw_contacts_count] %></td>
       <td class="cell_text">
-        <% if res.nssnps.size > 0 %>
-          <% res.nssnps.each do |nssnp| %>
-            <%= link_to nssnp.variation_name, nssnp.dbsnp_url, :popup => true %><br />
-          <% end %>
-        <% else %>
-          N/A
-        <% end %>
+        <%= res.chain.chain_code %>
+      </td>
+      <td class="cell_number">
+        <%= res.residue_code %>
+      </td>
+      <td class="cell_text">
+        <%= res.residue_name%>
+      </td>
+      <td class="cell_text">
+        <%= res.dssp.andand.sse %>
+      </td>
+      <td class="cell_number">
+        <%= "%.2f" % res.delta_asa %>
+      </td>
+      <td class="cell_number">
+        <%= res.send("hbonds_#{@interface.interface_to.downcase}_as_donor_count") + res.send("hbonds_#{@interface.interface_to.downcase}_as_acceptor_count") %>
+      </td>
+      <td class="cell_number">
+        <%= res.send("whbonds_#{@interface.interface_to.downcase}_count") %>
+      </td>
+      <td class="cell_number">
+        <%= res.send("vdw_contacts_#{@interface.interface_to.downcase}_count") %>
+      </td>
+      <td class="cell_text">
+        N/A
       </td>
       <td class="cell_text" colspan=3>
         <% if res.uniprot_features.size > 0 %>

@@ -3,7 +3,7 @@ class ScopsController < ApplicationController
   caches_page :show, :jmol
 
   def index
-    @scops = ScopDomain.rpall.paginate(:page => params[:page] || 1, :per_page => 20)
+    @scops = ScopDomain.reg_all.paginate(:page => params[:page] || 1, :per_page => 20)
 
     respond_to do |format|
       format.html
@@ -14,12 +14,12 @@ class ScopsController < ApplicationController
     @scop = Scop.find(params[:id])
 
     if @scop.is_a? ScopDomain
-      @dna_subfamily = @scop.andand.red100_dna_binding_subfamily
-      @rna_subfamily = @scop.andand.red100_rna_binding_subfamily
+      @dna_subfamily = @scop.andand.red_dna_binding_subfamily
+      @rna_subfamily = @scop.andand.red_rna_binding_subfamily
       @dna_subfamily_alignment = @dna_subfamily.andand.alignment
       @rna_subfamily_alignment = @rna_subfamily.andand.alignment
-      @dna_rep_family_alignments = @scop.scop_family.andand.rep100_dna_binding_family_alignments
-      @rna_rep_family_alignments = @scop.scop_family.andand.rep100_rna_binding_family_alignments
+      @dna_rep_family_alignments = @scop.scop_family.andand.rep_dna_binding_family_alignments
+      @rna_rep_family_alignments = @scop.scop_family.andand.rep_rna_binding_family_alignments
 
       respond_to do |format|
         format.html
@@ -40,7 +40,10 @@ class ScopsController < ApplicationController
 
   def search
     @query = params[:query]
-    @scops = ScopDomain.rpall.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10).compact
+    @scops = ScopDomain.reg_all.search(@query,
+                                          :match_mode => :extended,
+                                          :page => params[:page],
+                                          :per_page => 10).compact
 
     respond_to do |format|
       format.html

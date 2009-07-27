@@ -56,7 +56,7 @@
   </tr>
   <tr>
     <td class="title" rowspan=<%= @scop.dna_interfaces.size + @scop.rna_interfaces.size + 4 %>>Structural Alignments</td>
-    <th colspan=3>Subfamily Alignment (PID &gt; 80)</th>
+    <th colspan=3>Subfamily Alignment (PID &#61; 100)</th>
   </tr>
   <% if @scop.dna_interfaces.size > 0 %>
     <tr>
@@ -76,7 +76,7 @@
         <% else %>
           N/A [<%= link_to "?", "#dna_sub_alignment_na_box", :id => "dna_sub_alignment_na_box_link" %>]<br />
           <div id="dna_sub_alignment_na_box">
-            A subfamily alignment is generated from domain structures in the subfamily, which is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, and it is impossible to generate a subfamily alignment.
+            A subfamily alignment is generated from domain structures in the subfamily, which is created using a certain level of percentage identity (PID) cutoff (100 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, and it is impossible to generate a subfamily alignment.
           </div>
         <% end %>
       </td>
@@ -100,14 +100,14 @@
         <% else %>
           N/A [<%= link_to "?", "#rna_sub_alignment_na_box", :id => "rna_sub_alignment_na_box_link" %>]<br />
           <div id="rna_sub_alignment_na_box">
-            A subfamily alignment is generated from domain structures in the subfamily, which is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, and it is impossible to generate a subfamily alignment.
+            A subfamily alignment is generated from domain structures in the subfamily, which is created using a certain level of percentage identity (PID) cutoff (100 for BIPA) for each SCOP family. However, in some cases, there is only one domain structure for the subfamily, and it is impossible to generate a subfamily alignment.
           </div>
         <% end %>
       </td>
     </tr>
   <% end %>
   <tr>
-    <th colspan=3>Representative Family (<%= link_to @scop.scop_family.description, scop_path(@scop.scop_family) %>) Alignment (PID &lt; 80)</th>
+    <th colspan=3>Representative Family (<%= link_to @scop.scop_family.description, scop_path(@scop.scop_family) %>) Alignment (PID &lt; 100)</th>
   </tr>
   <% if @scop.dna_interfaces.size > 0 %>
     <tr>
@@ -127,7 +127,7 @@
         <% else %>
           N/A [<%= link_to "?", "#dna_rep_alignment_na_box", :id => "dna_rep_alignment_na_box_link" %>]<br />
           <div id="dna_rep_alignment_na_box">
-            A representatitive family alignment is generated from a representative set of domain structures from its subfamilies, which is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, and it is impossible to generate a representative family alignment.
+            A representatitive family alignment is generated from a representative set of domain structures from its subfamilies, which is created using a certain level of percentage identity (PID) cutoff (100 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, and it is impossible to generate a representative family alignment.
           </div>
         <% end %>
       </td>
@@ -147,7 +147,7 @@
         <% else %>
           N/A [<%= link_to "?", "#rna_rep_alignment_na_box", :id => "rna_rep_alignment_na_box_link" %>]<br />
           <div id="rna_rep_alignment_na_box">
-            A representatitive family alignment is generated from a representative set of domain structures from its subfamilies, which is created using a certain level of percentage identity (PID) cutoff (80 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, and it is impossible to generate a representative family alignment.
+            A representatitive family alignment is generated from a representative set of domain structures from its subfamilies, which is created using a certain level of percentage identity (PID) cutoff (100 for BIPA) for each SCOP family. However, in some cases, there is only one representative structure (or subfamily) for the family, and it is impossible to generate a representative family alignment.
           </div>
         <% end %>
       </td>
