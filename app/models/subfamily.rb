@@ -8,9 +8,6 @@ class Subfamily < ActiveRecord::Base
           :class_name   => :SubfamilyAlignment,
           :foreign_key  => :subfamily_id
 
-  has_many  :domains,
-            :class_name   => :ScopDomain
-
   def representative
     rep = nil
     domains.each do |domain|
@@ -33,6 +30,9 @@ end
 %w[dna rna].each do |na|
   eval <<-EVAL
     class #{na.capitalize}BindingSubfamily < Subfamily
+      has_many  :domains,
+                :class_name   => "ScopDomain",
+                :foreign_key  => "#{na}_binding_subfamily_id"
     end
   EVAL
 end

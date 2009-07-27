@@ -2,356 +2,165 @@ namespace :bipa do
   namespace :generate do
 
     desc "Generate full set of PDB files for each SCOP family"
-    task :full_scop_pdbs => [:environment] do
+    task :fullscop => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
         full_dir  = configatron.family_dir.join("full", na)
-        fmanager  = ForkManager.new(configatron.max_fork)
+        config    = ActiveRecord::Base.remove_connection
 
         refresh_dir(full_dir) unless configatron.resume
 
-        fmanager.manage do
-          config = ActiveRecord::Base.remove_connection
+        sunids.forkify(configatron.max_fork) do |sunid|
+          ActiveRecord::Base.establish_connection(config)
+          family  = ScopFamily.find_by_sunid(sunid)
+          fam_dir = full_dir.join("#{sunid}")
 
-          sunids.each_with_index do |sunid, i|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
+          mkdir_p fam_dir
 
-              family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = full_dir.join("#{sunid}")
+          domains = family.leaves.select(&:"reg_#{na}")
+          domains.each do |domain|
+            if domain.calpha_only?
+              $logger.warn "!!! SCOP domain, #{domain.sunid} is C-alpha only structure"
+              next
+            end
 
-              mkdir_p fam_dir
+            if domain.has_unks?
+              $logger.warn "!!! SCOP domain, #{domain.sunid} has UNKs"
+              next
+            end
 
-              domains = family.leaves.select(&:"reg_#{na}")
-              domains.each do |domain|
-                if domain.calpha_only?
-                  $logger.warn "!!! SCOP domain, #{domain.sunid} is C-alpha only structure"
-                  next
-                end
+            dom_sid   = domain.sid.gsub(/^g/, "d")
+            dom_sunid = domain.sunid
+            dom_pdb   = configatron.scop_pdb_dir.join(dom_sid[2..3], "#{dom_sid}.ent")
 
-                if domain.has_unks?
-                  $logger.warn "!!! SCOP domain, #{domain.sunid} has UNKs"
-                  next
-                end
+            if !File.size? dom_pdb
+              $logger.error "!!! Cannot find #{dom_pdb}"
+              next
+            end
 
-                dom_sid   = domain.sid.gsub(/^g/, "d")
-                dom_sunid = domain.sunid
-                dom_pdb   = configatron.scop_pdb_dir.join(dom_sid[2..3], "#{dom_sid}.ent")
-
-                if !File.size? dom_pdb
-                  $logger.warn "!!! Cannot find #{dom_pdb}"
-                  exit 1
-                end
-
-                # Generate PDB file only for the first model in NMR structure using Bio::PDB
-                File.open(fam_dir.join("#{domain.sunid}.pdb"), "w") do |f|
-                  f.puts Bio::PDB.new(IO.read(dom_pdb)).models.first
-                end
-              end
-
-              ActiveRecord::Base.remove_connection
-              $logger.info ">>> Generating full set of PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+            # Generate PDB file only for the first model in NMR structure using Bio::PDB
+            File.open(fam_dir.join("#{domain.sunid}.pdb"), "w") do |f|
+              f.puts Bio::PDB.new(IO.read(dom_pdb)).models.first
             end
           end
-          ActiveRecord::Base.establish_connection(config)
+
+          $logger.info ">>> Generating full PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done"
+          ActiveRecord::Base.remove_connection
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 
 
     desc "Generate representative set of PDB files for each SCOP Family"
-    task :rep_scop_pdbs => [:environment] do
+    task :repscop => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
         full_dir  = configatron.family_dir.join("full", na)
-        fmanager  = ForkManager.new(configatron.max_fork)
+        config    = ActiveRecord::Base.remove_connection
 
-        fmanager.manage do
-          config = ActiveRecord::Base.remove_connection
+        sunids.forkify(configatron.max_fork) do |sunid|
+          ActiveRecord::Base.establish_connection(config)
+          family  = ScopFamily.find_by_sunid(sunid)
+          rep_dir = configatron.family_dir.join("rep", na)
+          fam_dir = rep_dir.join(sunid.to_s)
+          mkdir_p fam_dir
 
-          sunids.each_with_index do |sunid, i|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
+          subfamilies = family.send("#{na}_binding_subfamilies")
+          subfamilies.each do |subfamily|
+            domain = subfamily.representative
+            next if domain.nil?
 
-              family = ScopFamily.find_by_sunid(sunid)
+            domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
 
-              configatron.rep_pids.each do |pid|
-                rep_dir = configatron.family_dir.join("rep#{pid}", na)
-                fam_dir = rep_dir.join(sunid.to_s)
-                mkdir_p fam_dir
+            if !File.size? domain_pdb_file
+              $logger.warn "!!! Cannot find #{domain_pdb_file}"
+              exit 1
+            end
 
-                subfamilies = family.send("red#{pid}_#{na}_binding_subfamilies")
-                subfamilies.each do |subfamily|
-                  domain = subfamily.representative
-                  next if domain.nil?
-
-                  domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
-
-                  if !File.size? domain_pdb_file
-                    $logger.warn "!!! Cannot find #{domain_pdb_file}"
-                    exit 1
-                  end
-
-                  cp domain_pdb_file, fam_dir
+            # postproces domain pdb file
+            # change HETATM MSE into ATOM MET
+            # remove HETATM * SE   MSE
+            mod_pdb_file = fam_dir.join(domain_pdb_file.basename)
+            File.open(mod_pdb_file, 'w') do |f|
+              IO.foreach(domain_pdb_file) do |l|
+                # HETATM 2017 SE   MSE
+                if l =~ /^HETATM\s+\S+\s+SE\s+MSE/
+                  puts "Omit: #{l.chomp}"
+                  next
+                # HETATM 2011  N   MSE
+                elsif l =~ /^HETATM(\s+\S+\s+\S+\s+)MSE(.*)$/
+                  f.puts "ATOM  #{$1}MET#{$2}"
+                else
+                  f.puts l.chomp
                 end
               end
-              ActiveRecord::Base.remove_connection
             end
-            $logger.info ">>> Generating representative PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-            ActiveRecord::Base.establish_connection(config)
           end
+          $logger.info ">>> Generating representative PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done"
+          ActiveRecord::Base.remove_connection
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 
 
     desc "Generate PDB files for each Subfamily of each SCOP Family"
-    task :sub_scop_pdbs => [:environment] do
+    task :subscop => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
         sub_dir   = configatron.family_dir.join("sub", na)
         full_dir  = configatron.family_dir.join("full", na)
-        fmanager  = ForkManager.new(configatron.max_fork)
+        config    = ActiveRecord::Base.remove_connection
 
         refresh_dir(sub_dir) unless configatron.resume
 
-        fmanager.manage do
-          config = ActiveRecord::Base.remove_connection
-
-          sunids.each_with_index do |sunid, i|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
-
-              family  = ScopFamily.find_by_sunid(sunid)
-              fam_dir = sub_dir.join("#{sunid}")
-
-              configatron.rep_pids.each do |pid|
-                subfamilies = family.send("red#{pid}_#{na}_binding_subfamilies")
-                subfamilies.each do |subfamily|
-                  subfam_dir = fam_dir.join("red#{pid}", subfamily.id.to_s)
-                  mkdir_p subfam_dir
-
-                  domains = subfamily.domains
-                  domains.each do |domain|
-                    domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
-
-                    if !File.exists?(domain_pdb_file)
-                      $logger.warn "!!! SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
-                      next
-                    end
-                    cp domain_pdb_file, subfam_dir
-                  end # domains.each
-                end # subfamilies.each
-              end # configatron.rep_pids
-
-              $logger.info ">>> Generating PDB files for #{na.upcase}-binding subfamilies of each SCOP Family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-              ActiveRecord::Base.remove_connection
-            end
-          end
+        sunids.forkify(configatron.max_fork) do |sunid|
           ActiveRecord::Base.establish_connection(config)
-        end
-      end
-    end
 
+          family  = ScopFamily.find_by_sunid(sunid)
+          fam_dir = sub_dir.join("#{sunid}")
+          subfamilies = family.send("#{na}_binding_subfamilies")
+          subfamilies.each do |subfamily|
+            subfam_dir = fam_dir.join("red", subfamily.id.to_s)
+            mkdir_p subfam_dir
 
-    desc "Generate DNA/RNA TEM file for each alignments"
-    task :tem_files => [:environment] do
+            domains = subfamily.domains
+            domains.each do |domain|
+              domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
 
-      %w[dna rna].each do |na|
-        configatron.rep_pids.each do |si|
+              if !File.exists?(domain_pdb_file)
+                $logger.warn "!!! SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
+                next
+              end
 
-          rep_dir = configatron.alignment_dir.join("rep#{si}")
-
-          Dir.new(rep_dir).each do |dir|
-            next if dir =~ /^\./
-
-            family    = Scop.find_by_sunid(dir)
-            alignment = family.send(:"rep#{si}_alignment")
-
-            next unless alignment
-
-            fam_dir   = File.join(rep_dir, dir)
-            tem_file  = File.join(fam_dir, "baton.tem")
-
-            next unless File.size? tem_file
-
-            new_tem_file = File.join(fam_dir, "baton_na.tem")
-  #          cp tem_file, new_tem_file
-
-            File.open(new_tem_file, "w") do |file|
-
-              $logger.info "Working on SCOP family, #{dir} ..."
-
-              alignment.sequences.each do |sequence|
-                sunid = sequence.domain.sunid
-
-                $logger.info "Adding DNA/RNA interface environment for #{sunid} ..."
-
-                res_tem = []
-                sec_tem = []
-                acc_tem = []
-
-                dna_tem = []
-                rna_tem = []
-
-                hbond_dna_tem   = []
-                whbond_dna_tem  = []
-                vdw_dna_tem     = []
-
-                hbond_rna_tem   = []
-                whbond_rna_tem  = []
-                vdw_rna_tem     = []
-
-                sequence.positions.each_with_index do |position, pi|
-                  if pi != 0 and pi % 75 == 0
-                    res_tem << "\n"
-                    sec_tem << "\n"
-                    acc_tem << "\n"
-
-                    dna_tem << "\n"
-                    rna_tem << "\n"
-
-                    hbond_dna_tem   << "\n"
-                    whbond_dna_tem  << "\n"
-                    vdw_dna_tem     << "\n"
-
-                    hbond_rna_tem   << "\n"
-                    whbond_rna_tem  << "\n"
-                    vdw_rna_tem     << "\n"
-                  end
-
-                  if position.gap?
-                    res_tem << "-"
-                    sec_tem << "-"
-                    acc_tem << "-"
-
-                    dna_tem << "-"
-                    rna_tem << "-"
-
-                    hbond_dna_tem   << "-"
-                    whbond_dna_tem  << "-"
-                    vdw_dna_tem     << "-"
-
-                    hbond_rna_tem   << "-"
-                    whbond_rna_tem  << "-"
-                    vdw_rna_tem     << "-"
-
+              # postproces domain pdb file
+              # change HETATM MSE into ATOM MET
+              # remove HETATM * SE   MSE
+              mod_pdb_file = subfam_dir.join(domain_pdb_file.basename)
+              File.open(mod_pdb_file, 'w') do |f|
+                IO.foreach(domain_pdb_file) do |l|
+                  # HETATM 2017 SE   MSE
+                  if l =~ /^HETATM\s+\S+\s+SE\s+MSE/
+                    puts "Omit: #{l.chomp}"
                     next
-                  end
-
-                  res = position.residue
-
-                  res_tem << position.residue_name
-                  sec_tem << case
-                          when res.alpha_helix? || res.three10_helix? then  "H"
-                          when res.beta_sheet? then  "E"
-                          when res.positive_phi? then  "P"
-                          else "C"
-                          end
-                  acc_tem << case
-                          when res.on_surface? then  "T"
-                          else "F"
-                          end
-
-                  if res.hbonding_dna?
-                    hbond_dna_tem << "T"
+                  # HETATM 2011  N   MSE
+                  elsif l =~ /^HETATM(\s+\S+\s+\S+\s+)MSE(.*)$/
+                    f.puts "ATOM  #{$1}MET#{$2}"
                   else
-                    hbond_dna_tem << "F"
-                  end
-
-                  if res.whbonding_dna?
-                    whbond_dna_tem << "T"
-                  else
-                    whbond_dna_tem << "F"
-                  end
-
-                  if res.vdw_contacting_dna?
-                    vdw_dna_tem << "T"
-                  else
-                    vdw_dna_tem << "F"
-                  end
-
-                  if res.binding_dna?
-                    dna_tem << "T"
-                  else
-                    dna_tem << "F"
-                  end
-
-                  if res.hbonding_rna?
-                    hbond_rna_tem << "T"
-                  else
-                    hbond_rna_tem << "F"
-                  end
-
-                  if res.whbonding_rna?
-                    whbond_rna_tem << "T"
-                  else
-                    whbond_rna_tem << "F"
-                  end
-
-                  if res.vdw_contacting_rna?
-                    vdw_rna_tem << "T"
-                  else
-                    vdw_rna_tem << "F"
-                  end
-
-                  if res.binding_rna?
-                    rna_tem << "T"
-                  else
-                    rna_tem << "F"
+                    f.puts l.chomp
                   end
                 end
-
-                file.puts ">P1;#{sunid}"
-                file.puts "sequence"
-                file.puts res_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "secondary structure and phi angle"
-                file.puts sec_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "solvent accessibility"
-                file.puts acc_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "hydrogen bond to DNA"
-                file.puts hbond_dna_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "water-mediated hydrogen bond to DNA"
-                file.puts whbond_dna_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "vdw contact to DNA"
-                file.puts vdw_dna_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "DNA interface"
-                file.puts dna_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "hydrogen bond to RNA"
-                file.puts hbond_rna_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "water-mediated hydrogen bond to RNA"
-                file.puts whbond_rna_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "vdw contact to RNA"
-                file.puts vdw_rna_tem.join + "*"
-
-                file.puts ">P1;#{sunid}"
-                file.puts "RNA interface"
-                file.puts rna_tem.join + "*"
               end
             end
           end
+          $logger.info ">>> Generating PDB files for subfamilies of each #{na.upcase}-binding SCOP family, #{sunid}: done"
+          ActiveRecord::Base.remove_connection
         end
+        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -359,15 +168,15 @@ namespace :bipa do
     desc "Generate ESSTs for each representative set of SCOP families"
     task :essts => [:environment] do
 
-      #refresh_dir(configatron.esst_dir) unless configatron.resume
+      refresh_dir(configatron.esst_dir) unless configatron.resume
 
       %w[dna rna].each do |na|
-        esst_dir  = File.join(configatron.esst_dir, "nr100", na)
         cwd       = pwd
+        esst_dir  = configatron.esst_dir.join(na)
         mkdir_p esst_dir
         chdir esst_dir
 
-        FileList[File.join(configatron.family_dir, "nr100", na, "*", "*")].select { |t|
+        Dir[configatron.family_dir.join("rep", na, "*", "salign*_mod.ali").to_s].select { |t|
           t.match(/(\d+)\/\1\.tem/)
         }.each do |tem_file|
           cp tem_file, "."

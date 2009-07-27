@@ -496,7 +496,7 @@ namespace :bipa do
 
 
     desc "Import van der Waals Contacts"
-    task :vdw_contacts => [:environment] do
+    task :vdwcontacts => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)
       fmanager  = ForkManager.new(configatron.max_fork)
@@ -543,7 +543,7 @@ namespace :bipa do
 
 
     desc "Import Domain Interfaces"
-    task :domain_interfaces => [:environment] do
+    task :domint => [:environment] do
 
       pdb_codes = Structure.untainted.map(&:pdb_code)
       fmanager  = ForkManager.new(configatron.max_fork)
@@ -596,7 +596,7 @@ namespace :bipa do
 
 
     desc "Import Chain Interfaces"
-    task :chain_interfaces => [:environment] do
+    task :chaininterfaces => [:environment] do
 
       pdb_codes = Structure.untainted.map(&:pdb_code)
       fmanager  = ForkManager.new(configatron.max_fork)
@@ -641,7 +641,7 @@ namespace :bipa do
 
 
     desc "Import subfamilies"
-    task :subfamilies => [:environment] do
+    task :subfams => [:environment] do
 
       %w[dna rna].each do |na|
         sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -679,78 +679,8 @@ namespace :bipa do
     end
 
 
-    desc "Import Full & Representative Alignments for each SCOP Family"
-    task :full_alignments => [:environment] do
-
-      %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        fmanager  = ForkManager.new(configatron.max_fork)
-
-        fmanager.manage do
-          config = ActiveRecord::Base.remove_connection
-          sunids.each_with_index do |sunid, i|
-            fmanager.fork do
-              ActiveRecord::Base.establish_connection(config)
-
-              family    = ScopFamily.find_by_sunid(sunid)
-              fam_dir   = configatron.family_dir.join("full", na, sunid.to_s)
-              ali_files = Dir[fam_dir.join("salign*.ali").to_s]
-
-              if ali_files.nil? or ali_files.size < 1
-                $logger.warn "!!! Cannot find alignment files in #{fam_dir}"
-                ActiveRecord::Base.remove_connection
-                next
-              end
-
-              ali_files.each do |ali_file|
-                alignment = family.send("full_#{na}_binding_family_alignments").create
-                flat_file = Bio::FlatFile.auto(ali_file)
-
-                flat_file.each_entry do |entry|
-                  next unless entry.seq_type == "P1"
-
-                  domain          = ScopDomain.find_by_sunid(File.basename(entry.entry_id, ".pdb"))
-                  db_residues     = domain.aa_residues
-                  ff_residues     = entry.seq.split("")
-                  sequence        = alignment.sequences.create
-                  sequence.domain = domain
-
-                  di = 0
-                  ff_residues.each_with_index do |res, fi|
-                    break if fi >= db_residues.size
-                    column    = alignment.columns.find_or_create_by_number(fi + 1)
-                    position  = sequence.positions.build
-                    if (res == "-")
-                      position.residue_name = res
-                    elsif (db_residues[di].one_letter_code == res)
-                      position.residue      = db_residues[di]
-                      position.residue_name = res
-                      di += 1
-                    else
-                      position.residue_name = 'X'
-                      $logger.warn "!!! Mismatch at #{di}, between #{res} and #{db_residues[di].one_letter_code} of #{domain.sid}, #{domain.sunid}"
-                    end
-                    position.number = fi + 1
-                    position.column = column
-                    position.save!
-                    column.save!
-                  end # ff_residues.each_with_index
-                  sequence.save!
-                end # flat_file.each_entry
-                alignment.save!
-              end
-              ActiveRecord::Base.remove_connection
-              $logger.info ">>> Importing full alignment of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
-            end # fmanger.fork
-          end
-          ActiveRecord::Base.establish_connection(config)
-        end # sunids.each
-      end # fmanager.manage
-    end # task :full_alignments
-
-
     desc "Import representative alignments for each SCOP Family"
-    task :rep_alignments => [:environment] do
+    task :repalignments => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -823,7 +753,7 @@ namespace :bipa do
 
 
     desc "Import subfamily alignments for each SCOP Family"
-    task :sub_alignments => [:environment] do
+    task :subalignments => [:environment] do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -900,7 +830,7 @@ namespace :bipa do
 
 
     desc "Import GO data into 'go_terms' and 'go_relationships' tables"
-    task :go_terms => [:environment] do
+    task :goterms => [:environment] do
 
       obo_file  = File.join(configatron.go_dir, "gene_ontology_edit.obo")
       obo_obj   = Bipa::Obo.new(IO.read(obo_file))
@@ -983,7 +913,7 @@ namespace :bipa do
 
 
     desc "Import NCBI Taxonomy 'nodes.dmp' file into 'taxonomic_nodes' table"
-    task :taxonomic_nodes => [:environment] do
+    task :taxnodes => [:environment] do
       ActiveRecord::Base.connection.execute(
         <<-SQL
           LOAD DATA INFILE "#{Rail.root.join('/public/taxonomy/nodes.dmp')}"
@@ -1030,7 +960,7 @@ namespace :bipa do
 
 
     desc "Import NCBI Taxonomy 'names.dmp' file into 'taxonomic_names' table"
-    task :taxonomic_names => [:environment] do
+    task :taxnames => [:environment] do
       ActiveRecord::Base.connection.execute(
         <<-SQL
           LOAD DATA INFILE "#{Rails.root.join('./public/taxonomy/names.dmp')}"
@@ -1329,123 +1259,6 @@ namespace :bipa do
             $logger.info "Importing #{fugue_hit_class} for #{sunid}: done"
           end
         end
-      end
-    end
-
-
-#    desc "Import Refernce Alignments"
-#    task :reference_alignments => [:environment] do
-#
-#      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
-#
-#      Dir.new(rep_dir).each do |fam_dir|
-#        next if fam_dir =~ /^\./
-#
-#          FileList[File.join(rep_dir, fam_dir, "*.ref.ali")].each do |f|
-#          next unless File.size? f # CAUTIONSome alingments are size 0. Don't know why yet!
-#
-#          $logger.info "Importing #{f} ..."
-#
-#          tem_sunid, tgt_sunid = File.basename(f, ".ref.ali").split(/-/)
-#          ref_ali = Bio::Alignment::OriginalAlignment.readfiles(Bio::FlatFile.auto(f))
-#          ident, align, intgp, count = 0, 0, 0, 0
-#
-#          ref_ali.each_site do |site|
-#            if (site[0] != "-") && (site[1] != "-")
-#              align += 1
-#              if site[0] == site[1]
-#                ident += 1
-#              end
-#            elsif ((site[0] == "-") && (site[1] != "-")) || ((site[0] != "-") && (site[1] == "-"))
-#              intgp += 1
-#            end
-#            count += 1
-#          end
-#
-#          minl = nil
-#          ref_ali.each_seq do |s|
-#            l = s.gsub(/-/, '').length
-#            if minl.nil?
-#              minl = l
-#            else
-#              minl = l if l < minl
-#            end
-#          end
-#
-#          mingl = nil
-#          ref_ali.each_seq do |s|
-#            gl = s.gsub(/^-+/, '').gsub(/-+$/,'').length
-#            if mingl.nil?
-#              mingl = gl
-#            else
-#              mingl = gl if gl < mingl
-#            end
-#          end
-#
-#          pid1 = 100 * ident.to_f / (align + intgp)
-#          pid2 = 100 * ident.to_f / align
-#          pid3 = 100 * ident.to_f / minl
-#          pid4 = 100 * ident.to_f / mingl
-#
-#          family    = Scop.find_by_sunid(fam_dir)
-#          alignment = Rep90Alignment.find_by_scop_id(family.id)
-#          tem  = Scop.find_by_sunid(tem_sunid)
-#          tgt    = Scop.find_by_sunid(tgt_sunid)
-#
-#          if alignment
-#            alignment.reference_alignments << ReferenceAlignment.create!(:template_id => tem.id,
-#                                                                         :target_id   => tgt.id,
-#                                                                         :pid1        => pid1,
-#                                                                         :pid2        => pid2,
-#                                                                         :pid3        => pid3,
-#                                                                         :pid4        => pid4)
-#          else
-#            raise "Cannot find alignment AR object for SCOP family, #{fam_dir}"
-#          end
-#          end
-#      end
-#    end
-
-
-    desc "Import Test Alignments"
-    task :test_alignments => [:environment] do
-
-      rep_dir = "/BiO/Research/BIPA/bipa/public/alignments/rep90"
-
-      Dir.new(rep_dir).each do |fam_dir|
-        next if fam_dir =~ /^\./
-
-        FileList[File.join(rep_dir, fam_dir, "*.bb")].each do |f|
-          next unless File.size? f # CAUTIONSome alingments are size 0. Don't know why yet!
-
-          $logger.info "Importing #{f} ..."
-
-          stem = File.basename(f, ".bb")
-          tem_sunid, tgt_sunid = stem.match(/(\d+)-(\d+)/)[1..2].to_a
-          tem = Scop.find_by_sunid(tem_sunid)
-          tgt = Scop.find_by_sunid(tgt_sunid)
-          ref_ali = ReferenceAlignment.find_by_template_id_and_target_id(tem.id, tgt.id)
-          ali_class = nil
-          sp_score = nil
-          tc_score = nil
-
-          IO.foreach(f) do |l|
-            if l =~ /SP\sscore=\s(\S+)/ then sp_score = $1 end
-            if l =~ /TC\sscore=\s(\S+)/ then tc_score = $1 end
-          end
-
-          case stem
-          when /ndl/  then ali_class = TestNeedleAlignment
-          when /clt/  then ali_class = TestClustalwAlignment
-          when /std/  then ali_class = TestStdFugueAlignment
-          when /na/   then ali_class = TestNaFugueAlignment
-          else
-            raise "Unknown TestAlignment class!: #{stem}"
-          end
-
-          ref_ali.test_alignments << ali_class.create!(:sp => sp_score, :tc => tc_score)
-        end
-
       end
     end
 

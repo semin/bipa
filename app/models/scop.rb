@@ -122,7 +122,9 @@ class ScopDomain < Scop
   include Bipa::ComposedOfResidues
 
   %w[dna rna].each do |na|
-    belongs_to  :"#{na}_binding_subfamily"
+    belongs_to  :"#{na}_binding_subfamily",
+                :class_name   => "#{na.capitalize}BindingSubfamily",
+                :foreign_key  => "#{na}_binding_subfamily_id"
   end
 
   has_many  :dna_interfaces,

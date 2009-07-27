@@ -2,47 +2,40 @@ namespace :bipa do
   namespace :associate do
 
     desc "Associate Residue with SCOP"
-    task :residues_scop => [:environment] do
+    task :resscop => [:environment] do
 
       pdb_codes = Structure.all.map(&:pdb_code)
-      fmanager  = ForkManager.new(configatron.max_fork)
+      config    = ActiveRecord::Base.remove_connection
 
-      fmanager.manage do
-        config = ActiveRecord::Base.remove_connection
+      pdb_codes.forkify(configatron.max_fork) do |pdb_code|
+        ActiveRecord::Base.establish_connection(config)
+        structure = Structure.find_by_pdb_code(pdb_code)
+        domains   = ScopDomain.find_all_by_pdb_code(pdb_code)
 
-        pdb_codes.each_with_index do |pdb_code, i|
-          fmanager.fork do
-            ActiveRecord::Base.establish_connection(config)
+        if domains.empty?
+          $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
+          ActiveRecord::Base.remove_connection
+          next
+        end
 
-            structure = Structure.find_by_pdb_code(pdb_code)
-            domains   = ScopDomain.find_all_by_pdb_code(pdb_code)
-
-            if domains.empty?
-              $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
-              ActiveRecord::Base.remove_connection
-              next
+        domains.each do |domain|
+          structure.models.first.residues.each do |residue|
+            if domain.include? residue
+              residue.domain = domain
+              residue.save!
             end
-
-            domains.each do |domain|
-              structure.models.first.residues.each do |residue|
-                if domain.include? residue
-                  residue.domain = domain
-                  residue.save!
-                end
-              end
-            end
-
-            ActiveRecord::Base.remove_connection
-            $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_codes.size}): done"
           end
         end
-        ActiveRecord::Base.establish_connection(config)
+
+        $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_codes.size}): done"
+        ActiveRecord::Base.remove_connection
       end
+      ActiveRecord::Base.establish_connection(config)
     end
 
 
     desc "Associate Residue with ResMap"
-    task :residues_res_map => [:environment] do
+    task :resmap => [:environment] do
 
       cnt = 0
 
@@ -64,13 +57,13 @@ namespace :bipa do
         else
           next
         end
-        $logger.info("Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResMap")
+        $logger.info ">>> Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResMap"
       end
     end
 
 
-    desc "Associate Residue with ResMap"
-    task :residues_residue_map => [:environment] do
+    desc "Associate Residue with ResidueMap"
+    task :residuemap => [:environment] do
 
       cnt = 0
 
@@ -93,7 +86,7 @@ namespace :bipa do
           next
         end
       end
-      $logger.info("Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResidueMap")
+      $logger.info ">>> Total #{cnt} out of #{AaResidue.count} AaResidue entries were associated to ResidueMap"
     end
 
   end

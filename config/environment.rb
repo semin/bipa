@@ -78,10 +78,10 @@ Rails::Initializer.run do |config|
     # for will_paginate plugin
     WillPaginate.enable_named_scope
 
-    # Environmental variables
+    # environmental variables
     ENV["PDB_EXT"] = ".pdb" # for Baton
 
-    # Configuration (Constants) for BIPA
+    # configatron for BIPA
     configatron.rep_pid   = 100
     configatron.resume    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
     configatron.max_fork  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
@@ -99,12 +99,12 @@ Rails::Initializer.run do |config|
     configatron.pdb_entry_file  = "./derived_data/pdb_entry_type.txt"
     configatron.pdb_dir         = Rails.root.join("public/pdb")
 
-    configatron.scop_uri        = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
+    configatron.scop_uri        = "http://scop.mrc-lmb.cam.aconfigatron.uk/scop/parse/"
     configatron.scop_dir        = Rails.root.join("public/scop")
     configatron.scop_pdb_dir    = Pathname.new("~/BiO/Store/SCOP/pdbstyle").expand_path
     configatron.true_scop_classes = %w[a b c d e f g]
 
-    configatron.prescop_uri     = "http://www.mrc-lmb.cam.ac.uk/agm/pre-scop/parseable/"
+    configatron.prescop_uri     = "http://www.mrc-lmb.cam.aconfigatron.uk/agm/pre-scop/parseable/"
     configatron.prescop_dir     = Rails.root.join("public/pre-scop")
 
     configatron.ncbi_ftp        = "ftp.ncbi.nih.gov"

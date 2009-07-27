@@ -2,7 +2,7 @@ namespace :bipa do
   namespace :fetch do
 
     desc "Download protein-nucleic acid complexes from PDB ftp"
-    task :pdb_remote => [:environment] do
+    task :pdbremote => [:environment] do
 
       refresh_dir configatron.pdb_dir
 
@@ -31,39 +31,34 @@ namespace :bipa do
       system "gzip -d *.gz"
       chdir cwd
 
-      $logger.info "Unzipping downloaded PDB files: done"
+      $logger.info ">>> Unzipping downloaded PDB files: done"
     end
 
 
     desc "Copy protein-nucleic acid complexes from local mirror"
-    task :pdb_local => [:environment] do
+    task :pdblocal => [:environment] do
 
       refresh_dir configatron.pdb_dir
-      pna_complexes = []
+      pdb_codes = []
 
       IO.foreach(File.join(configatron.pdb_mirror_dir, configatron.pdb_entry_file)) do |line|
         pdb_code, entry_type, exp_method = line.chomp.split(/\s+/)
-        pna_complexes << pdb_code if entry_type == "prot-nuc"
+        pdb_codes << pdb_code if entry_type == "prot-nuc"
       end
 
       missings = []
-      fmanager = ForkManager.new(configatron.max_fork)
 
-      fmanager.manage do
-        pna_complexes.each_with_index do |pdb_code, i|
-          fmanager.fork do
-            pdb_file = File.join(configatron.pdb_mirror_dir, "./data/structures/all/pdb/pdb#{pdb_code}.ent.gz")
+      pdb_codes.forkify(configatron.max_fork) do |pdb_code|
+        pdb_file = File.join(configatron.pdb_mirror_dir, "./data/structures/all/pdb/pdb#{pdb_code}.ent.gz")
 
-            if File.size?(pdb_file)
-              system "gzip -cd #{pdb_file} > #{File.join(configatron.pdb_dir, pdb_code + '.pdb')}"
-              $logger.info ">>> Unzipping #{pdb_file} (#{i + 1}/#{pna_complexes.size}): done"
-            else
-              missings << pdb_code
-            end
-          end
+        if File.size?(pdb_file)
+          system "gzip -cd #{pdb_file} > #{File.join(configatron.pdb_dir, pdb_code + '.pdb')}"
+          $logger.info ">>> Unzipping #{pdb_file}: done"
+        else
+          missings << pdb_code
         end
       end
-      $logger.info ">>> Total: #{pna_complexes.size - missings.size} files.\n" + "Missing: #{missings.size} files"
+      $logger.info ">>> Total: #{pdb_codes.size - missings.size} files.\n" + "Missing: #{missings.size} files"
     end
 
 
@@ -118,7 +113,7 @@ namespace :bipa do
 
 
     desc "Fetch NCBI taxonomy files"
-    task :ncbi_taxonomy => [:environment] do
+    task :ncbitax => [:environment] do
 
       refresh_dir configatron.taxonomy_dir
 
@@ -128,7 +123,6 @@ namespace :bipa do
         ftp.login "anonymous"
         ftp.chdir "/pub/taxonomy/"
         ftp.getbinaryfile("./taxdump.tar.gz", File.join(configatron.taxonomy_dir, 'taxdump.tar.gz'))
-
         $logger.info ">>> Downloading taxdump.tar.gz: done"
       end
 
@@ -136,7 +130,6 @@ namespace :bipa do
       chdir configatron.taxonomy_dir
       system "tar xvzf *.tar.gz"
       chdir cwd
-
       $logger.info ">>> Uncompressing taxdump.tar.gz: done"
     end
 
