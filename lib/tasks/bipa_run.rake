@@ -264,19 +264,15 @@ namespace :bipa do
             }
           )
 
-          sunids  = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-
+          sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
           sunids.each do |sunid|
-            next if pfm.start(sunid)
-
             cwd       = pwd
             fam_dir   = configatron.family_dir.join("rep", na, sunid.to_s)
             pdb_files = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
 
             if pdb_files.size < 2
               $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{fam_dir}"
-              pfm.finish(255)
-              #next
+              next
             end
 
             chdir fam_dir
@@ -294,14 +290,17 @@ namespace :bipa do
                 next
               end
 
+              pfm.start(sunid) and next
+
               system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
               system "mv salign.ali salign#{gi}.ali"
               system "mv salign.pap salign#{gi}.pap"
               $logger.info ">>> SALIGN with group, #{gi} from representative set of #{na.upcase}-binding SCOP family, #{sunid}: done"
+
+              pfm.finish(0)
             end
 
             chdir cwd
-            pfm.finish(0)
           end
           pfm.wait_all_children
         end
@@ -313,7 +312,7 @@ namespace :bipa do
 
         %w[dna rna].each do |na|
           sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          sunids.forkify(:procs => configatron.max_fork, :method => :pool) do |sunid|
+          sunids.forkify(:procs => configatron.max_fork) do |sunid|
             cwd     = pwd
             fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
 
