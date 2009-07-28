@@ -256,7 +256,6 @@ namespace :bipa do
       desc "Run SALIGN for representative PDB files for each SCOP Family"
       task :repscop => [:environment] do
 
-
         %w[dna rna].each do |na|
           pfm = Parallel::ForkManager.new(configatron.max_fork)
           pfm.run_on_finish(
@@ -276,7 +275,7 @@ namespace :bipa do
 
             if pdb_files.size < 2
               $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{fam_dir}"
-              pfm.finish(0)
+              pfm.finish(255)
               #next
             end
 
@@ -314,10 +313,7 @@ namespace :bipa do
 
         %w[dna rna].each do |na|
           sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          config = ActiveRecord::Base.remove_connection
-
-          sunids.forkify(configatron.max_fork) do |sunid, i|
-            ActiveRecord::Base.establish_connection(config)
+          sunids.forkify(:procs => configatron.max_fork, :method => :pool) do |sunid|
             cwd     = pwd
             fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
 

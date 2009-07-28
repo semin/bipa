@@ -150,6 +150,7 @@ Rails::Initializer.run do |config|
     configatron.usr_res         = Rails.root.join("tmp", "interface_similarities.txt")
 
     # for custom libraries in RAILS_ROOT/lib
+    require 'forkify'
     require 'matrix'
     require 'bio_extensions'
     require 'math_extensions'
