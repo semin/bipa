@@ -257,32 +257,32 @@ namespace :bipa do
           %w[dna rna].each do |na|
             sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
             sunids.each do |sunid|
-              cwd       = pwd
-              fam_dir   = configatron.family_dir.join("rep", na, sunid.to_s)
-              pdbfiles = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
+              cwd     = pwd
+              famdir  = configatron.family_dir.join("rep", na, sunid.to_s)
+              pdbs    = Dir[famdir.join("*.pdb").to_s].map { |p| File.basename(p) }
 
-              if pdbfiles.size < 2
-                $logger.warn "!!! Only #{pdbfiles.size} PDB structure detected in #{fam_dir}"
+              if pdbs.size < 2
+                $logger.warn "!!! Only #{pdbs.size} PDB structure detected in #{famdir}"
                 next
               end
 
-              chdir fam_dir
+              chdir famdir
 
               # single linkage clustering using TM-score
-              clusters = Bipa::Tmalign.single_linkage_clustering(pdbfiles.combination(1).to_a)
-              clusters.each_with_index do |group, gi|
-                if group.size < 2
-                  $logger.warn "!!! Only #{group.size} PDB structure detected in group, #{gi} in #{fam_dir}"
+              clsts = Bipa::Tmalign.single_linkage_clustering(pdbs.combination(1).to_a)
+              clsts.each_with_index do |grp, gi|
+                if grp.size < 2
+                  $logger.warn "!!! Only #{grp.size} PDB structure detected in group, #{gi} in #{famdir}"
                   next
                 end
 
-                if File.exists?(File.join(fam_dir, "salign#{gi}.ali")) and File.exists?(File.join(fam_dir, "salign#{gi}.pap"))
-                  $logger.warn "!!! Skipped group, #{gi} in #{fam_dir}"
+                if File.exists?(File.join(famdir, "salign#{gi}.ali")) and File.exists?(File.join(famdir, "salign#{gi}.pap"))
+                  $logger.warn "!!! Skipped group, #{gi} in #{famdir}"
                   next
                 end
 
                 fm.fork do
-                  system "salign #{group.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
+                  system "salign #{grp.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
                   system "mv salign.ali salign#{gi}.ali"
                   system "mv salign.pap salign#{gi}.pap"
                   $logger.info ">>> SALIGN with group, #{gi} from representative set of #{na.upcase}-binding SCOP family, #{sunid}: done"
@@ -304,22 +304,22 @@ namespace :bipa do
             sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
             sunids.each do |sunid|
               cwd     = pwd
-              fam_dir = configatron.family_dir.join("sub", na, sunid.to_s)
+              famdir  = configatron.family_dir.join("sub", na, sunid.to_s)
 
-              Dir[fam_dir.join("*").to_s].each do |subfam_dir|
-                pdbfiles = Dir[File.join(subfam_dir, "*.pdb")]
+              Dir[famdir.join("*").to_s].each do |subfamdir|
+                pdbs = Dir[File.join(subfamdir, "*.pdb")]
 
-                if pdbfiles.size < 2
-                  $logger.warn "!!! Only #{pdbfiles.size} PDB structure detected in #{subfam_dir}"
+                if pdbs.size < 2
+                  $logger.warn "!!! Only #{pdbs.size} PDB structure detected in #{subfamdir}"
                   next
                 end
 
-                if File.exists?(File.join(subfam_dir, "salign.ali")) and File.exists?(File.join(subfam_dir, "salign.pap"))
-                  $logger.warn "!!! Skipped #{subfam_dir}"
+                if File.exists?(File.join(subfamdir, "salign.ali")) and File.exists?(File.join(subfamdir, "salign.pap"))
+                  $logger.warn "!!! Skipped #{subfamdir}"
                   next
                 end
 
-                chdir subfam_dir
+                chdir subfamdir
 
                 fm.fork do
                   system "salign *.pdb 1>salign.stdout 2>salign.stderr"

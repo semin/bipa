@@ -6,8 +6,8 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         klass = "#{na.capitalize}BindingSubfamily".constantize
-        klass.all.each do |subfamily|
-          rep = subfamily.representative
+        klass.all.each do |subfam|
+          rep = subfam.representative
           unless rep.nil?
             rep.send("rep_#{na}=", true)
             rep.save!
@@ -15,9 +15,9 @@ namespace :bipa do
               anc.send("rep_#{na}=", true)
               anc.save!
             end
-            $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfamily.id}: done"
+            $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfam.id}: done"
           else
-            $logger.warn "!!! No representative structure for #{klass}, #{subfamily.id}"
+            $logger.warn "!!! No representative structure for #{klass}, #{subfam.id}"
           end
         end
       end
@@ -25,32 +25,40 @@ namespace :bipa do
 
 
     desc "Update atoms' and residues' DNA/RNA interaction counts"
-    task :intcnt => [:environment] do
+    task :intcnts => [:environment] do
 
-      AaResidue.find_in_batches do |group|
-        ids     = group.map(&:id)
-        config  = ActiveRecord::Base.remove_connection
-        ids.forkify(configatron.max_fork) do |id|
-          ActiveRecord::Base.establish_connection(config)
-          aar = AaResidue.find(id)
-          %w[dna rna].each do |na|
-            aar.atoms.each do |atm|
-              atm.send("hbonds_#{na}_as_donor_count=",    atm.hbonds_as_donor.select { |b| b.acceptor.send("#{na}?") }.size)
-              atm.send("hbonds_#{na}_as_acceptor_count=", atm.hbonds_as_acceptor.select { |b| b.donor.send("#{na}?") }.size)
-              atm.send("whbonds_#{na}_count=",            atm.whbonds.select { |b| b.whbonding_atm.send("#{na}?") }.size)
-              atm.send("vdw_contacts_#{na}_count=",       atm.vdw_contacts.select { |b| b.vdw_contacting_atm.send("#{na}?") }.size)
-              atm.save!
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        AaResidue.find_in_batches do |grp|
+          ids   = grp.map(&:id)
+          conf  = ActiveRecord::Base.remove_connection
+
+          fm.fork do
+            ActiveRecord::Base.establish_connection(conf)
+
+            ids.each do |id|
+              aar = AaResidue.find(id)
+              %w[dna rna].each do |na|
+                aar.atoms.each do |atm|
+                  atm.send("hbonds_#{na}_as_donor_count=",    atm.hbonds_as_donor.select { |b| b.acceptor.send("#{na}?") }.size)
+                  atm.send("hbonds_#{na}_as_acceptor_count=", atm.hbonds_as_acceptor.select { |b| b.donor.send("#{na}?") }.size)
+                  atm.send("whbonds_#{na}_count=",            atm.whbonds.select { |b| b.whbonding_atom.send("#{na}?") }.size)
+                  atm.send("vdw_contacts_#{na}_count=",       atm.vdw_contacts.select { |b| b.vdw_contacting_atom.send("#{na}?") }.size)
+                  atm.save!
+                end
+    #            aar.send("hbonds_#{na}_as_donor_count=",    aar.atoms.sum(:"hbonds_#{na}_as_donor_count"))
+    #            aar.send("hbonds_#{na}_as_acceptor_count=", aar.atoms.sum(:"hbonds_#{na}_as_acceptor_count"))
+    #            aar.send("whbonds_#{na}_count=",            aar.atoms.sum(:"whbonds_#{na}_count"))
+    #            aar.send("vdw_contacts_#{na}_count=",       aar.atoms.sum(:"vdw_contacts_#{na}_count"))
+    #            aar.save!
+              end
+
             end
-#            aar.send("hbonds_#{na}_as_donor_count=",    aar.atoms.sum(:"hbonds_#{na}_as_donor_count"))
-#            aar.send("hbonds_#{na}_as_acceptor_count=", aar.atoms.sum(:"hbonds_#{na}_as_acceptor_count"))
-#            aar.send("whbonds_#{na}_count=",            aar.atoms.sum(:"whbonds_#{na}_count"))
-#            aar.send("vdw_contacts_#{na}_count=",       aar.atoms.sum(:"vdw_contacts_#{na}_count"))
-#            aar.save!
+            $logger.info ">>> Updating atomic interaction counts for #{grp.size} residues: done"
+            ActiveRecord::Base.remove_connection
           end
-          $logger.info ">>> Counting atomic interactions for #{aar.class}, #{id}: done"
-          ActiveRecord::Base.remove_connection
+          ActiveRecord::Base.establish_connection(conf)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -58,88 +66,99 @@ namespace :bipa do
     desc "Update ASA related fields for 'residues' table"
     task :resasa => [:environment] do
 
-      pdb_codes = Structure.all.map(&:pdb_code)
-      config    = ActiveRecord::Base.remove_connection
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        pdbs = Structure.all.map(&:pdb_code)
+        conf = ActiveRecord::Base.remove_connection
 
-      pdb_codes.forkify(configatron.max_fork) do |pdb_code|
-        ActiveRecord::Base.establish_connection(config)
-        structure = Structure.find_by_pdb_code(pdb_code)
-        structure.models.first.std_residues.each do |residue|
-          %w[unbound bound delta].each do |state|
-            residue.send("#{state}_asa=", residue.send("calculate_#{state}_asa"))
-            residue.save!
+        pdbs.each do |pdb|
+          fm.fork do
+            ActiveRecord::Base.establish_connection(conf)
+
+            s = Structure.find_by_pdb_code(pdb)
+            s.models.first.std_residues.each do |r|
+              %w[unbound bound delta].each do |state|
+                r.send("#{state}_asa=", r.send("calculate_#{state}_asa"))
+                r.save!
+              end
+            end
+            $logger.info ">>> Updating residue ASA fields for #{pdb_code}: done"
+            ActiveRecord::Base.remove_connection
           end
         end
-        $logger.info ">>> Updating residue ASA fields for #{pdb_code}: done"
-        ActiveRecord::Base.remove_connection
+        ActiveRecord::Base.establish_connection(conf)
       end
-      ActiveRecord::Base.establish_connection(config)
     end
 
 
     desc "Update secondary fields for interfaces table"
     task :intsec => [:environment] do
 
-      %w[dna rna].each do |na|
-        nas     = "Bipa::Constants::NucleicAcids::#{na.capitalize}::Residues::STANDARD".constantize
-        int_ids = "Domain#{na.capitalize}Interface".constantize.all.map(&:id)
-        config  = ActiveRecord::Base.remove_connection
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          nas   = "Bipa::Constants::NucleicAcids::#{na.capitalize}::Residues::STANDARD".constantize
+          ids   = "Domain#{na.capitalize}Interface".constantize.all.map(&:id)
+          conf  = ActiveRecord::Base.remove_connection
 
-        interface_ids.forkify(configatron.max_fork) do |id|
-          ActiveRecord::Base.establish_connection(config)
+          ids.each do |id|
+            fm.fork do
+              ActiveRecord::Base.establish_connection(conf)
 
-          int = DomainInterface.find(id)
-          int.update_attribute :asa,                      int.calculate_asa
-          int.update_attribute :percent_asa,              int.calculate_percent_asa
-          int.update_attribute :polarity,                 int.calculate_polarity
-          int.update_attribute :atoms_count,              int.atoms.length
-          int.update_attribute :residues_count,           int.residues.length
-          int.update_attribute :vdw_contacts_count,       int.vdw_contacts.length
-          int.update_attribute :whbonds_count,            int.whbonds.length
-          int.update_attribute :hbonds_as_donor_count,    int.hbonds_as_donor.length
-          int.update_attribute :hbonds_as_acceptor_count, int.hbonds_as_acceptor.length
-          int.update_attribute :hbonds_count,             int.hbonds_as_donor.length + int.hbonds_as_acceptor.length
-
-          AminoAcids::Residues::STANDARD.each do |aa|
-            int.update_attribute :"residue_propensity_of_#{aa.downcase}", int.calculate_residue_propensity_of(aa)
-            int.update_attribute :"residue_percentage_of_#{aa.downcase}", int.calculate_residue_percentage_of(aa)
-          end
-          Sses::ALL.each do |sse|
-            int.update_attribute :"sse_propensity_of_#{sse.downcase}", int.calculate_sse_propensity_of(sse)
-            int.update_attribute :"sse_percentage_of_#{sse.downcase}", int.calculate_sse_percentage_of(sse)
-          end
-          %w[hbond whbond vdw_contact].each do |intact|
-            AminoAcids::Residues::STANDARD.each do |aa|
-              int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids=",
-                            int.send("calculate_frequency_of_#{intact}_between_nucleic_acids_and_", aa))
-            end
-
-            nas.each do |na_residue|
-              int.send("frequency_of_#{intact}_between_amino_acids_and_#{na_residue.downcase}=",
-                            int.send("calculate_frequency_of_#{intact}_between_amino_acids_and_", na_residue))
+              int = DomainInterface.find(id)
+              int.update_attribute :asa,                      int.calculate_asa
+              int.update_attribute :percent_asa,              int.calculate_percent_asa
+              int.update_attribute :polarity,                 int.calculate_polarity
+              int.update_attribute :atoms_count,              int.atoms.length
+              int.update_attribute :residues_count,           int.residues.length
+              int.update_attribute :vdw_contacts_count,       int.vdw_contacts.length
+              int.update_attribute :whbonds_count,            int.whbonds.length
+              int.update_attribute :hbonds_as_donor_count,    int.hbonds_as_donor.length
+              int.update_attribute :hbonds_as_acceptor_count, int.hbonds_as_acceptor.length
+              int.update_attribute :hbonds_count,             int.hbonds_as_donor.length + int.hbonds_as_acceptor.length
 
               AminoAcids::Residues::STANDARD.each do |aa|
-                int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{na_residue.downcase}=",
-                              int.send("calculate_frequency_of_#{intact}_between", aa, na_residue))
+                int.update_attribute :"residue_propensity_of_#{aa.downcase}", int.calculate_residue_propensity_of(aa)
+                int.update_attribute :"residue_percentage_of_#{aa.downcase}", int.calculate_residue_percentage_of(aa)
               end
-            end
-
-            %w[sugar phosphate].each do |moiety|
-              int.send("frequency_of_#{intact}_between_amino_acids_and_#{moiety}=",
-                AminoAcids::Residues::STANDARD.inject(0) { |sum, aa| sum + int.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa) })
-
-              AminoAcids::Residues::STANDARD.each do |aa|
-                int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}=",
-                              int.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa))
+              Sses::ALL.each do |sse|
+                int.update_attribute :"sse_propensity_of_#{sse.downcase}", int.calculate_sse_propensity_of(sse)
+                int.update_attribute :"sse_percentage_of_#{sse.downcase}", int.calculate_sse_percentage_of(sse)
               end
+              %w[hbond whbond vdw_contact].each do |intact|
+                AminoAcids::Residues::STANDARD.each do |aa|
+                  int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids=",
+                                int.send("calculate_frequency_of_#{intact}_between_nucleic_acids_and_", aa))
+                end
+
+                nas.each do |na_residue|
+                  int.send("frequency_of_#{intact}_between_amino_acids_and_#{na_residue.downcase}=",
+                                int.send("calculate_frequency_of_#{intact}_between_amino_acids_and_", na_residue))
+
+                  AminoAcids::Residues::STANDARD.each do |aa|
+                    int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{na_residue.downcase}=",
+                                  int.send("calculate_frequency_of_#{intact}_between", aa, na_residue))
+                  end
+                end
+
+                %w[sugar phosphate].each do |moiety|
+                  int.send("frequency_of_#{intact}_between_amino_acids_and_#{moiety}=",
+                    AminoAcids::Residues::STANDARD.inject(0) { |sum, aa| sum + int.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa) })
+
+                  AminoAcids::Residues::STANDARD.each do |aa|
+                    int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}=",
+                                  int.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa))
+                  end
+                end
+              end
+
+              int.save!
+              $logger.info ">>> Updating secondary fields for #{int.class}, #{int.id}: done"
+              ActiveRecord::Base.remove_connection
             end
           end
-
-          int.save!
-          $logger.info ">>> Updating secondary fields for #{int.class}, #{int.id}: done"
-          ActiveRecord::Base.remove_connection
+          ActiveRecord::Base.establish_connection(conf)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -147,118 +166,107 @@ namespace :bipa do
     desc "Update JOY templates for alignments"
     task :joytems => [:environment] do
 
-      %w[dna rna].each do |na|
-        config      = ActiveRecord::Base.remove_connection
-        fam_dirs    = Dir[configatron.family_dir.join("rep*", na, "*").to_s]
-        subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red*", "*").to_s]
-        dirs        = fam_dirs + subfam_dirs
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          conf  = ActiveRecord::Base.remove_connection
+          fams  = Dir[configatron.family_dir.join("rep", na, "*").to_s]
+          subs  = Dir[configatron.family_dir.join("sub", na, "*", "*").to_s]
+          dirs  = fams + subs
 
-        dirs.forkify(configatron.max_fork) do |dir|
-          ActiveRecord::Base.establish_connection(config)
+          dirs.each do |dir|
+            fm.fork do
+              ActiveRecord::Base.establish_connection(conf)
 
-          tem_files = Dir[File.join(dir, "salign*_mod.tem").to_s]
+              tems = Dir[File.join(dir, "salign*_mod.tem").to_s]
 
-          if tem_files.nil? or tem_files.size < 1
-            $logger.warn "!!! Cannot find JOY template file(s) in #{dir}"
-            ActiveRecord::Base.remove_connection
-            next
-          end
+              if tems.empty?
+                $logger.warn "!!! Cannot find JOY template file(s) in #{dir}"
+                ActiveRecord::Base.remove_connection
+                next
+              end
 
-          tem_files.each do |tem_file|
-            basename      = File.basename(tem_file, ".tem")
-            new_tem_file  = File.join(dir, "#{basename}_na.tem")
-            cp tem_file, new_tem_file
+              tems.each do |tem|
+                bsn     = File.basename(tem, ".tem")
+                newtem  = File.join(dir, "#{bsn}_na.tem")
+                cp tem, newtem
 
-            flat_file = Bio::FlatFile.auto(tem_file)
-            flat_file.each_entry do |entry|
-              if entry.seq_type == "P1" and entry.definition == "sequence"
-                domain = ScopDomain.find_by_sunid(entry.entry_id)
+                bio = Bio::FlatFile.auto(tem)
+                bio.each_entry do |entry|
+                  if entry.seq_type == "P1" and entry.definition == "sequence"
+                    dom = ScopDomain.find_by_sunid(entry.entry_id)
 
-                if domain.nil?
-                  $logger.warn "!!! Cannot find #{entry.entry_id} of #{tem_file} from BIPA"
-                  next
-                end
-
-                bind_tem        = []
-                hbond_tem       = []
-                whbond_tem      = []
-                vdw_contact_tem = []
-                na_binding_tem  = []
-                db_residues     = domain.aa_residues
-                ff_residues     = entry.seq.split("")
-
-                di = 0
-                ff_residues.each_with_index do |res, fi|
-                  break if fi >= db_residues.size
-
-                  if fi != 0 and fi % 75 == 0
-                    bind_tem        << "\n"
-                    hbond_tem       << "\n"
-                    whbond_tem      << "\n"
-                    vdw_contact_tem << "\n"
-                    na_binding_tem  << "\n"
-                  end
-
-                  if (res == "-")
-                    bind_tem        << "-"
-                    hbond_tem       << "-"
-                    whbond_tem      << "-"
-                    vdw_contact_tem << "-"
-                    na_binding_tem  << "-"
-                  elsif (db_residues[di].one_letter_code == res)
-                    db_residues[di].send("binding_#{na}?")         ? bind_tem        << "T" : bind_tem         << "F"
-                    db_residues[di].send("hbonding_#{na}?")        ? hbond_tem       << "T" : hbond_tem        << "F"
-                    db_residues[di].send("whbonding_#{na}?")       ? whbond_tem      << "T" : whbond_tem       << "F"
-                    db_residues[di].send("vdw_contacting_#{na}?")  ? vdw_contact_tem << "T" : vdw_contact_tem  << "F"
-                    if hbond_tem.last == "T"
-                      na_binding_tem << "H"
-                    elsif whbond_tem.last == "T"
-                      na_binding_tem << "W"
-                    elsif vdw_contact_tem.last == "T"
-                      na_binding_tem << "V"
-                    else
-                      na_binding_tem << "N"
+                    if dom.nil?
+                      $logger.warn "!!! Cannot find #{entry.entry_id} of #{tem} from BIPA"
+                      next
                     end
-                    di += 1
-                  else
-                    bind_tem        << "X"
-                    hbond_tem       << "X"
-                    whbond_tem      << "X"
-                    vdw_contact_tem << "X"
-                    na_binding_tem  << "X"
-                    $logger.warn  "!!! Unmatched residue at #{di} in #{domain.sid} in #{dir}: " +
-                                      "BIPA: #{db_residues[di].one_letter_code} <=> TEM: #{res}"
+
+                    bind, hbond, whbond, vdw, nabind = [], [], [], [], []
+                    dbrs = dom.aa_residues
+                    ffrs = entry.seq.split("")
+
+                    di = 0
+                    ffrs.each_with_index do |res, fi|
+                      break if fi >= dbrs.size
+
+                      if fi != 0 and fi % 75 == 0
+                        bind << "\n"; hbond << "\n"; whbond << "\n"; vdw << "\n"; nabind << "\n"
+                      end
+
+                      if res == "-"
+                        bind << "-"; hbond << "-"; whbond << "-"; vdw << "-"; nabind << "-"
+                      elsif dbrs[di].one_letter_code == res
+                        dbrs[di].send("binding_#{na}?")         ? bind    << "T" : bind   << "F"
+                        dbrs[di].send("hbonding_#{na}?")        ? hbond   << "T" : hbond  << "F"
+                        dbrs[di].send("whbonding_#{na}?")       ? whbond  << "T" : whbond << "F"
+                        dbrs[di].send("vdw_contacting_#{na}?")  ? vdw     << "T" : vdw    << "F"
+                        if hbond.last == "T"
+                          nabind << "H"
+                        elsif whbond.last == "T"
+                          nabind << "W"
+                        elsif vdw.last == "T"
+                          nabind << "V"
+                        else
+                          nabind << "N"
+                        end
+                        di += 1
+                      else
+                        bind << "X"; hbond << "X"; whbond << "X"; vdw << "X"; nabind << "X"
+                        $logger.warn  "!!! Unmatched residue at #{di} in #{domain.sid} in #{dir}: " +
+                                      "BIPA: #{dbrs[di].one_letter_code} <=> TEM: #{res}"
+                      end
+                    end
+
+                    File.open(newtem, "a") do |f|
+                      f.puts ">P1;#{entry.entry_id}"
+                      f.puts "#{na.upcase} interface"
+                      f.puts bind.join + "*"
+
+                      f.puts ">P1;#{entry.entry_id}"
+                      f.puts "hydrogen bond to #{na.upcase}"
+                      f.puts hbond.join + "*"
+
+                      f.puts ">P1;#{entry.entry_id}"
+                      f.puts "water-mediated hydrogen bond to #{na.upcase}"
+                      f.puts whbond.join + "*"
+
+                      f.puts ">P1;#{entry.entry_id}"
+                      f.puts "van der Waals contact to #{na.upcase}"
+                      f.puts vdw.join + "*"
+
+                      f.puts ">P1;#{entry.entry_id}"
+                      f.puts "#{na.upcase}-binding type"
+                      f.puts nabind.join + "*"
+                    end
                   end
-                end
-
-                File.open(new_tem_file, "a") do |file|
-                  file.puts ">P1;#{entry.entry_id}"
-                  file.puts "#{na.upcase} interface"
-                  file.puts bind_tem.join + "*"
-
-                  file.puts ">P1;#{entry.entry_id}"
-                  file.puts "hydrogen bond to #{na.upcase}"
-                  file.puts hbond_tem.join + "*"
-
-                  file.puts ">P1;#{entry.entry_id}"
-                  file.puts "water-mediated hydrogen bond to #{na.upcase}"
-                  file.puts whbond_tem.join + "*"
-
-                  file.puts ">P1;#{entry.entry_id}"
-                  file.puts "van der Waals contact to #{na.upcase}"
-                  file.puts vdw_contact_tem.join + "*"
-
-                  file.puts ">P1;#{entry.entry_id}"
-                  file.puts "#{na.upcase}-binding type"
-                  file.puts na_binding_tem.join + "*"
                 end
               end
+              $logger.info ">>> Updating JOY template(s) in #{dir}: done"
+              ActiveRecord::Base.remove_connection
             end
           end
-          $logger.info ">>> Updating JOY template(s) in #{dir}: done"
-          ActiveRecord::Base.remove_connection
+          ActiveRecord::Base.establish_connection(conf)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -329,52 +337,59 @@ namespace :bipa do
     desc "Update cssed_sequence for all sequences"
     task :seqcss => [:environment] do
 
-      seq_ids = Sequence.all.map(&:id)
-      config  = ActiveRecord::Base.remove_connection
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        ids   = Sequence.all.map(&:id)
+        conf  = ActiveRecord::Base.remove_connection
 
-      seq_ids.forkify(configatron.max_fork) do |id|
-        ActiveRecord::Base.establish_connection(config)
+        ids.each do |id|
+          fm.fork do
+            ActiveRecord::Base.establish_connection(conf)
 
-        seq = Sequence.find(id)
+            seq = Sequence.find(id)
 
-        unless seq.cssed_sequence.nil?
-          $logger.info ">>> Skipped Sequence, #{seq.id}"
-          ActiveRecord::Base.remove_connection
-          next
+            unless seq.cssed_sequence.nil?
+              $logger.info ">>> Skipped Sequence, #{seq.id}"
+              ActiveRecord::Base.remove_connection
+              next
+            end
+
+            seq.cssed_sequence = seq.formatted_sequence
+            seq.save!
+            $logger.info ">>> Updating cssed_sequence of Sequence, #{seq.id}: done"
+            ActiveRecord::Base.remove_connection
+          end
         end
-
-        seq.cssed_sequence = seq.formatted_sequence
-        seq.save!
-        $logger.info ">>> Updating cssed_sequence of Sequence, #{seq.id}: done"
-        ActiveRecord::Base.remove_connection
+        ActiveRecord::Base.establish_connection(conf)
       end
-      ActiveRecord::Base.establish_connection(config)
     end
 
 
     desc "Update cssed_sequence for all chains"
     task :chncss => [:environment] do
 
-      chn_ids = AaChain.all.map(&:id)
-      config  = ActiveRecord::Base.remove_connection
+      ids   = AaChain.all.map(&:id)
+      conf  = ActiveRecord::Base.remove_connection
 
-      chn_ids.forkify(configatron.max_fork) do |id|
-        ActiveRecord::Base.establish_connection(config)
+      ids.echn do |id|
+        fm.fork do
+          ActiveRecord::Base.establish_connection(conf)
 
-        chn = AaChain.find(id)
+          chn = AaChain.find(id)
 
-        unless chn.cssed_sequence.nil?
-          $logger.info ">>> Skipped Chain, #{chn.id}"
+          unless chn.cssed_sequence.nil?
+            $logger.info ">>> Skipped Chain, #{chn.id}"
+            ActiveRecord::Base.remove_connection
+            next
+          end
+
+          chn.cssed_sequence = chn.formatted_sequence
+          chn.save!
+          $logger.info ">>> Updating cssed_sequence of Chain, #{chn.id}: done"
           ActiveRecord::Base.remove_connection
-          next
         end
-
-        chn.cssed_sequence = chn.formatted_sequence
-        chn.save!
-        $logger.info ">>> Updating cssed_sequence of Chain, #{chn.id}: done"
-        ActiveRecord::Base.remove_connection
       end
-      ActiveRecord::Base.establish_connection(config)
+      ActiveRecord::Base.establish_connection(conf)
     end
 
   end

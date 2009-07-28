@@ -705,7 +705,7 @@ namespace :bipa do
                 bio.each_entry do |entry|
                   next if entry.seq_type != "P1"
 
-                  domain          = ScopDomain.find_by_sunid(File.basename(entry.entry_id, ".pdb"))
+                  dom          = ScopDomain.find_by_sunid(File.basename(entry.entry_id, ".pdb"))
                   db_residues     = domain.aa_residues
                   ff_residues     = entry.seq.split("")
                   sequence        = alignment.sequences.create
