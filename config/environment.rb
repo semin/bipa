@@ -15,13 +15,12 @@ Rails::Initializer.run do |config|
   config.gem 'narray'
   config.gem 'andand'
   config.gem 'hpricot'
-  config.gem 'forkify'
   config.gem 'configatron'
-  config.gem 'fork_manager'
   config.gem 'ar-extensions'
   config.gem 'composite_primary_keys'
   config.gem 'RubyInline', :lib => 'inline'
   config.gem 'googlecharts', :lib => 'gchart'
+  config.gem 'parallel-forkmanager', :lib => 'parallel/forkmanager'
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers

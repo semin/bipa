@@ -256,24 +256,33 @@ namespace :bipa do
       desc "Run SALIGN for representative PDB files for each SCOP Family"
       task :repscop => [:environment] do
 
-        %w[dna rna].each do |na|
-          sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          config = ActiveRecord::Base.remove_connection
 
-          sunids.forkify(configatron.max_fork) do |sunid|
-            ActiveRecord::Base.establish_connection(config)
+        %w[dna rna].each do |na|
+          pfm = Parallel::ForkManager.new(configatron.max_fork)
+          pfm.run_on_finish(
+            lambda { |pid,exit_code,ident|
+              puts "** PID (#{pid}) for #{ident} exited with code #{exit_code}!"
+            }
+          )
+
+          sunids  = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+
+          sunids.each do |sunid|
+            next if pfm.start(sunid)
+
             cwd       = pwd
             fam_dir   = configatron.family_dir.join("rep", na, sunid.to_s)
             pdb_files = Dir[fam_dir.join("*.pdb").to_s].map { |p| File.basename(p) }
 
             if pdb_files.size < 2
               $logger.warn "!!! Only #{pdb_files.size} PDB structure detected in #{fam_dir}"
-              ActiveRecord::Base.remove_connection
-              next
+              pfm.finish(0)
+              #next
             end
 
-            # single linkage clustering using TM-score
             chdir fam_dir
+
+            # single linkage clustering using TM-score
             clusters = Bipa::Tmalign.single_linkage_clustering(pdb_files.combination(1).to_a)
             clusters.each_with_index do |group, gi|
               if group.size < 2
@@ -291,10 +300,11 @@ namespace :bipa do
               system "mv salign.pap salign#{gi}.pap"
               $logger.info ">>> SALIGN with group, #{gi} from representative set of #{na.upcase}-binding SCOP family, #{sunid}: done"
             end
+
             chdir cwd
-            ActiveRecord::Base.remove_connection
+            pfm.finish(0)
           end
-          ActiveRecord::Base.establish_connection(config)
+          pfm.wait_all_children
         end
       end
 
