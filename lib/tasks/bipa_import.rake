@@ -690,55 +690,56 @@ namespace :bipa do
 
               fam    = ScopFamily.find_by_sunid(sunid)
               famdir = configatron.family_dir.join("rep", na, "#{sunid}")
-              aligns = Dir[fam_dir.join("salign*.ali").to_s]
+              aligns = Dir[famdir.join("salign*.ali").to_s]
 
               if aligns.empty?
-                $logger.warn "!!! Cannot find alignment files in #{fam_dir}"
+                $logger.warn "!!! Cannot find alignment files in #{famdir}"
                 ActiveRecord::Base.remove_connection
                 next
               end
 
               aligns.each do |align|
-                ali = family.send("#{na}_binding_family_alignments").create
+                ali = fam.send("#{na}_binding_family_alignments").create
                 bio = Bio::FlatFile.auto(align)
 
-                bio.each_entry do |entry|
-                  next if entry.seq_type != "P1"
+                bio.each_entry do |ent|
+                  next if ent.seq_type != "P1"
 
-                  dom          = ScopDomain.find_by_sunid(File.basename(entry.entry_id, ".pdb"))
-                  db_residues     = domain.aa_residues
-                  ff_residues     = entry.seq.split("")
-                  sequence        = alignment.sequences.create
-                  sequence.domain = domain
+                  dom   = ScopDomain.find_by_sunid(File.basename(ent.entry_id, ".pdb"))
+                  dbrs  = dom.aa_residues
+                  ffrs  = ent.seq.split("")
+                  seq   = ali.sequences.create
+                  seq.domain = dom
+                  seq.save!
 
                   di = 0
-                  ff_residues.each_with_index do |res, fi|
-                    break if fi >= db_residues.size
-                    column    = alignment.columns.find_or_create_by_number(fi + 1)
-                    position  = sequence.positions.build
-                    if (res == "-")
-                      position.residue_name = res
-                    elsif (db_residues[di].one_letter_code == res)
-                      position.residue      = db_residues[di]
-                      position.residue_name = res
+                  ffrs.each_with_index do |res, fi|
+                    break if fi >= dbrs.size
+                    col = ali.columns.find_or_create_by_number(fi + 1)
+                    pos = seq.positions.create
+                    if res == "-"
+                      pos.residue_name = res
+                    elsif (dbrs[di].one_letter_code == res)
+                      pos.residue      = dbrs[di]
+                      pos.residue_name = res
                       di += 1
                     else
-                      position.residue_name = 'X'
-                      $logger.warn "!!! Mismatch at #{di}, between #{res} and #{db_residues[di].one_letter_code} of #{domain.sid}, #{domain.sunid}"
+                      pos.residue_name = 'X'
+                      $logger.warn "!!! Mismatch at #{di}, between #{res} and #{dbrs[di].one_letter_code} of #{dom.sid}, #{dom.sunid}"
                     end
-                    position.number = fi + 1
-                    position.column = column
-                    position.save!
-                    column.save!
-                  end # ff_residues.each_with_index
-                  sequence.save!
-                end # flat_file.each_entry
-                alignment.save!
+                    pos.number = fi + 1
+                    pos.column = col
+                    pos.save!
+                    col.save!
+                  end
+                  seq.save!
+                end
+                ali.save!
               end
-              $logger.info ">>> Importing alignments for representative sets of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+              $logger.info ">>> Importing alignments for representative sets of #{na.upcase}-binding SCOP family, #{sunid}: done"
               ActiveRecord::Base.remove_connection
-            end # fm.fork
-          end # sunids.each
+            end
+          end
           ActiveRecord::Base.establish_connection(config)
         end
       end
@@ -749,7 +750,6 @@ namespace :bipa do
     task :subaligns => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
-
       fm.manage do
         %w[dna rna].each do |na|
           sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -759,56 +759,57 @@ namespace :bipa do
             fm.fork do
               ActiveRecord::Base.establish_connection(config)
 
-              family      = ScopFamily.find_by_sunid(sunid)
-              fam_dir     = configatron.family_dir.join("sub", na, sunid.to_s)
-              subfam_dirs = Dir[fam_dir.join("*").to_s]
+              fam         = ScopFamily.find_by_sunid(sunid)
+              famdir      = configatron.family_dir.join("sub", na, sunid.to_s)
+              subfamdirs  = Dir[famdir.join("*").to_s]
 
-              subfam_dirs.each do |subfam_dir|
-                align = File.join(subfam_dir, "salign.ali")
+              subfamdirs.each do |subfamdir|
+                align = File.join(subfamdir, "salign.ali")
 
                 if !File.exists? align
-                  $logger.warn "!!! Cannot find an alignment file in #{subfam_dir}"
+                  $logger.warn "!!! Cannot find an alignment file in #{subfamdir}"
                   next
                 end
 
-                klass     = "#{na.capitalize}BindingSubfamily".constantize
-                subfam_id = File.basename(subfam_dir)
-                alignment = klass.find(subfam_id).create_alignment
-                flat_file = Bio::FlatFile.auto(align)
+                klass = "#{na.capitalize}BindingSubfamily".constantize
+                id    = File.basename(subfamdir)
+                ali   = klass.find(id).create_alignment
+                bio   = Bio::FlatFile.auto(align)
 
-                flat_file.each_entry do |entry|
-                  next if entry.seq_type != "P1"
+                bio.each_entry do |ent|
+                  next if ent.seq_type != "P1"
 
-                  domain          = ScopDomain.find_by_sunid(File.basename(entry.entry_id, ".pdb"))
-                  db_residues     = domain.aa_residues
-                  ff_residues     = entry.seq.split("")
-                  sequence        = alignment.sequences.create
-                  sequence.domain = domain
+                  dom   = ScopDomain.find_by_sunid(File.basename(ent.entry_id, ".pdb"))
+                  dbrs  = dom.aa_residues
+                  ffrs  = ent.seq.split("")
+                  seq   = ali.sequences.create
+                  seq.domain = dom
+                  seq.save!
 
                   di = 0
-                  ff_residues.each_with_index do |res, fi|
-                    break if fi >= db_residues.size
+                  ffrs.each_with_index do |res, fi|
+                    break if fi >= dbrs.size
 
-                    column    = alignment.columns.find_or_create_by_number(fi + 1)
-                    position  = sequence.positions.build
+                    col = ali.columns.find_or_create_by_number(fi + 1)
+                    pos = seq.positions.create
                     if (res == "-")
-                      position.residue_name = res
-                    elsif (db_residues[di].one_letter_code == res)
-                      position.residue      = db_residues[di]
-                      position.residue_name = res
+                      pos.residue_name = res
+                    elsif (dbrs[di].one_letter_code == res)
+                      pos.residue      = dbrs[di]
+                      pos.residue_name = res
                       di += 1
                     else
-                      position.residue_name = 'X'
-                      $logger.warn "!!! Mismatch at #{di}, between #{res} and #{db_residues[di].one_letter_code} of #{domain.sid}, #{domain.sunid}"
+                      pos.residue_name = 'X'
+                      $logger.warn "!!! Mismatch at #{di}, between #{res} and #{dbrs[di].one_letter_code} of #{dom.sid}, #{dom.sunid}"
                     end
-                    position.number = fi + 1
-                    position.column = column
-                    position.save!
-                    column.save!
+                    pos.number = fi + 1
+                    pos.column = col
+                    pos.save!
+                    col.save!
                   end
-                  sequence.save!
+                  seq.save!
                 end
-                alignment.save!
+                ali.save!
               end
               $logger.info ">>> Importing subfamily alignments of #{na.upcase}-binding SCOP family, #{sunid}: done"
               ActiveRecord::Base.remove_connection

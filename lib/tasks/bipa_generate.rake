@@ -6,17 +6,17 @@ namespace :bipa do
 
       %w[dna rna].each do |na|
         sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        full_dir  = configatron.family_dir.join("full", na)
+        fulldir  = configatron.family_dir.join("full", na)
         config    = ActiveRecord::Base.remove_connection
 
-        refresh_dir(full_dir) unless configatron.resume
+        refresh_dir(fulldir) unless configatron.resume
 
         sunids.forkify(configatron.max_fork) do |sunid|
           ActiveRecord::Base.establish_connection(config)
           family  = ScopFamily.find_by_sunid(sunid)
-          fam_dir = full_dir.join("#{sunid}")
+          famdir = fulldir.join("#{sunid}")
 
-          mkdir_p fam_dir
+          mkdir_p famdir
 
           domains = family.leaves.select(&:"reg_#{na}")
           domains.each do |domain|
@@ -40,7 +40,7 @@ namespace :bipa do
             end
 
             # Generate PDB file only for the first model in NMR structure using Bio::PDB
-            File.open(fam_dir.join("#{domain.sunid}.pdb"), "w") do |f|
+            File.open(famdir.join("#{domain.sunid}.pdb"), "w") do |f|
               f.puts Bio::PDB.new(IO.read(dom_pdb)).models.first
             end
           end
@@ -56,53 +56,65 @@ namespace :bipa do
     desc "Generate representative set of PDB files for each SCOP Family"
     task :repscop => [:environment] do
 
-      %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        full_dir  = configatron.family_dir.join("full", na)
-        config    = ActiveRecord::Base.remove_connection
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          sunids  = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          fulldir = configatron.family_dir.join("full", na)
+          config  = ActiveRecord::Base.remove_connection
 
-        sunids.forkify(configatron.max_fork) do |sunid|
-          ActiveRecord::Base.establish_connection(config)
-          family  = ScopFamily.find_by_sunid(sunid)
-          rep_dir = configatron.family_dir.join("rep", na)
-          fam_dir = rep_dir.join(sunid.to_s)
-          mkdir_p fam_dir
+          sunids.each do |sunid|
+            fm.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-          subfamilies = family.send("#{na}_binding_subfamilies")
-          subfamilies.each do |subfamily|
-            domain = subfamily.representative
-            next if domain.nil?
+              fam     = ScopFamily.find_by_sunid(sunid)
+              repdir  = configatron.family_dir.join("rep", na)
+              famdir  = repdir.join(sunid.to_s)
 
-            domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
+              mkdir_p famdir
 
-            if !File.size? domain_pdb_file
-              $logger.warn "!!! Cannot find #{domain_pdb_file}"
-              exit 1
-            end
+              subfams = fam.send("#{na}_binding_subfamilies")
+              subfams.each do |subfam|
+                domain = subfam.representative
 
-            # postproces domain pdb file
-            # change HETATM MSE into ATOM MET
-            # remove HETATM * SE   MSE
-            mod_pdb_file = fam_dir.join(domain_pdb_file.basename)
-            File.open(mod_pdb_file, 'w') do |f|
-              IO.foreach(domain_pdb_file) do |l|
-                # HETATM 2017 SE   MSE
-                if l =~ /^HETATM\s+\S+\s+SE\s+MSE/
-                  puts "Omit: #{l.chomp}"
+                next if domain.nil?
+
+                dompdb = fulldir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
+
+                if !File.size? dompdb
+                  $logger.warn "!!! Cannot find #{dompdb}"
                   next
-                # HETATM 2011  N   MSE
-                elsif l =~ /^HETATM(\s+\S+\s+\S+\s+)MSE(.*)$/
-                  f.puts "ATOM  #{$1}MET#{$2}"
-                else
-                  f.puts l.chomp
+                end
+
+                # postproces domain pdb file
+                # change HETATM MSE into ATOM MET
+                # remove HETATM * SE   MSE
+                modpdb = famdir.join(dompdb.basename)
+
+                File.open(modpdb, 'w') do |f|
+                  IO.foreach(dompdb) do |l|
+                    # HETATM 2017 SE   MSE
+                    if l[0..5] == "HETATM" and l[12..13] == "SE" and l[17..19] == "MSE"
+                      $logger.warn "!!! Omit: #{l.chomp}"
+                      next
+                    # HETATM 2011  N   MSE
+                    # HETATM20783  N   MSE
+                    # HETATM  591  N  AMSE
+                    elsif l[0..5] == "HETATM" and l[17..19] == "MSE"
+                      f.puts l.gsub("HETATM", "ATOM").gsub("MSE", "MET").chomp
+                    else
+                      f.puts l.chomp
+                    end
+                  end
                 end
               end
+
+              $logger.info ">>> Generating representative PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done"
+              ActiveRecord::Base.remove_connection
             end
           end
-          $logger.info ">>> Generating representative PDB files for #{na.upcase}-binding SCOP family, #{sunid}: done"
-          ActiveRecord::Base.remove_connection
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 
@@ -110,57 +122,64 @@ namespace :bipa do
     desc "Generate PDB files for each Subfamily of each SCOP Family"
     task :subscop => [:environment] do
 
-      %w[dna rna].each do |na|
-        sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        sub_dir   = configatron.family_dir.join("sub", na)
-        full_dir  = configatron.family_dir.join("full", na)
-        config    = ActiveRecord::Base.remove_connection
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          sunids  = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          subdir  = configatron.family_dir.join("sub", na)
+          fulldir = configatron.family_dir.join("full", na)
+          config  = ActiveRecord::Base.remove_connection
 
-        refresh_dir(sub_dir) unless configatron.resume
+          sunids.each do |sunid|
+            fm.fork do
+              ActiveRecord::Base.establish_connection(config)
 
-        sunids.forkify(configatron.max_fork) do |sunid|
-          ActiveRecord::Base.establish_connection(config)
+              fam     = ScopFamily.find_by_sunid(sunid)
+              famdir  = subdir.join("#{sunid}")
+              subfams = fam.send("#{na}_binding_subfamilies")
 
-          family  = ScopFamily.find_by_sunid(sunid)
-          fam_dir = sub_dir.join("#{sunid}")
-          subfamilies = family.send("#{na}_binding_subfamilies")
-          subfamilies.each do |subfamily|
-            subfam_dir = fam_dir.join(subfamily.id.to_s)
-            mkdir_p subfam_dir
+              subfams.each do |subfam|
+                subfamdir = famdir.join(subfam.id.to_s)
 
-            domains = subfamily.domains
-            domains.each do |domain|
-              domain_pdb_file = full_dir.join(sunid.to_s, domain.sunid.to_s + '.pdb')
+                mkdir_p subfamdir
 
-              if !File.exists?(domain_pdb_file)
-                $logger.warn "!!! SCOP Domain, #{domain.sunid} might be C-alpha only or having 'UNK' residues"
-                next
-              end
+                subfam.domains.each do |dom|
+                  dompdb = fulldir.join(sunid.to_s, dom.sunid.to_s + '.pdb')
 
-              # postproces domain pdb file
-              # change HETATM MSE into ATOM MET
-              # remove HETATM * SE   MSE
-              mod_pdb_file = subfam_dir.join(domain_pdb_file.basename)
-              File.open(mod_pdb_file, 'w') do |f|
-                IO.foreach(domain_pdb_file) do |l|
-                  # HETATM 2017 SE   MSE
-                  if l =~ /^HETATM\s+\S+\s+SE\s+MSE/
-                    puts "Omit: #{l.chomp}"
+                  if !File.exists?(dompdb)
+                    $logger.warn "!!! SCOP Domain, #{dom.sunid} might be C-alpha only or having 'UNK' residues"
                     next
-                  # HETATM 2011  N   MSE
-                  elsif l =~ /^HETATM(\s+\S+\s+\S+\s+)MSE(.*)$/
-                    f.puts "ATOM  #{$1}MET#{$2}"
-                  else
-                    f.puts l.chomp
+                  end
+
+                  # postproces domain pdb file
+                  # change HETATM MSE into ATOM MET
+                  # remove HETATM * SE   MSE
+                  modpdb = subfamdir.join(dompdb.basename)
+
+                  File.open(modpdb, 'w') do |f|
+                    IO.foreach(dompdb) do |l|
+                      # HETATM 2017 SE   MSE
+                      if l[0..5] == "HETATM" and l[12..13] == "SE" and l[17..19] == "MSE"
+                        $logger.warn "!!! Omit: #{l.chomp}"
+                        next
+                      # HETATM 2011  N   MSE
+                      # HETATM20783  N   MSE
+                      # HETATM  591  N  AMSE
+                      elsif l[0..5] == "HETATM" and l[17..19] == "MSE"
+                        f.puts l.gsub("HETATM", "ATOM").gsub("MSE", "MET").chomp
+                      else
+                        f.puts l.chomp
+                      end
+                    end
                   end
                 end
               end
+              $logger.info ">>> Generating PDB files for subfamilies of each #{na.upcase}-binding SCOP family, #{sunid}: done"
+              ActiveRecord::Base.remove_connection
             end
           end
-          $logger.info ">>> Generating PDB files for subfamilies of each #{na.upcase}-binding SCOP family, #{sunid}: done"
-          ActiveRecord::Base.remove_connection
+          ActiveRecord::Base.establish_connection(config)
         end
-        ActiveRecord::Base.establish_connection(config)
       end
     end
 

@@ -276,7 +276,7 @@ namespace :bipa do
                   next
                 end
 
-                if File.exists?(File.join(famdir, "salign#{gi}.ali")) and File.exists?(File.join(famdir, "salign#{gi}.pap"))
+                if File.size?(famdir.join("salign#{gi}.ali")) and File.size?(famdir.join("salign#{gi}.pap"))
                   $logger.warn "!!! Skipped group, #{gi} in #{famdir}"
                   next
                 end
@@ -314,7 +314,7 @@ namespace :bipa do
                   next
                 end
 
-                if File.exists?(File.join(subfamdir, "salign.ali")) and File.exists?(File.join(subfamdir, "salign.pap"))
+                if File.size?(File.join(subfamdir, "salign.ali")) and File.size?(File.join(subfamdir, "salign.pap"))
                   $logger.warn "!!! Skipped #{subfamdir}"
                   next
                 end
@@ -508,57 +508,83 @@ namespace :bipa do
     namespace :joy do
 
       desc "Run JOY for representative SCOP family alignments"
-      task :rep_alignments => [:environment] do
+      task :repaligns => [:environment] do
 
-        %w[dna rna].each do |na|
-          cwd = pwd
-          fam_dirs = Dir[configatron.family_dir.join("rep", na, "*").to_s]
-          fam_dirs.forkify(configatron.max_fork) do |fam_dir|
-            ali_files = Dir[File.join(fam_dir, "salign*.ali").to_s]
+        $logger.level = Logger::ERROR
 
-            if ali_files.nil? or ali_files.size < 1
-              $logger.error "!!! Cannot find alignment files in #{fam_dir}"
-              next
+        fm = ForkManager.new(configatron.max_fork)
+        fm.manage do
+          %w[dna rna].each do |na|
+            cwd     = pwd
+            famdirs = Dir[configatron.family_dir.join("rep", na, "*").to_s]
+            famdirs.each do |famdir|
+              aligns = Dir[File.join(famdir, "salign*.ali").to_s]
+
+              if aligns.empty?
+                $logger.warn "!!! Cannot find alignment files in #{famdir}"
+                next
+              end
+
+              chdir famdir
+
+              aligns.each do |ali|
+                stem    = File.basename(ali, ".ali")
+                id      = stem.match(/salign(\d+)/)[1]
+                modali  = "mod#{stem}.ali"
+                tem     = "mod#{stem}.tem"
+
+                File.open(modali, "w") { |f| f.puts IO.read(ali).gsub(/\.pdb/, "") }
+
+                fm.fork do
+                  system "joy #{modali} 1>joy#{id}.stdout 2>joy#{id}.stderr"
+
+                  if !File.exists? tem
+                    $logger.error "!!! JOY failed to run with #{modali} in #{famdir}"
+                  end
+                end
+              end
+
+              $logger.info ">>> JOY with alignments in #{famdir}: done"
             end
-
-            chdir fam_dir
-
-            ali_files.each do |ali_file|
-              basename      = File.basename(ali_file, ".ali")
-              cluster_id    = basename.match(/salign(\d+)/)[1]
-              mod_ali_file  = "#{basename}_mod.ali"
-              File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
-              system "joy #{mod_ali_file} 1>joy#{cluster_id}.stdout 2>joy#{cluster_id}.stderr"
-            end
-
-            chdir cwd
-            $logger.info ">>> JOY with alignments in #{fam_dir}: done"
           end
         end
       end
 
 
       desc "Run JOY for SCOP subfamily alignments"
-      task :sub_alignments => [:environment] do
-        %w[dna rna].each do |na|
-          cwd         = pwd
-          subfam_dirs = Dir[configatron.family_dir.join("sub", na, "*", "red", "*").to_s]
-          subfam_dirs.forkify(configatron.max_fork) do |subfam_dir|
-            ali_file = File.join(subfam_dir, "salign.ali")
+      task :subaligns => [:environment] do
 
-            if !File.exists? ali_file
-              $logger.error "!!! Cannot find an alignment file in #{subfam_dir}"
-              next
+        fm = ForkManager.new(configatron.max_fork)
+        fm.manage do
+          %w[dna rna].each do |na|
+            cwd         = pwd
+            subfamdirs  = Dir[configatron.family_dir.join("sub", na, "*", "*").to_s]
+            subfamdirs.each do |subfamdir|
+              ali = File.join(subfamdir, "salign.ali")
+
+              if !File.exists? ali
+                $logger.error "!!! Cannot find an alignment file in #{subfamdir}"
+                next
+              end
+
+              chdir subfamdir
+
+              stem    = File.basename(ali, ".ali")
+              modali  = "mod#{stem}.ali"
+              tem     = "mod#{stem}.tem"
+
+              File.open(modali, "w") { |f| f.puts IO.read(ali).gsub(/\.pdb/, "") }
+
+              fm.fork do
+                system "joy #{modali} 1>joy.stdout 2>joy.stderr"
+
+                if !File.exists? tem
+                  $logger.error "!!! JOY failed to run with #{modali} in #{subfamdir}"
+                end
+              end
+
+              $logger.info ">>> JOY with an alignment in #{subfamdir}: done"
             end
-
-            chdir subfam_dir
-
-            basename      = File.basename(ali_file, ".ali")
-            mod_ali_file  = "#{basename}_mod.ali"
-            File.open(mod_ali_file, "w") { |f| f.puts IO.read(ali_file).gsub(/\.pdb/, "") }
-            system "joy #{mod_ali_file} 1>joy.stdout 2>joy.stderr"
-            chdir cwd
-            $logger.info ">>> JOY with an alignment in #{subfam_dir}: done"
           end
         end
       end
