@@ -713,24 +713,29 @@ namespace :bipa do
                   seq.save!
 
                   di = 0
+
                   ffrs.each_with_index do |res, fi|
-                    break if fi >= dbrs.size
                     col = ali.columns.find_or_create_by_number(fi + 1)
                     pos = seq.positions.create
+
                     if res == "-"
                       pos.residue_name = res
-                    elsif (dbrs[di].one_letter_code == res)
+                    elsif dbrs[di].nil?
+                      pos.residue_name = 'X'
+                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                                    "(ALI: #{res} <=> BIPA: None)."
+                    elsif res == dbrs[di].one_letter_code
                       pos.residue      = dbrs[di]
                       pos.residue_name = res
                       di += 1
                     else
                       pos.residue_name = 'X'
-                      $logger.warn "!!! Mismatch at #{di}, between #{res} and #{dbrs[di].one_letter_code} of #{dom.sid}, #{dom.sunid}"
+                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                                    "(ALI: #{res} <=> BIPA: #{dbrs[di].one_letter_code})."
                     end
                     pos.number = fi + 1
                     pos.column = col
                     pos.save!
-                    col.save!
                   end
                   seq.save!
                 end
@@ -788,24 +793,27 @@ namespace :bipa do
 
                   di = 0
                   ffrs.each_with_index do |res, fi|
-                    break if fi >= dbrs.size
-
                     col = ali.columns.find_or_create_by_number(fi + 1)
                     pos = seq.positions.create
-                    if (res == "-")
+
+                    if res == "-"
                       pos.residue_name = res
-                    elsif (dbrs[di].one_letter_code == res)
+                    elsif dbrs[di].nil?
+                      pos.residue_name = 'X'
+                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                                    "(ALI: #{res} <=> BIPA: None)."
+                    elsif res == dbrs[di].one_letter_code
                       pos.residue      = dbrs[di]
                       pos.residue_name = res
                       di += 1
                     else
                       pos.residue_name = 'X'
-                      $logger.warn "!!! Mismatch at #{di}, between #{res} and #{dbrs[di].one_letter_code} of #{dom.sid}, #{dom.sunid}"
+                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                                    "(ALI: #{res} <=> BIPA: #{dbrs[di].one_letter_code})."
                     end
                     pos.number = fi + 1
                     pos.column = col
                     pos.save!
-                    col.save!
                   end
                   seq.save!
                 end
@@ -1277,67 +1285,77 @@ namespace :bipa do
     desc "Import Atom Charges and Potentials"
     task :spicoli => [:environment] do
 
-      aa_pot_files  = Dir[configatron.spicoli_dir.join("*_aa.pot").to_s].sort
-      na_pot_files  = Dir[configatron.spicoli_dir.join("*_na.pot").to_s].sort
-      pot_files     = aa_pot_files + na_pot_files
-
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
-        config = ActiveRecord::Base.remove_connection
+        aapots  = Dir[configatron.spicoli_dir.join("*_aa.pot").to_s].sort
+        napots  = Dir[configatron.spicoli_dir.join("*_na.pot").to_s].sort
+        pots    = aapots + napots
+        config  = ActiveRecord::Base.remove_connection
 
-        pot_files.each_with_index do |pot_file, i|
-          pdb_code = pot_file.match(/(\S{4})\_\S{2}\.pot/)[1]
+        pots.each do |pot|
+          pdb   = pot.match(/(\S{4})\_(\S{2})\.pot/)[1]
+          type  = pot.match(/(\S{4})\_(\S{2})\.pot/)[2]
 
           fm.fork do
             ActiveRecord::Base.establish_connection(config)
-            structure = Structure.find_by_pdb_code(pdb_code.upcase)
-            if structure.nil?
-              $logger.error "!!! Cannot find a structure, #{pdb_code.upcase}"
+
+            strc = Structure.find_by_pdb_code(pdb.upcase)
+
+            if strc.nil?
+              $logger.error "!!! Cannot find a structure, #{pdb.upcase}"
               ActiveRecord::Base.remove_connection
-              exit 1
+              next
             end
 
-            potentials = []
+            objs  = []
+            lines = IO.readlines(pot)
 
-            IO.foreach(pot_file) do |line|
+            if lines.empty? or lines[0] =~ /^out\s+of\s+memory/
+              $logger.warn "!!! Spicoli seems to have failed to run with #{type} chain(S) of #{pdb}"
+              strc.no_spicoli = true
+              ActiveRecord::Base.remove_connection
+              next
+            end
+
+            lines.each do |line|
               if line.start_with?('#') or line.blank?
                 next
               end
 
-              columns = line.chomp.split(',').map(&:strip)
-              model   = structure.models[0]
-              chain   = model.chains.find_by_chain_code(columns[0])
+              cols  = line.chomp.split(',').map(&:strip)
+              mdl   = strc.models[0]
+              chn   = mdl.chains.find_by_chain_code(cols[0])
 
-              if chain.nil?
-                $logger.error "!!! Cannot find a chain, #{columns[0]} of #{pot_file}"
+              if chn.nil?
+                $logger.error "!!! Cannot find a chain, #{cols[0]} of #{pot}"
                 next
               end
 
-              residue = chain.residues.find_by_residue_code_and_residue_name(columns[1], columns[2])
+              res = chn.residues.find_by_residue_code_and_residue_name(cols[1], cols[2])
 
-              if residue.nil?
-                $logger.error "!!! Cannot find a residue, #{columns[1]}, #{columns[2]} of #{pot_file}"
+              if res.nil?
+                $logger.error "!!! Cannot find a residue, #{cols[1]}, #{cols[2]} of #{pot}"
                 next
               end
 
-              atom = residue.atoms.find_by_atom_name(columns[4])
+              atm = res.atoms.find_by_atom_name(cols[4])
 
-              if atom.nil?
-                $logger.error "!!! Cannot find a atom, #{columns.join(', ')} of #{pot_file}"
+              if atm.nil?
+                $logger.error "!!! Cannot find a atom, #{cols.join(', ')} of #{pot}"
                 next
               end
 
-              potentials << Potential.new(:atom_id        => atom,
-                                          :formal_charge  => columns[5],
-                                          :partial_charge => columns[6],
-                                          :unbound_asa    => columns[7],
-                                          :atom_potential => columns[8],
-                                          :asa_potential  => columns[9])
+              objs << Potential.new(:atom_id        => atm,
+                                    :formal_charge  => cols[5],
+                                    :partial_charge => cols[6],
+                                    :unbound_asa    => cols[7],
+                                    :atom_potential => cols[8],
+                                    :asa_potential  => cols[9])
             end
 
-            Potential.import(potentials)
+            Potential.import(objs)
+            $logger.info ">>> Importing #{pot} done. (#{i + 1}/#{pots.size})"
             ActiveRecord::Base.remove_connection
-            $logger.info ">>> Importing #{pot_file} done. (#{i + 1}/#{pot_files.size})"
           end
         end
         ActiveRecord::Base.establish_connection(config)

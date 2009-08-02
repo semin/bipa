@@ -101,7 +101,7 @@ namespace :bipa do
                     # HETATM20783  N   MSE
                     # HETATM  591  N  AMSE
                     elsif l[0..5] == "HETATM" and l[17..19] == "MSE"
-                      f.puts l.gsub("HETATM", "ATOM").gsub("MSE", "MET").chomp
+                      f.puts l.gsub("HETATM", "ATOM  ").gsub("MSE", "MET").chomp
                     else
                       f.puts l.chomp
                     end
@@ -166,7 +166,7 @@ namespace :bipa do
                       # HETATM20783  N   MSE
                       # HETATM  591  N  AMSE
                       elsif l[0..5] == "HETATM" and l[17..19] == "MSE"
-                        f.puts l.gsub("HETATM", "ATOM").gsub("MSE", "MET").chomp
+                        f.puts l.gsub("HETATM", "ATOM  ").gsub("MSE", "MET").chomp
                       else
                         f.puts l.chomp
                       end
@@ -184,57 +184,53 @@ namespace :bipa do
     end
 
 
-    desc "Generate ESSTs for each representative set of SCOP families"
+    desc "Generate ESSTs for representative sets of SCOP family alignments"
     task :essts => [:environment] do
 
       refresh_dir(configatron.esst_dir) unless configatron.resume
 
       %w[dna rna].each do |na|
         cwd       = pwd
-        esst_dir  = configatron.esst_dir.join(na)
-        mkdir_p esst_dir
-        chdir esst_dir
+        esstdir  = configatron.esst_dir.join(na)
 
-        Dir[configatron.family_dir.join("rep", na, "*", "salign*_mod.ali").to_s].select { |t|
-          t.match(/(\d+)\/\1\.tem/)
-        }.each do |tem_file|
-          cp tem_file, "."
+        mkdir_p esstdir
+        chdir   esstdir
+
+        modtems = Dir[configatron.family_dir.join("rep", na, "*", "#{na}modsalign*.tem").to_s]
+
+        modtems.each do |modtem|
+          if modtem =~ /(\d+)\/#{na}modsalign(\d+)\.tem/
+            famid, grpid = $1, $2
+            newtem = esstdir.join("#{$1}_#{$2}.tem")
+            cp modtem, newtem
+          end
         end
 
-        sh "ls -1 *.tem > tem_files.lst"
+        system "ls -1 *.tem > temfiles.lst"
+        cp configatron.send("classdef#{na}"), "classdef.dat"
 
         (30..100).step(5) do |weight|
-#          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
-#          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 1 -o ulla-#{na}-#{weight}.prb"
-#          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 2 -o ulla-#{na}-#{weight}.log"
-          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
-          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 1 -o ulla-#{na}-#{weight}.prb"
-          sh "ruby-1.9 /home/semin/ulla/bin/ulla -l tem_files.lst --cys 2 --autosigma --weight #{weight} --output 2 -o ulla-#{na}-#{weight}.log"
+          system "ulla -l temfiles.lst --cys 2 --weight #{weight} --output 0 -o ulla-#{na}-#{weight}.cnt"
+          system "ulla -l temfiles.lst --cys 2 --autosigma --weight #{weight} --output 1 -o ulla-#{na}-#{weight}.prb"
+          system "ulla -l temfiles.lst --cys 2 --autosigma --weight #{weight} --output 2 -o ulla-#{na}-#{weight}.log"
         end
 
         chdir cwd
       end
-    end # task :essts
+    end
 
 
     desc "Generate Fugue profile for each representative set of SCOP families"
     task :profiles => [:environment] do
 
-      (20..100).step(20) do |si|
-        #temporary filter!!!
-        next if si != 90
+      %w[dna rna].each do |na|
+        cwd     = pwd
+        esstdir = File.join(configatron.esstdir, "rep#{si}", "#{na}#{env}")
 
-        %w[dna rna].each do |na|
-          %w[16 64 std].each do |env|
-            cwd     = pwd
-            est_dir = File.join(configatron.esst_dir, "rep#{si}", "#{na}#{env}")
-
-            chdir esst_dir
-            cp "allmat.#{na}#{env}.log.dat", "allmat.dat.log"
-            system "melody -list templates.lst -c classdef.dat -s allmat.dat.log"
-            chdir cwd
-          end
-        end
+        chdir esstdir
+        cp "allmat.#{na}#{env}.log.dat", "allmat.dat.log"
+        system "melody -list templates.lst -c classdef.dat -s allmat.dat.log"
+        chdir cwd
       end
     end
 

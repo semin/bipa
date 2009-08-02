@@ -178,7 +178,7 @@ namespace :bipa do
             fm.fork do
               ActiveRecord::Base.establish_connection(conf)
 
-              tems = Dir[File.join(dir, "salign*_mod.tem").to_s]
+              tems = Dir[File.join(dir, "modsalign*.tem").to_s]
 
               if tems.empty?
                 $logger.warn "!!! Cannot find JOY template file(s) in #{dir}"
@@ -187,8 +187,8 @@ namespace :bipa do
               end
 
               tems.each do |tem|
-                bsn     = File.basename(tem, ".tem")
-                newtem  = File.join(dir, "#{bsn}_na.tem")
+                stem    = File.basename(tem, ".tem")
+                newtem  = File.join(dir, "#{na}#{stem}.tem")
                 cp tem, newtem
 
                 bio = Bio::FlatFile.auto(tem)
@@ -206,8 +206,8 @@ namespace :bipa do
                     ffrs = entry.seq.split("")
 
                     di = 0
+
                     ffrs.each_with_index do |res, fi|
-                      break if fi >= dbrs.size
 
                       if fi != 0 and fi % 75 == 0
                         bind << "\n"; hbond << "\n"; whbond << "\n"; vdw << "\n"; nabind << "\n"
@@ -215,6 +215,10 @@ namespace :bipa do
 
                       if res == "-"
                         bind << "-"; hbond << "-"; whbond << "-"; vdw << "-"; nabind << "-"
+                      elsif dbrs[di].nil?
+                        bind << "X"; hbond << "X"; whbond << "X"; vdw << "X"; nabind << "X"
+                        $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                                    "(TEM: #{res} <=> BIPA: None)."
                       elsif dbrs[di].one_letter_code == res
                         dbrs[di].send("binding_#{na}?")         ? bind    << "T" : bind   << "F"
                         dbrs[di].send("hbonding_#{na}?")        ? hbond   << "T" : hbond  << "F"
@@ -232,7 +236,7 @@ namespace :bipa do
                         di += 1
                       else
                         bind << "X"; hbond << "X"; whbond << "X"; vdw << "X"; nabind << "X"
-                        $logger.warn  "!!! Unmatched residue at #{di} in #{domain.sid} in #{dir}: " +
+                        $logger.warn  "!!! Unmatched residue at #{di} in #{dom.sid} in #{dir}: " +
                                       "BIPA: #{dbrs[di].one_letter_code} <=> TEM: #{res}"
                       end
                     end

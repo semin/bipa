@@ -24,13 +24,10 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :sccs
     t.string      :sid
     t.string      :description
-    t.float       :resolution
     %w[dna rna].each { |na|
-      configatron.rep_pids.each { |pid|
-        t.belongs_to  :"red#{pid}_#{na}_binding_subfamily"
-        t.boolean     :"rep#{pid}_#{na}", :default => false # for representative memebers
-      }
-      t.boolean :"reg_#{na}", :default => false # for registered members
+      t.belongs_to  :"#{na}_binding_subfamily"
+      t.boolean     :"rep_#{na}", :default => false # for representative memebers
+      t.boolean     :"reg_#{na}", :default => false # for registered members
     }
   end
 
@@ -53,7 +50,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string    :space_group
     t.date      :deposited_at
     t.boolean   :obsolete,    :default => false
-    t.boolean   :no_zap,      :default => false
+    t.boolean   :no_spicoli,  :default => false
     t.boolean   :no_dssp,     :default => false
     t.boolean   :no_hbplus,   :default => false
     t.boolean   :no_naccess,  :default => false
@@ -65,7 +62,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :structures, :r_value
   add_index :structures, :r_free
   add_index :structures, :deposited_at
-  add_index :structures, :no_zap
+  add_index :structures, :no_spicoli
   add_index :structures, :no_dssp
   add_index :structures, :no_hbplus
   add_index :structures, :no_naccess

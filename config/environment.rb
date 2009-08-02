@@ -150,6 +150,9 @@ Rails::Initializer.run do |config|
     configatron.usr_des         = Rails.root.join("tmp", "usr_descriptors.txt")
     configatron.usr_res         = Rails.root.join("tmp", "interface_similarities.txt")
 
+    configatron.classdefdna     = Rails.root.join("config", "classdef.dna")
+    configatron.classdefrna     = Rails.root.join("config", "classdef.rna")
+
     # for custom libraries in RAILS_ROOT/lib
     require 'forkify'
     require 'matrix'

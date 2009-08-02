@@ -256,6 +256,8 @@ namespace :bipa do
         fm.manage do
           %w[dna rna].each do |na|
             sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+            config = ActiveRecord::Base.remove_connection
+
             sunids.each do |sunid|
               cwd     = pwd
               famdir  = configatron.family_dir.join("rep", na, sunid.to_s)
@@ -290,6 +292,7 @@ namespace :bipa do
               end
               chdir cwd
             end
+            ActiveRecord::Base.establish_connection(config)
           end
         end
       end
@@ -302,6 +305,8 @@ namespace :bipa do
         fm.manage do
           %w[dna rna].each do |na|
             sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+            config = ActiveRecord::Base.remove_connection
+
             sunids.each do |sunid|
               cwd     = pwd
               famdir  = configatron.family_dir.join("sub", na, sunid.to_s)
@@ -329,6 +334,7 @@ namespace :bipa do
               end
               $logger.info ">>> SALIGN with subfamilies of #{na.upcase}-binding SCOP family, #{sunid}: done"
             end
+            ActiveRecord::Base.establish_connection(config)
           end
         end
       end
@@ -554,16 +560,46 @@ namespace :bipa do
       desc "Run JOY for SCOP subfamily alignments"
       task :subaligns => [:environment] do
 
+        $logger.level = Logger::ERROR
+
         fm = ForkManager.new(configatron.max_fork)
         fm.manage do
           %w[dna rna].each do |na|
             cwd         = pwd
             subfamdirs  = Dir[configatron.family_dir.join("sub", na, "*", "*").to_s]
+#
+#            subfamdirs = %w[
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/50461/1055
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1305
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1307
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1311
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1320
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1325
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1327
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1333
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1335
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1348
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1351
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1370
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1357
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1379
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1385
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1396
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1404
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1401
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1406
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1405
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1408
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1409
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1412
+#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1414
+#            ]
+
             subfamdirs.each do |subfamdir|
               ali = File.join(subfamdir, "salign.ali")
 
               if !File.exists? ali
-                $logger.error "!!! Cannot find an alignment file in #{subfamdir}"
+                $logger.warn "!!! Cannot find an alignment file in #{subfamdir}"
                 next
               end
 
@@ -576,6 +612,21 @@ namespace :bipa do
               File.open(modali, "w") { |f| f.puts IO.read(ali).gsub(/\.pdb/, "") }
 
               fm.fork do
+                rm_r Dir['*.sst']
+                rm_r Dir['*.psa']
+                rm_r Dir['*.hbd']
+                rm_r Dir['*.html']
+                rm_r Dir['*.ps']
+                rm_r Dir['*.rtf']
+                rm_r Dir['*.tem']
+
+                Dir['*.pdb'].each do |pdb|
+                  stem = File.basename(pdb, '.pdb')
+                  system "sstruc s #{pdb} 1>#{stem}.sst.stdout 2>#{stem}.sst.stderr"
+                  system "psa #{pdb}      1>#{stem}.psa.stdout 2>#{stem}.psa.stderr"
+                  system "hbond #{pdb}    1>#{stem}.hbd.stdout 2>#{stem}.hbd.stderr"
+                end
+
                 system "joy #{modali} 1>joy.stdout 2>joy.stderr"
 
                 if !File.exists? tem
@@ -583,6 +634,7 @@ namespace :bipa do
                 end
               end
 
+              chdir cwd
               $logger.info ">>> JOY with an alignment in #{subfamdir}: done"
             end
           end
