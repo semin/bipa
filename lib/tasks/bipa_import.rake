@@ -1311,8 +1311,9 @@ namespace :bipa do
             lines = IO.readlines(pot)
 
             if lines.empty? or lines[0] =~ /^out\s+of\s+memory/
-              $logger.warn "!!! Spicoli seems to have failed to run with #{type} chain(S) of #{pdb}"
+              $logger.warn "!!! Spicoli failed to run with #{type} chain(S) of #{pdb}."
               strc.no_spicoli = true
+              strc.save!
               ActiveRecord::Base.remove_connection
               next
             end
@@ -1354,7 +1355,7 @@ namespace :bipa do
             end
 
             Potential.import(objs)
-            $logger.info ">>> Importing #{pot} done. (#{i + 1}/#{pots.size})"
+            $logger.info ">>> Importing #{pot}: done."
             ActiveRecord::Base.remove_connection
           end
         end

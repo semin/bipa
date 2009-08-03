@@ -29,10 +29,10 @@ class Structure < ActiveRecord::Base
   named_scope :latest, { :order => 'deposited_at DESC' }
 
   named_scope :untainted, :conditions => {
-    :no_zap     => false,
     :no_dssp    => false,
     :no_hbplus  => false,
-    :no_naccess => false
+    :no_naccess => false,
+    :no_spicoli => false,
   }
 
   named_scope :max_resolution, lambda { |res|
