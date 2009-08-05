@@ -153,7 +153,6 @@ Rails::Initializer.run do |config|
     configatron.classdefrna     = Rails.root.join("config", "classdef.rna")
 
     # for custom libraries in RAILS_ROOT/lib
-    require 'forkify'
     require 'matrix'
     require 'bio_extensions'
     require 'math_extensions'
