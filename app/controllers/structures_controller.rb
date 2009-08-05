@@ -1,6 +1,6 @@
 class StructuresController < ApplicationController
 
-  caches_page :show, :jmol
+  caches_page :index, :show, :jmol
 
   def index
     @structures = Structure.untainted.paginate(:page => params[:page], :per_page => 10)
@@ -12,7 +12,7 @@ class StructuresController < ApplicationController
   end
 
   def show
-    @structure  = Structure.find(params[:id])
+    @structure  = Structure.find_by_pdb_code(params[:id])
 
     respond_to do |format|
       format.html # show.rhtml
@@ -21,7 +21,7 @@ class StructuresController < ApplicationController
   end
 
   def jmol
-    @structure = Structure.find(params[:id])
+    @structure = Structure.find_by_pdb_code(params[:id])
 
     respond_to do |format|
       format.html # show.rhtml

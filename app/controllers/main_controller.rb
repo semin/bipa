@@ -1,6 +1,6 @@
 class MainController < ApplicationController
 
-  caches_page :home
+  caches_page :home, :references, :contact
 
   def home
     @structure    = Structure.latest.first

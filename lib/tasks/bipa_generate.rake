@@ -244,9 +244,9 @@ namespace :bipa do
       pdb_files.each_with_index do |pdb_file, i|
         stem    = File.basename(pdb_file, ".pdb")
         input   = Rails.root.join("tmp", "#{stem}.input")
-        fig5    = configatron.figure_dir.join("#{stem}_5.png") # molscript cannot hangle a long input file name
-        fig500  = configatron.figure_dir.join("#{stem}_500.png")
-        fig100  = configatron.figure_dir.join("#{stem}_100.png")
+        fig5    = configatron.figure_dir.join("pdb", "#{stem}_5.png") # molscript cannot hangle a long input file name
+        fig500  = configatron.figure_dir.join("pdb", "#{stem}_500.png")
+        fig100  = configatron.figure_dir.join("pdb", "#{stem}_100.png")
 
         if File.size?(fig500) && File.size?(fig100)
           $logger.warn "!!! Skipped PDB structure, #{stem}, figures are already created"
@@ -272,9 +272,9 @@ namespace :bipa do
       scop_files.each_with_index do |scop_file, i|
         stem    = File.basename(scop_file, ".pdb")
         input   = Rails.root.join("tmp", "#{stem}.molinput")
-        fig5    = configatron.figure_dir.join("#{stem}_5.png") # molscript cannot hangle a long input file name
-        fig500  = configatron.figure_dir.join("#{stem}_only_500.png")
-        fig100  = configatron.figure_dir.join("#{stem}_only_100.png")
+        fig5    = configatron.figure_dir.join("scop", "#{stem}_5.png") # molscript cannot hangle a long input file name
+        fig500  = configatron.figure_dir.join("scop", "#{stem}_only_500.png")
+        fig100  = configatron.figure_dir.join("scop", "#{stem}_only_100.png")
 
         if File.size?(fig500) && File.size?(fig100)
           $logger.warn "!!! Skipped SCOP domain, #{stem}, figures are already created"

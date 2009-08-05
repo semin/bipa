@@ -129,7 +129,7 @@ class DomainInterface < Interface
   def calculate_residue_propensity_of(res)
     result = ((delta_asa_of_residue(res) / delta_asa) /
               (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
-    result.to_f.nan? ? 1 : result
+    result.to_f.nan? ? 1.0 : result
   end
 
   def calculate_sse_percentage_of(sse)
@@ -139,7 +139,7 @@ class DomainInterface < Interface
   def calculate_sse_propensity_of(sse)
     result = ((delta_asa_of_sse(sse) / delta_asa) /
               (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
-    result.to_f.nan? ? 1 : result
+    result.to_f.nan? ? 1.0 : result
   end
 
   def calculate_frequency_of_hbond_between(aa, na)
@@ -254,7 +254,6 @@ class DomainInterface < Interface
   def calculate_frequency_of_vdw_contact_between_amino_acids_and_(na)
     AminoAcids::Residues::STANDARD.inject(0) { |s, r| s + calculate_frequency_of_vdw_contact_between(r, na) }
   end
-
 
   def calculate_polarity
     begin

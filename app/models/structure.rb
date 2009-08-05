@@ -49,6 +49,10 @@ class Structure < ActiveRecord::Base
     has :deposited_at
   end
 
+  def to_param
+    self.pdb_code
+  end
+
   def residues
     chains.inject([]) { |s, c| s.concat(c.residues) }
   end
@@ -70,11 +74,11 @@ class Structure < ActiveRecord::Base
   end
 
   def small_image
-    "/images/pdb/#{pdb_code.downcase}_100.png"
+    "/figures/pdb/#{pdb_code.downcase}_100.png"
   end
 
   def big_image
-    "/images/pdb/#{pdb_code.downcase}_500.png"
+    "/figures/pdb/#{pdb_code.downcase}_500.png"
   end
 
   def authors

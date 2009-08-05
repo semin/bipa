@@ -372,28 +372,32 @@ namespace :bipa do
     desc "Update cssed_sequence for all chains"
     task :chncss => [:environment] do
 
-      ids   = AaChain.all.map(&:id)
-      conf  = ActiveRecord::Base.remove_connection
+      fm  = ForkManager.new(configatron.max_fork)
+      ids = AaChain.all.map(&:id)
 
-      ids.echn do |id|
-        fm.fork do
-          ActiveRecord::Base.establish_connection(conf)
+      fm.manage do
+        config = ActiveRecord::Base.remove_connection
 
-          chn = AaChain.find(id)
+        ids.each do |id|
+          fm.fork do
+            ActiveRecord::Base.establish_connection(config)
 
-          unless chn.cssed_sequence.nil?
-            $logger.info ">>> Skipped Chain, #{chn.id}"
+            chn = AaChain.find(id)
+
+            unless chn.cssed_sequence.nil?
+              $logger.info ">>> Skipped Chain, #{chn.id}"
+              ActiveRecord::Base.remove_connection
+              next
+            end
+
+            chn.cssed_sequence = chn.formatted_sequence
+            chn.save!
+            $logger.info ">>> Updating cssed_sequence of Chain, #{chn.id}: done"
             ActiveRecord::Base.remove_connection
-            next
           end
-
-          chn.cssed_sequence = chn.formatted_sequence
-          chn.save!
-          $logger.info ">>> Updating cssed_sequence of Chain, #{chn.id}: done"
-          ActiveRecord::Base.remove_connection
         end
+        ActiveRecord::Base.establish_connection(config)
       end
-      ActiveRecord::Base.establish_connection(conf)
     end
 
   end

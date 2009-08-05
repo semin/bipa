@@ -26,6 +26,10 @@ class Scop < ActiveRecord::Base
     indexes :description
   end
 
+  def to_param
+    self.sunid.to_s
+  end
+
   def self.factory_create!(opts={})
     case opts[:stype]
     when "root" then ScopRoot.create!(opts)
@@ -97,6 +101,7 @@ end
 
 
 class ScopFamily < Scop
+
   %w[dna rna].each do |na|
     has_many  :"#{na}_binding_family_alignments",
               :class_name   => "#{na.capitalize}BindingFamilyAlignment",
@@ -249,18 +254,18 @@ class ScopDomain < Scop
   end
 
   def big_image
-    "/figures/#{sunid}_500.png"
+    "/figures/scop/#{sunid}_500.png"
   end
 
   def big_solo_image
-    "/figures/#{sunid}_solo_500.png"
+    "/figures/scop/#{sunid}_solo_500.png"
   end
 
   def small_image
-    "/figures/#{sunid}_100.png"
+    "/figures/scop/#{sunid}_100.png"
   end
 
   def small_solo_image
-    "/figures/#{sunid}_solo_100.png"
+    "/figures/scop/#{sunid}_solo_100.png"
   end
 end

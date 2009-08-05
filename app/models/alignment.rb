@@ -14,6 +14,16 @@ class Alignment < ActiveRecord::Base
 
   has_one   :profile
 
+  def contains?(obj)
+    if obj.kind_of? ScopDomain
+      sequences.map(&:domain).include?(obj)
+    elsif obj.kind_of? Chain
+      sequences.map(&:chain).include?(obj)
+    else
+      false
+    end
+  end
+
   def ruler_with_margin(margin = 9)
     "&nbsp;" * margin + (1..columns.size).map do |i|
       case
@@ -80,11 +90,13 @@ class Alignment < ActiveRecord::Base
   end
 end
 
+
 class SubfamilyAlignment < Alignment
 
   belongs_to :subfamily
 
 end
+
 
 %w[dna rna].each do |na|
   eval <<-EVAL
@@ -93,10 +105,10 @@ end
     belongs_to  :family,
                 :class_name   => "ScopFamily",
                 :foreign_key  => "scop_id"
-    
+
     has_many  :subfamilies,
-              :class_name   => "Subfamily",
-              :foreign_key  => "family_alignment_id"
+                :class_name   => "Subfamily",
+                :foreign_key  => "family_alignment_id"
   end
   EVAL
 end
