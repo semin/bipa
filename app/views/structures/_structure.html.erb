@@ -1,6 +1,6 @@
 <div class="list blue_link">
   <div class="small_image">
-    <%= link_to image_tag(structure.small_image, :border => 0), structure_path(structure) %>
+    <%= link_to image_tag(structure.small_image, :border => 0, :alt => structure.pdb_code), structure_path(structure) %>
   </div>
   <div class="list_title">
     <%= link_to "#{structure.title}", structure_path(structure) %>

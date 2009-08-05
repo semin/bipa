@@ -10,7 +10,7 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  named_scope :reg_all, :conditions => { :reg_dna => true, :reg_rna => true }
+  named_scope :reg_all, :conditions => [ 'reg_dna = 1 or reg_rna = 1' ]
 
   %w[dna rna].each do |na|
     named_scope :"reg_#{na}", :conditions => { :"reg_#{na}" => true }

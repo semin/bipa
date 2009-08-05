@@ -1,6 +1,6 @@
 <div class="list blue_link">
   <div class="small_image">
-    <%= link_to image_tag(scop.small_solo_image, :border => 0), scop_path(scop)  %>
+    <%= link_to image_tag(scop.small_solo_image, :border => 0, :alt => scop.sunid), scop_path(scop)  %>
   </div>
   <div class="list_title">
     <%= link_to "#{scop.scop_protein.description}, #{scop.description}", scop_path(scop) %>
