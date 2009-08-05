@@ -21,7 +21,6 @@ Rails::Initializer.run do |config|
   config.gem 'composite_primary_keys'
   config.gem 'RubyInline', :lib => 'inline'
   config.gem 'mattetti-googlecharts', :lib => 'gchart', :source => 'http://gems.github.com'
-  config.gem 'parallel-forkmanager', :lib => 'parallel/forkmanager'
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
