@@ -101,5 +101,38 @@ namespace :bipa do
       fh_rna.close
     end
 
+
+    desc "Analyze briefs statistics for interfaces properties"
+    task :briefstat => [:environment] do
+
+      %w[dna rna].each do |na|
+        asas, pols, hbonds, whbonds, vdws = [], [], [], [], []
+
+        ScopDomain.send("rep_#{na}").find_each do |dom|
+          interface = dom.send("#{na}_interfaces").first
+          asas    << interface.asa
+          pols    << interface.polarity
+          hbonds  << interface.hbonds_count
+          whbonds << interface.whbonds_count
+          vdws    << interface.vdw_contacts_count
+        end
+
+        cols = [
+          asas.to_stats_array.mean,
+          asas.to_stats_array.stddev,
+          pols.to_stats_array.mean,
+          pols.to_stats_array.stddev,
+          hbonds.to_stats_array.mean,
+          hbonds.to_stats_array.stddev,
+          whbonds.to_stats_array.mean,
+          whbonds.to_stats_array.stddev,
+          vdws.to_stats_array.mean,
+          vdws.to_stats_array.stddev
+        ]
+
+        puts cols.join(", ")
+      end
+    end
+
   end
 end
