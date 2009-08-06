@@ -11,21 +11,26 @@ class ScopsController < ApplicationController
   end
 
   def show
-    @scop = ScopDomain.find_by_sunid(params[:id])
+    @scop = Scop.find_by_sunid(params[:id])
 
-    @dna_subfamily = @scop.dna_binding_subfamily
-    @rna_subfamily = @scop.rna_binding_subfamily
+    if @scop.is_a? ScopDomain
 
-    @dna_subfamily_alignment = @dna_subfamily.andand.alignment
-    @rna_subfamily_alignment = @rna_subfamily.andand.alignment
+      @dna_subfamily = @scop.dna_binding_subfamily
+      @rna_subfamily = @scop.rna_binding_subfamily
 
-    @dna_family_alignment = @scop.scop_family.dna_binding_family_alignments.
-                            select { |a| a.contains?(@dna_subfamily.andand.representative) }[0]
-    @rna_family_alignment = @scop.scop_family.rna_binding_family_alignments.
-                            select { |a| a.contains?(@rna_subfamily.andand.representative) }[0]
+      @dna_subfamily_alignment = @dna_subfamily.andand.alignment
+      @rna_subfamily_alignment = @rna_subfamily.andand.alignment
 
-    respond_to do |format|
-      format.html
+      @dna_family_alignment = @scop.scop_family.dna_binding_family_alignments.
+                              select { |a| a.contains?(@dna_subfamily.andand.representative) }[0]
+      @rna_family_alignment = @scop.scop_family.rna_binding_family_alignments.
+                              select { |a| a.contains?(@rna_subfamily.andand.representative) }[0]
+
+      respond_to do |format|
+        format.html
+      end
+    else
+      redirect_to domains_scop_url(@scop)
     end
   end
 

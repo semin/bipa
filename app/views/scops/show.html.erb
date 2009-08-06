@@ -1,5 +1,5 @@
 <div class="main_title blue_link">
-  SCOP Domain: <%= link_to @scop.sid, @scop.html_sunid_link %>
+  <%= link_to @scop.sid, @scop.html_sunid_link %>
 </div>
 
 <table id="scop_table" class="bipa">
@@ -14,7 +14,14 @@
       <%= link_to @scop.structure.title, structure_path(@scop.structure) %>
     </td>
     <td rowspan=10 style="width:280px" align="center">
-      <%= link_to image_tag(@scop.big_image, :width => 250, :border => 0), jmol_scop_path %><br />
+      <div id="image">
+        <%= link_to_function "Complex", "$('image').hide(); $('image_solo').show();" %><br />
+        <%= link_to image_tag(@scop.big_image, :width => 250, :border => 0), "#big_image_box", :id => "big_image_box_link" %><br />
+      </div>
+      <div id="image_solo" style="display: none;">
+        <%= link_to_function "Solo", "$('image_solo').hide(); $('image').show();" %><br />
+        <%= link_to image_tag(@scop.big_solo_image, :width => 250, :border => 0), "#big_solo_image_box", :id => "big_solo_image_box_link" %><br />
+      </div>
       3D View: <%= link_to "Jmol", jmol_scop_path %>
     </td>
   </tr>
@@ -288,3 +295,13 @@
     </td>
   </tr>
 </table>
+
+<div id="big_image_box">
+  <%= image_tag @scop.big_image %><br />
+  <%= @scop.sid %> (<%= @scop.sccs %>)
+</div>
+
+<div id="big_solo_image_box">
+  <%= image_tag @scop.big_solo_image %><br />
+  <%= @scop.sid %> (<%= @scop.sccs %>)
+</div>
