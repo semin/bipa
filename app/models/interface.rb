@@ -82,6 +82,10 @@ class DomainInterface < Interface
             :class_name   => "Residue",
             :foreign_key  => "domain_interface_id"
 
+  has_many  :aa_residues,
+            :class_name   => "AaResidue",
+            :foreign_key  => "domain_interface_id"
+
   has_many  :chains,
             :through      => :residues,
             :uniq         => true

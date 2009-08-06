@@ -65,7 +65,7 @@ module Bipa
         end
 
         def #{stat}_asa_of_sse(sse)
-          residues.inject(0) { |s, r| !r.dssp.nil? && r.sse == sse.upcase ? s + r.#{stat}_asa : s }
+          aa_residues.inject(0) { |s, r| !r.dssp.nil? && r.sse == sse.upcase ? s + r.#{stat}_asa : s }
         end
       END
     end
