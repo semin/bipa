@@ -448,7 +448,6 @@ table caption {
   font-family: "Courier New", courier, monospace;
   font-size: 90%;
   white-space: nowrap;
-  overflow-x: scroll;
 }
 
 .sequence {
