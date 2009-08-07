@@ -7,7 +7,7 @@
     <td class="title">Title</td>
     <td colspan=6><%=h @structure.title %></td>
     <td colspan=2 rowspan=5 style="width:280px" align="center">
-      <%= link_to image_tag(@structure.big_image, :width => 250, :border => 0), jmol_structure_path %><br />
+      <%= link_to image_tag(@structure.big_image, :width => 250, :border => 0), "#big_image_box", :id => "big_image_box_link" %><br />
       3D View: <%= link_to "Jmol", jmol_structure_path %>
     </td>
   </tr>
@@ -219,4 +219,9 @@
 
 <div id="abstract" class="zoomed">
   <%=h @structure.abstract %>
+</div>
+
+<div id="big_image_box">
+  <%= image_tag @structure.big_image %><br />
+  <%= @structure.pdb_code %>
 </div>
