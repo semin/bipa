@@ -3,9 +3,9 @@
 BIPA (Biological Interaction database for Protein-nucleic Acid) is a comprehensive protein-nucleic acid interaction database, especially focusing on structural and functional restraints on nulceic acid-binding protein families. 
 
 
-## TODO
+## Reference
 
-* Query using UniProt ID
+[Lee S., Blundell T.L. (2009) BIPA: a database for protein–nucleic acid interaction in 3D structures. Bioinformatics. 2009 Jun 15;25(12):1559-60. Epub 2009 Apr 8.](http://bioinformatics.oxfordjournals.org/cgi/content/abstract/25/12/1559)
 
 
 ## License
