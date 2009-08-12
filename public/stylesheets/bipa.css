@@ -588,3 +588,7 @@ div#zoom {
   list-style: square;
 }
 
+div#footer_banner {
+ margin-top: 5px;
+ text-align: center
+}
