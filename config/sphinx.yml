@@ -1,7 +1,6 @@
-development:
-  morphology: stem_en
-test:
-  morphology: stem_en
 production:
+  enable_star: 1
+  min_infix_len: 1
   morphology: stem_en
+  port: 3313
 
