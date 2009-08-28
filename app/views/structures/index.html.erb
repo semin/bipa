@@ -2,8 +2,50 @@
   PDB
 </div>
 
-<%= will_paginate @structures %>
+<div class="search_form">
+  <% form_tag structures_path, :method => "get" do %>
+    <%= text_field_tag :query, params[:query], :size => 30 %>
+    <%= submit_tag "Search", :name => nil %>
+    [<%= link_to "?", "#search_box", :id => "search_box_link" %>]
+  <% end %>
+</div>
 
-<%= render :partial => "structure", :collection => @structures, :spacer_template => "/shared/list_spacer" %>
+<% if @query.blank? %>
+  <%= will_paginate @structures %>
+  <%= render :partial => "structure", :collection => @structures, :spacer_template => "/shared/list_spacer" %>
+  <%= will_paginate @structures %>
+<% else %>
+  <% if (@structures && @structures.size > 0 && @structures.total_entries > 0) %>
+    <div class="search_result">
+      <h4>Query: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @structures.total_entries %></font></h4>
+    </div>
+    <%= will_paginate @structures %>
+    <%= render :partial => "structure", :collection => @structures, :spacer_template => "/shared/list_spacer" %>
+    <%= will_paginate @structures %>
+  <% else %>
+    <div class="search_result">
+      <h4>Query: <font color='green'><%= @query %></font>, Hits: <font color='green'>0</font></h4>
+      Sorry. No hits found.
+    </div>
+  <% end %>
+  <br />
+<% end %>
 
-<%= will_paginate @structures %>
+<div id="search_box">
+  BIPA supports <%= link_to "Sphinx", "http://www.sphinxsearch.com/", :popup => true %>'s extended query syntax. You can use the indexed fields of BIPA to build more sophisticated query :<br /><br />
+  <b>PDB</b>
+  <ul class="cell_text">
+    <li>pdb_code (e.g. @pdb_code 10MH)</li>
+    <li>classification (e.g. @classification TRANSFERASE/DNA)</li>
+    <li>title (e.g. @title "TERNARY STRUCTURE OF HHAI")</li>
+    <li>exp_method (e.g. @exp_method "X-RAY DIFFRACTION")</li>
+  </ul>
+  <b>SCOP</b>
+  <ul class="cell_text">
+    <li>sid (e.g. @sid d10mha_)</li>
+    <li>sunid (e.g. @sunid 34232)</li>
+    <li>sccs (e.g. @sccs c.66.1.26)</li>
+    <li>description (e.g. @description "10mh A:")</li>
+  </ul>
+  Please check <%= link_to "this document", "http://www.sphinxsearch.com/docs/current.html#searching", :popup => true %> for more details.
+</div>

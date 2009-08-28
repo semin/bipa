@@ -3,11 +3,16 @@ class StructuresController < ApplicationController
   caches_page :show, :jmol
 
   def index
-    @structures = Structure.untainted.paginate(:page => params[:page], :per_page => 10)
+    @query = params[:query]
+
+    if @query && !@query.empty?
+      @structures = Structure.untainted.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10).compact
+    else
+      @structures = Structure.untainted.paginate(:page => params[:page], :per_page => 10)
+    end
 
     respond_to do |format|
-      format.html # index.rhtml
-      format.xml  { render :xml => @structures.to_xml }
+      format.html
     end
   end
 
@@ -28,12 +33,4 @@ class StructuresController < ApplicationController
     end
   end
 
-  def search
-    @query      = params[:query]
-    @structures = Structure.untainted.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10).compact
-
-    respond_to do |format|
-      format.html
-    end
-  end
 end

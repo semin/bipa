@@ -2,8 +2,32 @@
   SCOP Domains
 </div>
 
-<%= will_paginate @scops %>
+<div class="search_form">
+  <% form_tag scops_path, :method => "get" do %>
+    <%= text_field_tag :query, params[:query], :size => 30 %>
+    <%= submit_tag "Search", :name => nil %>
+    [<%= link_to "?", "#search_box", :id => "search_box_link" %>]
+  <% end %>
+</div>
 
-<%= render :partial => "scop", :collection => @scops, :spacer_template => "/shared/list_spacer" %>
+<% if @query.blank? %>
+  <%= will_paginate @scops %>
+  <%= render :partial => "scop", :collection => @scops, :spacer_template => "/shared/list_spacer" %>
+  <%= will_paginate @scops %>
+<% else %>
+  <% if (@scops && @scops.size > 0 && @scops.total_entries > 0) %>
+    <div class="search_result">
+      <h4>Query: <font color='green'><%= @query %></font>, Hits: <font color='green'><%= @scops.total_entries %></font></h4>
+    </div>
+    <%= will_paginate @scops %>
+    <%= render :partial => "scop", :collection => @scops, :spacer_template => "/shared/list_spacer" %>
+    <%= will_paginate @scops %>
+  <% else %>
+    <div class="search_result">
+      <h4>Query: <font color='green'><%= @query %></font>, Hits: <font color='green'>0</font></h4>
+      Sorry. No hits found.
+    </div>
+  <% end %>
+  <br />
+<% end %>
 
-<%= will_paginate @scops %>

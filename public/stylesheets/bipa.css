@@ -75,7 +75,7 @@ span.representative {
 
 #header_menu {
   position: absolute;
-  top: 2px;
+  top: 5px;
   right: 0px;
 }
 
@@ -119,20 +119,19 @@ span.representative {
   display: inline;
 }
 
-#header_search {
-  position: absolute;
-  top: 50px;
-  right: 0px;
-  font-size: 90%;
-}
-
 div.search_form {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
   display: inline;
 }
 
-form.search_form {
-  display: inline;
+div.search_result {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
+
 #settings {
   display: inline;
 }

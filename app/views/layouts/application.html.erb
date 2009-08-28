@@ -75,14 +75,6 @@
           <%= link_to "Contact", :controller => "main", :action => "contact" %>
           </li>
         </ul>
-        <div id="header_search">
-          <% form_tag(:controller => "main", :action => "search", :method => "get", :class => "search_form") do %>
-            <%= select_tag(:search_model, options_for_select(%w[ PDB SCOP ])) %>
-            <%= text_field_tag :query, nil, :size => 20 %>
-            <%= submit_tag "Search", :name => nil %>
-            [<%= link_to "?", "#search_box", :id => "search_box_link" %>]
-          <% end %>
-        </div>
         <div id="main_logo">
           <%= link_to(image_tag("bipa_logo.png", :size => "40x70", :border => 0), :controller => "main", :action => "home") %>
         </div>
@@ -107,25 +99,6 @@
     <div id="footer_banner">
       <%= link_to image_tag("ruby_powered.png", :border => 0), "http://ruby-lang.org/", :popup => true %> 
       <%= link_to image_tag("rails_powered.png", :border => 0), "http://rubyonrails.org/", :popup => true %>                                                               
-    </div>
-
-    <div id="search_box">
-      BIPA supports <%= link_to "Sphinx", "http://www.sphinxsearch.com/", :popup => true %>'s extended query syntax. You can use the indexed fields of BIPA to build more sophisticated query :<br /><br />
-      <b>PDB</b>
-      <ul class="cell_text">
-        <li>pdb_code (e.g. @pdb_code 10MH)</li>
-        <li>classification (e.g. @classification TRANSFERASE/DNA)</li>
-        <li>title (e.g. @title "TERNARY STRUCTURE OF HHAI")</li>
-        <li>exp_method (e.g. @exp_method "X-RAY DIFFRACTION")</li>
-      </ul>
-      <b>SCOP</b>
-      <ul class="cell_text">
-        <li>sid (e.g. @sid d10mha_)</li>
-        <li>sunid (e.g. @sunid 34232)</li>
-        <li>sccs (e.g. @sccs c.66.1.26)</li>
-        <li>description (e.g. @description "10mh A:")</li>
-      </ul>
-      Please check <%= link_to "this document", "http://www.sphinxsearch.com/docs/current.html#searching", :popup => true %> for more details.
     </div>
 
     <script type="text/javascript">

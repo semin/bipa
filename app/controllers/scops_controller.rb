@@ -3,7 +3,13 @@ class ScopsController < ApplicationController
   caches_page :show, :jmol
 
   def index
-    @scops = ScopDomain.reg_all.paginate(:page => params[:page] || 1, :per_page => 20)
+    @query = params[:query]
+
+    if @query && !@query.empty?
+      @scops = ScopDomain.reg_all.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10).compact
+    else
+      @scops = ScopDomain.reg_all.paginate(:page => params[:page] || 1, :per_page => 10)
+    end
 
     respond_to do |format|
       format.html
@@ -37,18 +43,6 @@ class ScopsController < ApplicationController
   def domains
     @scop = Scop.find_by_sunid(params[:id])
     @doms = @scop.scop_domains.paginate(:page => params[:page] || 1, :per_page => 20)
-
-    respond_to do |format|
-      format.html
-    end
-  end
-
-  def search
-    @query = params[:query]
-    @scops = ScopDomain.reg_all.search(@query,
-                                       :match_mode => :extended,
-                                       :page => params[:page],
-                                       :per_page => 10).compact
 
     respond_to do |format|
       format.html

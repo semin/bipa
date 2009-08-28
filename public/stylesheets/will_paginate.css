@@ -2,7 +2,10 @@
   clear: both;
   width: 100%;
   padding: 3px;
-  margin: 3px;
+  margin-left: 3px;
+  margin-right: 3px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   font-size: 80%;
   text-align: center;
 }
