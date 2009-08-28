@@ -132,6 +132,10 @@ div.search_result {
   margin-right: auto;
 }
 
+form {
+  text-align: center;
+}
+
 #settings {
   display: inline;
 }
