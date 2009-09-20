@@ -17,7 +17,7 @@ class StructuresController < ApplicationController
   end
 
   def show
-    @structure  = Structure.find_by_pdb_code(params[:id])
+    @structure  = Structure.find_by_pdb_code(params[:id].upcase)
 
     respond_to do |format|
       format.html # show.rhtml
