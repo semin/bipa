@@ -102,7 +102,7 @@ class Structure < ActiveRecord::Base
 
   def abstract
     citation   = Citation.find_by_Structure_ID(pdb_code)
-    pubmed     = Bio::PubMed.efetch(citation.pdbx_database_id_PubMed)
+    pubmed     = Bio::PubMed.query(citation.pdbx_database_id_PubMed)
     medline    = Bio::MEDLINE.new(pubmed)
     medline.abstract.empty? ? "N/A" : medline.abstract
   end
