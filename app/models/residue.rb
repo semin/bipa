@@ -168,6 +168,16 @@ class AaResidue < StdResidue
     ss ? true : false
   end
 
+  def usr_descriptors_from_atoms_in(dist)
+    ca    = atoms.find_by_atom_name('CA')
+    cas   = chain.residues.map { |r| r.atoms.find_by_atom_name('CA') }.compact
+    kt    = Bipa::KDTree.new
+    cas.each { |c| kt.insert(c) }
+
+    ncas  = kt.neighbors(ca, dist).map(&:point)
+    AtomSet.new(ncas).shape_descriptors
+  end
+
   def one_letter_code
     AminoAcids::Residues::ONE_LETTER_CODE[residue_name] or "X"
   end

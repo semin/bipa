@@ -5,7 +5,7 @@
 # ENV['RAILS_ENV'] ||= 'production'
 
 # Specifies gem version of Rails to use when vendor/rails is not present
-RAILS_GEM_VERSION = '2.3.3' unless defined? RAILS_GEM_VERSION
+RAILS_GEM_VERSION = '2.3.4' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -82,8 +82,8 @@ Rails::Initializer.run do |config|
 
     # configatron for BIPA
     configatron.rep_pid   = 100
-    configatron.resume    = (ENV['RESUME'].to_i > 0    ? ENV['RESUME'].to_i    : false)
-    configatron.max_fork  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i  : 2)
+    configatron.resume    = (ENV['RESUME'].to_i > 0   ? ENV['RESUME'].to_i  : false)
+    configatron.max_fork  = (ENV['MAXFORK'].to_i > 0  ? ENV['MAXFORK'].to_i : 2)
 
     configatron.epsilon                           = 1.0E-6
     configatron.max_vdw_distance                  = 5.0

@@ -216,7 +216,7 @@ namespace :bipa do
                       if res == "-"
                         bind << "-"; hbond << "-"; whbond << "-"; vdw << "-"; nabind << "-"
                       elsif dbrs[di].nil?
-                        bind << "X"; hbond << "X"; whbond << "X"; vdw << "X"; nabind << "X"
+                        bind << "F"; hbond << "F"; whbond << "F"; vdw << "F"; nabind << "N"
                         $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
                                     "(TEM: #{res} <=> BIPA: None)."
                       elsif dbrs[di].one_letter_code == res
@@ -235,7 +235,7 @@ namespace :bipa do
                         end
                         di += 1
                       else
-                        bind << "X"; hbond << "X"; whbond << "X"; vdw << "X"; nabind << "X"
+                        bind << "F"; hbond << "F"; whbond << "F"; vdw << "F"; nabind << "N"
                         $logger.warn  "!!! Unmatched residue at #{di} in #{dom.sid} in #{dir}: " +
                                       "BIPA: #{dbrs[di].one_letter_code} <=> TEM: #{res}"
                       end
