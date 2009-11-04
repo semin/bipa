@@ -152,6 +152,12 @@ Rails::Initializer.run do |config|
     configatron.classdefdna     = Rails.root.join("config", "classdef.dna")
     configatron.classdefrna     = Rails.root.join("config", "classdef.rna")
 
+    configatron.nabal_dir       = Rails.root.join("public/nabal")
+    configatron.fuguena_dir     = Rails.root.join("public/fuguena")
+    configatron.psiblast_dir    = Rails.root.join("public/psiblast")
+    configatron.needle_dir      = Rails.root.join("public/needle")
+    configatron.water_dir       = Rails.root.join("public/water")
+
     # for custom libraries in RAILS_ROOT/lib
     require 'matrix'
     require 'bio_extensions'

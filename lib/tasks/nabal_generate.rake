@@ -2,7 +2,7 @@ namespace :nabal do
   namespace :generate do
 
     desc "Generate non-redundant protein-DNA/RNA chain sets for Nabal training"
-    task :nr_chains => [:environment] do
+    task :nrchains => [:environment] do
 
       structures = Structure.untainted.max_resolution(3.0)
 
@@ -31,7 +31,7 @@ namespace :nabal do
 
 
     desc "Generate lists of non-redundant protein-DNA/RNA chain sets"
-    task :nr_chain_lists => [:environment] do
+    task :nrchainlists => [:environment] do
 
       %w[dna rna].each do |na|
         na_set = Rails.root.join("tmp", "#{na}_set.cluster30")
@@ -64,9 +64,9 @@ namespace :nabal do
         config = ActiveRecord::Base.remove_connection
 
         %w[dna rna].each do |na|
-          na_list  = Rails.root.join("tmp", "#{na}_set.list")
+          nalist  = Rails.root.join("tmp", "#{na}_set.list")
 
-          IO.foreach(na_list) do |line|
+          IO.foreach(nalist) do |line|
             fmanager.fork do
               ActiveRecord::Base.establish_connection(config)
 
@@ -99,121 +99,183 @@ namespace :nabal do
     end
 
 
+    desc "Generate input feature statistics for Nabal"
+    task :input_stats => [:environment] do
+
+      %w[dna rna].each do |na|
+        nastem      = "#{na}_set"
+        nalist      = configatron.nabal_dir + "#{nastem}.list"
+        nrchains    = IO.readlines(nalist).map(&:chomp)
+        interfaces  = []
+        surfaces    = []
+        cores       = []
+
+        nrchains.each_with_index do |nrchain, i|
+          $logger.info "Processing #{nrchain} of #{na.upcase} set (#{i+1}/#{nrchains.size})"
+
+          pdb_code        = nrchain.split("_").first
+          chain_code      = nrchain.split("_").last
+          structure       = Structure.find_by_pdb_code(pdb_code.upcase)
+          chain           = structure.models[0].chains.find_by_chain_code(chain_code)
+          aa_residues     = chain.aa_residues
+          nab_residues    = chain.send("#{na}_binding_interface_residues")
+          nanb_residues   = aa_residues - nab_residues
+          kdtree   = Bipa::KDTree.new
+          aa_residues.each { |r| r.atoms.each { |c| kdtree.insert(c) } }
+
+          aa_residues.each do |residue|
+            # USR descriptors
+            ca = residue.atoms.find_by_atom_name('CA')
+
+            if ca.nil?
+              $logger.warn "Skip #{pdb_code}/#{chain_code}/#{i}/#{residue.residue_name}, no CA!"
+              next
+            end
+
+            ncas          = kdtree.neighbors(ca, 12).map(&:point)
+            usr_features  = AtomSet.new(ncas).shape_descriptors.to_a
+
+            if residue.on_interface?
+              interfaces << usr_features
+            elsif residue.on_surface?
+              surfaces << usr_features
+            else
+              cores << usr_features
+            end
+          end
+        end
+
+        File.open("#{nastem}-usr-interfaces.csv", 'w') do |f|
+          interfaces.each { |i| f.puts i.join(", ") }
+        end
+        File.open("#{nastem}-usr-surfaces.csv", 'w') do |f|
+          surfaces.each { |i| f.puts i.join(", ") }
+        end
+        File.open("#{nastem}-usr-cores.csv", 'w') do |f|
+          cores.each { |i| f.puts i.join(", ") }
+        end
+      end
+    end
+
+
     desc "Generate vectorized input features for Nabal traning & testing"
     task :input_features => [:environment] do
 
-      require 'facets'
+      require "facets"
 
-      window_size = 7
-      radius      = window_size / 2
+      winsize = 7
+      radius  = winsize / 2
 
       %w[dna rna].each do |na|
-        na_stem = "#{na}_set"
-        na_list = Rails.root.join("tmp", "#{na_stem}.list")
+        nastem    = "#{na}_set"
+        nalist    = configatron.nabal_dir + "#{nastem}.list"
+        iff       = configatron.nabal_dir + "#{nastem}.input"
+        nrchains  = IO.readlines(nalist).map(&:chomp)
 
-        unless File.exists? na_list
-          $logger.error "!!! Cannot find #{na_list}"
-          exit 1
-        end
+        File.open(iff, 'w') do |feature|
+          nrchains.each_with_index do |nrchain, i|
+            $logger.info "Extracting input features from #{nrchain} of #{na.upcase} set (#{i+1}/#{nrchains.size})"
 
-#        # read ESST files
-#        esst_file = Rails.root.join("tmp", "essts", na, "ulla-#{na}-60.log")
-#
-#        unless File.exists? esst_file
-#          $logger.error "!!! Cannot find #{esst_file}"
-#          exit 1
-#        end
-#
-#        essts = Bipa::Essts.new(esst_file).essts
+            pdb_code        = nrchain.split("_").first
+            chain_code      = nrchain.split("_").last
+            structure       = Structure.find_by_pdb_code(pdb_code.upcase)
+            chain           = structure.models[0].chains.find_by_chain_code(chain_code)
+            aa_residues     = chain.aa_residues
+            nab_residues    = chain.send("#{na}_binding_interface_residues")
+            nanb_residues   = aa_residues - nab_residues
+            kdtree          = Bipa::KDTree.new
 
-        # divide traning and test sets
-        # here, we use leave-one-out cross-validation
-        total_set = IO.readlines(na_list)
+            aa_residues.each { |r| r.atoms.each { |c| kdtree.insert(c) } }
 
-        total_set.combination(1).each_with_index do |test_set, i|
-          train_set = total_set - test_set
-
-          %w[train test].each do |set_type|
-            feature_file  = Rails.root.join("tmp", "#{na_stem}.#{set_type}#{i}")
-            current_set   = set_type == 'train' ? train_set : test_set
-
-            File.open(feature_file, 'w') do |feature|
-              current_set.each do |entry|
-                entry_stem      = entry.chomp
-                pdb_code        = entry_stem.split("_").first
-                chain_code      = entry_stem.split("_").last
-                structure       = Structure.find_by_pdb_code(pdb_code.upcase)
-                chain           = structure.models[0].chains.find_by_chain_code(chain_code)
-                aa_residues     = chain.aa_residues
-                nab_residues    = chain.send("#{na}_binding_interface_residues")
-                nanb_residues   = aa_residues - nab_residues
-
-                # balance NA-binding and NA-non-binding residue numbers
-                if nanb_residues.size > nab_residues.size
-                  snanb_residues  = []
-                  nab_residues.size.times do
-                    res = nanb_residues[rand(nanb_residues.size)]
-                    snanb_residues << res
-                    nanb_residues.delete(res)
-                  end
-                  nanb_residues = snanb_residues
-                end
-
-                # read PSSM file
-                pssms     = []
-                pssm_file = Rails.root.join("tmp", "#{entry_stem}.pssm")
-                $logger.error "!!! #{pssm_file} does not exits" unless File.exists? pssm_file
-
-                IO.foreach(pssm_file) do |line|
-                  line.chomp!.strip!
-                  if line =~ /^\d+\s+\w+/
-                    columns = line.split(/\s+/)
-                    pssms << NVector[*columns[2..21].map { |c| Float(c) }]
-                  end
-                end
-
-                # create libSVM train file
-                sel_residues = nab_residues + nanb_residues
-                sel_residues.each_with_index do |residue, i|
-                  # binding activily label
-                  label = residue.on_interface? ? '+1' : '-1'
-
-                  # sequence features
-                  seq_features = (-radius..radius).map { |distance|
-                    if (i + distance) >= 0 and aa_residues[i + distance]
-                      aa_residues[i + distance].array20
-                    else
-                      AaResidue::ZeroArray20
-                    end
-                  }.flatten
-
-                  # PSSM features
-                  pssm_features = (-radius..radius).map { |distance|
-                    if (i + distance) >= 0 and pssms[i + distance]
-                      pssms[i + distance].to_a.map { |p| 1 / (1 + 1.0 / Math::E**-p) }
-                    else
-                      AaResidue::ZeroArray20
-                    end
-                  }.flatten
-
-  #                # Distances between PSSM and corresponding ESST columns
-  #                esst_features = essts.map { |esst|
-  #                  (pssms[i] - esst.column(residue.one_letter_code)).to_a.map { |p| 1 / (1 + 1.0 / Math::E**-p) }
-  #                }.flatten
-  #
-  #                # build atom KDTree
-  #                kdtree      = Bipa::KDTree.new
-  #                aa_atoms.each { |a| kdtree.insert(a) }
-
-                  # USR descriptors
-
-                  # Concatenate all the input features into total_features
-                  total_features = seq_features + pssm_features
-
-                  # Create libSVM input feature file
-                  feature.puts label + " " + total_features.map_with_index { |f, i| "#{i + 1}:#{f}" }.join(' ')
-                end
+            # balance NA-binding and NA-non-binding residue numbers
+            if nanb_residues.size > nab_residues.size
+              snanb_residues  = []
+              nab_residues.size.times do
+                res = nanb_residues[rand(nanb_residues.size)]
+                snanb_residues << res
+                nanb_residues.delete(res)
               end
+              nanb_residues = snanb_residues
+            end
+
+            # read PSSM file
+            pssms     = []
+            pssm_file = configatron.nabal_dir.join("blast", "#{nrchain}.pssm")
+            $logger.error "!!! #{pssm_file} does not exits" unless File.exists? pssm_file
+
+            IO.foreach(pssm_file) do |line|
+              line.chomp!.strip!
+              if line =~ /^\d+\s+\w+/
+                columns = line.split(/\s+/)
+                pssms << NVector[*columns[2..21].map { |c| Float(c) }]
+              end
+            end
+
+            # create libSVM train file
+            sel_residues = nab_residues + nanb_residues
+            sel_residues.each do |residue|
+              # index
+              i = aa_residues.index(residue)
+
+              # binding activily label
+              label = residue.on_interface? ? '+1' : '-1'
+
+              #
+              # 1-Dimensional features
+              #
+              seq_features = (-radius..radius).map { |distance|
+                if (i + distance) >= 0 and aa_residues[i + distance]
+                  aa_residues[i + distance].array20
+                else
+                  AaResidue::ZeroArray20
+                end
+              }.flatten
+
+              # PSSM features
+              pssm_features = (-radius..radius).map { |distance|
+                if (i + distance) >= 0 and pssms[i + distance]
+                  pssms[i + distance].to_a
+                else
+                  AaResidue::ZeroArray20
+                end
+              }.flatten
+
+              pssm_norm_features = pssm_features.map { |p| 1 / (1 + 1.0 / Math::E**-p) }
+
+              #
+              # 3-dimensional features from here!!!
+              #
+
+              # SSE
+              sse_features = if residue.helix?
+                               [1, 0, 0]
+                             elsif residue.beta_sheet?
+                               [0, 1, 0]
+                             else
+                               [0, 0, 1]
+                             end
+
+              # ASA
+              asa_feature = [residue.relative_unbound_asa]
+
+              # Spatial neighbors
+
+              # USR descriptors
+              ca = residue.atoms.find_by_atom_name('CA')
+
+              if ca.nil?
+                $logger.warn "Skip #{pdb_code}/#{chain_code}/#{i}/#{residue.residue_name}, no CA!"
+                next
+              end
+
+              ncas          = kdtree.neighbors(ca, 12).map(&:point)
+              usr_features  = AtomSet.new(ncas).shape_descriptors.to_a
+
+              # Concatenate all the input features into total_features
+              total_features = seq_features + pssm_features + sse_features + asa_feature + usr_features
+
+              # Create libSVM input feature file
+              feature.puts label + " " + total_features.map_with_index { |f, i| "#{i + 1}:#{f}" }.join(' ')
             end
           end
         end

@@ -16,8 +16,3 @@ require File.expand_path(File.dirname(__FILE__) + "/bipa/nucleic_acid_binding")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_residues")
 require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_atoms")
 
-def refresh_dir(dir)
-  rm_rf(dir) if File.exists?(dir)
-  mkdir_p(dir)
-  puts ">>> Refreshing #{dir}: done"
-end

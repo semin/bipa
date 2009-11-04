@@ -25,16 +25,20 @@ namespace :bipa do
 
 
     desc "Update atoms' and residues' DNA/RNA interaction counts"
-    task :intcnts => [:environment] do
+    task :intcnt => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        tot = AaResidue.count
+        idx = 0
+
         AaResidue.find_in_batches do |grp|
+          idx   += 1
           ids   = grp.map(&:id)
-          conf  = ActiveRecord::Base.remove_connection
+          conn  = ActiveRecord::Base.remove_connection
 
           fm.fork do
-            ActiveRecord::Base.establish_connection(conf)
+            ActiveRecord::Base.establish_connection(conn)
 
             ids.each do |id|
               aar = AaResidue.find(id)
@@ -46,18 +50,19 @@ namespace :bipa do
                   atm.send("vdw_contacts_#{na}_count=",       atm.vdw_contacts.select { |b| b.vdw_contacting_atom.send("#{na}?") }.size)
                   atm.save!
                 end
-    #            aar.send("hbonds_#{na}_as_donor_count=",    aar.atoms.sum(:"hbonds_#{na}_as_donor_count"))
-    #            aar.send("hbonds_#{na}_as_acceptor_count=", aar.atoms.sum(:"hbonds_#{na}_as_acceptor_count"))
-    #            aar.send("whbonds_#{na}_count=",            aar.atoms.sum(:"whbonds_#{na}_count"))
-    #            aar.send("vdw_contacts_#{na}_count=",       aar.atoms.sum(:"vdw_contacts_#{na}_count"))
-    #            aar.save!
+                aar.send("hbonds_#{na}_as_donor_count=",    aar.atoms.sum(:"hbonds_#{na}_as_donor_count"))
+                aar.send("hbonds_#{na}_as_acceptor_count=", aar.atoms.sum(:"hbonds_#{na}_as_acceptor_count"))
+                aar.send("whbonds_#{na}_count=",            aar.atoms.sum(:"whbonds_#{na}_count"))
+                aar.send("vdw_contacts_#{na}_count=",       aar.atoms.sum(:"vdw_contacts_#{na}_count"))
+                aar.save!
               end
-
             end
-            $logger.info ">>> Updating atomic interaction counts for #{grp.size} residues: done"
+            $logger.info ">>> Updating atomic interaction counts for group #{idx} of #{grp.size} residues (out of #{tot}): done"
+
             ActiveRecord::Base.remove_connection
           end
-          ActiveRecord::Base.establish_connection(conf)
+
+          ActiveRecord::Base.establish_connection(conn)
         end
       end
     end
