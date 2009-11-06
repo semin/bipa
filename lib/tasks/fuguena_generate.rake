@@ -32,20 +32,14 @@ namespace :fuguena do
                 famdirs = esstdir.children.select { |d| d.directory? }
 
                 famdirs.each_with_index do |famdir, i|
-                  pred_table = esstdir.join("fugue-pred-#{na}-#{env}-#{weight}-#{i+1}.csv")
+                  pred_table = esstdir.join("fugue-pred-#{na}-#{env}-#{weight}-#{famdir.basename}.csv")
                   pred_table.open('w') do |file|
-                    #qfam_sunid  = famdir.basename.to_s.match(/^(\d+)\_\d+/)[1].to_i
-                    #qfam        = ScopFamily.find_by_sunid(qfam_sunid)
-
-                    ## Skip if it is not a true SCOP family!!!
-                    #if qfam.sccs !~ /^[a|b|c|d|e|f|g]/
-                    #  $logger.warn "Skipped #{famdir} (#{qfam.sccs}) as it's not a true SCOP family"
-                    #  next
-                    #end
-
                     hit_files = Dir[famdir.join("fugue-#{famdir.basename}-*-#{env}-#{weight}.hits").to_s]
                     hit_files.each do |hit_file|
-                      qsunid = File.basename(hit_file).split('-')[2].to_i
+                      qsunid      = File.basename(hit_file).split('-')[2].to_i
+                      qsccs       = sunid_to_sccs[qsunid]
+                      qsid        = sunid_to_sid[qsunid]
+                      qsfam_sunid = sunid_to_supfam_sunid[qsunid]
 
                       IO.readlines(hit_file).each do |line|
                         if line.blank?
@@ -63,18 +57,15 @@ namespace :fuguena do
                           tsunid      = sid_to_sunid[tsid]
                           tsccs       = sunid_to_sccs[tsunid]
                           tsfam_sunid = sunid_to_supfam_sunid[tsunid]
-                          #tfam  = ScopDomain.find_by_sid(tsid).scop_family
-                          #tag   = tfam.parent.sunid == qfam.parent.sunid ? 1 : -1
-                          tag         = sunid_to_supfam_sunid[tsunid] == sunid_to_supfam_sunid[qsunid] ? 1 : -1
-                          #cols    = [tag, zscore, tsid, tfam.sccs, tfam.sunid, qfam.sccs, qfam.sunid, len, raws, rvn]
-                          cols        = [tag, zscore, qsid, qsccs, qsfam_sunid, tsid, tsccs, tsfam_sunid, len, raws, rvn]
+                          tag         = qsfam_sunid == tsfam_sunid ? 1 : -1
+                          cols        = [tag, zscore, qsid, qsccs, tsid, tsccs, len, raws, rvn]
 
                           file.puts cols.join(", ")
                         end
                       end
                     end
                   end
-                  $logger.info "Processing #{fam_dir}: done"
+                  $logger.info "Processing #{famdir}: done"
                 end
                 ActiveRecord::Base.remove_connection
               end # fm.fork
@@ -159,7 +150,7 @@ namespace :fuguena do
         tf_pairs  << [false_pos, true_pos]
 
         pred50.open('w') do |file|
-          sorted_hits = hits.sort { |a, b| b[1] <=> a[1] }
+          sorted_hits = hits.sort { |a, b| Float(b[1]) <=> Float(a[1]) }
           sorted_hits.each do |hit|
             if Integer(hit[0]) == 1
               true_pos += 1
@@ -207,7 +198,7 @@ namespace :fuguena do
     end
 
 
-    desc "Generate a ROC table for FUGUE search"
+    desc "Generate ROC tables for FUGUE search"
     task :roc_fugue => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
@@ -215,58 +206,51 @@ namespace :fuguena do
 
         %w[dna rna].each do |na|
           ["std64", "#{na}128", "#{na}256"].each do |env|
-            (30..100).step(10) do |weight|
+            (60..60).step(10) do |weight|
 
               fm.fork do
                 esstdir     = configatron.fuguena_dir.join("essts", na, env)
-                famdirs     = esstdir.children.select { |d| d.directory? }
-                pred_table  = esstdir.join("rank-#{na}-#{env}-#{weight}.csv")
-                fugue_hits  = []
+                pred_tables = Dir[esstdir.join("fugue-pred-#{na}-#{env}-#{weight}-*.csv").to_s]
+                pred_tables.each do |pred_table|
+                  hits  = []
 
-                pred_table.each_line do |line|
-                  fugue_hits << line.chomp.split(", ")
-                end
-
-                true_pos  = 0
-                false_pos = 0
-                tf_pairs  = []
-                tf_pairs  << [false_pos, true_pos]
-
-                sorted_hits = fugue_hits.sort { |a, b| b[1] <=> a[1] }
-                sorted_hits.each do |hit|
-                  if hit[0] == "T"
-                    true_pos += 1
-                  elsif hit[0] == "F"
-                    false_pos += 1
+                  IO.readlines(pred_table).each do |line|
+                    hits << line.chomp.split(", ") unless line.blank?
                   end
-                  tf_pairs << [false_pos, true_pos]
+
+                  sorted_hits = hits.sort { |a, b| Float(b[1]) <=> Float(a[1]) }
+                  sorted_pred = esstdir + pred_table.sub("pred", "sorted")
+                  true_pos    = 0
+                  false_pos   = 0
+                  tf_pairs    = []
+                  tf_pairs    << [false_pos, true_pos]
+
+                  sorted_pred.open('w') do |file|
+                    sorted_hits.each do |hit|
+                      if Integer(hit[0]) == 1
+                        true_pos += 1
+                      elsif Integer(hit[0]) == -1
+                        false_pos += 1
+                      end
+                      tf_pairs << [false_pos, true_pos]
+                      file.puts hit.join(", ")
+                    end
+                  end
+
+                  [10, 20, 50].each do |cut|
+                    roc_table = esstdir + pred_table.sub("pred", "roc#{cut}")
+                    roc_table.open('w') do |file|
+                      tf_pairs.each_with_index do |pair, i|
+                        begin
+                          file.puts sorted_hits[i].join(', ') if pair[0] <= cut
+                        rescue
+                          raise "Error: you should check the row, #{i+1} in #{sorted_pred}"
+                        end
+                      end
+                    end
+                  end
+                  $logger.info "Processing #{pred_table}: done"
                 end
-
-#                roc_table = esstdir + "roc-#{na}-#{env}-#{weight}.csv"
-#                roc_table.open('w') { |f| f.puts(tf_pairs.each { |p| p.join(", ") }) }
-#
-#                [10, 20, 50].each do |cut|
-#                  max_tp = 0.0
-#                  max_fp = cut.to_f
-#
-#                  roc_occ_table = esstdir + "roc-#{na}-#{env}-#{weight}-occ#{cut}.csv"
-#                  roc_occ_table.open('w') do |file|
-#                    tf_pairs.each do |pair|
-#                      if pair[0] <= cut
-#                        max_tp = pair[1].to_f
-#                        file.puts pair.join(", ")
-#                      end
-#                    end
-#                  end
-#
-#                  roc_frq_table = esstdir + "roc-#{na}-#{env}-#{weight}-frq#{cut}.csv"
-#                  roc_frq_table.open('w') do |file|
-#                    tf_pairs.each do |pair|
-#                      file.puts [pair[0] / max_fp, pair[1] / max_tp].join(", ") if pair[0] <= cut
-#                    end
-#                  end
-#                end
-
               end # fm.fork
 
             end

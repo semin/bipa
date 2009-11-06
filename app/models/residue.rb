@@ -20,6 +20,18 @@ class Residue < ActiveRecord::Base
 
   has_many  :positions
 
+  named_scope :surface, lambda { |*args|
+    { :conditions => ["unbound_asa > ?", (args.first || configatron.min_surface_residue_asa)] }
+  }
+
+  named_scope :buried, lambda { |*args|
+    { :conditions => ["unbound_asa <= ?", (args.first || configatron.min_surface_resdiue_asa)] }
+  }
+
+  named_scope :interface, lambda { |*args|
+    { :conditions => ["delta_asa > ?", (args.first || configatron.min_interface_residue_delta_asa)] }
+  }
+
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?
