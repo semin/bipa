@@ -40,6 +40,9 @@ class Model < ActiveRecord::Base
   has_many  :het_residues,
             :through    => :chains
 
+  has_many  :water_residues,
+            :through    => :chains
+
   def domains
     aa_chains.inject([]) { |s, a| s.concat(a.domains) }
   end

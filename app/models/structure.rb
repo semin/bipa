@@ -23,7 +23,7 @@ class Structure < ActiveRecord::Base
   has_many  :hna_chains,
             :through    => :models
 
-  has_many  :het_chains,
+  has_many  :pseudo_chains,
             :through    => :models
 
   named_scope :latest, { :order => 'deposited_at DESC' }

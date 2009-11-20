@@ -4,27 +4,28 @@ namespace :nabal do
     desc "Generate non-redundant protein-DNA/RNA chain sets for Nabal training"
     task :nrchains => [:environment] do
 
-      structures = Structure.untainted.max_resolution(3.0)
+      refresh_dir configatron.nabal_dir
+      structures = Structure.untainted.max_resolution(3.5)
 
       %w[dna rna].each do |na|
-        File.open(Rails.root.join("tmp/#{na}_set.fasta"), 'w') do |na_set|
+        fasta = configatron.nabal_dir + "#{na}_set.fasta"
+        fasta.open('w') do |file|
           structures.each_with_index do |structure, i|
             structure.aa_chains.each do |chain|
               if (chain.aa_residues.size > 30) && ((residue_size = chain.send("#{na}_binding_interface_residues").size) > 0)
-                na_set.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
-                na_set.puts chain.aa_residues.map(&:one_letter_code).join('')
+                file.puts ">#{structure.pdb_code}_#{chain.chain_code}_#{residue_size}"
+                file.puts chain.aa_residues.map(&:one_letter_code).join('')
               end
             end
-            $logger.info ">>> Detecting #{na.upcase}-binding chain(s) from #{structure.pdb_code}: done (#{i+1}/#{structures.size})"
+            $logger.info "Detecting #{na.upcase}-binding chain(s) from #{structure.pdb_code}: done (#{i+1}/#{structures.size})"
           end
         end
 
         # Run blastclust to make non-redundant protein-DNA/RNA chain sets
         cwd = pwd
-        chdir Rails.root.join("tmp")
+        chdir configatron.nabal_dir
         sh "blastclust -i #{na}_set.fasta -o #{na}_set.cluster30 -L .9 -b F -p T -S 30"
         chdir cwd
-
         $logger.info ">> Running blastclust for non-redundant protein-#{na.upcase} chain sets: done"
       end
     end
@@ -58,16 +59,16 @@ namespace :nabal do
     task :pssms => [:environment] do
 
       blast_db = Rails.root.join("tmp", "nr100_24Jun09.clean.fasta")
-      fmanager = ForkManager.new(configatron.max_fork)
+      fm = ForkManager.new(configatron.max_fork)
 
-      fmanager.manage do
+      fm.manage do
         config = ActiveRecord::Base.remove_connection
 
         %w[dna rna].each do |na|
           nalist  = Rails.root.join("tmp", "#{na}_set.list")
 
           IO.foreach(nalist) do |line|
-            fmanager.fork do
+            fm.fork do
               ActiveRecord::Base.establish_connection(config)
 
               stem        = line.chomp
@@ -113,14 +114,15 @@ namespace :nabal do
         nrchains.each_with_index do |nrchain, i|
           $logger.info "Processing #{nrchain} of #{na.upcase} set (#{i+1}/#{nrchains.size})"
 
-          pdb_code        = nrchain.split("_").first
-          chain_code      = nrchain.split("_").last
-          structure       = Structure.find_by_pdb_code(pdb_code.upcase)
-          chain           = structure.models[0].chains.find_by_chain_code(chain_code)
-          aa_residues     = chain.aa_residues
-          nab_residues    = chain.send("#{na}_binding_interface_residues")
-          nanb_residues   = aa_residues - nab_residues
-          kdtree   = Bipa::KDTree.new
+          pdb_code      = nrchain.split("_").first
+          chain_code    = nrchain.split("_").last
+          structure     = Structure.find_by_pdb_code(pdb_code.upcase)
+          chain         = structure.models[0].chains.find_by_chain_code(chain_code)
+          aa_residues   = chain.aa_residues
+          nab_residues  = chain.send("#{na}_binding_interface_residues")
+          nanb_residues = aa_residues - nab_residues
+          kdtree        = Bipa::KDTree.new
+
           aa_residues.each { |r| r.atoms.each { |c| kdtree.insert(c) } }
 
           aa_residues.each do |residue|

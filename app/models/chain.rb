@@ -19,6 +19,11 @@ class Chain < ActiveRecord::Base
 
   has_many  :het_residues
 
+  has_many  :water_residues,
+            :class_name   => "Residue",
+            :foreign_key  => "chain_id",
+            :conditions   => "residue_name = 'HOH'"
+
   has_many  :atoms,
             :through      => :residues
 

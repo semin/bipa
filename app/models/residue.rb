@@ -32,6 +32,8 @@ class Residue < ActiveRecord::Base
     { :conditions => ["delta_asa > ?", (args.first || configatron.min_interface_residue_delta_asa)] }
   }
 
+  named_scope :domain_interface, :conditions => ["domain_interface_id is NOT NULL"]
+
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?
