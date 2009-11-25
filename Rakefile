@@ -18,7 +18,7 @@ include FileUtils
 
 class RakeLogger < Logger
   def format_message(severity, timestamp, progname, msg)
-    "[#{timestamp.to_formatted_s(:db)} #{severity}]: #{msg}\n"
+    "[#{timestamp.to_formatted_s(:db)} #{severity}] #{msg}\n"
   end
 end
 

@@ -20,14 +20,12 @@ namespace :fuguena do
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
-        conn = ActiveRecord::Base.remove_connection
-
         %w[dna rna].each do |na|
-          ["std64", "#{na}128", "#{na}256"].each do |env|
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
             (60..60).step(10) do |weight|
 
               fm.fork do
-                ActiveRecord::Base.establish_connection(conn)
                 esstdir = configatron.fuguena_dir.join("essts", na, env)
                 famdirs = esstdir.children.select { |d| d.directory? }
 
@@ -67,7 +65,6 @@ namespace :fuguena do
                   end
                   $logger.info "Processing #{famdir}: done"
                 end
-                ActiveRecord::Base.remove_connection
               end # fm.fork
             end
           end
@@ -201,60 +198,155 @@ namespace :fuguena do
     desc "Generate ROC tables for FUGUE search"
     task :roc_fugue => [:environment] do
 
-      fm = ForkManager.new(configatron.max_fork)
-      fm.manage do
+#      fm = ForkManager.new(configatron.max_fork)
+#      fm.manage do
+#        conn = ActiveRecord::Base.remove_connection
 
         %w[dna rna].each do |na|
-          ["std64", "#{na}128", "#{na}256"].each do |env|
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
             (60..60).step(10) do |weight|
 
-              fm.fork do
+#              fm.fork do
+#                ActiveRecord::Base.establish_connection(conn)
+                total_hits  = []
                 esstdir     = configatron.fuguena_dir.join("essts", na, env)
                 pred_tables = Dir[esstdir.join("fugue-pred-#{na}-#{env}-#{weight}-*.csv").to_s]
                 pred_tables.each do |pred_table|
-                  hits  = []
+
+                  # Check if the prediction file belongs to true SCOP classes
+                  bname = File.basename(pred_table, ".csv")
+                  sunid = bname.split("-")[5].split("_")[0]
+                  sfam  = ScopFamily.find_by_sunid(sunid)
+
+                  if (sfam.sccs !~ /^[a|b|c|d|e|f|g]/)
+                    $logger.warn "Skip, #{bname}.csv: #{sunid} (#{sfam.sccs}) does NOT belong to a true SCOP class!"
+                    next
+                  end
+
+                  hits = []
 
                   IO.readlines(pred_table).each do |line|
-                    hits << line.chomp.split(", ") unless line.blank?
+                    hits        << line.chomp.split(", ") unless line.blank?
+                    total_hits  << line.chomp.split(", ") unless line.blank?
                   end
 
-                  sorted_hits = hits.sort { |a, b| Float(b[1]) <=> Float(a[1]) }
-                  sorted_pred = esstdir + pred_table.sub("pred", "sorted")
-                  true_pos    = 0
-                  false_pos   = 0
-                  tf_pairs    = []
-                  tf_pairs    << [false_pos, true_pos]
+#                  sorted_hits = hits.sort { |a, b| Float(b[1]) <=> Float(a[1]) }
+#                  sorted_pred = esstdir + pred_table.sub("pred", "sorted")
+#                  true_pos    = 0
+#                  false_pos   = 0
+#                  tf_pairs    = []
+#                  tf_pairs    << [false_pos, true_pos]
+#
+#                  sorted_pred.open('w') do |file|
+#                    sorted_hits.each do |hit|
+#                      if Integer(hit[0]) == 1
+#                        true_pos += 1
+#                      elsif Integer(hit[0]) == -1
+#                        false_pos += 1
+#                      end
+#                      tf_pairs << [false_pos, true_pos]
+#                      file.puts hit.join(", ")
+#                    end
+#                  end
+#
+#                  [10, 20, 50].each do |cut|
+#                    roc_table = esstdir + pred_table.sub("pred", "roc#{cut}")
+#                    roc_table.open('w') do |file|
+#                      tf_pairs.each_with_index do |pair, i|
+#                        begin
+#                          file.puts sorted_hits[i].join(', ') if pair[0] < cut
+#                        rescue
+#                          raise "Error: you should check the row, #{i+1} in #{sorted_pred}"
+#                        end
+#                      end
+#                    end
+#                  end
 
-                  sorted_pred.open('w') do |file|
-                    sorted_hits.each do |hit|
-                      if Integer(hit[0]) == 1
-                        true_pos += 1
-                      elsif Integer(hit[0]) == -1
-                        false_pos += 1
-                      end
-                      tf_pairs << [false_pos, true_pos]
-                      file.puts hit.join(", ")
-                    end
-                  end
-
-                  [10, 20, 50].each do |cut|
-                    roc_table = esstdir + pred_table.sub("pred", "roc#{cut}")
-                    roc_table.open('w') do |file|
-                      tf_pairs.each_with_index do |pair, i|
-                        begin
-                          file.puts sorted_hits[i].join(', ') if pair[0] <= cut
-                        rescue
-                          raise "Error: you should check the row, #{i+1} in #{sorted_pred}"
-                        end
-                      end
-                    end
-                  end
-                  $logger.info "Processing #{pred_table}: done"
+                  $logger.info "Processing #{bname}: done"
                 end
-              end # fm.fork
 
+                sorted_hits = total_hits.sort { |a, b| Float(b[1]) <=> Float(a[1]) }
+                sorted_pred = esstdir + "fugue-total-sorted-#{na}-#{env}-#{weight}.csv"
+                true_pos    = 0
+                false_pos   = 0
+                tf_pairs    = []
+                tf_pairs    << [false_pos, true_pos]
+
+                sorted_pred.open('w') do |file|
+                  sorted_hits.each do |hit|
+                    if Integer(hit[0]) == 1
+                      true_pos += 1
+                    elsif Integer(hit[0]) == -1
+                      false_pos += 1
+                    end
+                    tf_pairs << [false_pos, true_pos]
+                    file.puts hit.join(", ")
+                  end
+                end
+
+                [10, 20, 50].each do |cut|
+                  #roc_table = esstdir + "fugue-tot#{cut}-#{na}-#{env}-#{weight}.csv"
+                  roc_table = esstdir + "fugue-cnt#{cut}-#{na}-#{env}-#{weight}.csv"
+                  roc_table.open('w') do |file|
+                    tf_pairs.each_with_index do |pair, i|
+                      #file.puts sorted_hits[i].join(', ') if pair[0] < cut
+                      file.puts pair.join(", ") if pair[0] < cut
+                    end
+                  end
+                end
+
+#                ActiveRecord::Base.remove_connection
+#              end # fm.fork
             end
           end
+        end
+#        ActiveRecord::Base.establish_connection(conn)
+#      end
+    end
+
+
+    desc "ROC curves from FUGUE results"
+    task :r_fugue => [:environment] do
+
+      %w[dna rna].each do |na|
+        (60..60).step(10) do |weight|
+          [10, 20, 50].each do |cut|
+            envs    = ["std64", "#{na}128", "#{na}256"]
+            esstdir = configatron.fuguena_dir + "essts"
+            rfile   = esstdir + "fugue-#{na}-#{weight}-roc#{cut}.R"
+
+            rfile.open('w') do |file|
+              file.puts <<-R_CODE
+library(ROCR)
+              R_CODE
+
+              envs.each_with_index do |env, env_index|
+                roc_tables = Dir[esstdir.join(na, env, "fugue-roc#{cut}-#{na}-#{env}-#{weight}-*.csv").to_s].map { |d| Pathname.new(d) }
+                roc_tables.each_with_index do |roc_table, roc_index|
+                  file.puts <<-R_CODE
+#{env}.#{roc_index} <- read.csv("#{roc_table.relative_path_from(esstdir)}", head=FALSE)
+                  R_CODE
+                end
+
+                file.puts <<-R_CODE
+#{env}.labels <- list(#{(0..roc_tables.size-1).map { |i| "#{env}.#{i}[,1]" }.join(", ") })
+#{env}.predictions <- list(#{(0..roc_tables.size-1).map { |i| "#{env}.#{i}[,2]" }.join(", ") })
+pred.#{env} <- prediction(#{env}.predictions, #{env}.labels)
+perf.#{env} <- performance(pred.#{env}, 'tpr', 'fpr')
+plot( perf.#{env}, lty=3, col=#{if (env_index == 0); "'red'";elsif (env_index == 1); "'blue'";else "'green'"; end} #{if (env_index != 0) then ', add=TRUE' end} )
+plot( perf.#{env}, avg="vertical", lwd=3, col=#{if (env_index == 0); "'red'";elsif (env_index == 1); "'blue'";else "'green'"; end}, spread.estimate="stderror", plotCI.lwd=2, add=TRUE )
+                R_CODE
+              end
+
+              file.puts <<-R_CODE
+legend(0.6, 0.6, c(#{envs.map { |e| "'#{e}'"}.join(", ")}), col=c('red','blue','green'), lwd=3)
+              R_CODE
+            end
+
+            $logger.info "Generating R codes for ROC#{cut} curves from #{na.upcase}-binding sets: done"
+          end
+
         end
       end
     end

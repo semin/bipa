@@ -214,7 +214,6 @@ module Bipa
     end
 
     def vdw_contacting_rna_sugar?
-      vdw_contacting_atoms.any? { |a| a.rna? && a.sugar? }
     end
 
     def vdw_contacting_rna_phosphate?

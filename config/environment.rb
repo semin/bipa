@@ -17,10 +17,15 @@ Rails::Initializer.run do |config|
   config.gem 'hpricot'
   config.gem 'configatron'
   config.gem 'fork_manager'
+  config.gem 'acts_as_tree'
+  config.gem 'will_paginate'
   config.gem 'ar-extensions'
+  config.gem 'awesome_nested_set'
   config.gem 'composite_primary_keys'
+  config.gem 'internuity-quick_scopes'
   config.gem 'RubyInline', :lib => 'inline'
-  config.gem 'mattetti-googlecharts', :lib => 'gchart', :source => 'http://gems.github.com'
+  config.gem 'googlecharts', :lib => 'gchart'
+  config.gem 'thinking-sphinx', :lib => 'thinking_sphinx/0.9.8'
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers

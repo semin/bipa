@@ -7,7 +7,8 @@ namespace :fuguena do
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
         %w[dna rna].each do |na|
-          ["std64", "#{na}128", "#{na}256"].each do |env|
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
             fm.fork do
               cwd      = pwd
               esstdir  = configatron.fuguena_dir.join("essts", na, env)
@@ -33,14 +34,19 @@ namespace :fuguena do
                 mkdir_p newtem
                 chdir   newtem
 
-                system "ls -1 ../*.tem | grep -v #{newtem} > temfiles.lst"
-
-                (30..100).step(10) do |weight|
-                  system "ulla -l temfiles.lst -c ../classdef.dat --autosigma --weight #{weight} --output 2 -o ulla-#{env}-#{weight}.lgd"
+                if env == "ord64"
+                  cp configatron.fuguena_dir.join("subst-ord64-60.lgd"), "."
+                else
+#                  system "ls -1 ../*.tem | grep -v #{newtem} > temfiles.lst"
+#
+#                  (30..100).step(10) do |weight|
+#                    system "ulla -l temfiles.lst -c ../classdef.dat --autosigma --weight #{weight} --output 2 -o ulla-#{env}-#{weight}.lgd"
+#                  end
                 end
                 chdir esstdir
               end
               chdir cwd
+              $logger.info "Running ulla in #{esstdir}: done"
             end
           end
         end
@@ -54,10 +60,12 @@ namespace :fuguena do
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
         %w[dna rna].each do |na|
-          ["std64", "#{na}128", "#{na}256"].each do |env|
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
             fm.fork do
-              cwd   = pwd
-              tests = configatron.fuguena_dir.join("essts", na, env).children.select { |c| c.directory? }
+              cwd     = pwd
+              esstdir = configatron.fuguena_dir.join("essts", na, env)
+              tests   = esstdir.children.select { |c| c.directory? }
 
               tests.each do |test|
                 chdir test
@@ -79,11 +87,12 @@ namespace :fuguena do
                       end
                     end
                   end
-                  system "melody -t #{tem} -c ../classdef.dat -s ulla-#{env}-60.lgd -o #{fam}-#{sunid}-#{env}-60.fug"
+                  mat = (env == "ord64" ? "subst-ord64-60.lgd" : "ulla-#{env}-60.lgd")
+                  system "melody -t #{tem} -c ../classdef.dat -s #{mat} -o #{fam}-#{sunid}-#{env}-60.fug"
                 end
               end
-
               chdir cwd
+              $logger.info "Run melody in #{esstdir}: done"
             end
           end
         end
@@ -97,31 +106,31 @@ namespace :fuguena do
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
         %w[dna rna].each do |na|
-          ["std64", "#{na}128", "#{na}256"].each do |env|
-            fm.fork do
-              cwd   = pwd
-              tests = configatron.fuguena_dir.join("essts", na, env).children.select { |c| c.directory? }
-              total = tests.size
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
+            cwd   = pwd
+            tests = configatron.fuguena_dir.join("essts", na, env).children.select { |c| c.directory? }
+            total = tests.size
 
-              tests.each_with_index do |test, i|
-                chdir test
-                fugs  = test.children.select { |c| c.extname == '.fug' }
-                s40   = configatron.fuguena_dir + "astral40.fa"
+            tests.each_with_index do |test, i|
+              chdir test
+              fugs  = test.children.select { |c| c.extname == '.fug' }
+              s40   = configatron.fuguena_dir + "astral40.fa"
 
-                fugs.each do |fug|
-                  stem = fug.basename(".fug")
-                  cmd =   "fugueprf " +
+              fugs.each do |fug|
+                stem = fug.basename(".fug")
+                cmd =   "fugueprf " +
                           "-seq #{s40} " +
                           "-prf #{fug} " +
                           "-allrank " +
                           "-o fugue-#{stem}.seq " +
                           "> fugue-#{stem}.hits"
+                fm.fork do
                   system cmd
                 end
-                $logger.info "FUGUE-#{na.upcase}-#{env} search for #{test.basename}: done (#{i+1}/#{total})"
               end
-
               chdir cwd
+              $logger.info "FUGUE-#{na.upcase}-#{env} search in #{test}: done (#{i+1}/#{total})"
             end
           end
         end
@@ -252,6 +261,11 @@ namespace :fuguena do
           chdir cwd
         end
       end
+    end
+
+
+    desc "Run FUGUEALI for representative sets of protein-DNA/RNA complex"
+    task :fugueali => [:environment] do
     end
 
   end

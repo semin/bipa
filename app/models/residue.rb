@@ -28,10 +28,6 @@ class Residue < ActiveRecord::Base
     { :conditions => ["unbound_asa <= ?", (args.first || configatron.min_surface_resdiue_asa)] }
   }
 
-  named_scope :interface, lambda { |*args|
-    { :conditions => ["delta_asa > ?", (args.first || configatron.min_interface_residue_delta_asa)] }
-  }
-
   named_scope :domain_interface, :conditions => ["domain_interface_id is NOT NULL"]
 
   # this is for regular 'residue' types except 'AaResidue',
@@ -40,8 +36,6 @@ class Residue < ActiveRecord::Base
     surface_atoms.size > 0
   end
 
-  # this is for regular 'residue' types except 'AaResidue',
-  # which has its own definition of 'interface residue'
   def on_interface?
     interface_atoms.size > 0
   end
@@ -174,9 +168,9 @@ class AaResidue < StdResidue
     !on_surface?
   end
 
-  def on_interface?
-    delta_asa >= configatron.min_interface_residue_delta_asa
-  end
+#  def on_interface?
+#    delta_asa >= configatron.min_interface_residue_delta_asa
+#  end
 
   def disulfide_bond?
     ss ? true : false
