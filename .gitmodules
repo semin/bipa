@@ -1,3 +1,6 @@
 [submodule "vendor/plugins/auto_migrations"]
 	path = vendor/plugins/auto_migrations
 	url = git://github.com/pjhyett/auto_migrations.git
+[submodule "vendor/plugins/acts_as_network"]
+	path = vendor/plugins/acts_as_network
+	url = git://github.com/towanda/acts_as_network.git
