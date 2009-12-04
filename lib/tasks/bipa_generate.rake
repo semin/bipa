@@ -356,12 +356,19 @@ namespace :bipa do
 
 
     desc "Generate a dump file for interface atom coordiantes"
-    task :usrfile => [:environment] do
+    task :interface_usr_descriptors => [:environment] do
 
-      File.open("./tmp/interface_descriptors.txt", "w") do |file|
-        DomainInterface.find_each do |int|
-          file.puts [int.id, *int.shape_descriptors].join(", ") if int.interface_atoms.size > 3
-          $logger.info ">>> Generating USR descriptors for #{int.class}, #{int.id}: done"
+      [DomainNucleicAcidInterface, ChainNucleicAcidInterface].each do |klass|
+        File.open("./tmp/#{klass.to_s.downcase}_descriptors.txt", "w") do |file|
+          klass.find_each do |i|
+            na = i.interface_to.downcase
+            if i.send("#{na}_binding_atoms").size > 3
+              file.puts [i.id, *i.shape_descriptors].join(", ")
+              $logger.info "Generating USR descriptors for #{i.class}, #{i.id}: done"
+            else
+              $logger.info "Skip, #{i.class}, #{i.id}: < 3 #{na.upcase} binding atoms"
+            end
+          end
         end
       end
     end

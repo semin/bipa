@@ -1,6 +1,6 @@
 class TaxonomicNode < ActiveRecord::Base
 
-  acts_as_tree
+  acts_as_nested_set
 
   has_many  :taxonomic_names
 
@@ -9,7 +9,4 @@ class TaxonomicNode < ActiveRecord::Base
             :foreign_key  => "taxonomic_node_id",
             :conditions   => ["name_class = 'scientific name'"]
 
-  def tree_title
-    %Q^<a href="#" onclick="new Ajax.Updater('main_content', '/taxonomy/show/#{id}', { asynchronous:true, evalScripts:true }); return false;">[TaxID:#{id}]: #{scientific_name.name_txt}</a>^
-  end
 end

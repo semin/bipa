@@ -82,13 +82,13 @@ class AaChain < Chain
 
   belongs_to  :model
 
-  has_many  :dna_interfaces,
-            :class_name   => "ChainDnaInterface",
-            :foreign_key  => "chain_id"
+  has_one :dna_interface,
+          :class_name   => "ChainDnaInterface",
+          :foreign_key  => "chain_id"
 
-  has_many  :rna_interfaces,
-            :class_name   => "ChainRnaInterface",
-            :foreign_key  => "chain_id"
+  has_one :rna_interface,
+          :class_name   => "ChainRnaInterface",
+          :foreign_key  => "chain_id"
 
   has_many  :domains,
             :through      => :residues,

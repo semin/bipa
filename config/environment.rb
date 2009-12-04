@@ -5,7 +5,7 @@
 # ENV['RAILS_ENV'] ||= 'production'
 
 # Specifies gem version of Rails to use when vendor/rails is not present
-RAILS_GEM_VERSION = '2.3.4' unless defined? RAILS_GEM_VERSION
+RAILS_GEM_VERSION = '2.3.5' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -17,15 +17,14 @@ Rails::Initializer.run do |config|
   config.gem 'hpricot'
   config.gem 'configatron'
   config.gem 'fork_manager'
-  config.gem 'acts_as_tree'
   config.gem 'will_paginate'
   config.gem 'ar-extensions'
   config.gem 'awesome_nested_set'
   config.gem 'composite_primary_keys'
-  config.gem 'internuity-quick_scopes'
   config.gem 'RubyInline', :lib => 'inline'
   config.gem 'googlecharts', :lib => 'gchart'
-  config.gem 'thinking-sphinx', :lib => 'thinking_sphinx/0.9.8'
+  config.gem 'internuity-quick_scopes', :lib => 'quick_scopes'
+  config.gem 'thinking-sphinx', :lib => 'thinking_sphinx', :version => '1.3.8'
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
@@ -79,6 +78,7 @@ Rails::Initializer.run do |config|
 
   # for BIPA specific configurations
   config.after_initialize do
+
     # for will_paginate plugin
     WillPaginate.enable_named_scope
 
@@ -86,9 +86,12 @@ Rails::Initializer.run do |config|
     ENV["PDB_EXT"] = ".pdb" # for Baton
 
     # configatron for BIPA
+    configatron.rel_url_root =  ActionController::Base.relative_url_root ?
+                                ActionController::Base.relative_url_root.to_s : ''
+
     configatron.rep_pid   = 100
     configatron.resume    = (ENV['RESUME'].to_i > 0   ? ENV['RESUME'].to_i  : false)
-    configatron.max_fork  = (ENV['MAXFORK'].to_i > 0  ? ENV['MAXFORK'].to_i : 2)
+    configatron.max_fork  = (ENV['MAX_FORK'].to_i > 0  ? ENV['MAX_FORK'].to_i : 2)
 
     configatron.epsilon                           = 1.0E-6
     configatron.max_vdw_distance                  = 5.0
@@ -103,13 +106,10 @@ Rails::Initializer.run do |config|
     configatron.pdb_entry_file  = "./derived_data/pdb_entry_type.txt"
     configatron.pdb_dir         = Rails.root.join("public/pdb")
 
-    configatron.scop_uri        = "http://scop.mrc-lmb.cam.aconfigatron.uk/scop/parse/"
+    configatron.scop_uri        = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
     configatron.scop_dir        = Rails.root.join("public/scop")
     configatron.scop_pdb_dir    = Pathname.new("~/BiO/Store/SCOP/pdbstyle").expand_path
     configatron.true_scop_classes = %w[a b c d e f g]
-
-    configatron.prescop_uri     = "http://www.mrc-lmb.cam.aconfigatron.uk/agm/pre-scop/parseable/"
-    configatron.prescop_dir     = Rails.root.join("public/pre-scop")
 
     configatron.ncbi_ftp        = "ftp.ncbi.nih.gov"
     configatron.taxonomy_ftp    = "pub/taxonomy"
@@ -139,21 +139,22 @@ Rails::Initializer.run do |config|
     configatron.blastclust_bin  = Pathname.new("/usr/bin/blastclust")
     configatron.blastclust_dir  = Rails.root.join("public/blastclust/")
 
-    configatron.family_dir      = Rails.root.join("public/families")
-    configatron.alignment_dir   = Rails.root.join("public/alignments")
     configatron.zap_dir         = Rails.root.join("public/zap")
     configatron.spicoli_dir     = Rails.root.join("public/spicoli")
+    configatron.spicoli_bin     = Rails.root.join("bin/spicoli")
+
+    configatron.usr_bin         = Rails.root.join("bin", "usr")
+    configatron.usr_des         = Rails.root.join("tmp", "usr_descriptors.txt")
+    configatron.usr_res         = Rails.root.join("tmp", "interface_similarities.txt")
+
+    configatron.family_dir      = Rails.root.join("public/families")
+    configatron.alignment_dir   = Rails.root.join("public/alignments")
     configatron.go_dir          = Rails.root.join("public/go")
     configatron.esst_dir        = Rails.root.join("public/essts")
     configatron.figure_dir      = Rails.root.join("public/figures")
 
     configatron.astral40        = Pathname.new("~/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa").expand_path
     configatron.baliscore_bin   = Pathname.new("~/BiO/Install/bali_score/bali_score").expand_path
-    configatron.rel_url_root    = ActionController::Base.relative_url_root ? ActionController::Base.relative_url_root.to_s : ''
-    configatron.usr_bin         = Rails.root.join("bin", "usr")
-    configatron.usr_des         = Rails.root.join("tmp", "usr_descriptors.txt")
-    configatron.usr_res         = Rails.root.join("tmp", "interface_similarities.txt")
-
     configatron.classdefdna     = Rails.root.join("config", "classdef.dna")
     configatron.classdefrna     = Rails.root.join("config", "classdef.rna")
 
@@ -164,15 +165,6 @@ Rails::Initializer.run do |config|
     configatron.water_dir       = Rails.root.join("public/water")
 
     # for custom libraries in RAILS_ROOT/lib
-    require 'matrix'
-    require 'bio_extensions'
-    require 'math_extensions'
-    require 'array_extensions'
-    require 'vector_extensions'
-    require 'kernel_extentions'
-    require 'string_extensions'
-    require 'struct_extensions'
-    require 'numeric_extensions'
     require 'bipa'
 
     # for STI dependency

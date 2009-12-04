@@ -23,6 +23,7 @@ class RakeLogger < Logger
 end
 
 $logger = RakeLogger.new(STDOUT)
+$logger.level = RakeLogger::DEBUG
 
 def refresh_dir(dir)
   rm_rf(dir) if File.exists?(dir)

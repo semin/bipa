@@ -9,9 +9,10 @@ class Residue < ActiveRecord::Base
               :class_name   => "ScopDomain",
               :foreign_key  => "scop_id"
 
-  belongs_to  :domain_interface
-
-  belongs_to  :chain_interface
+  %w[dna rna].each do |na|
+    belongs_to  :"chain_#{na}_interface"
+    belongs_to  :"domain_#{na}_interface"
+  end
 
   has_many  :atoms,
             :class_name   => "Atom",
@@ -28,17 +29,15 @@ class Residue < ActiveRecord::Base
     { :conditions => ["unbound_asa <= ?", (args.first || configatron.min_surface_resdiue_asa)] }
   }
 
-  named_scope :domain_interface, :conditions => ["domain_interface_id is NOT NULL"]
-
   # this is for regular 'residue' types except 'AaResidue',
   # which has its own definition of surface residue
   def on_surface?
     surface_atoms.size > 0
   end
 
-  def on_interface?
-    interface_atoms.size > 0
-  end
+  #def on_interface?
+    #interface_atoms.size > 0
+  #end
 
   def buried?
     !on_surface?
@@ -168,9 +167,9 @@ class AaResidue < StdResidue
     !on_surface?
   end
 
-#  def on_interface?
-#    delta_asa >= configatron.min_interface_residue_delta_asa
-#  end
+  #def on_interface?
+    #delta_asa >= configatron.min_interface_residue_delta_asa
+  #end
 
   def disulfide_bond?
     ss ? true : false

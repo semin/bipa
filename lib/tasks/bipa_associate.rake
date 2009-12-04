@@ -1,36 +1,41 @@
 namespace :bipa do
   namespace :associate do
 
-    desc "Associate Residue with SCOP"
-    task :resscop => [:environment] do
+    desc "Associate PDB residues with SCOP domains"
+    task :pdb_scop => [:environment] do
 
-      pdb_codes = Structure.all.map(&:pdb_code)
-      config    = ActiveRecord::Base.remove_connection
+      pdbs  = Structure.all.map(&:pdb_code)
+      fm    = ForkManager.new(configatron.max_fork)
 
-      pdb_codes.forkify(configatron.max_fork) do |pdb_code|
-        ActiveRecord::Base.establish_connection(config)
-        structure = Structure.find_by_pdb_code(pdb_code)
-        domains   = ScopDomain.find_all_by_pdb_code(pdb_code)
+      fm.manage do
+        conn  = ActiveRecord::Base.remove_connection
+        pdbs.each_with_index do |pdb, i|
+          fm.fork do
+            ActiveRecord::Base.establish_connection(conn)
+            structure = Structure.find_by_pdb_code(pdb)
+            domains   = ScopDomain.find_all_by_pdb_code(pdb)
 
-        if domains.empty?
-          $logger.warn "!!! No SCOP domains for #{pdb_code} (#{i+1}/#{pdb_codes.size})"
-          ActiveRecord::Base.remove_connection
-          next
-        end
-
-        domains.each do |domain|
-          structure.models.first.residues.each do |residue|
-            if domain.include? residue
-              residue.domain = domain
-              residue.save!
+            if domains.empty?
+              $logger.warn "No SCOP domains for #{pdb} (#{i+1}/#{pdbs.size})"
+              ActiveRecord::Base.remove_connection
+              next
             end
+
+            domains.each do |domain|
+              structure.models.first.residues.each do |residue|
+                if domain.include? residue
+                  residue.domain = domain
+                  residue.save!
+                end
+              end
+            end
+
+            $logger.info "Associating SCOP domains with #{pdb} (#{i+1}/#{pdbs.size}): done"
+            ActiveRecord::Base.remove_connection
           end
         end
-
-        $logger.info ">>> Associating SCOP domains with #{pdb_code} (#{i+1}/#{pdb_codes.size}): done"
-        ActiveRecord::Base.remove_connection
+        ActiveRecord::Base.establish_connection(conn)
       end
-      ActiveRecord::Base.establish_connection(config)
     end
 
 

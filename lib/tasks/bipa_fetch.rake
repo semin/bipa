@@ -48,17 +48,22 @@ namespace :bipa do
 
       missings = []
 
-      pdb_codes.forkify(configatron.max_fork) do |pdb_code|
-        pdb_file = File.join(configatron.pdb_mirror_dir, "./data/structures/all/pdb/pdb#{pdb_code}.ent.gz")
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        pdb_codes.each_with_index do |pdb_code, i|
+          pdb_file = File.join(configatron.pdb_mirror_dir, "./data/structures/all/pdb/pdb#{pdb_code}.ent.gz")
 
-        if File.size?(pdb_file)
-          system "gzip -cd #{pdb_file} > #{File.join(configatron.pdb_dir, pdb_code + '.pdb')}"
-          $logger.info ">>> Unzipping #{pdb_file}: done"
-        else
-          missings << pdb_code
+          if File.size?(pdb_file)
+            fm.fork do
+              system "gzip -cd #{pdb_file} > #{File.join(configatron.pdb_dir, pdb_code + '.pdb')}"
+              $logger.info "Unzipping #{pdb_file}: done (#{i+1}/#{pdb_codes.size})"
+            end
+          else
+            missings << pdb_code
+          end
         end
+        $logger.info "Total: #{pdb_codes.size - missings.size} files.\n" + "Missing: #{missings.size} files"
       end
-      $logger.info ">>> Total: #{pdb_codes.size - missings.size} files.\n" + "Missing: #{missings.size} files"
     end
 
 
@@ -67,7 +72,7 @@ namespace :bipa do
 
       refresh_dir configatron.scop_dir
 
-      require "open-uri"
+      require "uri"
       require "hpricot"
 
       links = Hash.new(0)

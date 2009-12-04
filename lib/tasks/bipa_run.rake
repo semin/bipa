@@ -4,17 +4,17 @@ namespace :bipa do
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
 
-      refresh_dir configatron.hbplust_dir
+      refresh_dir configatron.hbplus_dir
 
       fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Dir[File.join(configatron.pdb_dir, "*.pdb")]
+      pdbs  = Dir[configatron.pdb_dir + "*.pdb"].to_pathnames
 
       fm.manage do
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             cwd       = pwd
-            pdb_code  = File.basename(pdb, ".pdb")
-            work_dir  = File.join(configatron.hbplust_dir, pdb_code)
+            pdb_code  = pdb.basename(".pdb")
+            work_dir  = configatron.hbplus_dir + pdb_code
 
             mkdir_p work_dir
             chdir work_dir
@@ -31,7 +31,7 @@ namespace :bipa do
 #            # NACCESS
 #            new_pdb  = pdb_code + ".new"
 #            naccess_input = File.exists?(new_pdb) ? new_pdb : pdb
-#            naccess_cmd   = "#{NACCESS_BIN} #{naccess_input} -p 1.40 -z 0.05 -r #{NACCESS_VDW} -s #{NACCESS_STD}"
+#            naccess_cmd   = "#{configatron.naccess_bin} #{naccess_input} -p 1.40 -z 0.05 -r #{configatron.naccess_vdw} -s #{configatron.naccess_std}"
 #
 #            File.open(pdb_code + ".naccess.log", "w") do |log|
 #              IO.popen(naccess_cmd, "r") do |pipe|
@@ -66,12 +66,13 @@ namespace :bipa do
 #            mv("hbplus.rc", "#{pdb_code}.rc") if File.exists?("hbplus.rc")
 #            $logger.info("HBPLUS: #{pdb} (#{i + 1}/#{pdbs.size}): done")
 
-            sh "#{HBPLUS_BIN} -c #{pdb} 1>#{pdb_code}.hbplus.log 2>&1"
+            cmd = "#{configatron.hbplus_bin} -c #{pdb} 1>#{pdb_code}.hbplus.log 2>&1"
+            system cmd
             move Dir["*"], ".."
             chdir cwd
             rm_rf work_dir
 
-            $logger.info ">>> Running HBPlus on #{pdb} (#{i + 1}/#{pdbs.size}): done"
+            $logger.info "Running 'hbplus' with #{pdb} (#{i + 1}/#{pdbs.size}): done"
           end
         end
       end
@@ -89,53 +90,56 @@ namespace :bipa do
       refresh_dir configatron.naccess_dir
 
       fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Dir[File.join(configatron.pdb_dir, "*.pdb")].sort
+      pdbs  = Dir[configatron.pdb_dir + "*.pdb"].to_pathnames
 
       fm.manage do
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             cwd       = pwd
-            pdb_code  = File.basename(pdb, ".pdb")
+            pdb_code  = pdb.basename(".pdb")
             pdb_obj   = Bio::PDB.new(IO.read(pdb))
-            work_dir  = File.join(configatron.naccess_dir, pdb_code)
+            work_dir  = configatron.naccess_dir + pdb_code
 
             if (pdb_obj.models.first.aa_chains.empty? ||
                 pdb_obj.models.first.na_chains.empty?)
-              $logger.warn "!!! SKIP: #{pdb} HAS NO AMINO ACID CHAIN OR NUCLEIC ACID CHAIN"
+              $logger.warn "Skip, #{pdb}: no amino acid chain nor nucleic acid chain"
               next
             end
 
-            mkdir(work_dir)
-            chdir(work_dir)
+            mkdir work_dir
+            chdir work_dir
 
             co_pdb = "#{pdb_code}_co.pdb"
+
             File.open(co_pdb, "w") do |f|
-              f.puts pdb_obj.models.first.aa_chains.to_s
-              f.puts pdb_obj.models.first.na_chains.to_s
+              pdb_obj.models.first.aa_chains.each { |c| f.puts c.to_s }
+              pdb_obj.models.first.na_chains.each { |c| f.puts c.to_s }
               f.puts "END\n"
             end
 
             aa_pdb = "#{pdb_code}_aa.pdb"
+
             File.open(aa_pdb, "w") do |f|
-              f.puts pdb_obj.models.first.aa_chains.to_s
+              pdb_obj.models.first.aa_chains.each { |c| f.puts c.to_s }
               f.puts "END\n"
             end
 
             na_pdb = "#{pdb_code}_na.pdb"
+
             File.open(na_pdb, "w") do |f|
-              f.puts pdb_obj.models.first.na_chains.to_s
+              pdb_obj.models.first.na_chains.each { |c| f.puts c.to_s }
               f.puts "END\n"
             end
 
-            sh "#{NACCESS_BIN} #{co_pdb} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
-            sh "#{NACCESS_BIN} #{aa_pdb} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
-            sh "#{NACCESS_BIN} #{na_pdb} -h -r #{NACCESS_VDW} -s #{NACCESS_STD}"
+            system "#{configatron.naccess_bin} #{co_pdb} -h -r #{configatron.naccess_vdw} -s #{configatron.naccess_std}"
+            system "#{configatron.naccess_bin} #{aa_pdb} -h -r #{configatron.naccess_vdw} -s #{configatron.naccess_std}"
+            system "#{configatron.naccess_bin} #{na_pdb} -h -r #{configatron.naccess_vdw} -s #{configatron.naccess_std}"
 
             cp Dir["#{pdb_code}*"], ".."
             chdir cwd
             rm_r work_dir
 
-            $logger.info ">>> Running NACCESS: #{pdb} (#{i + 1}/#{pdbs.size}): done"
+            $logger.info "Running 'naccess' with #{pdb} (#{i + 1}/#{pdbs.size}): done"
           end
         end
       end
@@ -148,17 +152,17 @@ namespace :bipa do
       refresh_dir configatron.dssp_dir
 
       fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Dir[configatron.pdb_dir.join("*.pdb")]
+      pdbs  = Dir[configatron.pdb_dir + "*.pdb"].to_pathnames
 
       fm.manage do
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             cwd = pwd
             chdir configatron.dssp_dir
-            pdb_code = File.basename(pdb, '.pdb')
+            pdb_code = pdb.basename('.pdb')
             system "#{configatron.dssp_bin} #{pdb} 1> #{pdb_code}.dssp 2> #{pdb_code}.dssp.err"
             chdir cwd
-            $logger.info ">>> Running DSSP on #{pdb} (#{i + 1}/#{pdbs.size}): done"
+            $logger.info "Running 'dsspcmbi' with #{pdb} (#{i + 1}/#{pdbs.size}): done"
           end
         end
       end
@@ -168,24 +172,18 @@ namespace :bipa do
     desc "Run OESpicoli and OEZap for unbound state PDB structures"
     task :spicoli => [:environment] do
 
-      refresh_dir(configatron.spicoli_dir) unless configatron.resume
+      refresh_dir configatron.spicoli_dir
 
       fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Dir[configatron.naccess_dir.join("*a.pdb").to_s]
+      pdbs  = Dir[configatron.naccess_dir.join("*a.pdb")].to_pathnames
 
       fm.manage do
         pdbs.each_with_index do |pdb, i|
-          bsn = File.basename(pdb, ".pdb")
-          pot = configatron.spicoli_dir.join("#{bsn}.pot")
-
-          if File.exists? pot
-            $logger.info ">>> Skip, #{pdb}"
-            next
-          else
-            fm.fork do
-              system "./lib/calculate_electrostatic_potentials #{pdb} 1> #{pot}"
-              $logger.info ">>> Calculating electrostatic potentials for #{pdb}: done (#{i+1}/#{pdbs.size})"
-            end
+          bsn = pdb.basename(".pdb")
+          pot = configatron.spicoli_dir + "#{bsn}.pot"
+          fm.fork do
+            system "#{configatron.spicoli_bin} #{pdb} 1> #{pot}"
+            $logger.info "Running 'spicoli' with #{pdb} (#{i+1}/#{pdbs.size}): done"
           end
         end
       end
@@ -261,7 +259,7 @@ namespace :bipa do
             sunids.each do |sunid|
               cwd     = pwd
               famdir  = configatron.family_dir.join("rep", na, sunid.to_s)
-              pdbs    = Dir[famdir.join("*.pdb").to_s].map { |p| File.basename(p) }
+              pdbs    = Dir[famdir.join("*.pdb")].map { |p| File.basename(p) }
 
               if pdbs.size < 2
                 $logger.warn "!!! Only #{pdbs.size} PDB structure detected in #{famdir}"
@@ -311,7 +309,7 @@ namespace :bipa do
               cwd     = pwd
               famdir  = configatron.family_dir.join("sub", na, sunid.to_s)
 
-              Dir[famdir.join("*").to_s].each do |subfamdir|
+              Dir[famdir.join("*")].each do |subfamdir|
                 pdbs = Dir[File.join(subfamdir, "*.pdb")]
 
                 if pdbs.size < 2
@@ -522,9 +520,9 @@ namespace :bipa do
         fm.manage do
           %w[dna rna].each do |na|
             cwd     = pwd
-            famdirs = Dir[configatron.family_dir.join("rep", na, "*").to_s]
+            famdirs = Dir[configatron.family_dir.join("rep", na, "*")]
             famdirs.each do |famdir|
-              aligns = Dir[File.join(famdir, "salign*.ali").to_s]
+              aligns = Dir[File.join(famdir, "salign*.ali")]
 
               if aligns.empty?
                 $logger.warn "!!! Cannot find alignment files in #{famdir}"
@@ -566,7 +564,7 @@ namespace :bipa do
         fm.manage do
           %w[dna rna].each do |na|
             cwd         = pwd
-            subfamdirs  = Dir[configatron.family_dir.join("sub", na, "*", "*").to_s]
+            subfamdirs  = Dir[configatron.family_dir.join("sub", na, "*", "*")]
 #
 #            subfamdirs = %w[
 #              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/50461/1055

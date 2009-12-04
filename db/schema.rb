@@ -11,7 +11,7 @@
 
 include Bipa::Constants
 
-ActiveRecord::Schema.define(:version => 1) do
+ActiveRecord::Schema.define(:version => 20091204121000) do
 
   # 'scop' table
   create_table :scop, :force => true do |t|
@@ -100,8 +100,6 @@ ActiveRecord::Schema.define(:version => 1) do
   create_table :residues, :force => true do |t|
     t.belongs_to  :chain
     t.belongs_to  :scop
-    t.belongs_to  :chain_interface
-    t.belongs_to  :domain_interface
     t.belongs_to  :res_map
     t.belongs_to  :residue_map
     t.string      :type
@@ -113,6 +111,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :delta_asa
     t.boolean     :ss, :default => nil
     %w[dna rna].each do |na|
+      t.belongs_to  :"chain_#{na}_interface"
+      t.belongs_to  :"domain_#{na}_interface"
       t.integer     :"hbonds_#{na}_as_donor_count",     :default => nil
       t.integer     :"hbonds_#{na}_as_acceptor_count",  :default => nil
       t.integer     :"whbonds_#{na}_count",             :default => nil
@@ -122,8 +122,10 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index :residues, :chain_id
   add_index :residues, :scop_id
-  add_index :residues, :domain_interface_id
-  add_index :residues, :chain_interface_id
+  %w[dna rna].each do |na|
+    add_index :residues, :"chain_#{na}_interface_id"
+    add_index :residues, :"domain_#{na}_interface_id"
+  end
   add_index :residues, :res_map_id
   add_index :residues, :residue_map_id
   add_index :residues, :residue_name
@@ -210,8 +212,8 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :naccess, :atom_id
 
 
-  # 'potentials' table
-  create_table :potentials, :force => true do |t|
+  # 'spicoli' table
+  create_table :spicoli, :force => true do |t|
     t.belongs_to  :atom
     t.float       :unbound_asa
     t.float       :formal_charge
@@ -220,7 +222,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :asa_potential
   end
 
-  add_index :potentials, :atom_id
+  add_index :spicoli, :atom_id
 
 
   # 'vdw_contacts' table
@@ -292,7 +294,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.belongs_to  :chain
     t.string      :type
     t.float       :asa
-    t.float       :percent_asa
+    t.float       :asa_percentage
     t.float       :polarity
     t.integer     :residues_count,            :default => 0
     t.integer     :atoms_count,               :default => 0
@@ -303,13 +305,17 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :hbonds_as_acceptor_count,  :default => 0
 
     AminoAcids::Residues::STANDARD.each do |aa|
-      t.float :"residue_propensity_of_#{aa.downcase}"
-      t.float :"residue_percentage_of_#{aa.downcase}"
+      t.float :"residue_asa_propensity_of_#{aa.downcase}"
+      t.float :"residue_asa_percentage_of_#{aa.downcase}"
+      t.float :"residue_cnt_propensity_of_#{aa.downcase}"
+      t.float :"residue_cnt_percentage_of_#{aa.downcase}"
     end
 
     Sses::ALL.each do |sse|
-      t.float :"sse_propensity_of_#{sse.downcase}"
-      t.float :"sse_percentage_of_#{sse.downcase}"
+      t.float :"sse_asa_propensity_of_#{sse.downcase}"
+      t.float :"sse_asa_percentage_of_#{sse.downcase}"
+      t.float :"sse_cnt_propensity_of_#{sse.downcase}"
+      t.float :"sse_cnt_percentage_of_#{sse.downcase}"
     end
 
     %w(hbond whbond vdw_contact).each do |intact|
@@ -436,7 +442,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   create_table :goa_pdbs, :force => true do |t|
-    t.belongs_to  :chain
+    t.belongs_to  :structure
     t.belongs_to  :go_term
     t.string      :db
     t.string      :db_object_id
@@ -460,38 +466,46 @@ ActiveRecord::Schema.define(:version => 1) do
   #execute "ALTER TABLE goa_pdbs MODIFY db_object_id     VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
   #execute "ALTER TABLE goa_pdbs MODIFY db_object_symbol VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
 
-  add_index :goa_pdbs, :chain_id
+  add_index :goa_pdbs, :structure_id
   add_index :goa_pdbs, :go_term_id
   add_index :goa_pdbs, :go_id
 
 
-  create_table :taxonomic_nodes, :force => true do |t|
-    t.integer     :parent_id
-    t.string      :rank
-    t.string      :embl_code
-    t.integer     :division_id
-    t.boolean     :inherited_div_flag
-    t.integer     :genetic_code_id
-    t.boolean     :inherited_gc_flag
-    t.integer     :mitochondrial_genetic_code_id
-    t.boolean     :inherited_mgc_flag
-    t.boolean     :genbank_hidden_flag
-    t.boolean     :hidden_subtree_root
-    t.string      :comments
-    t.boolean     :registered,    :default => false
-  end
-
-  add_index :taxonomic_nodes, :parent_id
-
-
-  create_table :taxonomic_names, :force => true do |t|
-    t.belongs_to  :taxonomic_node
-    t.string      :name_txt
-    t.string      :unique_name
-    t.string      :name_class
-  end
-
-  add_index :taxonomic_names, :taxonomic_node_id
+#  create_table :taxonomic_nodes, :force => true do |t|
+#    t.integer     :parent_id
+#    t.integer     :lft
+#    t.integer     :rgt
+#    t.integer     :tax_id
+#    t.integer     :parent_tax_id
+#    t.string      :rank
+#    t.string      :embl_code
+#    t.integer     :division_id
+#    t.boolean     :inherited_div_flag
+#    t.integer     :genetic_code_id
+#    t.boolean     :inherited_gc_flag
+#    t.integer     :mitochondrial_genetic_code_id
+#    t.boolean     :inherited_mgc_flag
+#    t.boolean     :genbank_hidden_flag
+#    t.boolean     :hidden_subtree_root
+#    t.string      :comments
+#    %w[dna rna].each { |na|
+#      t.boolean     :"reg_#{na}", :default => false # for registered members
+#    }
+#  end
+#
+#  add_index :taxonomic_nodes, :parent_id
+#  add_index :taxonomic_nodes, :lft
+#  add_index :taxonomic_nodes, :rgt
+#
+#
+#  create_table :taxonomic_names, :force => true do |t|
+#    t.belongs_to  :taxonomic_node
+#    t.string      :name_txt
+#    t.string      :unique_name
+#    t.string      :name_class
+#  end
+#
+#  add_index :taxonomic_names, :taxonomic_node_id
 
 
   create_table :news, :force => true do |t|

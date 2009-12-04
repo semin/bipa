@@ -25,7 +25,7 @@ namespace :bipa do
 
 
     desc "Update atoms' and residues' DNA/RNA interaction counts"
-    task :intcnt => [:environment] do
+    task :interaction_counts => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
@@ -44,24 +44,30 @@ namespace :bipa do
               aar = AaResidue.find(id)
               %w[dna rna].each do |na|
                 aar.atoms.each do |atm|
-                  atm.send("hbonds_#{na}_as_donor_count=",    atm.hbonds_as_donor.select { |b| b.acceptor.send("#{na}?") }.size)
-                  atm.send("hbonds_#{na}_as_acceptor_count=", atm.hbonds_as_acceptor.select { |b| b.donor.send("#{na}?") }.size)
-                  atm.send("whbonds_#{na}_count=",            atm.whbonds.select { |b| b.whbonding_atom.send("#{na}?") }.size)
-                  atm.send("vdw_contacts_#{na}_count=",       atm.vdw_contacts.select { |b| b.vdw_contacting_atom.send("#{na}?") }.size)
+                  atm.send("hbonds_#{na}_as_donor_count=",
+                           atm.hbonds_as_donor.select { |b| b.acceptor.send("#{na}?") }.size)
+                  atm.send("hbonds_#{na}_as_acceptor_count=",
+                           atm.hbonds_as_acceptor.select { |b| b.donor.send("#{na}?") }.size)
+                  atm.send("whbonds_#{na}_count=",
+                           atm.whbonds.select { |b| b.whbonding_atom.send("#{na}?") }.size)
+                  atm.send("vdw_contacts_#{na}_count=",
+                           atm.vdw_contacts.select { |b| b.vdw_contacting_atom.send("#{na}?") }.size)
                   atm.save!
                 end
-                aar.send("hbonds_#{na}_as_donor_count=",    aar.atoms.sum(:"hbonds_#{na}_as_donor_count"))
-                aar.send("hbonds_#{na}_as_acceptor_count=", aar.atoms.sum(:"hbonds_#{na}_as_acceptor_count"))
-                aar.send("whbonds_#{na}_count=",            aar.atoms.sum(:"whbonds_#{na}_count"))
-                aar.send("vdw_contacts_#{na}_count=",       aar.atoms.sum(:"vdw_contacts_#{na}_count"))
+                aar.send("hbonds_#{na}_as_donor_count=",
+                         aar.atoms.sum(:"hbonds_#{na}_as_donor_count"))
+                aar.send("hbonds_#{na}_as_acceptor_count=",
+                         aar.atoms.sum(:"hbonds_#{na}_as_acceptor_count"))
+                aar.send("whbonds_#{na}_count=",
+                         aar.atoms.sum(:"whbonds_#{na}_count"))
+                aar.send("vdw_contacts_#{na}_count=",
+                         aar.atoms.sum(:"vdw_contacts_#{na}_count"))
                 aar.save!
               end
             end
-            $logger.info ">>> Updating atomic interaction counts for group #{idx} of #{grp.size} residues (out of #{tot}): done"
-
+            $logger.info "Updating interaction counts for group #{idx} of #{grp.size} residues (out of #{tot}): done"
             ActiveRecord::Base.remove_connection
           end
-
           ActiveRecord::Base.establish_connection(conn)
         end
       end
@@ -69,17 +75,16 @@ namespace :bipa do
 
 
     desc "Update ASA related fields for 'residues' table"
-    task :resasa => [:environment] do
+    task :residues_asa_columns => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
         pdbs = Structure.all.map(&:pdb_code)
-        conf = ActiveRecord::Base.remove_connection
+        conn = ActiveRecord::Base.remove_connection
 
-        pdbs.each do |pdb|
+        pdbs.each_with_index do |pdb, i|
           fm.fork do
-            ActiveRecord::Base.establish_connection(conf)
-
+            ActiveRecord::Base.establish_connection(conn)
             s = Structure.find_by_pdb_code(pdb)
             s.models.first.std_residues.each do |r|
               %w[unbound bound delta].each do |state|
@@ -87,83 +92,88 @@ namespace :bipa do
                 r.save!
               end
             end
-            $logger.info ">>> Updating residue ASA fields for #{pdb_code}: done"
+            $logger.info "Updating ASA columns of residues table for #{pdb} (#{i+1}/#{pdbs.size}): done"
             ActiveRecord::Base.remove_connection
           end
         end
-        ActiveRecord::Base.establish_connection(conf)
+        ActiveRecord::Base.establish_connection(conn)
       end
     end
 
 
-    desc "Update secondary fields for interfaces table"
-    task :intsec => [:environment] do
+    desc "Update auxiliary fields for interfaces table"
+    task :interfaces_auxiliary_columns => [:environment] do
+
+      include Bipa::Constants
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
-        %w[dna rna].each do |na|
-          nas   = "Bipa::Constants::NucleicAcids::#{na.capitalize}::Residues::STANDARD".constantize
-          ids   = "Domain#{na.capitalize}Interface".constantize.all.map(&:id)
-          conf  = ActiveRecord::Base.remove_connection
+        interfaces  = ProteinNucleicAcidInterface.all
+        conn        = ActiveRecord::Base.remove_connection
 
-          ids.each do |id|
-            fm.fork do
-              ActiveRecord::Base.establish_connection(conf)
+        interfaces.each_with_index do |interface, i|
+          fm.fork do
+            ActiveRecord::Base.establish_connection(conn)
 
-              int = DomainInterface.find(id)
-              int.update_attribute :asa,                      int.calculate_asa
-              int.update_attribute :percent_asa,              int.calculate_percent_asa
-              int.update_attribute :polarity,                 int.calculate_polarity
-              int.update_attribute :atoms_count,              int.atoms.length
-              int.update_attribute :residues_count,           int.residues.length
-              int.update_attribute :vdw_contacts_count,       int.vdw_contacts.length
-              int.update_attribute :whbonds_count,            int.whbonds.length
-              int.update_attribute :hbonds_as_donor_count,    int.hbonds_as_donor.length
-              int.update_attribute :hbonds_as_acceptor_count, int.hbonds_as_acceptor.length
-              int.update_attribute :hbonds_count,             int.hbonds_as_donor.length + int.hbonds_as_acceptor.length
+            interface.update_attribute :asa,                      interface.calculate_asa
+            interface.update_attribute :asa_percentage,           interface.calculate_asa_percentage
+            interface.update_attribute :polarity,                 interface.calculate_polarity
+            interface.update_attribute :atoms_count,              interface.atoms.length
+            interface.update_attribute :residues_count,           interface.residues.length
+            interface.update_attribute :vdw_contacts_count,       interface.vdw_contacts.length
+            interface.update_attribute :whbonds_count,            interface.whbonds.length
+            interface.update_attribute :hbonds_as_donor_count,    interface.hbonds_as_donor.length
+            interface.update_attribute :hbonds_as_acceptor_count, interface.hbonds_as_acceptor.length
+            interface.update_attribute :hbonds_count,             interface.hbonds_as_donor.length + interface.hbonds_as_acceptor.length
 
-              AminoAcids::Residues::STANDARD.each do |aa|
-                int.update_attribute :"residue_propensity_of_#{aa.downcase}", int.calculate_residue_propensity_of(aa)
-                int.update_attribute :"residue_percentage_of_#{aa.downcase}", int.calculate_residue_percentage_of(aa)
-              end
-              Sses::ALL.each do |sse|
-                int.update_attribute :"sse_propensity_of_#{sse.downcase}", int.calculate_sse_propensity_of(sse)
-                int.update_attribute :"sse_percentage_of_#{sse.downcase}", int.calculate_sse_percentage_of(sse)
-              end
-              %w[hbond whbond vdw_contact].each do |intact|
-                AminoAcids::Residues::STANDARD.each do |aa|
-                  int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids=",
-                                int.send("calculate_frequency_of_#{intact}_between_nucleic_acids_and_", aa))
-                end
-
-                nas.each do |na_residue|
-                  int.send("frequency_of_#{intact}_between_amino_acids_and_#{na_residue.downcase}=",
-                                int.send("calculate_frequency_of_#{intact}_between_amino_acids_and_", na_residue))
-
-                  AminoAcids::Residues::STANDARD.each do |aa|
-                    int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{na_residue.downcase}=",
-                                  int.send("calculate_frequency_of_#{intact}_between", aa, na_residue))
-                  end
-                end
-
-                %w[sugar phosphate].each do |moiety|
-                  int.send("frequency_of_#{intact}_between_amino_acids_and_#{moiety}=",
-                    AminoAcids::Residues::STANDARD.inject(0) { |sum, aa| sum + int.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa) })
-
-                  AminoAcids::Residues::STANDARD.each do |aa|
-                    int.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}=",
-                                  int.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa))
-                  end
-                end
-              end
-
-              int.save!
-              $logger.info ">>> Updating secondary fields for #{int.class}, #{int.id}: done"
-              ActiveRecord::Base.remove_connection
+            AminoAcids::Residues::STANDARD.each do |aa|
+              interface.update_attribute :"residue_asa_propensity_of_#{aa.downcase}", interface.calculate_residue_asa_propensity_of(aa)
+              interface.update_attribute :"residue_asa_percentage_of_#{aa.downcase}", interface.calculate_residue_asa_percentage_of(aa)
+              interface.update_attribute :"residue_cnt_propensity_of_#{aa.downcase}", interface.calculate_residue_cnt_propensity_of(aa)
+              interface.update_attribute :"residue_cnt_percentage_of_#{aa.downcase}", interface.calculate_residue_cnt_percentage_of(aa)
             end
+
+            Sses::ALL.each do |sse|
+              interface.update_attribute :"sse_asa_propensity_of_#{sse.downcase}", interface.calculate_sse_asa_propensity_of(sse)
+              interface.update_attribute :"sse_asa_propensity_of_#{sse.downcase}", interface.calculate_sse_asa_propensity_of(sse)
+              interface.update_attribute :"sse_cnt_percentage_of_#{sse.downcase}", interface.calculate_sse_cnt_percentage_of(sse)
+              interface.update_attribute :"sse_cnt_percentage_of_#{sse.downcase}", interface.calculate_sse_cnt_percentage_of(sse)
+            end
+
+            %w[hbond whbond vdw_contact].each do |intact|
+              AminoAcids::Residues::STANDARD.each do |aa|
+                interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_nucleic_acids=",
+                                interface.send("calculate_frequency_of_#{intact}_between_nucleic_acids_and_", aa))
+              end
+
+              nas = "NucleicAcids::#{interface.interface_to.capitalize}::Residues::STANDARD".constantize
+              nas.each do |na_residue|
+                interface.send("frequency_of_#{intact}_between_amino_acids_and_#{na_residue.downcase}=",
+                                interface.send("calculate_frequency_of_#{intact}_between_amino_acids_and_", na_residue))
+
+                AminoAcids::Residues::STANDARD.each do |aa|
+                  interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{na_residue.downcase}=",
+                                  interface.send("calculate_frequency_of_#{intact}_between", aa, na_residue))
+                end
+              end
+
+              %w[sugar phosphate].each do |moiety|
+                interface.send("frequency_of_#{intact}_between_amino_acids_and_#{moiety}=",
+                                AminoAcids::Residues::STANDARD.inject(0) { |sum, aa|
+                                sum + interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa) })
+
+                AminoAcids::Residues::STANDARD.each do |aa|
+                  interface.send("frequency_of_#{intact}_between_#{aa.downcase}_and_#{moiety}=",
+                                  interface.send("calculate_frequency_of_#{intact}_between_#{moiety}_and_", aa))
+                end
+              end
+            end
+            interface.save!
+            $logger.info "Updating auxiliary columns for #{interface.class}, #{interface.id} (#{i+1}/#{interfaces.size}): done"
+            ActiveRecord::Base.remove_connection
           end
-          ActiveRecord::Base.establish_connection(conf)
         end
+        ActiveRecord::Base.establish_connection(conn)
       end
     end
 

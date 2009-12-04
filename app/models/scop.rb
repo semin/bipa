@@ -132,13 +132,13 @@ class ScopDomain < Scop
                 :foreign_key  => "#{na}_binding_subfamily_id"
   end
 
-  has_many  :dna_interfaces,
-            :class_name   => "DomainDnaInterface",
-            :foreign_key  => "scop_id"
+  has_one :dna_interface,
+          :class_name   => "DomainDnaInterface",
+          :foreign_key  => "scop_id"
 
-  has_many  :rna_interfaces,
-            :class_name   => "DomainRnaInterface",
-            :foreign_key  => "scop_id"
+  has_one :rna_interface,
+          :class_name   => "DomainRnaInterface",
+          :foreign_key  => "scop_id"
 
   has_many  :residues,
             :class_name   => "Residue",

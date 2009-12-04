@@ -55,7 +55,7 @@ class Atom < ActiveRecord::Base
 
   has_one   :naccess
 
-  has_one   :potential
+  has_one   :spicoli
 
   delegate  :aa?,
             :dna?,
@@ -63,22 +63,22 @@ class Atom < ActiveRecord::Base
             :na?,
             :het?,
             :water?,
-            :to => :residue,
-            :allow_nil => true
+            :to         => :residue,
+            :allow_nil  => true
 
   delegate  :unbound_asa,
             :bound_asa,
             :delta_asa,
             :radius,
-            :to => :naccess,
-            :allow_nil => true
+            :to         => :naccess,
+            :allow_nil  => true
 
   delegate  :formal_charge,
             :partial_charge,
             :atom_potential,
             :asa_potential,
-            :to => :potential,
-            :allow_nil => true
+            :to         => :spicoli,
+            :allow_nil  => true
 
   named_scope :surface, lambda { |*args|
     { :conditions => ["unbound_asa > ?", (args.first || configatron.min_surface_atom_asa)] }
