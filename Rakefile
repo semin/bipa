@@ -22,7 +22,7 @@ class RakeLogger < Logger
   end
 end
 
-$logger = RakeLogger.new(STDOUT)
+$logger       = RakeLogger.new(STDOUT)
 $logger.level = RakeLogger::DEBUG
 
 def refresh_dir(dir)

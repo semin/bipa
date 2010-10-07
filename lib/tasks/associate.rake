@@ -4,11 +4,11 @@ namespace :bipa do
     desc "Associate PDB residues with SCOP domains"
     task :pdb_scop => [:environment] do
 
-      pdbs  = Structure.all.map(&:pdb_code)
-      fm    = ForkManager.new(configatron.max_fork)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        pdbs  = Structure.all.map(&:pdb_code)
         conn  = ActiveRecord::Base.remove_connection
+
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)

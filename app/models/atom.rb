@@ -190,7 +190,7 @@ class Atom < ActiveRecord::Base
 
   def to_pdb
     sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s",
-            'ATOM',
+            is_a?(StdAtom) ? 'ATOM' : 'HETATM',
             atom_code,
             justified_atom_name,
             altloc,

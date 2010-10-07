@@ -1,57 +1,82 @@
 module Bipa
-
-  require "narray"
-
-  class Esst
-
-    attr_reader :matrix
-
-    def initialize(env_name, col_names, row_names, rows)
-      @env_name   = env_name
-      @col_names  = col_names
-      @row_names  = row_names
-      @matrix     = NMatrix[*rows]
-    end
-
-    def column(col_name)
-      col_index = @col_names.index(col_name)
-      if col_index.nil?
-        raise "Unknown residue type: #{col_name}"
-      else
-        NVector[*(0...@matrix.shape[1]).map { |row_i| @matrix[col_index, row_i] }]
-      end
-    end
-  end
-
   class Essts
 
-    attr_reader :essts
+    attr_reader :file, :type, :aa_symbols,
+                :environments, :essts, :total_table,
+                :number_of_environments, :number_of_alignments
 
-    def initialize(file)
-      aas     = 'ACDEFGHIKLMNPQRSTVWY'.split('')
-      env     = nil
-      rows    = []
-      @essts  = []
+    def initialize(file, type = :logo)
+      @file         = file
+      @type         = type
+      @environments = []
+      @essts        = []
+      @total_table  = nil
+      parse_tag     = nil
 
-      file_str = File.exists?(file) ? IO.read(file) : file
-      file_str.split("\n").each_with_index do |line, i|
+      IO.readlines(@file).each_with_index do |line, li|
         line.chomp!
-        if line =~ /^#/ or line.blank?
+        if    line =~ /^#\s+(ACDEFGHIKLMNPQRSTV\w+)/
+          @aa_symbols = $1.split('')
+        elsif line =~ /^#\s+(.*;\w+;\w+;[T|F];[T|F])/
+          elems = $1.split(';')
+          @environments << (env = OpenStruct.new)
+          @environments[-1].name        = elems[0]
+          @environments[-1].values      = elems[1].split('')
+          @environments[-1].labels      = elems[2].split('')
+          @environments[-1].constraind  = elems[3] == 'T' ? true : false
+          @environments[-1].silent      = elems[4] == 'T' ? true : false
+        elsif line =~ /^#\s+Total\s+number\s+of\s+environments:\s+(\d+)/
+          @number_of_environments = Integer($1)
+        elsif line =~ /^#\s+Number\s+of\s+alignments:\s+(\d+)/
+          @number_of_alignments = Integer($1)
+        elsif line =~ /^#/ # skip other comments!
           next
-        elsif line =~ /^>(\S+)\s+(\d+)/
-          if !rows.empty?
-            @essts << Esst.new(env, aas, aas, rows)
-            rows.clear
+        elsif line =~ /^>Total\s+(\S+)/i
+          @total_table  = Esst.new(type, 'total', Integer($1), @aa_symbols)
+          parse_tag     = :tot_row
+        #elsif line =~ /^>Total/i
+          #@total_table  = Esst.new(type, 'total', @essts.size, @aa_symbols)
+          #parse_tag     = :tot_row
+        elsif line =~ /^>(\S+)\s+(\S+)/
+          break if parse_tag == :tot_row
+          @essts    << Esst.new(type, $1, Integer($2), @aa_symbols)
+          parse_tag = :esst_row
+        elsif (line =~ /^(\S+)\s+(\S+.*)$/) && (parse_tag == :esst_row || parse_tag == :tot_row)
+          row_name    = $1
+          row_values  = $2.strip.split(/\s+/).map { |v| Float(v) }
+          if parse_tag == :esst_row
+            @essts[-1].rownames << row_name
+            @essts[-1].matrix = NMatrix[*(@essts[-1].matrix.to_a << row_values)]
+          elsif parse_tag == :tot_row
+            @total_table.rownames << row_name
+            @total_table.matrix = NMatrix[*(@total_table.matrix.to_a << row_values)]
+          else
+            $logger.error "Something wrong at line #{li}: #{line}"
+            exit 1
           end
-          if $1 == 'Total'
-            break
-          end
-          env == $1
-        elsif line =~ /^\S\s+(.*)$/
-          rows << $1.strip.split(/\s+/).map(&:to_f)
         else
-          raise "Unknown style of line, #{i + 1}: #{line}"
+          raise "Something wrong at line, #{li}: #{line}"
         end
+      end
+    end
+
+    def colnames
+      @essts[0].colnames
+    end
+
+    def rownames
+      @essts[0].rownames
+    end
+
+    def [](index)
+      case index
+      when Integer
+        @essts[index]
+      when String
+        @essts.find { |e| e.label == index }
+      else
+        $logger.error "#{index} is not available for indexing ESSTs"
+        exit
       end
     end
 

@@ -26,6 +26,12 @@ class Structure < ActiveRecord::Base
   has_many  :pseudo_chains,
             :through    => :models
 
+  has_many  :goa_pdbs
+
+  has_many  :go_terms,
+            :through    => :goa_pdbs,
+            :uniq       => true
+
   named_scope :latest, { :order => 'deposited_at DESC' }
 
   named_scope :untainted, :conditions => {

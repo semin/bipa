@@ -1,5 +1,5 @@
-namespace :bipa do
-  namespace :run do
+namespace :run do
+  namespace :bipa do
 
     desc "Run HBPLUS on each PDB file"
     task :hbplus => [:environment] do
@@ -190,55 +190,147 @@ namespace :bipa do
     end
 
 
-    desc "Run blastclust for each SCOP family"
-    task :blastclust => [:environment] do
+    desc "Run 'TMalign' to create nucleic acid-binding chain families"
+    task :tmalign => [:environment] do
 
-      refresh_dir(configatron.blastclust_dir) unless configatron.resume
+      dir = configatron.tmalign_dir + "chains"
+      refresh_dir dir
 
       fm = ForkManager.new(configatron.max_fork)
-
       fm.manage do
         %w[dna rna].each do |na|
+          # Generate chain PDB files
+          AaChain.find_each do |chain|
+            file = dir + "#{chain.fasta_header}_#{chain.chain_code}.pdb"
+            file.open('w') do |f|
+              f.puts chain.to_pdb
+            end
+          end
+        end
+      end
+
+    end
+
+
+    desc "Run 'cd-hit' for each PDB chains"
+    task :cdhit_chains => [:environment] do
+
+      %w[dna rna].each do |na|
+        # Create FASTA files
+        dir = configatron.cdhit_dir + "pdb" + na
+        refresh_dir dir
+        fasta = dir + "#{na}_binding_chains.fa"
+        fasta.open('w') do |file|
+          AaChain.find_each do |chain|
+            hdr = chain.fasta_header
+
+            if chain.send("#{na}_binding_residues").size > 0
+              begin
+                seq = chain.res_seq
+                if (seq.count('X') / seq.length.to_f) < 0.5
+                  file.puts ">#{hdr}"
+                  file.puts seq
+                  #$logger.info "Getting fasta from #{hdr}: done"
+                else
+                  #$logger.info "Skipped #{hdr}: "
+                end
+              rescue Exception => e
+                $logger.error "Something wrong with #{hdr}: #{e}"
+              end
+            else
+              #$logger.debug "Skipped #{hdr}: no #{na.upcase}-binding residues"
+            end
+          end
+        end
+
+        stem  = fasta.basename('.fa').to_s
+        #cmd   = [
+          #"blastclust",
+          #"-i #{fasta}",
+          #"-o #{dir.join(stem + '.nr100')}",
+          #"-L .9",
+          #"-S 100",
+          #"-a 2",
+          #"-p T",
+          #"1> #{dir + 'blastclust.stdout'}",
+          #"2> #{dir + 'blastclust.stderr'}",
+        #].join(' ')
+
+        cmd   = [
+          "cd-hit",
+          "-i #{fasta}",
+          "-o #{dir.join(stem + '.nr100')}",
+          "-c 1.0",
+          "-s 0.9",
+          "-n 5",
+          "1> #{dir + 'cdhit.stdout'}",
+          "2> #{dir + 'cdhit.stderr'}",
+        ].join(' ')
+
+        system cmd
+        $logger.info "Running 'cd-hit' with #{fasta}: done"
+      end
+    end
+
+
+    desc "Run 'cd-hit' for each SCOP family"
+    task :cdhit_domains => [:environment] do
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        dir = configatron.cdhit_dir + "scop"
+        refresh_dir dir
+
+        %w[dna rna].each do |na|
           ScopFamily.send(:"reg_#{na}").find_each do |fam|
-            sunid     = fam.sunid
-            fam_dir   = configatron.blastclust_dir.join(na, "#{sunid}")
-            fam_fasta = fam_dir.join("#{sunid}.fa")
+            sunid   = fam.sunid
+            fam_dir = dir.join(na, sunid.to_s)
 
             mkdir_p fam_dir
 
-            doms = fam.leaves.select(&:"reg_#{na}")
-            doms.each do |dom|
-              seq = dom.to_sequence
-              if (seq.count('X') / seq.length.to_f) > 0.5
-                $logger.warn  "!!! Skipped: SCOP domain, #{dom.sunid} has " +
-                              "too many unknown residues (more than half)!"
-                next
-              end
-
-              File.open(fam_fasta, "a") do |f|
-                f.puts ">#{dom.sunid}"
-                f.puts seq
+            fasta = fam_dir + "#{sunid}.fa"
+            fasta.open('w') do |file|
+              doms = fam.leaves.select(&:"reg_#{na}")
+              doms.each do |dom|
+                seq = dom.to_sequence
+                if (seq.count('X') / seq.length.to_f) < 0.5
+                  file.puts ">#{dom.sunid}"
+                  file.puts seq
+                end
               end
             end
 
             ActiveRecord::Base.remove_connection
             fm.fork do
-              if File.size? fam_fasta
-                blastclust_cmd =  "blastclust " +
-                                  "-i #{fam_fasta} "+
-                                  "-o #{fam_dir.join(sunid.to_s + '.cluster')} " +
-                                  "-L .9 " +
-                                  "-S 100 " +
-                                  "-a 2 " +
-                                  "-p T " +
-                                  "1> #{fam_dir.join('blastclust.stdout')} " +
-                                  "2> #{fam_dir.join('blastclust.stderr')}"
+              if File.size? fasta
+                stem  = fasta.basename('.fa').to_s
+                #cmd   = [
+                  #"blastclust",
+                  #"-i #{fasta}",
+                  #"-o #{fam_dir.join(stem + '.nr100')}",
+                  #"-L .9",
+                  #"-S 100",
+                  #"-a 2",
+                  #"-p T",
+                  #"1> #{fam_dir + 'blastclust.stdout'}",
+                  #"2> #{fam_dir + 'blastclust.stderr'}",
+                #].join(' ')
+                cmd   = [
+                  "cd-hit",
+                  "-i #{fasta}",
+                  "-o #{fam_dir.join(stem + '.nr100')}",
+                  "-c 1.0",
+                  "-s 0.9",
+                  "-n 5",
+                  "1> #{fam_dir + 'cdhit.stdout'}",
+                  "2> #{fam_dir + 'cdhit.stderr'}",
+                ].join(' ')
 
-                system blastclust_cmd
+                system cmd
+                $logger.info "Run 'cd-hit' with #{na.upcase}-binding SCOP family, #{sunid}: done"
               end
             end
             ActiveRecord::Base.establish_connection
-            $logger.info ">>> Clustering #{na.upcase}-binding SCOP family, #{sunid}: done"
           end
         end
       end
@@ -248,56 +340,56 @@ namespace :bipa do
     namespace :salign do
 
       desc "Run SALIGN for representative PDB files for each SCOP Family"
-      task :repscop => [:environment] do
+      task :rep_scop_pdbs => [:environment] do
 
         fm = ForkManager.new(configatron.max_fork)
         fm.manage do
           %w[dna rna].each do |na|
-            sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-            config = ActiveRecord::Base.remove_connection
+            sunids  = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+            conn    = ActiveRecord::Base.remove_connection
 
-            sunids.each do |sunid|
-              cwd     = pwd
-              famdir  = configatron.family_dir.join("rep", na, sunid.to_s)
-              pdbs    = Dir[famdir.join("*.pdb")].map { |p| File.basename(p) }
+            sunids.each_with_index do |sunid, i|
+              fm.fork do
+                cwd     = pwd
+                cnt     = "(#{i+1}/#{sunids.size})"
+                fam_dir = configatron.family_dir.join("scop", "rep", na, sunid.to_s)
+                pdbs    = Pathname.glob(fam_dir.join("*.pdb")).map { |p| p.basename }
 
-              if pdbs.size < 2
-                $logger.warn "!!! Only #{pdbs.size} PDB structure detected in #{famdir}"
-                next
-              end
-
-              chdir famdir
-
-              # single linkage clustering using TM-score
-              clsts = Bipa::Tmalign.single_linkage_clustering(pdbs.combination(1).to_a)
-              clsts.each_with_index do |grp, gi|
-                if grp.size < 2
-                  $logger.warn "!!! Only #{grp.size} PDB structure detected in group, #{gi} in #{famdir}"
+                if pdbs.size < 2
+                  $logger.warn "Skipped #{na.upcase}-binding SCOP family, #{sunid} #{cnt}: only #{pdbs.size} PDB structure detected"
                   next
                 end
 
-                if File.size?(famdir.join("salign#{gi}.ali")) and File.size?(famdir.join("salign#{gi}.pap"))
-                  $logger.warn "!!! Skipped group, #{gi} in #{famdir}"
-                  next
-                end
+                chdir fam_dir
 
-                fm.fork do
-                  system "salign #{grp.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
-                  system "mv salign.ali salign#{gi}.ali"
-                  system "mv salign.pap salign#{gi}.pap"
-                  $logger.info ">>> SALIGN with group, #{gi} from representative set of #{na.upcase}-binding SCOP family, #{sunid}: done"
-                end
+                ## single linkage clustering using TM-score
+                #clsts = Bipa::Tmalign.single_linkage_clustering(pdbs.combination(1).to_a)
+                #clsts.each_with_index do |grp, gi|
+                  #if grp.size < 2
+                    #$logger.warn "Only #{grp.size} PDB structure detected in group, #{gi} in #{fam_dir}"
+                    #next
+                  #end
+
+                  #system "salign #{grp.join(' ')} 1>salign#{gi}.stdout 2>salign#{gi}.stderr"
+                  #mv "salign.ali", "salign#{gi}.ali"
+                  #mv "salign.pap", "salign#{gi}.pap"
+                  #$logger.info "SALIGN with group, #{gi} from representative set of #{na.upcase}-binding SCOP family, #{sunid} #{cnt}: done"
+                #end
+
+                # run salign without pre-clustering using TMAlign
+                system "salign *.pdb 1>salign.stdout 2>salign.stderr"
+                $logger.info "SALIGN with representative PDB files of #{na.upcase}-binding SCOP family, #{sunid} #{cnt}: done"
+                chdir cwd
               end
-              chdir cwd
             end
-            ActiveRecord::Base.establish_connection(config)
+            ActiveRecord::Base.establish_connection(conn)
           end
         end
       end
 
 
       desc "Run SALIGN for each subfamilies of SCOP families"
-      task :subscop => [:environment] do
+      task :sub_scop_pdbs => [:environment] do
 
         fm = ForkManager.new(configatron.max_fork)
         fm.manage do
@@ -339,15 +431,78 @@ namespace :bipa do
 
     end # namespace :salign
 
+    namespace :mafft do
+
+      desc "Run MAFFT for each subfamilies of SCOP families"
+      task :sub_scop_pdbs => [:environment] do
+
+        fm = ForkManager.new(configatron.max_fork)
+        fm.manage do
+          %w[dna rna].each do |na|
+            sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+            config = ActiveRecord::Base.remove_connection
+
+            sunids.each do |sunid|
+              fm.fork do
+                cwd     = pwd
+                famdir  = configatron.family_dir.join("scop", "sub", na, sunid.to_s)
+
+                famdir.children.select(&:directory?).each do |subfamdir|
+                  pdbs = Pathname.glob(subfamdir.join("*.pdb")).map(&:basename)
+
+                  if pdbs.size < 2
+                    $logger.warn "Only #{pdbs.size} PDB structure detected in #{subfamdir}"
+                    next
+                  end
+
+                  chdir subfamdir
+
+                  # create one big fasta file
+                  fasta = subfamdir + "msa_input.fasta"
+                  fasta.open("w") do |file|
+                    pdbs.each do |pdb|
+                      str = Bio::PDB.new(IO.read(pdb))
+                      seq = str.models.first.chains.map(&:atom_seq).join("/")
+                      hdr = ">#{pdb.basename(".pdb").to_s}"
+                      file.puts hdr
+                      file.puts seq
+                    end
+                  end
+
+                  system "muscle -msf -in msa_input.fasta -out msa.msf 1>muscle.stdout 2>muscle.stderr"
+                  system "mview -in msf -out pir msa.msf > msa.pir"
+
+                  mod_ali = subfamdir + "msa.ali"
+                  mod_ali.open("w") do |file|
+                    Bio::FlatFile.auto("msa.pir").each_entry do |ent|
+                     ent.entry_id.gsub!(/^\d+;/, "")
+                     ent.definition = "structureX:#{ent.entry_id}"
+                     file.puts ent
+                    end
+                  end
+
+                  system "joy msa.ali 1>joy.stdout 2>joy.stderr"
+
+                  chdir cwd
+                end
+              end
+              $logger.info "MUSCLE with subfamilies of #{na.upcase}-binding SCOP family, #{sunid}: done"
+            end
+            ActiveRecord::Base.establish_connection(config)
+          end
+        end
+      end
+
+    end
 
     namespace :baton do
 
       desc "Run Baton for each SCOP family"
-      task :full_scop => [:environment] do
+      task :all_scop_pdbs => [:environment] do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          full_dir  = File.join(configatron.family_dir, "full", na)
+          all_dir  = File.join(configatron.family_dir, "all", na)
           fm  = ForkManager.new(configatron.max_fork)
 
           fm.manage do
@@ -357,7 +512,7 @@ namespace :bipa do
               fm.fork do
                 ActiveRecord::Base.establish_connection(config)
                 cwd       = pwd
-                fam_dir   = File.join(full_dir, sunid.to_s)
+                fam_dir   = File.join(all_dir, sunid.to_s)
                 pdb_list  = Dir[fam_dir + "/*.pdb"].map { |p| p.match(/(\d+)\.pdb$/)[1] }
 
                 if pdb_list.size < 2
@@ -378,7 +533,7 @@ namespace :bipa do
                 end
 
                 chdir cwd
-                $logger.info ">>> Baton with full set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
+                $logger.info ">>> Baton with all set of #{na.upcase}-binding SCOP family, #{sunid}: done (#{i + 1}/#{sunids.size})"
                 ActiveRecord::Base.remove_connection
               end
             end
@@ -389,7 +544,7 @@ namespace :bipa do
 
 
       desc "Run Baton for representative PDB files for each SCOP Family"
-      task :rep_scop => [:environment] do
+      task :rep_scop_pdbs => [:environment] do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -437,7 +592,7 @@ namespace :bipa do
 
 
       desc "Run Baton for each subfamilies of SCOP families"
-      task :sub_scop => [:environment] do
+      task :sub_scop_pdbs => [:environment] do
 
         %w[dna rna].each do |na|
           sunids    = ScopFamily.send("reg_#{na}").map(&:sunid).sort
@@ -512,43 +667,58 @@ namespace :bipa do
     namespace :joy do
 
       desc "Run JOY for representative SCOP family alignments"
-      task :repaligns => [:environment] do
+      task :scop_rep_alignments => [:environment] do
 
-        $logger.level = Logger::ERROR
+        #$logger.level = Logger::ERROR
 
         fm = ForkManager.new(configatron.max_fork)
         fm.manage do
           %w[dna rna].each do |na|
-            cwd     = pwd
-            famdirs = Dir[configatron.family_dir.join("rep", na, "*")]
-            famdirs.each do |famdir|
-              aligns = Dir[File.join(famdir, "salign*.ali")]
+            cwd       = pwd
+            fam_dirs  = Pathname.glob(configatron.family_dir.join("scop", "rep", na, "*"))
 
-              if aligns.empty?
-                $logger.warn "!!! Cannot find alignment files in #{famdir}"
-                next
-              end
+            fam_dirs.each do |fam_dir|
+              chdir fam_dir
+              align = fam_dir + "salign.ali"
 
-              chdir famdir
+              if !align.exist?
+                $logger.warn "Cannot find alignment file, 'salign.ali' in #{fam_dir}"
+                pdbs = Pathname.glob(fam_dirs + "*.pdb")
 
-              aligns.each do |ali|
-                stem    = File.basename(ali, ".ali")
-                id      = stem.match(/salign(\d+)/)[1]
-                modali  = "mod#{stem}.ali"
-                tem     = "mod#{stem}.tem"
+                if pdbs.size == 1
+                  $logger.warn "Run JOY for a single protein, #{pdbs[0]} instead ..."
 
-                File.open(modali, "w") { |f| f.puts IO.read(ali).gsub(/\.pdb/, "") }
+                  pdb   = pdbs[0].cleanpath
+                  sunid = pdb.basename(".pdb").to_s
+                  tem   = sunid + ".tem"
+                  fm.fork do
+                    system "joy #{pdb} 1>joy.stdout 2>joy.stderr"
+                    if tem.exist?
+                      cp(pdb, 'single.tem')
+                    else
+                      $logger.error "JOY failed to run with #{pdb} in #{fam_dir}"
+                    end
+                  end
+                elsif pdbs.size > 1
+                  $logger.error "#{fam_dir} has two or more structures! Why no 'salign.ali' here?"
+                  exit 1
+                elsif pdbs.size == 0
+                  $logger.error "#{fam_dir} has no structures!"
+                  exit 1
+                end
+              else
+                modali  = Pathname.new("modsalign.ali")
+                tem     = Pathname.new("modsalign.tem")
+                modali.open("w") { |f| f.puts IO.read(align).gsub(/\.pdb/, "") }
 
                 fm.fork do
-                  system "joy #{modali} 1>joy#{id}.stdout 2>joy#{id}.stderr"
-
-                  if !File.exists? tem
-                    $logger.error "!!! JOY failed to run with #{modali} in #{famdir}"
+                  system "joy #{modali.to_s} 1>joy.stdout 2>joy.stderr"
+                  if !tem.exist?
+                    $logger.error "JOY failed to run with #{modali} in #{fam_dir}"
                   end
                 end
               end
-
-              $logger.info ">>> JOY with alignments in #{famdir}: done"
+            $logger.info "JOY with an alignment in #{fam_dir}: done"
             end
           end
         end
@@ -556,7 +726,7 @@ namespace :bipa do
 
 
       desc "Run JOY for SCOP subfamily alignments"
-      task :subaligns => [:environment] do
+      task :scop_sub_alignments => [:environment] do
 
         $logger.level = Logger::ERROR
 
@@ -564,50 +734,21 @@ namespace :bipa do
         fm.manage do
           %w[dna rna].each do |na|
             cwd         = pwd
-            subfamdirs  = Dir[configatron.family_dir.join("sub", na, "*", "*")]
-#
-#            subfamdirs = %w[
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/50461/1055
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1305
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1307
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1311
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1320
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1325
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1327
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1333
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1335
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1348
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1351
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1370
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1357
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1379
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1385
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1396
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1404
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1401
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1406
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1405
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1408
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1409
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1412
-#              /merlin/Live/semin/BiO/Develop/bipa/public/families/sub/rna/58120/1414
-#            ]
+            subfam_dirs = Pathname.new(configatron.family_dir.join("scop", "sub", na, "*", "*").to_s)
 
-            subfamdirs.each do |subfamdir|
-              ali = File.join(subfamdir, "salign.ali")
+            subfam_dirs.each do |subfam_dir|
+              ali = subfam_dir + "msa.ali"
 
-              if !File.exists? ali
-                $logger.warn "!!! Cannot find an alignment file in #{subfamdir}"
+              if !ali.exist?
+                $logger.warn "Cannot find an alignment file, msa.ali in #{subfam_dir}"
                 next
               end
 
-              chdir subfamdir
+              chdir subfam_dir
+              modali  = Pathname.new("modmsa.ali")
+              tem     = Pathname.new("modmsa.tem")
 
-              stem    = File.basename(ali, ".ali")
-              modali  = "mod#{stem}.ali"
-              tem     = "mod#{stem}.tem"
-
-              File.open(modali, "w") { |f| f.puts IO.read(ali).gsub(/\.pdb/, "") }
+              modali.open("w") { |f| f.puts IO.read(ali).gsub(/\.pdb/, "") }
 
               fm.fork do
                 rm_r Dir['*.sst']
@@ -627,13 +768,13 @@ namespace :bipa do
 
                 system "joy #{modali} 1>joy.stdout 2>joy.stderr"
 
-                if !File.exists? tem
-                  $logger.error "!!! JOY failed to run with #{modali} in #{subfamdir}"
+                if !tem.exist?
+                  $logger.error "JOY failed to run with #{modali} in #{subfam_dir}"
                 end
               end
 
               chdir cwd
-              $logger.info ">>> JOY with an alignment in #{subfamdir}: done"
+              $logger.info "JOY with an alignment in #{subfam_dir}: done"
             end
           end
         end
@@ -873,9 +1014,287 @@ namespace :bipa do
 
 
     desc "Calculate USR similarities using pre-calculated descriptors"
-    task :usrc => [:environment] do
-      system "#{configatron.usr_bin} < #{configatron.usr_des} > #{configatron.usr_res}"
-      $logger.info ">>> Running usr done."
+    task :usr => [:environment] do
+
+      [DomainNucleicAcidInterface, ChainNucleicAcidInterface].each do |klass|
+        usr_bin = configatron.usr_bin
+        usr_des = "./tmp/#{klass.to_s.downcase}_descriptors.txt"
+        usr_res = "./tmp/#{klass.to_s.downcase}_descriptor_similarities.txt"
+        usr_cmd = "#{usr_bin} < #{usr_des} > #{usr_res}"
+        system usr_cmd
+        $logger.info "Running 'usr' with #{usr_res}: done"
+      end
+    end
+  end
+
+
+  namespace :fuguena do
+
+    desc "Run Ulla to generate ESSTs"
+    task :ulla => [:environment] do
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
+            fm.fork do
+              cwd      = pwd
+              esstdir  = configatron.fuguena_dir.join("essts", na, env)
+
+              mkdir_p esstdir
+              chdir   esstdir
+
+              cp configatron.fuguena_dir.join("classdef.#{env}"), "classdef.dat"
+
+              modtems = Dir[configatron.family_dir.join("rep", na, "*", "#{na}modsalign*.tem").to_s]
+              newtems = []
+
+              modtems.each do |modtem|
+                if modtem =~ /(\d+)\/#{na}modsalign(\d+)\.tem/
+                  stem    = "#{$1}_#{$2}"
+                  newtem  = esstdir.join("#{stem}.tem")
+                  newtems << stem
+                  cp modtem, newtem
+                end
+              end
+
+              newtems.each do |newtem|
+                mkdir_p newtem
+                chdir   newtem
+
+                if env == "ord64"
+                  cp configatron.fuguena_dir.join("subst-ord64-60.lgd"), "."
+                else
+#                  system "ls -1 ../*.tem | grep -v #{newtem} > temfiles.lst"
+#
+#                  (30..100).step(10) do |weight|
+#                    system "ulla -l temfiles.lst -c ../classdef.dat --autosigma --weight #{weight} --output 2 -o ulla-#{env}-#{weight}.lgd"
+#                  end
+                end
+                chdir esstdir
+              end
+              chdir cwd
+              $logger.info "Running ulla in #{esstdir}: done"
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Run Melody for representative sets of protein-DNA/RNA complex"
+    task :melody => [:environment] do
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
+            fm.fork do
+              cwd     = pwd
+              esstdir = configatron.fuguena_dir.join("essts", na, env)
+              tests   = esstdir.children.select { |c| c.directory? }
+
+              tests.each do |test|
+                chdir test
+                fam     = test.basename
+                bff     = Bio::FlatFile.auto("../#{fam}.tem")
+                sunids  = []
+
+                bff.each_entry { |e| sunids << e.entry_id if e.definition == 'sequence' }
+
+                sunids.each do |sunid|
+                  bff.rewind
+                  tem = "#{sunid}.tem"
+                  File.open(tem, "w") do |file|
+                    bff.each_entry do |entry|
+                      if entry.entry_id == sunid
+                        file.puts ">P1;#{entry.entry_id}"
+                        file.puts "#{entry.definition}"
+                        file.puts "#{entry.data.gsub(/[\n|\-]/, '')}*"
+                      end
+                    end
+                  end
+                  mat = (env == "ord64" ? "subst-ord64-60.lgd" : "ulla-#{env}-60.lgd")
+                  system "melody -t #{tem} -c ../classdef.dat -s #{mat} -o #{fam}-#{sunid}-#{env}-60.fug"
+                end
+              end
+              chdir cwd
+              $logger.info "Run melody in #{esstdir}: done"
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Run FUGUE for representative sets of protein-DNA/RNA complex"
+    task :fugue => [:environment] do
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          #["ord64", "std64", "#{na}128", "#{na}256"].each do |env|
+          ["ord64"].each do |env|
+            cwd   = pwd
+            tests = configatron.fuguena_dir.join("essts", na, env).children.select { |c| c.directory? }
+            total = tests.size
+
+            tests.each_with_index do |test, i|
+              chdir test
+              fugs  = test.children.select { |c| c.extname == '.fug' }
+              s40   = configatron.fuguena_dir + "astral40.fa"
+
+              fugs.each do |fug|
+                stem = fug.basename(".fug")
+                cmd =   "fugueprf " +
+                          "-seq #{s40} " +
+                          "-prf #{fug} " +
+                          "-allrank " +
+                          "-o fugue-#{stem}.seq " +
+                          "> fugue-#{stem}.hits"
+                fm.fork do
+                  system cmd
+                end
+              end
+              chdir cwd
+              $logger.info "FUGUE-#{na.upcase}-#{env} search in #{test}: done (#{i+1}/#{total})"
+            end
+          end
+        end
+      end
+    end
+
+
+    desc "Run Needle for representative sets of protein-DNA/RNA complex"
+    task :needle => [:environment] do
+
+      refresh_dir(configatron.needle_dir)
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          cwd   = pwd
+          nadir = configatron.needle_dir + na
+          s40   = configatron.fuguena_dir + "astral40.fa"
+
+          mkdir_p nadir
+          chdir   nadir
+
+          tems = Dir[configatron.fuguena_dir.join("essts", na, "std64", "*", "*.tem").to_s]
+          tems.each_with_index do |tem, i|
+            fm.fork do
+              stem  = File.basename(tem, '.tem')
+              fa    = "#{stem}.fa"
+              ndl   = "#{stem}.ndl"
+              bff   = Bio::FlatFile.auto(tem)
+
+              bff.each_entry do |entry|
+                if entry.definition == 'sequence'
+                  File.open(fa, 'w') do |file|
+                    file.puts ">#{entry.entry_id}"
+                    file.puts "#{entry.data}"
+                  end
+                  cmd = "needle -asequence #{fa} -bsequence #{s40} -gapopen 10.0 -gapextend 0.5 -auto -aformat3 score -outfile #{ndl}"
+                  system cmd
+                  $logger.info "Needleman-Wunsch (#{na.upcase} set) search for #{fa}: done (#{i+1}/#{tems.size})"
+                end
+              end
+            end
+          end
+          chdir cwd
+        end
+      end
+    end
+
+
+    desc "Run Water for representative sets of protein-DNA/RNA complex"
+    task :water => [:environment] do
+
+      refresh_dir(configatron.water_dir)
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          cwd   = pwd
+          nadir = configatron.water_dir + na
+          s40   = configatron.fuguena_dir + "astral40.fa"
+
+          mkdir_p nadir
+          chdir   nadir
+
+          tems = Dir[configatron.fuguena_dir.join("essts", na, "std64", "*", "*.tem").to_s]
+          tems.each_with_index do |tem, i|
+            fm.fork do
+              stem  = File.basename(tem, '.tem')
+              fa    = "#{stem}.fa"
+              ndl   = "#{stem}.smw"
+              bff   = Bio::FlatFile.auto(tem)
+
+              bff.each_entry do |entry|
+                if entry.definition == 'sequence'
+                  File.open(fa, 'w') do |file|
+                    file.puts ">#{entry.entry_id}"
+                    file.puts "#{entry.data}"
+                  end
+                  cmd = "water -asequence #{fa} -bsequence #{s40} -gapopen 10.0 -gapextend 0.5 -auto -aformat3 score -outfile #{ndl}"
+                  system cmd
+                  $logger.info "Smith & Watermann (#{na.upcase} set) search for #{fa}: done (#{i+1}/#{tems.size})"
+                end
+              end
+            end
+          end
+          chdir cwd
+        end
+      end
+    end
+
+
+    desc "Run PSI-Blast for representative sets of protein-DNA/RNA complex"
+    task :psiblast => [:environment] do
+
+      refresh_dir(configatron.psiblast_dir)
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          cwd   = pwd
+          nadir = configatron.psiblast_dir + na
+          nr    = configatron.fuguena_dir + "uniref90_astral40.fa"
+
+          mkdir_p nadir
+          chdir   nadir
+
+          tems = Dir[configatron.fuguena_dir.join("essts", na, "std64", "*", "*.tem").to_s]
+          tems.each_with_index do |tem, i|
+            fm.fork do
+              stem  = File.basename(tem, '.tem')
+              fa    = "#{stem}.fa"
+              xml   = "#{stem}.xml"
+              bff   = Bio::FlatFile.auto(tem)
+
+              bff.each_entry do |entry|
+                if entry.definition == 'sequence'
+                  File.open(fa, 'w') do |file|
+                    file.puts ">#{entry.entry_id}"
+                    file.puts "#{entry.data}"
+                  end
+                  cmd = "blastpgp -i #{fa} -d #{nr} -j 5 -m 7 -o #{xml}"
+                  system cmd
+                  $logger.info "PSI-Blast (#{na.upcase} set) search for #{fa}: done (#{i+1}/#{tems.size})"
+                end
+              end
+            end
+          end
+          chdir cwd
+        end
+      end
+    end
+
+
+    desc "Run FUGUEALI for representative sets of protein-DNA/RNA complex"
+    task :fugueali => [:environment] do
     end
 
   end

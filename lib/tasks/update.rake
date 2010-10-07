@@ -1,25 +1,65 @@
-namespace :bipa do
-  namespace :update do
+namespace :update do
+  namespace :bipa do
 
-    desc "Update 'rep_{dna/rna}' columns of 'scop' table"
-    task :scoprep => [:environment] do
+    # this is a disposable task
+    desc "Update 'reg_{dna/rna}' columns of 'chain' and 'structures' table"
+    task :reg_cols => [:environment] do
 
       %w[dna rna].each do |na|
-        klass = "#{na.capitalize}BindingSubfamily".constantize
-        klass.all.each do |subfam|
-          rep = subfam.representative
-          unless rep.nil?
-            rep.send("rep_#{na}=", true)
-            rep.save!
-            rep.ancestors.each do |anc|
-              anc.send("rep_#{na}=", true)
-              anc.save!
+        klass = "Chain#{na.capitalize}Interface".constantize
+        klass.find_each do |chain_interface|
+          # update chain's reg_[d/r]na column
+          chain     = chain_interface.chain
+          chain.send("reg_#{na}=", true);
+          chain.save!
+
+          #update structure's reg_[d/r]na column
+          structure = chain.model.structure
+          structure.send("reg_#{na}=", true);
+          structure.save!
+
+          $logger.debug "#{structure.pdb_code}_#{chain.chain_code} has a #{na.upcase} interface"
+        end
+      end
+    end
+
+    desc "Update 'rep_{dna/rna}' columns of 'scops' table"
+    task :subfamily_representatives => [:environment] do
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        sub_fams  = Subfamily.all
+        conn      = ActiveRecord::Base.remove_connection
+
+        sub_fams.each_with_index do |sub_fam, i|
+          fm.fork do
+            ActiveRecord::Base.establish_connection(conn)
+            rep   = sub_fam.calculate_representative
+            na    = sub_fam.class.to_s.match(/dna/i) ? "dna" : "rna"
+            cnt   = "(#{i+1}/#{sub_fams.size})"
+            sub_fam_name  = "#{sub_fam.class}, #{sub_fam.id}"
+
+            unless rep.nil?
+              rep.send("rep_#{na}=", true)
+              rep.save!
+
+              if rep.is_a? Scop
+                rep.ancestors.each do |anc|
+                  anc.send("rep_#{na}=", true)
+                  anc.save!
+                end
+              end
+
+              rep_name = rep.is_a?(Chain) ? rep.fasta_header : rep.sid
+              $logger.info "Updating representative structure, #{rep_name} for #{sub_fam_name} #{cnt}: done"
+            else
+              $logger.warn "No representative structure for #{sub_fam_name} #{cnt}"
             end
-            $logger.info ">>> Updating representative structure, #{rep.id} for #{klass}, #{subfam.id}: done"
-          else
-            $logger.warn "!!! No representative structure for #{klass}, #{subfam.id}"
+
+            ActiveRecord::Base.remove_connection
           end
         end
+        ActiveRecord::Base.establish_connection(conn)
       end
     end
 
@@ -178,32 +218,30 @@ namespace :bipa do
     end
 
 
-    desc "Update JOY templates for alignments"
-    task :joytems => [:environment] do
+    desc "Update JOY templates for SCOP representative alignments"
+    task :scop_rep_joytems => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
         %w[dna rna].each do |na|
-          conf  = ActiveRecord::Base.remove_connection
-          fams  = Dir[configatron.family_dir.join("rep", na, "*").to_s]
-          subs  = Dir[configatron.family_dir.join("sub", na, "*", "*").to_s]
-          dirs  = fams + subs
+          conn      = ActiveRecord::Base.remove_connection
+          fam_dirs  = Pathname.glob(configatron.family_dir.join("scop", "rep", na, "*").to_s)
 
-          dirs.each do |dir|
+          fam_dirs.each do |fam_dir|
             fm.fork do
-              ActiveRecord::Base.establish_connection(conf)
+              ActiveRecord::Base.establish_connection(conn)
 
-              tems = Dir[File.join(dir, "modsalign*.tem").to_s]
+              tems = Pathname.glob(fam_dir.join("modsalign.tem").to_s)
 
               if tems.empty?
-                $logger.warn "!!! Cannot find JOY template file(s) in #{dir}"
+                $logger.warn "!!! Cannot find JOY template file(s) in #{fam_dir}"
                 ActiveRecord::Base.remove_connection
                 next
               end
 
               tems.each do |tem|
                 stem    = File.basename(tem, ".tem")
-                newtem  = File.join(dir, "#{na}#{stem}.tem")
+                newtem  = File.join(fam_dir, "#{na}#{stem}.tem")
                 cp tem, newtem
 
                 bio = Bio::FlatFile.auto(tem)
@@ -251,7 +289,7 @@ namespace :bipa do
                         di += 1
                       else
                         bind << "F"; hbond << "F"; whbond << "F"; vdw << "F"; nabind << "N"
-                        $logger.warn  "!!! Unmatched residue at #{di} in #{dom.sid} in #{dir}: " +
+                        $logger.warn  "!!! Unmatched residue at #{di} in #{dom.sid} in #{fam_dir}: " +
                                       "BIPA: #{dbrs[di].one_letter_code} <=> TEM: #{res}"
                       end
                     end
@@ -280,11 +318,121 @@ namespace :bipa do
                   end
                 end
               end
-              $logger.info ">>> Updating JOY template(s) in #{dir}: done"
+              $logger.info ">>> Updating JOY template(s) in #{fam_dir}: done"
               ActiveRecord::Base.remove_connection
             end
           end
-          ActiveRecord::Base.establish_connection(conf)
+          ActiveRecord::Base.establish_connection(conn)
+        end
+      end
+    end
+
+
+    desc "Update JOY templates for representative alignments"
+    task :sub_joytems => [:environment] do
+
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          conn        = ActiveRecord::Base.remove_connection
+          subfam_dirs = Pathname.glob(configatron.family_dir.join("scop", "sub", na, "*", "*").to_s)
+
+          subfam_dirs.each do |subfam_dir|
+            fm.fork do
+              ActiveRecord::Base.establish_connection(conn)
+              tems = Pathname.glob(subfam_dir.join("msa.tem").to_s)
+
+              if tems.empty?
+                $logger.warn "Cannot find JOY template file(s) in #{subfam_dir}"
+                ActiveRecord::Base.remove_connection
+                next
+              end
+
+              tems.each do |tem|
+                stem    = tem.basename(".tem")
+                newtem  = subfam_dir + "#{na}_#{stem}.tem"
+                cp tem, newtem
+
+                bio = Bio::FlatFile.auto(tem)
+                bio.each_entry do |entry|
+                  if entry.seq_type == "P1" and entry.definition == "sequence"
+                    dom = ScopDomain.find_by_sunid(entry.entry_id)
+
+                    if dom.nil?
+                      $logger.warn "Cannot find #{entry.entry_id} of #{tem} from BIPA"
+                      next
+                    end
+
+                    bind, hbond, whbond, vdw, nabind = [], [], [], [], []
+                    dbrs = dom.aa_residues
+                    ffrs = entry.seq.split("")
+
+                    di = 0
+
+                    ffrs.each_with_index do |res, fi|
+
+                      if fi != 0 and fi % 75 == 0
+                        bind << "\n"; hbond << "\n"; whbond << "\n"; vdw << "\n"; nabind << "\n"
+                      end
+
+                      if res == "-"
+                        bind << "-"; hbond << "-"; whbond << "-"; vdw << "-"; nabind << "-"
+                      elsif dbrs[di].nil?
+                        bind << "F"; hbond << "F"; whbond << "F"; vdw << "F"; nabind << "N"
+                        $logger.warn  "Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                                    "(TEM: #{res} <=> BIPA: None)."
+                      elsif dbrs[di].one_letter_code == res
+                        dbrs[di].send("binding_#{na}?")         ? bind    << "T" : bind   << "F"
+                        dbrs[di].send("hbonding_#{na}?")        ? hbond   << "T" : hbond  << "F"
+                        dbrs[di].send("whbonding_#{na}?")       ? whbond  << "T" : whbond << "F"
+                        dbrs[di].send("vdw_contacting_#{na}?")  ? vdw     << "T" : vdw    << "F"
+                        if hbond.last == "T"
+                          nabind << "H"
+                        elsif whbond.last == "T"
+                          nabind << "W"
+                        elsif vdw.last == "T"
+                          nabind << "V"
+                        else
+                          nabind << "N"
+                        end
+                        di += 1
+                      else
+                        bind << "F"; hbond << "F"; whbond << "F"; vdw << "F"; nabind << "N"
+                        $logger.warn  "Unmatched residue at #{di} in #{dom.sid} in #{subfam_dir}: " +
+                                      "BIPA: #{dbrs[di].one_letter_code} <=> TEM: #{res}"
+                      end
+                    end
+
+                    newtem.open("a") do |file|
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "#{na.upcase} interface"
+                      file.puts bind.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "hydrogen bond to #{na.upcase}"
+                      file.puts hbond.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "water-mediated hydrogen bond to #{na.upcase}"
+                      file.puts whbond.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "van der Waals contact to #{na.upcase}"
+                      file.puts vdw.join + "*"
+
+                      file.puts ">P1;#{entry.entry_id}"
+                      file.puts "#{na.upcase}-binding type"
+                      file.puts nabind.join + "*"
+                    end
+                  end
+                end
+              end
+
+              $logger.info "Updating JOY template(s) in #{subfam_dir}: done"
+              ActiveRecord::Base.remove_connection
+            end
+          end
+          ActiveRecord::Base.establish_connection(conn)
         end
       end
     end

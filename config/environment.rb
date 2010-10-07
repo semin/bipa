@@ -5,7 +5,7 @@
 # ENV['RAILS_ENV'] ||= 'production'
 
 # Specifies gem version of Rails to use when vendor/rails is not present
-RAILS_GEM_VERSION = '2.3.5' unless defined? RAILS_GEM_VERSION
+RAILS_GEM_VERSION = '2.3.8' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -16,6 +16,7 @@ Rails::Initializer.run do |config|
   config.gem 'andand'
   config.gem 'hpricot'
   config.gem 'configatron'
+  config.gem 'acts_as_tree'
   config.gem 'fork_manager'
   config.gem 'will_paginate'
   config.gem 'ar-extensions'
@@ -24,7 +25,7 @@ Rails::Initializer.run do |config|
   config.gem 'RubyInline', :lib => 'inline'
   config.gem 'googlecharts', :lib => 'gchart'
   config.gem 'internuity-quick_scopes', :lib => 'quick_scopes'
-  config.gem 'thinking-sphinx', :lib => 'thinking_sphinx', :version => '1.3.8'
+  config.gem 'thinking-sphinx', :lib => 'thinking_sphinx', :version => '1.3.18'
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
@@ -101,68 +102,73 @@ Rails::Initializer.run do |config|
     configatron.min_interface_atom_delta_asa      = 0.1
     configatron.min_surface_atom_asa              = 0.1
 
-    configatron.pdb_src         = :remote
-    configatron.pdb_mirror_dir  = Pathname.new("~/BiO/Mirror/PDB").expand_path
-    configatron.pdb_entry_file  = "./derived_data/pdb_entry_type.txt"
-    configatron.pdb_dir         = Rails.root.join("public/pdb")
+    configatron.pdb_src           = :remote
+    configatron.pdb_mirror_dir    = Pathname.new("~/BiO/Mirror/PDB").expand_path
+    configatron.pdb_entry_file    = "./derived_data/pdb_entry_type.txt"
+    configatron.pdb_dir           = Rails.root.join("public/pdb")
 
-    configatron.scop_uri        = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
-    configatron.scop_dir        = Rails.root.join("public/scop")
-    configatron.scop_pdb_dir    = Pathname.new("~/BiO/Store/SCOP/pdbstyle").expand_path
+    configatron.scop_uri          = "http://scop.mrc-lmb.cam.ac.uk/scop/parse/"
+    configatron.scop_dir          = Rails.root.join("public/scop")
+    configatron.scop_pdb_dir      = Pathname.new("~/BiO/Store/SCOP/pdbstyle").expand_path
     configatron.true_scop_classes = %w[a b c d e f g]
 
-    configatron.ncbi_ftp        = "ftp.ncbi.nih.gov"
-    configatron.taxonomy_ftp    = "pub/taxonomy"
-    configatron.taxonomy_dir    = Rails.root.join("public/taxonomy")
+    configatron.ncbi_ftp          = "ftp.ncbi.nih.gov"
+    configatron.taxonomy_ftp      = "pub/taxonomy"
+    configatron.taxonomy_dir      = Rails.root.join("public/taxonomy")
 
-    configatron.go_obo_uri      = "http://www.geneontology.org/ontology/gene_ontology_edit.obo"
+    configatron.go_obo_uri        = "http://www.geneontology.org/ontology/gene_ontology_edit.obo"
 
-    configatron.hbplus_bin      = Pathname.new("~/BiO/Install/hbplus/hbplus").expand_path
-    configatron.clean_bin       = Pathname.new("~/BiO/Install/hbplus/clean").expand_path
-    configatron.hbadd_bin       = Pathname.new("~/BiO/Install/hbadd/hdadd").expand_path
-    configatron.hbplus_dir      = Rails.root.join("public/hbplus")
+    configatron.hbplus_bin        = Pathname.new("~/BiO/Install/hbplus/hbplus").expand_path
+    configatron.clean_bin         = Pathname.new("~/BiO/Install/hbplus/clean").expand_path
+    configatron.hbadd_bin         = Pathname.new("~/BiO/Install/hbadd/hdadd").expand_path
+    configatron.hbplus_dir        = Rails.root.join("public/hbplus")
 
-    configatron.naccess_bin     = Pathname.new("~/BiO/Install/naccess/naccess").expand_path
-    configatron.naccess_vdw     = Pathname.new("~/BiO/Install/naccess/vdw.radii").expand_path
-    configatron.naccess_std     = Pathname.new("~/BiO/Install/naccess/standard.data").expand_path
-    configatron.naccess_dir     = Rails.root.join("public/naccess")
+    configatron.naccess_bin       = Pathname.new("~/BiO/Install/naccess/naccess").expand_path
+    configatron.naccess_vdw       = Pathname.new("~/BiO/Install/naccess/vdw.radii").expand_path
+    configatron.naccess_std       = Pathname.new("~/BiO/Install/naccess/standard.data").expand_path
+    configatron.naccess_dir       = Rails.root.join("public/naccess")
 
-    configatron.dssp_bin        = Pathname.new("~/BiO/Install/dssp/dsspcmbi").expand_path
-    configatron.dssp_dir        = Rails.root.join("public/dssp")
+    configatron.dssp_bin          = Pathname.new("~/BiO/Install/dssp/dsspcmbi").expand_path
+    configatron.dssp_dir          = Rails.root.join("public/dssp")
 
-    configatron.joy_bin         = Pathname.new("~/BiO/Install/joy/joy").expand_path
-    configatron.joy_dir         = Rails.root.join("public/joy")
+    configatron.joy_bin           = Pathname.new("~/BiO/Install/joy/joy").expand_path
+    configatron.joy_dir           = Rails.root.join("public/joy")
 
-    configatron.baton_bin       = Pathname.new("~/BiO/Install/Baton/bin/Baton").expand_path
-    configatron.baton_dir       = Rails.root.join("public/baton")
+    configatron.baton_bin         = Pathname.new("~/BiO/Install/Baton/bin/Baton").expand_path
+    configatron.baton_dir         = Rails.root.join("public/baton")
 
-    configatron.blastclust_bin  = Pathname.new("/usr/bin/blastclust")
-    configatron.blastclust_dir  = Rails.root.join("public/blastclust/")
+    configatron.blastclust_bin    = Pathname.new("/usr/bin/blastclust")
+    configatron.blastclust_dir    = Rails.root.join("public/blastclust/")
 
-    configatron.zap_dir         = Rails.root.join("public/zap")
-    configatron.spicoli_dir     = Rails.root.join("public/spicoli")
-    configatron.spicoli_bin     = Rails.root.join("bin/spicoli")
+    configatron.cdhit_dir         = Rails.root.join("public/cdhit/")
 
-    configatron.usr_bin         = Rails.root.join("bin", "usr")
-    configatron.usr_des         = Rails.root.join("tmp", "usr_descriptors.txt")
-    configatron.usr_res         = Rails.root.join("tmp", "interface_similarities.txt")
+    configatron.tmalign_bin       = Pathname.new("~/BiO/Install/TMalign/TMalign")
+    configatron.tmalign_dir       = Rails.root.join("public", "tmalign")
 
-    configatron.family_dir      = Rails.root.join("public/families")
-    configatron.alignment_dir   = Rails.root.join("public/alignments")
-    configatron.go_dir          = Rails.root.join("public/go")
-    configatron.esst_dir        = Rails.root.join("public/essts")
-    configatron.figure_dir      = Rails.root.join("public/figures")
+    configatron.zap_dir           = Rails.root.join("public/zap")
+    configatron.spicoli_dir       = Rails.root.join("public/spicoli")
+    configatron.spicoli_bin       = Rails.root.join("bin/spicoli")
 
-    configatron.astral40        = Pathname.new("~/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa").expand_path
-    configatron.baliscore_bin   = Pathname.new("~/BiO/Install/bali_score/bali_score").expand_path
-    configatron.classdefdna     = Rails.root.join("config", "classdef.dna")
-    configatron.classdefrna     = Rails.root.join("config", "classdef.rna")
+    configatron.usr_bin           = Rails.root.join("bin", "usr")
 
-    configatron.nabal_dir       = Rails.root.join("public/nabal")
-    configatron.fuguena_dir     = Rails.root.join("public/fuguena")
-    configatron.psiblast_dir    = Rails.root.join("public/psiblast")
-    configatron.needle_dir      = Rails.root.join("public/needle")
-    configatron.water_dir       = Rails.root.join("public/water")
+    configatron.family_dir        = Rails.root.join("public/families")
+    configatron.alignment_dir     = Rails.root.join("public/alignments")
+    configatron.go_dir            = Rails.root.join("public/go")
+    configatron.esst_dir          = Rails.root.join("public/essts")
+    configatron.figure_dir        = Rails.root.join("public/figures")
+    configatron.scop_figure_dir   = configatron.figure_dir.join("scop").relative_path_from(Rails.root)
+    configatron.pdb_figure_dir    = configatron.figure_dir.join("pdb").relative_path_from(Rails.root)
+
+    configatron.astral40          = Pathname.new("~/BiO/Store/SCOP/scopseq/astral-scopdom-seqres-gd-sel-gs-bib-40-1.73.fa").expand_path
+    configatron.baliscore_bin     = Pathname.new("~/BiO/Install/bali_score/bali_score").expand_path
+    configatron.classdefdna       = Rails.root.join("config", "classdef.dna")
+    configatron.classdefrna       = Rails.root.join("config", "classdef.rna")
+
+    configatron.nabal_dir         = Rails.root.join("public/nabal")
+    configatron.fuguena_dir       = Rails.root.join("public/fuguena")
+    configatron.psiblast_dir      = Rails.root.join("public/psiblast")
+    configatron.needle_dir        = Rails.root.join("public/needle")
+    configatron.water_dir         = Rails.root.join("public/water")
 
     # for custom libraries in RAILS_ROOT/lib
     require 'bipa'
@@ -174,6 +180,7 @@ Rails::Initializer.run do |config|
     require_dependency 'residue'
     require_dependency 'interface'
     require_dependency 'subfamily'
+    require_dependency 'chain_family'
     require_dependency 'alignment'
     require_dependency 'go_relationship'
     require_dependency 'gloria'
@@ -183,5 +190,6 @@ Rails::Initializer.run do |config|
     require_dependency 'fugue_hit'
     require_dependency 'fugue_search'
     require_dependency 'test_alignment'
+
   end
 end

@@ -52,19 +52,18 @@ class Chain < ActiveRecord::Base
 
   has_many  :sequences
 
-  has_many  :goa_pdbs
-
-  has_many  :go_terms,
-            :through      => :goa_pdbs
-
   validates_uniqueness_of :chain_code,
                           :scope          => :model_id,
                           :allow_nil      => true,
                           :case_sensitive => true
 
+  %w[dna rna].each do |na|
+    #named_scope :"reg_#{na}", :conditions => { :"reg_#{na}" => true }
+    named_scope :"rep_#{na}", :conditions => { :"rep_#{na}" => true }
+  end
 
   def fasta_header
-    "#{model.structure.pdb_code}:#{chain_code}"
+    "#{model.structure.pdb_code}_#{chain_code}"
   end
 
   def go_terms_for_html(namespace = :molecular_function)
@@ -75,6 +74,11 @@ class Chain < ActiveRecord::Base
       "N/A"
     end
   end
+
+  def resolution
+    model.structure.resolution
+  end
+
 end
 
 
@@ -82,13 +86,18 @@ class AaChain < Chain
 
   belongs_to  :model
 
-  has_one :dna_interface,
-          :class_name   => "ChainDnaInterface",
-          :foreign_key  => "chain_id"
+  %w[dna rna].each do |na|
 
-  has_one :rna_interface,
-          :class_name   => "ChainRnaInterface",
-          :foreign_key  => "chain_id"
+    belongs_to  :tmalign_family
+
+    belongs_to  :"#{na}_binding_subfamily",
+                :class_name   => "#{na.capitalize}BindingChainSubfamily",
+                :foreign_key  => "#{na}_binding_chain_subfamily_id"
+
+    has_one :"#{na}_interface",
+            :class_name   => "Chain#{na.capitalize}Interface",
+            :foreign_key  => "chain_id"
+  end
 
   has_many  :domains,
             :through      => :residues,
@@ -112,43 +121,43 @@ class AaChain < Chain
   end
 
   def res_seq
-    std_residues.map(&:one_letter_code).join
+    sorted_aa_residues.map(&:one_letter_code).join
   end
 
   def sse_seq
-    std_residues.map(&:sse).join
+    sorted_aa_residues.map(&:sse).join
   end
 
   def asa_seq
-    std_residues.map { |r| r.on_surface? ? "A" : "a" }.join
+    sorted_aa_residues.map { |r| r.on_surface? ? "A" : "a" }.join
   end
 
   def hbd_dna_seq
-    std_residues.map { |r| r.hbonding_dna? ? "T" : "." }.join
+    sorted_aa_residues.map { |r| r.hbonding_dna? ? "T" : "." }.join
   end
 
   def whb_dna_seq
-    std_residues.map { |r| r.whbonding_dna? ? "T" : "." }.join
+    sorted_aa_residues.map { |r| r.whbonding_dna? ? "T" : "." }.join
   end
 
   def vdw_dna_seq
-    std_residues.map { |r| r.vdw_contacting_dna? ? "T" : "." }.join
+    sorted_aa_residues.map { |r| r.vdw_contacting_dna? ? "T" : "." }.join
   end
 
   def hbd_rna_seq
-    std_residues.map { |r| r.hbonding_rna? ? "T" : "." }.join
+    sorted_aa_residues.map { |r| r.hbonding_rna? ? "T" : "." }.join
   end
 
   def whb_rna_seq
-    std_residues.map { |r| r.whbonding_rna? ? "T" : "." }.join
+    sorted_aa_residues.map { |r| r.whbonding_rna? ? "T" : "." }.join
   end
 
   def vdw_rna_seq
-    std_residues.map { |r| r.vdw_contacting_rna? ? "T" : "." }.join
+    sorted_aa_residues.map { |r| r.vdw_contacting_rna? ? "T" : "." }.join
   end
 
   def formatted_sequence
-    std_residues.map { |r| r.formatted_residue_name rescue "X" }.join
+    sorted_aa_residues.map { |r| r.formatted_residue_name rescue "X" }.join
   end
 end
 

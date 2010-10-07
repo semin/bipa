@@ -1,5 +1,5 @@
-namespace :bipa do
-  namespace :import do
+namespace :import do
+  namespace :bipa do
 
     desc "Import SCOP datasets"
     task :scop => [:environment] do
@@ -90,13 +90,13 @@ namespace :bipa do
         }
       end
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Dir[configatron.pdb_dir.join("*.pdb")].sort
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
-        conn = ActiveRecord::Base.remove_connection
+        conn  = ActiveRecord::Base.remove_connection
+        dir   = configatron.pdb_dir
+        pdbs  = Dir[dir + "*.pdb"].sort
 
-        pdbs.each_witb_index do |pdb, i|
+        pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
 
@@ -180,11 +180,9 @@ namespace :bipa do
                 bio_het_residue.each { |a| atoms << residue.atoms.build(atom_params(a)) }
               end
             end
-
             Atom.import(atoms)
             structure.save!
             $logger.info "Importing #{File.basename(pdb)}: done (#{i+1}/#{pdbs.size})"
-
             ActiveRecord::Base.remove_connection
           end
         end
@@ -196,16 +194,14 @@ namespace :bipa do
     desc "Import 'naccess' results into BIPA"
     task :naccess => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.all.map(&:pdb_code).map(&:downcase)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        pdbs = Structure.all.map(&:pdb_code).map(&:downcase)
         conn = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-
             structure           = Structure.find_by_pdb_code(pdb.upcase)
             dir                 = configatron.naccess_dir
             bound_asa_file      = dir.join("#{pdb}_co.asa")
@@ -215,7 +211,7 @@ namespace :bipa do
             if (!File.size?(bound_asa_file)       ||
                 !File.size?(unbound_aa_asa_file)  ||
                 !File.size?(unbound_na_asa_file))
-              $logger.warn "!!! Skipped #{pdb}: no NACCESS result file"
+              $logger.warn "Skipped #{pdb}: no NACCESS result file"
               structure.no_naccess = true
               structure.save!
               ActiveRecord::Base.remove_connection
@@ -243,8 +239,8 @@ namespace :bipa do
             end
 
             Naccess.import(columns, values)
+            $logger.info "Importing 'naccess' results from #{pdb} (#{i+1}/#{pdbs.size}): done"
             ActiveRecord::Base.remove_connection
-            $logger.info "Importing #{pdb}.asa (#{i+1}/#{pdbs.size}): done"
           end
         end
         ActiveRecord::Base.establish_connection(conn)
@@ -255,21 +251,21 @@ namespace :bipa do
     desc "Import DSSP results to BIPA"
     task :dssp => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.all.map(&:pdb_code).map(&:downcase)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
-        conn = ActiveRecord::Base.remove_connection
+        dir   = configatron.dssp_dir
+        pdbs  = Structure.all.map(&:pdb_code).map(&:downcase)
+        conn  = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
 
             structure = Structure.find_by_pdb_code(pdb.upcase)
-            dssp_file = configatron.dssp_dir + "#{pdb}.dssp"
+            dssp_file = dir + "#{pdb}.dssp"
 
             unless dssp_file.size?
-              $logger.warn "!!! Skipped #{pdb}: no DSSP result file"
+              $logger.warn "Skipped #{pdb} (#{i+1}/#{pdbs.size}): no DSSP result file"
               structure.no_dssp = true
               structure.save!
               ActiveRecord::Base.remove_connection
@@ -285,8 +281,8 @@ namespace :bipa do
               residue.create_dssp(dssp_residues[key].to_hash) if dssp_residues.has_key?(key)
             end
 
+            $logger.info "Importing #{dssp_file.basename} (#{i+1}/#{pdbs.size}): done"
             ActiveRecord::Base.remove_connection
-            $logger.info "Importing #{pdb}.dssp (#{i+1}/#{pdbs.size}): done"
           end
         end
         ActiveRecord::Base.establish_connection(conn)
@@ -297,18 +293,17 @@ namespace :bipa do
     desc "Import HBPlus results into BIPA"
     task :hbplus => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.all.map(&:pdb_code)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
-        conn = ActiveRecord::Base.remove_connection
+        dir   = configatron.hbplus_dir
+        pdbs  = Structure.all.map(&:pdb_code)
+        conn  = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-
             structure   = Structure.find_by_pdb_code(pdb)
-            hbplus_file = configatron.hbplus_dir + "#{pdb.downcase}.hb2"
+            hbplus_file = dir + "#{pdb.downcase}.hb2"
             bipa_hbonds = Bipa::Hbplus.new(hbplus_file.read).hbonds
             hbpluses    = []
 
@@ -367,8 +362,8 @@ namespace :bipa do
             end
 
             Hbplus.import(hbpluses)
+            $logger.info "Importing #{hbplus_file.basename} (#{i + 1}/#{pdbs.size}): done"
             ActiveRecord::Base.remove_connection
-            $logger.info "Importing #{pdb.downcase}.hb2 (#{i + 1}/#{pdbs.size}): done"
           end
         end
         ActiveRecord::Base.establish_connection(conn)
@@ -379,16 +374,14 @@ namespace :bipa do
     desc "Import hydrogen bonds between protein and nucleic acids"
     task :hbonds => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.untainted.map(&:pdb_code)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        pdbs = Structure.untainted.map(&:pdb_code)
         conn = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-
             columns   = [:donor_id, :acceptor_id, :hbplus_id]
             values    = []
             structure = Structure.find_by_pdb_code(pdb)
@@ -413,16 +406,14 @@ namespace :bipa do
     desc "Import Water-mediated hydrogen bonds"
     task :whbonds => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.untainted.map(&:pdb_code)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        pdbs = Structure.untainted.map(&:pdb_code)
         conn = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-
             structure = Structure.find_by_pdb_code(pdb)
             columns   = [:atom_id, :whbonding_atom_id, :water_atom_id, :aa_water_hbond_id, :na_water_hbond_id]
             values    = []
@@ -468,8 +459,8 @@ namespace :bipa do
             end
 
             Whbond.import(columns, values)
-            ActiveRecord::Base.remove_connection
             $logger.info "Importing #{values.size} water-mediated hbonds in #{pdb} (#{i + 1}/#{pdbs.size}): done"
+            ActiveRecord::Base.remove_connection
           end
         end
         ActiveRecord::Base.establish_connection(conn)
@@ -478,18 +469,16 @@ namespace :bipa do
 
 
     desc "Import van der Waals Contacts"
-    task :vdwcontacts => [:environment] do
+    task :vdw_contacts => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.all.map(&:pdb_code)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        pdbs = Structure.all.map(&:pdb_code)
         conn = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-
             structure = Structure.find_by_pdb_code(pdb)
             kdtree    = Bipa::KDTree.new
             columns   = [:atom_id, :vdw_contacting_atom_id, :distance]
@@ -506,17 +495,18 @@ namespace :bipa do
                 if neighbor_atom.aa?
                   dist = na_atom - neighbor_atom
                   values << [neighbor_atom.id, na_atom.id, dist]
-#                  if (!Hbond.exists?(:donor_id => neighbor_atom.id, :acceptor_id => na_atom.id) &&
-#                      !Hbond.exists?(:donor_id => na_atom.id, :acceptor_id => neighbor_atom.id))
-#                    values << [neighbor_atom.id, na_atom.id, dist]
-#                  end
+                  ## Add the atom pair if not forming hbonds
+                  #if (!Hbond.exists?(:donor_id => neighbor_atom.id, :acceptor_id => na_atom.id) &&
+                      #!Hbond.exists?(:donor_id => na_atom.id, :acceptor_id => neighbor_atom.id))
+                    #values << [neighbor_atom.id, na_atom.id, dist]
+                  #end
                 end
               end
             end
 
             VdwContact.import(columns, values)
+            $logger.info "Importing #{values.size} van der Waals contacts in #{pdb} (#{i+1}/#{pdbs.size}): done"
             ActiveRecord::Base.remove_connection
-            $logger.info "Importing #{values.size} van der Waals contacts in #{pdb} (#{i + 1}/#{pdbs.size}): done"
           end
           ActiveRecord::Base.establish_connection(conn)
         end
@@ -530,27 +520,20 @@ namespace :bipa do
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
         dir     = configatron.spicoli_dir
-        aapots  = Dir[dir.join("*_aa.pot")].sort
-        napots  = Dir[dir.join("*_na.pot")].sort
+        aapots  = Dir[dir.join("*_aa.pot")].to_pathnames
+        napots  = Dir[dir.join("*_na.pot")].to_pathnames
         pots    = aapots + napots
         conn    = ActiveRecord::Base.remove_connection
 
         pots.each_with_index do |pot, i|
-          pdb   = pot.match(/(\S{4})\_(\S{2})\.pot/)[1]
-          type  = pot.match(/(\S{4})\_(\S{2})\.pot/)[2]
+          pdb   = pot.to_s.match(/(\S{4})\_(\S{2})\.pot/)[1]
+          type  = pot.to_s.match(/(\S{4})\_(\S{2})\.pot/)[2]
 
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-            strc = Structure.find_by_pdb_code(pdb.upcase)
-
-            if strc.nil?
-              $logger.error "Cannot find a structure, #{pdb.upcase}"
-              ActiveRecord::Base.remove_connection
-              next
-            end
-
+            strc  = Structure.find_by_pdb_code(pdb.upcase)
             objs  = []
-            lines = IO.readlines(pot)
+            lines = pot.readlines
 
             if lines.empty? or lines[0] =~ /^out\s+of\s+memory/
               $logger.warn "Spicoli failed to run with #{type} chain(S) of #{pdb}."
@@ -597,7 +580,7 @@ namespace :bipa do
             end
 
             Spicoli.import(objs)
-            $logger.info "Importing #{pot} (#{i + 1}/#{pots.size}): done"
+            $logger.info "Importing #{pot.basename} (#{i + 1}/#{pots.size}): done"
             ActiveRecord::Base.remove_connection
           end
         end
@@ -609,16 +592,14 @@ namespace :bipa do
     desc "Import Domain Interfaces"
     task :domain_interfaces => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.untainted.map(&:pdb_code)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        pdbs = Structure.untainted.map(&:pdb_code)
         conn = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-
             domains = ScopDomain.find_all_by_pdb_code(pdb)
 
             if (domains.size > 0)
@@ -628,6 +609,7 @@ namespace :bipa do
                     domain.send("create_#{na}_interface").residues << binding_residues
                     domain.send("reg_#{na}=", true)
                     domain.save!
+
                     $logger.debug "#{domain.sid} has a #{na.upcase} interface"
 
                     # updating parents of domain's 'reg_[dna|rna]' column
@@ -638,9 +620,9 @@ namespace :bipa do
                   end
                 end
               end
-              $logger.info "Importing domain-NA interfaces in #{pdb} (#{i + 1}/#{pdbs.size}): done"
+              $logger.info "Importing domain-NA interfaces in #{pdb} (#{i+1}/#{pdbs.size}): done"
             else
-              $logger.info "No SCOP (#{Scop.version}) domains defined in #{pdb} (#{i + 1}/#{pdbs.size}): done"
+              $logger.info "No SCOP (#{Scop.version}) domains defined in #{pdb} (#{i+1}/#{pdbs.size}): done"
             end
             ActiveRecord::Base.remove_connection
           end
@@ -653,22 +635,26 @@ namespace :bipa do
     desc "Import Chain Interfaces"
     task :chain_interfaces => [:environment] do
 
-      fm    = ForkManager.new(configatron.max_fork)
-      pdbs  = Structure.untainted.map(&:pdb_code)
-
+      fm = ForkManager.new(configatron.max_fork)
       fm.manage do
+        pdbs = Structure.untainted.map(&:pdb_code)
         conn = ActiveRecord::Base.remove_connection
 
         pdbs.each_with_index do |pdb, i|
           fm.fork do
             ActiveRecord::Base.establish_connection(conn)
-
             structure = Structure.find_by_pdb_code(pdb)
             structure.aa_chains.each do |chain|
               %w[dna rna].each do |na|
                 if (binding_residues = chain.send("#{na}_binding_residues")).size > 0
                   chain.send("create_#{na}_interface").residues << binding_residues
+                  chain.send("reg_#{na}=", true); # update chain's reg_[d/r]na column
                   chain.save!
+
+                  #update structure's reg_[d/r]na column
+                  structure.send("reg_#{na}=", true);
+                  structure.save!
+
                   #$logger.debug "#{pdb}_#{chain.chain_code} has a #{na.upcase} interface"
                 else
                   #$logger.debug "#{pdb}_#{chain.chain_code} has no #{na.upcase} interface"
@@ -684,47 +670,87 @@ namespace :bipa do
     end
 
 
-    desc "Import subfamilies"
-    task :subfams => [:environment] do
+    desc "Import chain subfamilies from blastclust results"
+    task :chain_subfamilies => [:environment] do
 
       %w[dna rna].each do |na|
-        sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-        conn = ActiveRecord::Base.remove_connection
+        dir     = configatron.cdhit_dir + "pdb"
+        nr100   = dir.join(na, "#{na}_binding_chains.nr100.clstr")
+        subfam  = nil
 
-        sunids.forkify(configatron.max_fork) do |sunid|
-          ActiveRecord::Base.establish_connection(conn)
+        IO.foreach(nr100) do |line|
+          case
+          when line.blank?
+            next
+          when line =~ /^>Cluster/
+            subfam.save! unless subfam.nil?
+            klass   = "#{na.capitalize}BindingChainSubfamily".constantize
+            subfam  = klass.create
+            $logger.info "Creating #{klass}, #{subfam.id}: done"
+          when line =~ /^\d+\s+\S+,\s+>(\S+)/
+            pdb_code, chain_code = $1.gsub(".", "").split(/_/)
+            pdb   = Structure.find_by_pdb_code(pdb_code)
+            chain = pdb.models.first.chains.find_by_chain_code(chain_code)
+            subfam.chains << chain
+            $logger.info "Adding #{chain.fasta_header} to #{subfam.class}, #{subfam.id}: done"
+          else
+            raise "Something wrong with the line: #{line}"
+          end
+        end
+        subfam.save!
+        $logger.info "Importing subfamilies for #{na.upcase}-binding PDB chain families: done"
+      end
+    end
 
-          family      = ScopFamily.find_by_sunid(sunid)
-          fam_dir     = configatron.blastclust_dir.join(na, sunid.to_s)
-          subfam_file = fam_dir.join("#{sunid}.cluster")
 
-          IO.foreach(subfam_file) do |line|
-            members = line.chomp.split(/\s+/)
+    desc "Import domain subfamilies from blastclust results"
+    task :domain_subfamilies => [:environment] do
 
-            if !members.nil? and !members.empty?
-              subfamily = family.send("#{na}_binding_subfamilies").build
-              members.each do |member|
-                domain = ScopDomain.find_by_sunid(member)
-                if domain
-                  subfamily.domains << domain
+      fm = ForkManager.new(configatron.max_fork)
+      fm.manage do
+        %w[dna rna].each do |na|
+          sunids  = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          conn    = ActiveRecord::Base.remove_connection
+          dir     = configatron.cdhit_dir + "scop"
+
+          sunids.each_with_index do |sunid, i|
+            fm.fork do
+              ActiveRecord::Base.establish_connection(conn)
+              fam         = ScopFamily.find_by_sunid(sunid)
+              fam_dir     = dir.join(na, sunid.to_s)
+              subfam_file = fam_dir + "#{sunid}.nr100.clstr"
+              subfam      = nil
+
+              IO.foreach(subfam_file) do |line|
+                case
+                when line.blank?
+                  next
+                when line =~ /^>Cluster/
+                  subfam.save! unless subfam.nil?
+                  subfam = fam.send("#{na}_binding_subfamilies").build
+                  $logger.info "Creating #{subfam.class}, #{subfam.id} of #{fam.sccs}: done"
+                when line =~ /^\d+\s+\S+,\s+>(\S+)/
+                  sunid = $1.gsub(".", "")
+                  domain = ScopDomain.find_by_sunid(sunid)
+                  subfam.domains << domain
+                  $logger.info "Adding #{domain.sid} to #{subfam.class}, #{subfam.id}: done"
                 else
-                  $logger.warn "!!! Cannot find SCOP domain, #{member}"
+                  raise "Something wrong with the line: #{line}"
                 end
               end
-              subfamily.save!
+              subfam.save!
+              $logger.info "Importing subfamilies for #{na.upcase}-binding SCOP family, #{sunid}: done"
+              ActiveRecord::Base.remove_connection
             end
           end
-
-          $logger.info ">>> Importing subfamilies for #{na.upcase}-binding SCOP family, #{sunid}: done"
-          ActiveRecord::Base.remove_connection
+          ActiveRecord::Base.establish_connection(conn)
         end
-        ActiveRecord::Base.establish_connection(conn)
       end
     end
 
 
     desc "Import representative alignments for each SCOP Family"
-    task :repaligns => [:environment] do
+    task :scop_rep_alignments => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
@@ -735,13 +761,12 @@ namespace :bipa do
           sunids.each do |sunid|
             fm.fork do
               ActiveRecord::Base.establish_connection(conn)
-
               fam    = ScopFamily.find_by_sunid(sunid)
-              famdir = configatron.family_dir.join("rep", na, "#{sunid}")
+              famdir = configatron.family_dir.join("scop", "rep", na, "#{sunid}")
               aligns = Dir[famdir.join("salign*.ali")]
 
               if aligns.empty?
-                $logger.warn "!!! Cannot find alignment files in #{famdir}"
+                $logger.warn "Cannot find alignment files in #{famdir}"
                 ActiveRecord::Base.remove_connection
                 next
               end
@@ -770,7 +795,7 @@ namespace :bipa do
                       pos.residue_name = res
                     elsif dbrs[di].nil?
                       pos.residue_name = 'X'
-                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                      $logger.warn  "Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
                                     "(ALI: #{res} <=> BIPA: None)."
                     elsif res == dbrs[di].one_letter_code
                       pos.residue      = dbrs[di]
@@ -778,7 +803,7 @@ namespace :bipa do
                       di += 1
                     else
                       pos.residue_name = 'X'
-                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                      $logger.warn  "Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
                                     "(ALI: #{res} <=> BIPA: #{dbrs[di].one_letter_code})."
                     end
                     pos.number = fi + 1
@@ -789,7 +814,7 @@ namespace :bipa do
                 end
                 ali.save!
               end
-              $logger.info ">>> Importing alignments for representative sets of #{na.upcase}-binding SCOP family, #{sunid}: done"
+              $logger.info "Importing alignments for representative sets of #{na.upcase}-binding SCOP family, #{sunid}: done"
               ActiveRecord::Base.remove_connection
             end
           end
@@ -962,61 +987,79 @@ namespace :bipa do
 
 
     desc "Import NCBI Taxonomy 'nodes.dmp' file into 'taxonomic_nodes' table"
-    task :taxnodes => [:environment] do
+    task :taxonomic_nodes => [:environment] do
 
-      nodes_file = configatron.taxonomy_dir + "nodes.dmp"
-
-      Node = Struct.new(
-        :tax_id,
-        :parent_tax_id,
-        :rank,
-        :embl_code,
-        :division_id,
-        :inherited_div_flag,
-        :genetic_code_id,
-        :inherited_gc_flag,
-        :mitochondrial_genetic_code_id,
-        :inherited_mgc_flag,
-        :genbank_hidden_flag,
-        :hidden_subtree_root,
-        :comments
+      file = configatron.taxonomy_dir + "nodes.dmp"
+      ActiveRecord::Base.connection.execute(
+        <<-SQL
+          LOAD DATA LOCAL INFILE "#{file}"
+          IGNORE INTO TABLE taxonomic_nodes
+          FIELDS TERMINATED BY '\t|\t'
+          LINES  TERMINATED BY '\t|\n';
+        SQL
       )
+      $logger.info "Importing #{file} into 'taxonomic_nodes' table: done"
 
-      IO.foreach(nodes_file) do |line|
-        next if line =~ /^#/ || line.blank?
-        node_struct = Node.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
-        TaxonomicNode.create!(node_struct.to_hash)
-      end
+      #Node = Struct.new(
+        #:tax_id,
+        #:parent_tax_id,
+        #:rank,
+        #:embl_code,
+        #:division_id,
+        #:inherited_div_flag,
+        #:genetic_code_id,
+        #:inherited_gc_flag,
+        #:mitochondrial_genetic_code_id,
+        #:inherited_mgc_flag,
+        #:genbank_hidden_flag,
+        #:hidden_subtree_root,
+        #:comments
+      #)
 
-      nodes = TaxonomicNode.all(:select => "id, parent_id, lft, rgt, tax_id, parent_tax_id")
-      nodes.each_with_index do |node, i|
-        next if node.tax_id == 1;
-        parent = TaxonomicNode.find_by_tax_id(node.parent_tax_id)
-        node.move_to_child_of(parent)
-        $logger.info "Importing #{node.id} into 'nodes' table: done (#{i + 1}/#{nodes.size})"
-      end
+      #IO.foreach(nodes_file) do |line|
+        #next if line =~ /^#/ || line.blank?
+        #node_struct = Node.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
+        #TaxonomicNode.create!(node_struct.to_hash)
+      #end
+
+      #nodes = TaxonomicNode.all(:select => "id, parent_id, lft, rgt, tax_id, parent_tax_id")
+      #nodes.each_with_index do |node, i|
+        #next if node.tax_id == 1;
+        #parent = TaxonomicNode.find_by_tax_id(node.parent_tax_id)
+        #node.move_to_child_of(parent)
+        #$logger.info "Importing #{node.id} into 'nodes' table: done (#{i + 1}/#{nodes.size})"
+      #end
     end
 
 
     desc "Import NCBI Taxonomy 'names.dmp' file into 'taxonomic_names' table"
-    task :taxnames => [:environment] do
+    task :taxonomic_names => [:environment] do
 
-      name_file = configatron.taxonomy_dir + "names.dmp"
-
-      Name = Struct.new(
-        :tax_id,
-        :name_txt,
-        :unique_name,
-        :name_class
+      file = configatron.taxonomy_dir + "names.dmp"
+      ActiveRecord::Base.connection.execute(
+        <<-SQL
+          LOAD DATA LOCAL INFILE "#{file}"
+          IGNORE INTO TABLE taxonomic_names
+          FIELDS TERMINATED BY '\t|\t'
+          LINES  TERMINATED BY '\t|\n'
+          (taxonomic_node_id, name_txt, unique_name, name_class);
+        SQL
       )
+      $logger.info "Importing #{file} into 'taxonomic_names' table: done"
 
-      IO.foreach(names_file) do |line|
-        next if line =~ /^#/ || line.blank?
-        name = Name.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
-        node = TaxonomicNode.find_by_tax_id(name.tax_id)
-        node.names.create!(name.to_hash)
-      end
-      $logger.info "Importing 'names.dmp' file into 'taxonomic_names' table: done"
+      #Name = Struct.new(
+        #:tax_id,
+        #:name_txt,
+        #:unique_name,
+        #:name_class
+      #)
+
+      #IO.foreach(names_file) do |line|
+        #next if line =~ /^#/ || line.blank?
+        #name = Name.new(*line.gsub(/\t\|\n$/,"").split(/\t\|\t/))
+        #node = TaxonomicNode.find_by_tax_id(name.tax_id)
+        #node.names.create!(name.to_hash)
+      #end
     end
 
 
@@ -1294,23 +1337,24 @@ namespace :bipa do
 
 
     desc "Import USR Results"
-    task :usrs => [:environment] do
+    task :interface_similarities => [:environment] do
 
-      usr       = configatron.usr_res
-      host      = Rails.configuration.database_configuration[Rails.env]['host']
-      database  = Rails.configuration.database_configuration[Rails.env]['database']
+      tot_res = "./tmp/interface_similarities.txt"
 
-      if File.exists? usr
-        system  "mysqlimport -h #{host} " +
-                "-psemin --local --fields-terminated-by='\\t' --lines-terminated-by='\\n' " +
-                "#{database} #{usr}"
-                $logger.info ">>> Importing #{usr} done"
-      else
-        $logger.error "!!! Could not find #{usr}"
-        exit 1
+      [DomainNucleicAcidInterface, ChainNucleicAcidInterface].each do |klass|
+        res = "./tmp/#{klass.to_s.downcase}_descriptor_similarities.txt"
+        cmd = "cat #{res} >> #{tot_res}"
+        system cmd
       end
-    end
 
+      host  = Rails.configuration.database_configuration[Rails.env]['host']
+      db    = Rails.configuration.database_configuration[Rails.env]['database']
+      cmd   = ["mysqlimport -h #{host} -psemin --local --delete --lock-tables",
+                    "--fields-terminated-by='\\t' --lines-terminated-by='\\n'",
+                    "#{db} #{tot_res}"].join(' ')
+      system cmd
+      $logger.info "Importing #{tot_res}: done"
+    end
 
   end
 end

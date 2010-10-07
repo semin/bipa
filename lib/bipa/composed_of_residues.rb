@@ -7,14 +7,20 @@ module Bipa
       raise "You should implement 'residues' when including Bipa::ComposedOfResidues"
     end
 
-    def sorted_residues
-      residues.sort_by { |r|
-        if r.icode.blank?
-          100000 * r.residue_code + " ".ord
-        else
-          100000 * r.residue_code + r.icode.ord
-        end
-      }
+    %w[residues std_residues het_residues aa_residues].each do |rs|
+      class_eval <<-END
+      def sorted_#{rs}
+        #{rs}.sort_by { |r|
+          if r.icode.blank?
+            1000000000000 * r.chain.chain_code.ord + 
+            1000000 * r.residue_code + " ".ord
+          else
+            1000000000000 * r.chain.chain_code.ord + 
+            1000000 * r.residue_code + r.icode.ord
+          end
+        }
+      end
+      END
     end
 
     def atoms
@@ -66,17 +72,17 @@ module Bipa
 
     %w[unbound bound delta].each do |stat|
       class_eval <<-END
-        def #{stat}_asa_of_residue(res)
-          residues.inject(0) { |s, r|
-            r.residue_name == res.upcase ? s + r.#{stat}_asa : s
-          }
-        end
+      def #{stat}_asa_of_residue(res)
+        residues.inject(0) { |s, r|
+          r.residue_name == res.upcase ? s + r.#{stat}_asa : s
+        }
+      end
 
-        def #{stat}_asa_of_sse(sse)
-          aa_residues.inject(0) { |s, r|
-            !r.dssp.nil? && r.sse == sse.upcase ? s + r.#{stat}_asa : s
-          }
-        end
+      def #{stat}_asa_of_sse(sse)
+        aa_residues.inject(0) { |s, r|
+          !r.dssp.nil? && r.sse == sse.upcase ? s + r.#{stat}_asa : s
+        }
+      end
       END
     end
 
@@ -98,3 +104,4 @@ module Bipa
 
   end
 end
+

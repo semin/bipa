@@ -17,6 +17,8 @@ curdir = Pathname.new(__FILE__).dirname
 
 require curdir.join("./bipa/constants").expand_path
 require curdir.join("./bipa/dssp").expand_path
+require curdir.join("./bipa/esst").expand_path
+require curdir.join("./bipa/essts").expand_path
 require curdir.join("./bipa/hbplus").expand_path
 require curdir.join("./bipa/naccess").expand_path
 require curdir.join("./bipa/kdtree").expand_path

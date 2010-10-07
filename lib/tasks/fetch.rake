@@ -2,7 +2,7 @@ namespace :bipa do
   namespace :fetch do
 
     desc "Download protein-nucleic acid complexes from PDB ftp"
-    task :pdbremote => [:environment] do
+    task :pdb_remote => [:environment] do
 
       refresh_dir configatron.pdb_dir
 
@@ -36,7 +36,7 @@ namespace :bipa do
 
 
     desc "Copy protein-nucleic acid complexes from local mirror"
-    task :pdblocal => [:environment] do
+    task :pdb_local => [:environment] do
 
       refresh_dir configatron.pdb_dir
       pdb_codes = []
@@ -118,24 +118,25 @@ namespace :bipa do
 
 
     desc "Fetch NCBI taxonomy files"
-    task :ncbitax => [:environment] do
+    task :ncbi_taxonomy => [:environment] do
 
-      refresh_dir configatron.taxonomy_dir
+      dir = configatron.taxonomy_dir
+      refresh_dir dir
 
       require "net/ftp"
 
       Net::FTP.open("ftp.ncbi.nih.gov") do |ftp|
         ftp.login "anonymous"
         ftp.chdir "/pub/taxonomy/"
-        ftp.getbinaryfile("./taxdump.tar.gz", File.join(configatron.taxonomy_dir, 'taxdump.tar.gz'))
-        $logger.info ">>> Downloading taxdump.tar.gz: done"
+        ftp.getbinaryfile("./taxdump.tar.gz", dir + 'taxdump.tar.gz')
+        $logger.info "Downloading taxdump.tar.gz: done"
       end
 
       cwd = pwd
-      chdir configatron.taxonomy_dir
-      system "tar xvzf *.tar.gz"
+      chdir dir
+      system "tar xvzf *.tar.gz 1>/dev/null"
       chdir cwd
-      $logger.info ">>> Uncompressing taxdump.tar.gz: done"
+      $logger.info "Uncompressing taxdump.tar.gz: done"
     end
 
   end

@@ -46,4 +46,5 @@ class Model < ActiveRecord::Base
   def domains
     aa_chains.inject([]) { |s, a| s.concat(a.domains) }
   end
+
 end
