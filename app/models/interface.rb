@@ -1,5 +1,7 @@
 class Interface < ActiveRecord::Base
 
+  extend ActiveSupport::Memoizable
+
   include Bipa::Constants
   include Bipa::ComposedOfResidues
 
@@ -62,88 +64,199 @@ class Interface < ActiveRecord::Base
     end
   end
 
-  def interface_type
-    (self[:type].match(/DNA/i) ? "DNA" : "RNA") + " interface"
+  def calculate_asa
+    residues.inject(0) { |s, r| s + r.delta_asa }
   end
+  memoize :calculate_asa
+
+  def calculate_asa_percentage
+    asa   = calculate_asa
+    oasa  = origin.unbound_asa
+    asa == 0 ? 0.0 : 100.0 * asa / oasa
+  end
+
+  def calculate_residue_asa_percentage_of(res)
+    asa   = calculate_asa
+    rasa  = delta_asa_of_residue(res)
+    rasa == 0 ? 0.0 : 100.0 * rasa / asa
+  end
+
+  def calculate_residue_cnt_percentage_of(res)
+    rcnt = calculate_residue_cnt(res)
+    tcnt = residues.size.to_f
+    rcnt == 0 ? 0 : 100.0 * rcnt / tcnt
+  end
+
+  def calculate_residue_asa_propensity_of(res)
+    rasa  = delta_asa_of_residue(res)
+    iasa  = calculate_asa
+    orasa = origin.unbound_asa_of_residue(res)
+    oasa  = origin.unbound_asa
+    rasa == 0 ? 0.0 : ((rasa / iasa) / (orasa / oasa))
+  end
+
+  def calculate_residue_cnt_propensity_of(res)
+    ircnt   = calculate_residue_cnt(res)
+    irtcnt  = residues.size.to_f
+    orcnt   = origin.calculate_residue_cnt(res)
+    ortcnt  = origin.residues.size.to_f
+    ircnt == 0 ? 0 : ((ircnt / irtcnt) / (orcnt / ortcnt))
+  end
+
+end
+
+
+class ProteinInterface < Interface
+
+  def calculate_sse_asa_percentage_of(sse)
+    sasa = delta_asa_of_sse(sse)
+    iasa = calculate_asa
+    sasa == 0 ? 0.0 : 100.0 * sasa / iasa
+  end
+
+  def calculate_sse_cnt_percentage_of(sse)
+    scnt = calculate_sse_cnt(sse)
+    tcnt = residues.size.to_f
+    scnt == 0 ? 0.0 : 100.0 * scnt / tcnt
+  end
+
+  def calculate_sse_asa_propensity_of(sse)
+    sasa  = delta_asa_of_sse(sse)
+    iasa  = calculate_asa
+    osasa = origin.unbound_asa_of_sse(sse)
+    oasa  = origin.unbound_asa
+    sasa == 0 ? 0.0 : ((sasa / iasa) / (osasa / oasa))
+  end
+
+  def calculate_sse_cnt_propensity_of(sse)
+    iscnt   = calculate_sse_cnt(sse)
+    istcnt  = residues.size.to_f
+    oscnt   = origin.calculate_sse_cnt(sse)
+    ostcnt  = origin.residues.size.to_f
+    iscnt == 0 ? 0.0 : ((iscnt / istcnt) / (oscnt / ostcnt))
+  end
+
+  def residue_asa_propensity_google_chart_url
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_asa_propensity_of(r) }
+    Gchart.bar(:size              => '600x100',
+               :title             => 'Residue Propensity',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
+  end
+
+  def residue_cnt_propensity_google_chart_url
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_cnt_propensity_of(r) }
+    Gchart.bar(:size              => '600x100',
+               :title             => 'Residue Propensity',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
+  end
+
+  def residue_asa_percentage_google_chart_url
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_asa_percentage_of(r) }
+    Gchart.bar(:size              => '600x100',
+               :title             => 'Residue Percentage (%)',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
+  end
+
+  def residue_cnt_percentage_google_chart_url
+    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_cnt_percentage_of(r) }
+    Gchart.bar(:size              => '600x100',
+               :title             => 'Residue Percentage (%)',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
+  end
+
+  def sse_asa_percentage_google_chart_url
+    data = Sses::ALL.map { |s| calculate_sse_asa_percentage_of(s) }
+    Gchart.bar(:size              => '250x100',
+               :title             => 'SSE Percentage (%)',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
+  end
+
+  def sse_cnt_percentage_google_chart_url
+    data = Sses::ALL.map { |s| calculate_sse_cnt_percentage_of(s) }
+    Gchart.bar(:size              => '250x100',
+               :title             => 'SSE Percentage (%)',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
+  end
+
+  def sse_asa_propensity_google_chart_url
+    data = Sses::ALL.map { |s| calculate_sse_asa_propensity_of(s) }
+    Gchart.bar(:size              => '250x100',
+               :title             => 'SSE Propensity',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
+  end
+
+  def sse_cnt_propensity_google_chart_url
+    data = Sses::ALL.map { |s| calculate_cnt_asa_propensity_of(s) }
+    Gchart.bar(:size              => '250x100',
+               :title             => 'SSE Propensity',
+               :data              => data,
+               :axis_with_labels  => 'x,y',
+               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
+  end
+
+  def residue_asa_percentage_vector
+    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_asa_percentage_of_#{r.downcase}"] }]
+  end
+
+  def residue_cnt_percentage_vector
+    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_cnt_percentage_of_#{r.downcase}"] }]
+  end
+
+  def residue_asa_propensity_vector
+    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_asa_propensity_of_#{r.downcase}"] }]
+  end
+
+  def residue_cnt_propensity_vector
+    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_cnt_propensity_of_#{r.downcase}"] }]
+  end
+
+  def sse_asa_percentage_vector
+    NVector[*Sses::ALL.map { |s| self[:"sse_asa_percentage_of_#{s.downcase}"] }]
+  end
+
+  def sse_cnt_percentage_vector
+    NVector[*Sses::ALL.map { |s| self[:"sse_cnt_percentage_of_#{s.downcase}"] }]
+  end
+
+  def sse_asa_propensity_vector
+    NVector[*Sses::ALL.map { |s| self[:"sse_asa_propensity_of_#{s.downcase}"] }]
+  end
+
+  def sse_cnt_propensity_vector
+    NVector[*Sses::ALL.map { |s| self[:"sse_cnt_propensity_of_#{s.downcase}"] }]
+  end
+
+end
+
+
+class ProteinNucleicAcidInterface < ProteinInterface
 
   def interface_to
     self[:type].match(/DNA/i) ? "DNA" : "RNA"
   end
 
-end
+  def interface_type
+    "#{interface_to} interface"
+  end
 
-class DomainInterface < Interface
-
-  belongs_to  :domain,
-              :class_name   => "ScopDomain",
-              :foreign_key  => 'scop_id'
-
-  has_many  :residues,
-            :class_name   => "Residue",
-            :foreign_key  => "domain_interface_id"
-
-  has_many  :aa_residues,
-            :class_name   => "AaResidue",
-            :foreign_key  => "domain_interface_id"
-
-  has_many  :chains,
-            :through      => :residues,
-            :uniq         => true
-
-  has_many  :atoms,
-            :through      => :residues
-
-  delegate  :pdb_code,
-            :r_value,
-            :r_free,
-            :sunid,
-            :sccs,
-            :sid,
-            :description,
-            :resolution,
-            :to => :domain
-
-  named_scope :max_resolution, lambda { |res|
-    {
-      :include    => :domain,
-      :conditions => ["scops.resolution < ?", res.to_f]
+  def atoms
+    residues.inject([]) { |s, r|
+      s.concat(r.send("#{interface_to.downcase}_binding_atoms"))
     }
-  }
-
-  def na_type
-    "Protein-" + case self[:type]
-    when /Dna/i then "DNA"
-    when /Rna/i then "RNA"
-    else; "Unknown"
-    end
-  end
-
-  def calculate_asa
-    residues.inject(0) { |s, r| s + r.delta_asa }
-  end
-
-  def calculate_percent_asa
-    100.0 * self[:asa] / domain.unbound_asa rescue 0
-  end
-
-  def calculate_residue_percentage_of(res)
-    result = 100.0 * delta_asa_of_residue(res) / delta_asa rescue 0
-  end
-
-  def calculate_residue_propensity_of(res)
-    result = ((delta_asa_of_residue(res) / delta_asa) /
-              (domain.unbound_asa_of_residue(res) / domain.unbound_asa))
-    result.to_f.nan? ? 1.0 : result
-  end
-
-  def calculate_sse_percentage_of(sse)
-    result = 100.0 * delta_asa_of_sse(sse) / delta_asa rescue 0
-  end
-
-  def calculate_sse_propensity_of(sse)
-    result = ((delta_asa_of_sse(sse) / delta_asa) /
-              (domain.unbound_asa_of_sse(sse) / domain.unbound_asa))
-    result.to_f.nan? ? 1.0 : result
   end
 
   def calculate_frequency_of_hbond_between(aa, na)
@@ -270,62 +383,6 @@ class DomainInterface < Interface
     result
   end
 
-  def residue_percentage_google_chart_url
-    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_percentage_of(r) }
-    Gchart.bar(:size              => '600x100',
-               :title             => 'Residue Percentage (%)',
-               :data              => data,
-               :axis_with_labels  => 'x,y',
-               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
-  end
-
-  def residue_propensity_google_chart_url
-    data = AminoAcids::Residues::STANDARD.map { |r| calculate_residue_propensity_of(r) }
-    Gchart.bar(:size              => '600x100',
-               :title             => 'Residue Propensity',
-               :data              => data,
-               :axis_with_labels  => 'x,y',
-               :axis_labels       => [AminoAcids::Residues::STANDARD.join('|'), [0, data.max.round]])
-  end
-
-  def sse_percentage_google_chart_url
-    data = Sses::ALL.map { |s| calculate_sse_percentage_of(s) }
-    Gchart.bar(:size              => '250x100',
-               :title             => 'SSE Percentage (%)',
-               :data              => data,
-               :axis_with_labels  => 'x,y',
-               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
-  end
-
-  def sse_propensity_google_chart_url
-    data = Sses::ALL.map { |s| calculate_sse_propensity_of(s) }
-    Gchart.bar(:size              => '250x100',
-               :title             => 'SSE Propensity',
-               :data              => data,
-               :axis_with_labels  => 'x,y',
-               :axis_labels       => [Sses::ALL.join('|'), [0, data.max.round]])
-  end
-
-  def residue_percentage_vector
-    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_percentage_of_#{r.downcase}"] }]
-  end
-
-  def residue_propensity_vector
-    NVector[*AminoAcids::Residues::STANDARD.map { |r| self[:"residue_propensity_of_#{r.downcase}"] }]
-  end
-
-  def sse_percentage_vector
-    NVector[*Sses::ALL.map { |s| self[:"sse_percentage_of_#{s.downcase}"] }]
-  end
-
-  def sse_propensity_vector
-    NVector[*Sses::ALL.map { |s| self[:"sse_propensity_of_#{s.downcase}"] }]
-  end
-end # class DomainInterface
-
-
-class DomainDnaInterface < DomainInterface
-
   %w(hbond whbond vdw_contact).each do |intact|
     class_eval <<-END
       def calculate_frequency_of_#{intact}_between_nucleic_acids_and_(aa)
@@ -338,10 +395,82 @@ class DomainDnaInterface < DomainInterface
       end
     END
   end
+
+end
+
+
+class DomainNucleicAcidInterface < ProteinNucleicAcidInterface
+
+  belongs_to  :domain,
+              :class_name   => "ScopDomain",
+              :foreign_key  => 'scop_id'
+
+  alias :origin :domain
+
+  delegate  :pdb_code,
+            :r_value,
+            :r_free,
+            :sunid,
+            :sccs,
+            :sid,
+            :description,
+            :resolution,
+            :to => :domain
+
+  named_scope :max_resolution, lambda { |res|
+    {
+      :include    => :domain,
+      :conditions => ["scops.resolution < ?", res.to_f]
+    }
+  }
+
+  #def na_type
+    #"Protein-" +  case self[:type]
+                  #when /Dna/i then "DNA"
+                  #when /Rna/i then "RNA"
+                  #else; "Unknown"
+                  #end
+  #end
+
+end
+
+
+class DomainDnaInterface < DomainNucleicAcidInterface
+
+  has_many  :residues,
+            :class_name   => "Residue",
+            :foreign_key  => "domain_dna_interface_id"
+
+  has_many  :aa_residues,
+            :class_name   => "AaResidue",
+            :foreign_key  => "domain_dna_interface_id"
+
+  has_many  :chains,
+            :through      => :residues,
+            :uniq         => true
+
+  has_many  :atoms,
+            :through      => :residues
+
 end # class DomainDnaInterface
 
 
-class DomainRnaInterface < DomainInterface
+class DomainRnaInterface < DomainNucleicAcidInterface
+
+  has_many  :residues,
+            :class_name   => "Residue",
+            :foreign_key  => "domain_rna_interface_id"
+
+  has_many  :aa_residues,
+            :class_name   => "AaResidue",
+            :foreign_key  => "domain_rna_interface_id"
+
+  has_many  :chains,
+            :through      => :residues,
+            :uniq         => true
+
+  has_many  :atoms,
+            :through      => :residues
 
   %w(hbond whbond vdw_contact).each do |intact|
     class_eval <<-END
@@ -355,18 +484,51 @@ class DomainRnaInterface < DomainInterface
       end
     END
   end
-end # class DomainRnaInterface
+
+end
 
 
-class ChainInterface < Interface
+class ChainNucleicAcidInterface < ProteinNucleicAcidInterface
 
   belongs_to :chain
+
+  alias :origin :chain
+
 end
 
 
-class ChainDnaInterface < ChainInterface
+class ChainDnaInterface < ChainNucleicAcidInterface
+
+  has_many  :residues,
+            :class_name   => "Residue",
+            :foreign_key  => "chain_dna_interface_id"
+
+  has_many  :aa_residues,
+            :class_name   => "AaResidue",
+            :foreign_key  => "chain_dna_interface_id"
+
+  has_many  :atoms,
+            :through      => :residues
+
+  has_many  :aa_atoms,
+            :through      => :aa_residues
 end
 
 
-class ChainRnaInterface < ChainInterface
+class ChainRnaInterface < ChainNucleicAcidInterface
+
+  has_many  :residues,
+            :class_name   => "Residue",
+            :foreign_key  => "chain_rna_interface_id"
+
+  has_many  :aa_residues,
+            :class_name   => "AaResidue",
+            :foreign_key  => "chain_rna_interface_id"
+
+  has_many  :atoms,
+            :through      => :residues
+
+  has_many  :aa_atoms,
+            :through      => :aa_residues
+
 end

@@ -1,23 +1,32 @@
 require "active_support"
+require 'matrix'
 require "fileutils"
+require 'bio_extensions'
+require 'math_extensions'
+require 'array_extensions'
+require 'vector_extensions'
+require 'kernel_extentions'
+require 'string_extensions'
+require 'struct_extensions'
+require 'numeric_extensions'
+require 'pathname_extensions'
 
 include FileUtils
 
-require File.expand_path(File.dirname(__FILE__) + "/bipa/constants")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/dssp")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/hbplus")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/naccess")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/kdtree")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/usr")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/essts")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/tmalign")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/stats_array")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/nucleic_acid_binding")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_residues")
-require File.expand_path(File.dirname(__FILE__) + "/bipa/composed_of_atoms")
+curdir = Pathname.new(__FILE__).dirname
 
-def refresh_dir(dir)
-  rm_rf(dir) if File.exists?(dir)
-  mkdir_p(dir)
-  puts ">>> Refreshing #{dir}: done"
-end
+require curdir.join("./bipa/constants").expand_path
+require curdir.join("./bipa/dssp").expand_path
+require curdir.join("./bipa/esst").expand_path
+require curdir.join("./bipa/essts").expand_path
+require curdir.join("./bipa/hbplus").expand_path
+require curdir.join("./bipa/naccess").expand_path
+require curdir.join("./bipa/kdtree").expand_path
+require curdir.join("./bipa/usr").expand_path
+require curdir.join("./bipa/essts").expand_path
+require curdir.join("./bipa/tmalign").expand_path
+require curdir.join("./bipa/stats_array").expand_path
+require curdir.join("./bipa/nucleic_acid_binding").expand_path
+require curdir.join("./bipa/composed_of_residues").expand_path
+require curdir.join("./bipa/composed_of_atoms").expand_path
+

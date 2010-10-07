@@ -55,7 +55,7 @@ class Atom < ActiveRecord::Base
 
   has_one   :naccess
 
-  has_one   :potential
+  has_one   :spicoli
 
   delegate  :aa?,
             :dna?,
@@ -63,22 +63,22 @@ class Atom < ActiveRecord::Base
             :na?,
             :het?,
             :water?,
-            :to => :residue,
-            :allow_nil => true
+            :to         => :residue,
+            :allow_nil  => true
 
   delegate  :unbound_asa,
             :bound_asa,
             :delta_asa,
             :radius,
-            :to => :naccess,
-            :allow_nil => true
+            :to         => :naccess,
+            :allow_nil  => true
 
   delegate  :formal_charge,
             :partial_charge,
             :atom_potential,
             :asa_potential,
-            :to => :potential,
-            :allow_nil => true
+            :to         => :spicoli,
+            :allow_nil  => true
 
   named_scope :surface, lambda { |*args|
     { :conditions => ["unbound_asa > ?", (args.first || configatron.min_surface_atom_asa)] }
@@ -190,7 +190,7 @@ class Atom < ActiveRecord::Base
 
   def to_pdb
     sprintf("%-6s%5d %-4s%-1s%3s %-1s%4d%-1s   %8.3f%8.3f%8.3f%6.2f%6.2f      %-4s%2s%-2s",
-            'ATOM',
+            is_a?(StdAtom) ? 'ATOM' : 'HETATM',
             atom_code,
             justified_atom_name,
             altloc,

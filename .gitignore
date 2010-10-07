@@ -13,6 +13,7 @@ tmp/*.csv
 db/sphinx
 config/*.sphinx.conf
 config/database.yml
+public/*.html
 public/pdb
 public/scop
 public/families
@@ -22,6 +23,7 @@ public/dssp
 public/essts
 public/hbplus
 public/naccess
+public/cdhit
 public/blastclust
 public/spicoli
 public/interfaces
@@ -29,4 +31,8 @@ public/scops
 public/alignments
 public/structures
 public/figures
-public/*.html
+public/fuguena/
+public/nabal/
+public/needle/
+public/psiblast/
+public/water/

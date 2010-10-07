@@ -80,38 +80,39 @@ module Bio
     class Chain
 
       def aa?
-        (residues.any? { |r| r.aa? } || heterogens.any? { |r| r.aa? }) &&
-        !id.blank?
+        # original condition was commented out due to the case of 1AJU_A
+        #(residues.any? { |r| r.aa? } || heterogens.any? { |r| r.aa? }) &&
+        residues.any? { |r| r.aa? } && !id.blank?
       end
 
       def dna?
-        (residues.any? { |r| r.dna? } || heterogens.any? { |r| r.dna? }) &&
-        (residues.all? { |r| !r.rna? } && heterogens.all? { |r| !r.rna? }) &&
-        !id.blank?
+        #(residues.any? { |r| r.dna? } || heterogens.any? { |r| r.dna? }) &&
+        #(residues.all? { |r| !r.rna? } && heterogens.all? { |r| !r.rna? }) &&
+        residues.all? { |r| r.dna? } && !id.blank?
       end
 
       def rna?
-        (residues.any? { |r| r.rna? } || heterogens.any? { |r| r.rna? }) &&
-        (residues.all? { |r| !r.dna? } && heterogens.all? { |r| !r.dna? }) &&
-        !id.blank?
+        #(residues.any? { |r| r.rna? } || heterogens.any? { |r| r.rna? }) &&
+        #(residues.all? { |r| !r.dna? } && heterogens.all? { |r| !r.dna? }) &&
+        residues.all? { |r| r.rna? } && !id.blank?
       end
 
       def hna?
-        ((residues.any?   { |r| r.dna? } && residues.any?   { |r| r.rna? }) ||
-         (heterogens.any? { |r| r.dna? } && heterogens.any? { |r| r.rna? }) ||
-         (residues.any?   { |r| r.dna? } && heterogens.any?  { |r| r.rna? }) ||
-         (heterogens.any? { |r| r.dna? } && residues.any?   { |r| r.rna? })) &&
-         !id.blank?
+        #((residues.any?   { |r| r.dna? } && residues.any?   { |r| r.rna? }) ||
+         #(heterogens.any? { |r| r.dna? } && heterogens.any? { |r| r.rna? }) ||
+         #(residues.any?   { |r| r.dna? } && heterogens.any?  { |r| r.rna? }) ||
+         #(heterogens.any? { |r| r.dna? } && residues.any?   { |r| r.rna? })) &&
+        residues.any? { |r| r.dna? } && residues.any? { |r| r.rna? } && !id.blank?
       end
 
       def na?
         dna? || rna? || hna?
       end
 
-      alias :old_to_s :to_s
-      def to_s
-        atoms.concat(hetatms).sort_by { |a| a.serial }.map { |a| a.to_s }.join + "TER\n"
-      end
+      #alias :old_to_s :to_s
+      #def to_s
+        #atoms.concat(hetatms).sort_by { |a| a.serial }.map { |a| a.to_s }.join + "TER\n"
+      #end
     end
 
 

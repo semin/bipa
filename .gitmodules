@@ -1,24 +1,6 @@
-[submodule "vendor/plugins/acts_as_network"]
-	path = vendor/plugins/acts_as_network
-	url = git://github.com/sjlombardo/acts_as_network.git
-[submodule "vendor/plugins/acts_as_tree"]
-	path = vendor/plugins/acts_as_tree
-	url = git://github.com/rails/acts_as_tree.git
 [submodule "vendor/plugins/auto_migrations"]
 	path = vendor/plugins/auto_migrations
 	url = git://github.com/pjhyett/auto_migrations.git
-[submodule "vendor/plugins/quick_scopes"]
-	path = vendor/plugins/quick_scopes
-	url = git://github.com/internuity/quick_scopes.git
-[submodule "vendor/plugins/rudeq"]
-	path = vendor/plugins/rudeq
-	url = git://github.com/matthewrudy/rudeq.git
-[submodule "vendor/plugins/thinking-sphinx"]
-	path = vendor/plugins/thinking-sphinx
-	url = git://github.com/freelancing-god/thinking-sphinx.git
-[submodule "vendor/plugins/will_paginate"]
-	path = vendor/plugins/will_paginate
-	url = git://github.com/mislav/will_paginate.git
-[submodule "vendor/plugins/workling"]
-	path = vendor/plugins/workling
-	url = git://github.com/purzelrakete/workling.git
+[submodule "vendor/plugins/acts_as_network"]
+	path = vendor/plugins/acts_as_network
+	url = git://github.com/towanda/acts_as_network.git

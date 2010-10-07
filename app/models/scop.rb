@@ -104,11 +104,11 @@ class ScopFamily < Scop
 
   %w[dna rna].each do |na|
     has_many  :"#{na}_binding_family_alignments",
-              :class_name   => "#{na.capitalize}BindingFamilyAlignment",
+              :class_name   => "#{na.capitalize}BindingScopFamilyAlignment",
               :foreign_key  => "scop_id"
 
     has_many  :"#{na}_binding_subfamilies",
-              :class_name   => "#{na.capitalize}BindingSubfamily",
+              :class_name   => "#{na.capitalize}BindingScopSubfamily",
               :foreign_key  => "scop_id"
   end
 end
@@ -128,17 +128,17 @@ class ScopDomain < Scop
 
   %w[dna rna].each do |na|
     belongs_to  :"#{na}_binding_subfamily",
-                :class_name   => "#{na.capitalize}BindingSubfamily",
-                :foreign_key  => "#{na}_binding_subfamily_id"
+                :class_name   => "#{na.capitalize}BindingScopSubfamily",
+                :foreign_key  => "#{na}_binding_scop_subfamily_id"
   end
 
-  has_many  :dna_interfaces,
-            :class_name   => "DomainDnaInterface",
-            :foreign_key  => "scop_id"
+  has_one :dna_interface,
+          :class_name   => "DomainDnaInterface",
+          :foreign_key  => "scop_id"
 
-  has_many  :rna_interfaces,
-            :class_name   => "DomainRnaInterface",
-            :foreign_key  => "scop_id"
+  has_one :rna_interface,
+          :class_name   => "DomainRnaInterface",
+          :foreign_key  => "scop_id"
 
   has_many  :residues,
             :class_name   => "Residue",

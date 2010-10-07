@@ -17,7 +17,7 @@
     </td>
   </tr>
     <td colspan=4 class="title">% of ASA</td>
-    <td colspan=2 class="cell_number"><%=h "%.2f" % @interface[:percent_asa] %></td>
+    <td colspan=2 class="cell_number"><%=h "%.2f" % @interface[:asa_percentage] %></td>
   </tr>
   <tr>
     <td colspan=4 class="title">Polarity</td>
@@ -140,7 +140,7 @@
         <td class="cell_text"><%= link_to int.domain.sid, scop_path(int.domain) %></td>
         <td class="cell_text"><%= int.domain.sccs %></td>
         <td class="cell_number"><%= "%.2f" % int[:asa] %></td>
-        <td class="cell_number"><%= "%.2f" % int[:percent_asa] %></td>
+        <td class="cell_number"><%= "%.2f" % int[:asa_percentage] %></td>
         <td class="cell_number"><%= "%.2f" % int[:polarity] %></td>
         <td class="cell_number"><%= int[:residues_count] %></td>
         <td class="cell_number"><%= int[:atoms_count] %></td>

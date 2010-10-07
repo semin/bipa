@@ -11,10 +11,10 @@
 
 include Bipa::Constants
 
-ActiveRecord::Schema.define(:version => 1) do
+ActiveRecord::Schema.define(:version => 20100825104409) do
 
   # 'scop' table
-  create_table :scop, :force => true do |t|
+  create_table :scop, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :parent
     t.integer     :lft
     t.integer     :rgt
@@ -25,7 +25,7 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :sid
     t.string      :description
     %w[dna rna].each { |na|
-      t.belongs_to  :"#{na}_binding_subfamily"
+      t.belongs_to  :"#{na}_binding_scop_subfamily"
       t.boolean     :"rep_#{na}", :default => false # for representative memebers
       t.boolean     :"reg_#{na}", :default => false # for registered members
     }
@@ -36,10 +36,12 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :scop, :lft
   add_index :scop, :rgt
   add_index :scop, [:id, :type]
+  add_index :scop, [:id, :"dna_binding_scop_subfamily_id"]
+  add_index :scop, [:id, :"rna_binding_scop_subfamily_id"]
 
 
   # 'structures' table
-  create_table :structures, :force => true do |t|
+  create_table :structures, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.string    :pdb_code
     t.string    :classification
     t.string    :title
@@ -54,6 +56,9 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean   :no_dssp,     :default => false
     t.boolean   :no_hbplus,   :default => false
     t.boolean   :no_naccess,  :default => false
+    %w[dna rna].each { |na|
+      t.boolean     :"reg_#{na}", :default => false
+    }
     t.timestamps
   end
 
@@ -69,7 +74,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'models' table
-  create_table :models, :force => true do |t|
+  create_table :models, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :structure
     t.integer     :model_code
   end
@@ -79,29 +84,29 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'chains' table
-  create_table :chains, :force => true do |t|
+  create_table :chains, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :model
     t.string      :type
     t.string      :chain_code
     t.integer     :mol_code
     t.string      :molecule,  :default => ""
     t.text        :cssed_sequence
+    %w[dna rna].each { |na|
+      t.belongs_to  :"#{na}_binding_chain_subfamily"
+      t.boolean     :"reg_#{na}", :default => nil
+    }
   end
-
-  # This is for the case sesitivity of 'chain_code' column
-  # Please uncomment following line if your default collation is not case sensitive!!!
-  #execute "ALTER TABLE chains MODIFY chain_code VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
 
   add_index :chains, :chain_code
   add_index :chains, :model_id
+  add_index :chains, [:id, :"dna_binding_chain_subfamily_id"]
+  add_index :chains, [:id, :"rna_binding_chain_subfamily_id"]
 
 
   # 'resdiues' table
-  create_table :residues, :force => true do |t|
+  create_table :residues, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :chain
     t.belongs_to  :scop
-    t.belongs_to  :chain_interface
-    t.belongs_to  :domain_interface
     t.belongs_to  :res_map
     t.belongs_to  :residue_map
     t.string      :type
@@ -113,6 +118,8 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :delta_asa
     t.boolean     :ss, :default => nil
     %w[dna rna].each do |na|
+      t.belongs_to  :"chain_#{na}_interface"
+      t.belongs_to  :"domain_#{na}_interface"
       t.integer     :"hbonds_#{na}_as_donor_count",     :default => nil
       t.integer     :"hbonds_#{na}_as_acceptor_count",  :default => nil
       t.integer     :"whbonds_#{na}_count",             :default => nil
@@ -122,8 +129,10 @@ ActiveRecord::Schema.define(:version => 1) do
 
   add_index :residues, :chain_id
   add_index :residues, :scop_id
-  add_index :residues, :domain_interface_id
-  add_index :residues, :chain_interface_id
+  %w[dna rna].each do |na|
+    add_index :residues, :"chain_#{na}_interface_id"
+    add_index :residues, :"domain_#{na}_interface_id"
+  end
   add_index :residues, :res_map_id
   add_index :residues, :residue_map_id
   add_index :residues, :residue_name
@@ -136,7 +145,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'atoms' table
-  create_table :atoms, :force => true do |t|
+  create_table :atoms, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :residue
     t.string      :type
     t.string      :moiety
@@ -164,7 +173,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'dssp' table
-  create_table :dssp, :force => true do |t|
+  create_table :dssp, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :residue
     t.integer     :dssp_number
     t.string      :sse
@@ -199,7 +208,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'naccess' table
-  create_table :naccess, :force => true do |t|
+  create_table :naccess, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :atom
     t.float       :unbound_asa
     t.float       :bound_asa
@@ -210,8 +219,8 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :naccess, :atom_id
 
 
-  # 'potentials' table
-  create_table :potentials, :force => true do |t|
+  # 'spicoli' table
+  create_table :spicoli, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :atom
     t.float       :unbound_asa
     t.float       :formal_charge
@@ -220,11 +229,11 @@ ActiveRecord::Schema.define(:version => 1) do
     t.float       :asa_potential
   end
 
-  add_index :potentials, :atom_id
+  add_index :spicoli, :atom_id
 
 
   # 'vdw_contacts' table
-  create_table :vdw_contacts, :force => true do |t|
+  create_table :vdw_contacts, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :atom
     t.belongs_to  :vdw_contacting_atom
     t.float       :distance
@@ -237,7 +246,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'hbplus' table
-  create_table :hbplus, :force => true do |t|
+  create_table :hbplus, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :donor
     t.belongs_to  :acceptor
     t.float       :da_distance
@@ -257,7 +266,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'hbonds' table
-  create_table :hbonds, :force => true do |t|
+  create_table :hbonds, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :donor
     t.belongs_to  :acceptor
     t.belongs_to  :hbplus
@@ -271,7 +280,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'whbonds' table
-  create_table :whbonds, :force => true do |t|
+  create_table :whbonds, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to :atom
     t.belongs_to :whbonding_atom
     t.belongs_to :water_atom
@@ -287,12 +296,12 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'interface' table
-  create_table :interfaces, :force => true do |t|
+  create_table :interfaces, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :scop
     t.belongs_to  :chain
     t.string      :type
     t.float       :asa
-    t.float       :percent_asa
+    t.float       :asa_percentage
     t.float       :polarity
     t.integer     :residues_count,            :default => 0
     t.integer     :atoms_count,               :default => 0
@@ -303,13 +312,17 @@ ActiveRecord::Schema.define(:version => 1) do
     t.integer     :hbonds_as_acceptor_count,  :default => 0
 
     AminoAcids::Residues::STANDARD.each do |aa|
-      t.float :"residue_propensity_of_#{aa.downcase}"
-      t.float :"residue_percentage_of_#{aa.downcase}"
+      t.float :"residue_asa_propensity_of_#{aa.downcase}"
+      t.float :"residue_asa_percentage_of_#{aa.downcase}"
+      t.float :"residue_cnt_propensity_of_#{aa.downcase}"
+      t.float :"residue_cnt_percentage_of_#{aa.downcase}"
     end
 
     Sses::ALL.each do |sse|
-      t.float :"sse_propensity_of_#{sse.downcase}"
-      t.float :"sse_percentage_of_#{sse.downcase}"
+      t.float :"sse_asa_propensity_of_#{sse.downcase}"
+      t.float :"sse_asa_percentage_of_#{sse.downcase}"
+      t.float :"sse_cnt_propensity_of_#{sse.downcase}"
+      t.float :"sse_cnt_percentage_of_#{sse.downcase}"
     end
 
     %w(hbond whbond vdw_contact).each do |intact|
@@ -344,7 +357,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'subfamilies' table
-  create_table :subfamilies, :force => true do |t|
+  create_table :subfamilies, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :scop
     t.string      :type
   end
@@ -354,7 +367,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'alignments' table
-  create_table :alignments, :force => true do |t|
+  create_table :alignments, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :scop
     t.belongs_to  :subfamily
     t.string      :type
@@ -367,7 +380,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'sequneces' table
-  create_table :sequences, :force => true do |t|
+  create_table :sequences, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :alignment
     t.belongs_to  :scop
     t.belongs_to  :chain
@@ -380,7 +393,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'columns' table
-  create_table :columns, :force => true do |t|
+  create_table :columns, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :alignment
     t.integer     :number
     t.float       :entropy
@@ -392,7 +405,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 
   # 'positions' table
-  create_table :positions, :force => true do |t|
+  create_table :positions, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :sequence
     t.belongs_to  :column
     t.belongs_to  :residue
@@ -406,7 +419,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :positions, :residue_id
 
 
-  create_table :go_terms, :force => true do |t|
+  create_table :go_terms, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.string  :go_id
     t.boolean :is_anonymous,  :default => false
     t.string  :name
@@ -422,7 +435,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :go_terms, :registered
 
 
-  create_table :go_relationships, :force => true do |t|
+  create_table :go_relationships, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :source
     t.belongs_to  :target
     t.string      :type
@@ -435,8 +448,8 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :go_relationships, [:target_id, :source_id]
 
 
-  create_table :goa_pdbs, :force => true do |t|
-    t.belongs_to  :chain
+  create_table :goa_pdbs, :options => 'ENGINE=MyISAM', :force => true do |t|
+    t.belongs_to  :structure
     t.belongs_to  :go_term
     t.string      :db
     t.string      :db_object_id
@@ -455,17 +468,12 @@ ActiveRecord::Schema.define(:version => 1) do
     t.string      :assigned_by
   end
 
-  # This is for the case sesitivity of 'db_object_id' and 'db_object_symbol' columns
-  # Please uncomment following line if your default collation is not case sensitive!!!
-  #execute "ALTER TABLE goa_pdbs MODIFY db_object_id     VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
-  #execute "ALTER TABLE goa_pdbs MODIFY db_object_symbol VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_bin"
-
-  add_index :goa_pdbs, :chain_id
+  add_index :goa_pdbs, :structure_id
   add_index :goa_pdbs, :go_term_id
   add_index :goa_pdbs, :go_id
 
 
-  create_table :taxonomic_nodes, :force => true do |t|
+  create_table :taxonomic_nodes, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.integer     :parent_id
     t.string      :rank
     t.string      :embl_code
@@ -478,13 +486,15 @@ ActiveRecord::Schema.define(:version => 1) do
     t.boolean     :genbank_hidden_flag
     t.boolean     :hidden_subtree_root
     t.string      :comments
-    t.boolean     :registered,    :default => false
+    %w[dna rna].each { |na|
+      t.boolean     :"reg_#{na}", :default => false # for registered members
+    }
   end
 
   add_index :taxonomic_nodes, :parent_id
 
 
-  create_table :taxonomic_names, :force => true do |t|
+  create_table :taxonomic_names, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :taxonomic_node
     t.string      :name_txt
     t.string      :unique_name
@@ -494,7 +504,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :taxonomic_names, :taxonomic_node_id
 
 
-  create_table :news, :force => true do |t|
+  create_table :news, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.date    :date
     t.string  :title
     t.text    :content
@@ -503,7 +513,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :news, :date
 
 
-#  create_table :essts, :force => true do |t|
+#  create_table :essts, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.string  :type
 #    t.integer :redundancy
 #    t.integer :number
@@ -524,7 +534,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #  add_index :essts, [:environment]
 
 
-#  create_table :substitutions, :force => true do |t|
+#  create_table :substitutions, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.belongs_to  :esst
 #    t.string      :aa1
 #    t.string      :aa2
@@ -536,7 +546,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #  add_index :substitutions, :esst_id
 
 
-#  create_table :profiles, :force => true do |t|
+#  create_table :profiles, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.belongs_to  :alignment
 #    t.string      :type
 #    t.string      :name
@@ -567,7 +577,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #  add_index :profiles, :alignment_id
 
 
-#  create_table :profile_columns, :force => true do |t|
+#  create_table :profile_columns, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.belongs_to  :profile
 #    t.belongs_to  :column
 #    t.string      :type
@@ -586,7 +596,7 @@ ActiveRecord::Schema.define(:version => 1) do
   #execute "ALTER TABLE profile_columns CONVERT TO CHARACTER SET utf8 COLLATE utf8_bin"
 
 
-#  create_table :fugue_hits, :force => true do |t|
+#  create_table :fugue_hits, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.belongs_to  :profile
 #    t.belongs_to  :scop
 #    t.string      :type
@@ -610,7 +620,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #  add_index :fugue_hits, :zscore
 
 
-#  create_table :reference_alignments, :force => true do |t|
+#  create_table :reference_alignments, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.belongs_to  :alignment
 #    t.belongs_to  :template
 #    t.belongs_to  :target
@@ -624,7 +634,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #  add_index :reference_alignments, [:template_id, :target_id]
 
 
-#  create_table :test_alignments, :force => true do |t|
+#  create_table :test_alignments, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.belongs_to  :reference_alignment
 #    t.string      :type
 #    t.float       :sp
@@ -636,7 +646,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #  add_index :test_alignments, :tc
 
 
-  create_table :interface_similarities, :force => true do |t|
+  create_table :interface_similarities, :options => 'ENGINE=MyISAM', :force => true do |t|
     t.belongs_to  :interface
     t.belongs_to  :similar_interface
     t.float       :usr_score
@@ -646,7 +656,7 @@ ActiveRecord::Schema.define(:version => 1) do
   add_index :interface_similarities, [:similar_interface_id, :interface_id, :usr_score], :unique => true, :name => "by_sim_int_id_and_int_id"
 
 
-#  create_table :interface_searches, :force => true do |t|
+#  create_table :interface_searches, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.string    :interface_type
 #    t.float     :max_asa,                 :default => 10000.0
 #    t.float     :min_asa,                 :default => 0.0
@@ -675,7 +685,7 @@ ActiveRecord::Schema.define(:version => 1) do
 #  end
 
 
-#  create_table :fugue_searches, :force => true do |t|
+#  create_table :fugue_searches, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.string    :type
 #    t.string    :name,        :default => nil
 #    t.string    :email
@@ -690,7 +700,7 @@ ActiveRecord::Schema.define(:version => 1) do
 
 #  # For RudeQ
 #  # http://github.com/matthewrudy/rudeq/tree/master
-#  create_table :rude_queues, :force => true do |t|
+#  create_table :rude_queues, :options => 'ENGINE=MyISAM', :force => true do |t|
 #    t.string  :queue_name
 #    t.text    :data
 #    t.string  :token,     :default => nil

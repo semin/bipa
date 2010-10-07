@@ -1,9 +1,5 @@
 class GoTerm < ActiveRecord::Base
 
-  cattr_reader :version
-
-  @@version = "10 Oct 2008"
-
   # abstract source <-> target relationship
   has_many  :relationships_as_source,
             :class_name   => "GoRelationship",
@@ -97,8 +93,9 @@ class GoTerm < ActiveRecord::Base
   # etc
   has_many  :goa_pdbs
 
-  has_many  :chains,
-            :through      => :goa_pdbs
+  has_many  :structures,
+            :through      => :goa_pdbs,
+            :uniq         => true
 
 #  define_index do
 #    indexes go_id,      :sortable => true
@@ -108,11 +105,10 @@ class GoTerm < ActiveRecord::Base
 #  end
 
   named_scope :registered, :conditions => { :registered => true }
-  named_scope :molecular_function, :conditions => { :namespace => "molecular_function" }
-  named_scope :biological_process, :conditions => { :namespace => "biological_process" }
-  named_scope :cellular_component, :conditions => { :namespace => "cellular_component" }
+  named_scope :mf, :conditions => { :namespace => "molecular_function" }
+  named_scope :bp, :conditions => { :namespace => "biological_process" }
+  named_scope :cc, :conditions => { :namespace => "cellular_component" }
 
   def ancestors
   end
 end
-

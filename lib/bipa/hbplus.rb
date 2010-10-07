@@ -86,7 +86,7 @@ module Bipa
 
       @hbonds = []
 
-      file_str.each do |line|
+      file_str.each_line do |line|
         if line[15..15] =~ /\d+/
           hbline = Hbplus.parse_hbplus_line(line)
           @hbonds <<  Hbond.new(Atom.new(hbline[:donor_chain_code],

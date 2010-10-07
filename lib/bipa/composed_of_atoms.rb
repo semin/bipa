@@ -88,20 +88,20 @@ module Bipa
       atoms.select { |a| not a.on_surface? }
     end
 
-    def interface_atoms
-      atoms.select { |a| a.on_interface? }
+    #def interface_atoms
+      #atoms.select { |a| a.on_interface? }
+    #end
+
+    #def exclusive_surface_atoms
+      #surface_atoms - interface_atoms
+    #end
+
+    def dna_binding_atoms
+      atoms.select { |ia| ia.binding_dna? }
     end
 
-    def exclusive_surface_atoms
-      surface_atoms - interface_atoms
-    end
-
-    def interface_atoms_binding_dna
-      interface_atoms.select { |ia| ia.binding_dna? }
-    end
-
-    def interface_atoms_binding_rna
-      interface_atoms.select { |ia| ia.binding_rna? }
+    def rna_binding_atoms
+      atoms.select { |ia| ia.binding_rna? }
     end
 
     def calpha_only?

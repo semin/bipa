@@ -2,7 +2,7 @@ module Bipa
   class Tmalign
 
     def self.calculate_tmscore(pdb1, pdb2, tmalign="TMalign")
-      res = `#{tmalign} #{pdb1} #{pdb2} -a`
+      res = `#{tmalign} #{pdb1} #{pdb2} -b`
       res.split("\n").each do |line|
         if line =~ /^Aligned\s+length=\s*(\S+),\s*RMSD=\s*(\S+),\s*TM-score=\s*(\S+),\s+ID=\s*(\S+)/
           length  = Integer($1)
@@ -12,7 +12,7 @@ module Bipa
           return tmscore
         end
       end
-      raise "!!! Something wrong with TMaligning #{pdb1} and #{pdb2}"
+      raise "Something wrong with TMaligning #{pdb1} and #{pdb2}"
     end
 
     def self.single_linkage_clustering(clusters, tmscore=0.5)
