@@ -2,10 +2,10 @@
 
 # Uncomment below to force Rails into production mode when
 # you don't control web/app server and can't set it the proper way
-# ENV['RAILS_ENV'] ||= 'production'
+ENV['RAILS_ENV'] ||= 'production'
 
 # Specifies gem version of Rails to use when vendor/rails is not present
-RAILS_GEM_VERSION = '2.3.4' unless defined? RAILS_GEM_VERSION
+RAILS_GEM_VERSION = '2.3.8' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -16,11 +16,15 @@ Rails::Initializer.run do |config|
   config.gem 'andand'
   config.gem 'hpricot'
   config.gem 'configatron'
+  #config.gem 'acts_as_tree'
   config.gem 'fork_manager'
+  config.gem 'googlecharts'
   config.gem 'ar-extensions'
   config.gem 'composite_primary_keys'
   config.gem 'RubyInline', :lib => 'inline'
-  config.gem 'mattetti-googlecharts', :lib => 'gchart', :source => 'http://gems.github.com'
+  #config.gem 'googlecharts', :lib => 'gchart'
+  #config.gem 'internuity-quick_scopes', :lib => 'quick_scopes'
+  #config.gem 'thinking-sphinx', :lib => 'thinking_sphinx', :version => '1.3.18'
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
