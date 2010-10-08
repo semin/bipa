@@ -6,7 +6,7 @@ class ScopsController < ApplicationController
     @query = params[:query]
 
     if @query && !@query.empty?
-      @scops = ScopDomain.reg_all.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10).compact
+      @scops = ScopDomain.reg_all.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10)
     else
       @scops = ScopDomain.reg_all.paginate(:page => params[:page] || 1, :per_page => 10)
     end
@@ -17,7 +17,7 @@ class ScopsController < ApplicationController
   end
 
   def show
-    @scop = Scop.find_by_sunid(params[:id])
+    @scop = Scop.reg_all.find_by_sunid(params[:id])
 
     if @scop.is_a? ScopDomain
 
@@ -27,10 +27,8 @@ class ScopsController < ApplicationController
       @dna_subfamily_alignment = @dna_subfamily.andand.alignment
       @rna_subfamily_alignment = @rna_subfamily.andand.alignment
 
-      @dna_family_alignment = @scop.scop_family.dna_binding_family_alignments.
-                              select { |a| a.contains?(@dna_subfamily.andand.representative) }[0]
-      @rna_family_alignment = @scop.scop_family.rna_binding_family_alignments.
-                              select { |a| a.contains?(@rna_subfamily.andand.representative) }[0]
+      @dna_family_alignment = @scop.scop_family.dna_binding_family_alignments.select { |a| a.contains?(@dna_subfamily.andand.representative) }[0]
+      @rna_family_alignment = @scop.scop_family.rna_binding_family_alignments.select { |a| a.contains?(@rna_subfamily.andand.representative) }[0]
 
       respond_to do |format|
         format.html

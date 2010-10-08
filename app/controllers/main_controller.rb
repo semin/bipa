@@ -4,7 +4,7 @@ class MainController < ApplicationController
 
   def home
     @structure    = Structure.latest.first
-    @latest_news  = News.order('date desc').limit(5)
+    @latest_news  = News.all[-3..-1].reverse
 
     respond_to do |format|
       format.html
@@ -24,7 +24,7 @@ class MainController < ApplicationController
   end
 
   def news
-    @news = News.order('date desc')
+    @news = News.all.reverse
   end
 
 end

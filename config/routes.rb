@@ -7,7 +7,6 @@ ActionController::Routing::Routes.draw do |map|
   map.connect "search",     :controller => "main", :action => "search"
   map.connect "references", :controller => "main", :action => "references"
   map.connect "contact",    :controller => "main", :action => "contact"
-  #map.connect "statistics", :controller => "main", :action => "statistics"
 
   map.resources :structures,
                 :member     => { :jmol => :get },

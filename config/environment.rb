@@ -5,7 +5,7 @@
 ENV['RAILS_ENV'] ||= 'production'
 
 # Specifies gem version of Rails to use when vendor/rails is not present
-RAILS_GEM_VERSION = '2.3.8' unless defined? RAILS_GEM_VERSION
+RAILS_GEM_VERSION = '2.3.9' unless defined? RAILS_GEM_VERSION
 
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
@@ -25,8 +25,8 @@ Rails::Initializer.run do |config|
   config.gem 'composite_primary_keys'
   config.gem 'RubyInline', :lib => 'inline'
   config.gem 'googlecharts', :lib => 'gchart'
-  config.gem 'internuity-quick_scopes', :lib => 'quick_scopes'
-  config.gem 'thinking-sphinx', :lib => 'thinking_sphinx', :version => '1.3.18'
+  #config.gem 'internuity-quick_scopes', :lib => 'quick_scopes'
+  config.gem 'thinking-sphinx', :lib => 'thinking_sphinx', :version => '1.3.20'
 
   # Settings in config/environments/* take precedence over those specified here.
   # Application configuration should go into files in config/initializers
@@ -72,7 +72,7 @@ Rails::Initializer.run do |config|
   config.after_initialize do
 
     # for will_paginate plugin
-    WillPaginate.enable_named_scope
+    #WillPaginate.enable_named_scope
 
     # environmental variables
     ENV["PDB_EXT"] = ".pdb" # for Baton

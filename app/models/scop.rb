@@ -250,7 +250,7 @@ class ScopDomain < Scop
   end
 
   def structure
-    residues.first.chain.model.structure
+    self.chains.first.model.structure
   end
 
   def big_image

@@ -6,9 +6,13 @@ class StructuresController < ApplicationController
     @query = params[:query]
 
     if @query && !@query.empty?
-      @structures = Structure.untainted.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10).compact
+      @structures = Structure.untainted.search(@query,
+                                               :match_mode => :extended,
+                                               :page => params[:page],
+                                               :per_page => 10)
     else
-      @structures = Structure.untainted.paginate(:page => params[:page], :per_page => 10)
+      @structures = Structure.untainted.paginate(:page => params[:page],
+                                                 :per_page => 10)
     end
 
     respond_to do |format|
@@ -21,7 +25,6 @@ class StructuresController < ApplicationController
 
     respond_to do |format|
       format.html # show.rhtml
-      format.xml  { render :xml => @structure.to_xml }
     end
   end
 
