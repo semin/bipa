@@ -92,7 +92,7 @@
       DNA
     </td>
     <td>
-      <%= @scop.dna_interfaces.size > 0 ? link_to("DNA interface", interface_path(@scop.dna_interfaces.first)) : "N/A" %>
+      <%= @scop.dna_interface ? link_to("DNA interface", interface_path(@scop.dna_interface)) : "N/A" %>
     </td>
   </tr>
   <tr>
@@ -100,18 +100,18 @@
       RNA
     </td>
     <td>
-      <%= @scop.rna_interfaces.size > 0 ? link_to("RNA interface", interface_path(@scop.rna_interfaces.first)) : "N/A" %>
+      <%= @scop.rna_interface ? link_to("RNA interface", interface_path(@scop.rna_interface)) : "N/A" %>
     </td>
   </tr>
   <tr>
-    <td class="title" rowspan=<%= (@scop.dna_interfaces.size > 0 ? 2 : 0) + (@scop.rna_interfaces.size > 0 ? 2 : 0) + 2 %>>
+    <td class="title" rowspan=<%= (@scop.dna_interface ? 2 : 0) + (@scop.rna_interface ? 2 : 0) + 2 %>>
       Structural Alignments
     </td>
     <th colspan=3>
       Subfamily Alignment (PID &#61; 100)
     </th>
   </tr>
-  <% if @scop.dna_interfaces.size > 0 %>
+  <% if @scop.dna_interface %>
     <tr>
       <td class="title">DNA<br />Binding<br />
         <% if @dna_subfamily_alignment %>
@@ -135,7 +135,7 @@
       </td>
     </tr>
   <% end %>
-  <% if @scop.rna_interfaces.size > 0 %>
+  <% if @scop.rna_interface %>
     <tr>
       <td class="title">RNA<br />Binding<br />
         <% if @rna_subfamily_alignment %>
@@ -162,7 +162,7 @@
   <tr>
     <th colspan=3>Representative Family (<%= link_to @scop.scop_family.description, scop_path(@scop.scop_family) %>) Alignment (PID &lt; 100)</th>
   </tr>
-  <% if @scop.dna_interfaces.size > 0 %>
+  <% if @scop.dna_interface %>
     <tr>
       <td class="title">DNA<br />Binding<br />
         <% if @dna_family_alignment %>
@@ -186,7 +186,7 @@
       </td>
     </tr>
   <% end %>
-  <% if @scop.rna_interfaces.size > 0 %>
+  <% if @scop.rna_interface %>
     <tr>
       <td class="title">RNA<br />Binding<br />
         <% if @rna_family_alignment %>

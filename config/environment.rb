@@ -25,7 +25,6 @@ Rails::Initializer.run do |config|
   config.gem 'composite_primary_keys'
   config.gem 'RubyInline', :lib => 'inline'
   config.gem 'googlecharts', :lib => 'gchart'
-  #config.gem 'internuity-quick_scopes', :lib => 'quick_scopes'
   config.gem 'thinking-sphinx', :lib => 'thinking_sphinx', :version => '1.3.20'
 
   # Settings in config/environments/* take precedence over those specified here.
@@ -70,9 +69,6 @@ Rails::Initializer.run do |config|
 
   # for BIPA specific configurations
   config.after_initialize do
-
-    # for will_paginate plugin
-    #WillPaginate.enable_named_scope
 
     # environmental variables
     ENV["PDB_EXT"] = ".pdb" # for Baton

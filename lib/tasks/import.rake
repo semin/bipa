@@ -825,7 +825,7 @@ namespace :import do
 
 
     desc "Import subfamily alignments for each SCOP Family"
-    task :subaligns => [:environment] do
+    task :scop_sub_alignments => [:environment] do
 
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
@@ -845,7 +845,7 @@ namespace :import do
                 align = File.join(subfamdir, "salign.ali")
 
                 if !File.exists? align
-                  $logger.warn "!!! Cannot find an alignment file in #{subfamdir}"
+                  $logger.warn "Cannot find an alignment file in #{subfamdir}"
                   next
                 end
 
@@ -873,7 +873,7 @@ namespace :import do
                       pos.residue_name = res
                     elsif dbrs[di].nil?
                       pos.residue_name = 'X'
-                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                      $logger.warn  "Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
                                     "(ALI: #{res} <=> BIPA: None)."
                     elsif res == dbrs[di].one_letter_code
                       pos.residue      = dbrs[di]
@@ -881,7 +881,7 @@ namespace :import do
                       di += 1
                     else
                       pos.residue_name = 'X'
-                      $logger.warn  "!!! Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
+                      $logger.warn  "Mismatch at #{di}, in #{dom.sid}, #{dom.sunid} " +
                                     "(ALI: #{res} <=> BIPA: #{dbrs[di].one_letter_code})."
                     end
                     pos.number = fi + 1
@@ -892,7 +892,7 @@ namespace :import do
                 end
                 ali.save!
               end
-              $logger.info ">>> Importing subfamily alignments of #{na.upcase}-binding SCOP family, #{sunid}: done"
+              $logger.info "Importing subfamily alignments of #{na.upcase}-binding SCOP family, #{sunid}: done"
               ActiveRecord::Base.remove_connection
             end
           end

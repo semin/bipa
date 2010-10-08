@@ -399,18 +399,18 @@ namespace :run do
 
             sunids.each do |sunid|
               cwd     = pwd
-              famdir  = configatron.family_dir.join("sub", na, sunid.to_s)
+              famdir  = configatron.family_dir.join("scop/sub", na, sunid.to_s)
 
               Dir[famdir.join("*")].each do |subfamdir|
                 pdbs = Dir[File.join(subfamdir, "*.pdb")]
 
                 if pdbs.size < 2
-                  $logger.warn "!!! Only #{pdbs.size} PDB structure detected in #{subfamdir}"
+                  $logger.warn "Only #{pdbs.size} PDB structure detected in #{subfamdir}"
                   next
                 end
 
                 if File.size?(File.join(subfamdir, "salign.ali")) and File.size?(File.join(subfamdir, "salign.pap"))
-                  $logger.warn "!!! Skipped #{subfamdir}"
+                  $logger.warn "Skipped #{subfamdir}"
                   next
                 end
 
@@ -422,7 +422,7 @@ namespace :run do
 
                 chdir cwd
               end
-              $logger.info ">>> SALIGN with subfamilies of #{na.upcase}-binding SCOP family, #{sunid}: done"
+              $logger.info "SALIGN with subfamilies of #{na.upcase}-binding SCOP family, #{sunid}: done"
             end
             ActiveRecord::Base.establish_connection(config)
           end

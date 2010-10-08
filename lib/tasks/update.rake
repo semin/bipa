@@ -516,14 +516,14 @@ namespace :update do
             seq = Sequence.find(id)
 
             unless seq.cssed_sequence.nil?
-              $logger.info ">>> Skipped Sequence, #{seq.id}"
+              $logger.info "Skipped Sequence, #{seq.id}"
               ActiveRecord::Base.remove_connection
               next
             end
 
             seq.cssed_sequence = seq.formatted_sequence
             seq.save!
-            $logger.info ">>> Updating cssed_sequence of Sequence, #{seq.id}: done"
+            $logger.info "Updating cssed_sequence of Sequence, #{seq.id}: done"
             ActiveRecord::Base.remove_connection
           end
         end

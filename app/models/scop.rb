@@ -10,13 +10,6 @@ class Scop < ActiveRecord::Base
 
   acts_as_nested_set
 
-  named_scope :reg_all, :conditions => [ 'reg_dna = 1 or reg_rna = 1' ]
-
-  %w[dna rna].each do |na|
-    named_scope :"reg_#{na}", :conditions => { :"reg_#{na}" => true }
-    named_scope :"rep_#{na}", :conditions => { :"rep_#{na}" => true }
-  end
-
   define_index do
     indexes :type
     indexes :sunid
@@ -24,6 +17,16 @@ class Scop < ActiveRecord::Base
     indexes :sccs
     indexes :sid
     indexes :description
+  end
+
+  named_scope   :reg_all,       :conditions => { :reg_all => true }
+  sphinx_scope( :spx_reg_all) {{:conditions => { :reg_all => true }}}
+
+  %w[dna rna].each do |na|
+    named_scope   :"reg_#{na}",       :conditions => { :"reg_#{na}" => true }
+    named_scope   :"rep_#{na}",       :conditions => { :"rep_#{na}" => true }
+    sphinx_scope( :"spx_reg_#{na}") {{:conditions => { :"reg_#{na}" => true }}}
+    sphinx_scope( :"spx_rep_#{na}") {{:conditions => { :"rep_#{na}" => true }}}
   end
 
   def to_param

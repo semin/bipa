@@ -24,6 +24,7 @@ ActiveRecord::Schema.define(:version => 20100825104409) do
     t.string      :sccs
     t.string      :sid
     t.string      :description
+    t.boolean     :reg_all, :default => false
     %w[dna rna].each { |na|
       t.belongs_to  :"#{na}_binding_scop_subfamily"
       t.boolean     :"rep_#{na}", :default => false # for representative memebers

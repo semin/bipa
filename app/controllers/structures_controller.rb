@@ -6,10 +6,10 @@ class StructuresController < ApplicationController
     @query = params[:query]
 
     if @query && !@query.empty?
-      @structures = Structure.untainted.search(@query,
-                                               :match_mode => :extended,
-                                               :page => params[:page],
-                                               :per_page => 10)
+      @structures = Structure.spx_untainted.search(@query,
+                                                   :match_mode => :extended,
+                                                   :page => params[:page],
+                                                   :per_page => 10)
     else
       @structures = Structure.untainted.paginate(:page => params[:page],
                                                  :per_page => 10)

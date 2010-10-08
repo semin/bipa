@@ -32,19 +32,6 @@ class Structure < ActiveRecord::Base
             :through    => :goa_pdbs,
             :uniq       => true
 
-  named_scope :latest, { :order => 'deposited_at DESC' }
-
-  named_scope :untainted, :conditions => {
-    :no_dssp    => false,
-    :no_hbplus  => false,
-    :no_naccess => false,
-    :no_spicoli => false,
-  }
-
-  named_scope :max_resolution, lambda { |res|
-     { :conditions => ["resolution <= ?", res.to_f] }
-  }
-
   define_index do
     indexes :pdb_code
     indexes :classification
@@ -54,6 +41,27 @@ class Structure < ActiveRecord::Base
 
     has :deposited_at
   end
+
+  named_scope :latest, { :order => 'deposited_at DESC' }
+
+  named_scope :untainted, :conditions => {
+    :no_dssp    => false,
+    :no_hbplus  => false,
+    :no_naccess => false,
+    :no_spicoli => false,
+  }
+
+  sphinx_scope(:spx_untainted) {
+    { :conditions => {  :no_dssp    => false,
+                        :no_hbplus  => false,
+                        :no_naccess => false,
+                        :no_spicoli => false, }
+    }
+  }
+
+  named_scope :max_resolution, lambda { |res|
+     { :conditions => ["resolution <= ?", res.to_f] }
+  }
 
   def to_param
     self.pdb_code

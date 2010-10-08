@@ -6,7 +6,7 @@ class ScopsController < ApplicationController
     @query = params[:query]
 
     if @query && !@query.empty?
-      @scops = ScopDomain.reg_all.search(@query, :match_mode => :extended, :page => params[:page], :per_page => 10)
+      @scops = ScopDomain.spx_reg_all.search(@query, :match_mode => :extended, :page => params[:page] || 1, :per_page => 10)
     else
       @scops = ScopDomain.reg_all.paginate(:page => params[:page] || 1, :per_page => 10)
     end
@@ -17,7 +17,7 @@ class ScopsController < ApplicationController
   end
 
   def show
-    @scop = Scop.reg_all.find_by_sunid(params[:id])
+    @scop = Scop.find_by_sunid(params[:id])
 
     if @scop.is_a? ScopDomain
 
