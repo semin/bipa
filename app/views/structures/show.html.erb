@@ -58,7 +58,7 @@
           <% if domain.rna_interface %>
             <%= link_to "RNA", interface_path(domain.rna_interface) %>
           <% end %>
-          <% if !!domain.dna_interface && !!domain.rna_interface %>
+          <% if !domain.dna_interface && !domain.rna_interface %>
             N/A
           <% end %>
         </td>
