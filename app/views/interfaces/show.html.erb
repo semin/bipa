@@ -13,7 +13,7 @@
       SSE Composition [<%= link_to "?", "#sse_box", :id => "sse_box_link" %>]<br />
     </td>
     <td colspan=4 rowspan=4 align="center">
-      <%= image_tag @interface.sse_percentage_google_chart_url %>
+      <%= image_tag @interface.sse_asa_percentage_google_chart_url %>
     </td>
   </tr>
     <td colspan=4 class="title">% of ASA</td>
@@ -31,7 +31,7 @@
     <td colspan=4 class="title">No. of Atoms</td>
     <td colspan=2 class="cell_number"><%=h @interface[:atoms_count] %></td>
     <td colspan=4 rowspan=4 align="center">
-      <%= image_tag @interface.sse_propensity_google_chart_url %>
+      <%= image_tag @interface.sse_asa_propensity_google_chart_url %>
     </td>
   </tr>
   <tr>
@@ -49,12 +49,12 @@
   <tr>
     <td colspan=4 rowspan=2 class="title">Residue Composition</td>
     <td colspan=8 align="center">
-      <%= image_tag @interface.residue_percentage_google_chart_url %>
+      <%= image_tag @interface.residue_asa_percentage_google_chart_url %>
     </td>
   </tr>
   <tr>
     <td colspan=8 align="center">
-      <%= image_tag @interface.residue_propensity_google_chart_url %>
+      <%= image_tag @interface.residue_asa_propensity_google_chart_url %>
     </td>
   </tr>
   <tr>

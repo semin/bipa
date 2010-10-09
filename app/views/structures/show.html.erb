@@ -52,13 +52,13 @@
     <% @structure.domains.each do |domain| %>
       <tr>
         <td align="center">
-          <% if domain.dna_interfaces.size > 0 %>
-            <%= link_to "DNA", interface_path(domain.dna_interfaces.first) %>
+          <% if domain.dna_interface %>
+            <%= link_to "DNA", interface_path(domain.dna_interface) %>
           <% end %>
-          <% if domain.rna_interfaces.size > 0 %>
-            <%= link_to "RNA", interface_path(domain.rna_interfaces.first) %>
+          <% if domain.rna_interface %>
+            <%= link_to "RNA", interface_path(domain.rna_interface) %>
           <% end %>
-          <% if domain.dna_interfaces.size < 1 and domain.rna_interfaces.size < 1 %>
+          <% if !!domain.dna_interface && !!domain.rna_interface %>
             N/A
           <% end %>
         </td>

@@ -830,15 +830,15 @@ namespace :import do
       fm = ForkManager.new(configatron.max_fork)
       fm.manage do
         %w[dna rna].each do |na|
-          sunids = ScopFamily.send("reg_#{na}").map(&:sunid).sort
-          conn = ActiveRecord::Base.remove_connection
+          sunids  = ScopFamily.send("reg_#{na}").map(&:sunid).sort
+          conn    = ActiveRecord::Base.remove_connection
 
           sunids.each do |sunid|
             fm.fork do
               ActiveRecord::Base.establish_connection(conn)
 
               fam         = ScopFamily.find_by_sunid(sunid)
-              famdir      = configatron.family_dir.join("sub", na, sunid.to_s)
+              famdir      = configatron.family_dir.join("scop/sub", na, sunid.to_s)
               subfamdirs  = Dir[famdir.join("*")]
 
               subfamdirs.each do |subfamdir|
@@ -849,7 +849,7 @@ namespace :import do
                   next
                 end
 
-                klass = "#{na.capitalize}BindingSubfamily".constantize
+                klass = "#{na.capitalize}BindingScopSubfamily".constantize
                 id    = File.basename(subfamdir)
                 ali   = klass.find(id).create_alignment
                 bio   = Bio::FlatFile.auto(align)
