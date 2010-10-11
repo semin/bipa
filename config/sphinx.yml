@@ -3,4 +3,3 @@ production:
   min_infix_len: 1
   morphology: stem_en
   port: 9312
-
